@@ -1,9 +1,10 @@
 #import <Cocoa/Cocoa.h>
 #import <WebKit/WebKit.h>
 
-@interface AppDelegate : NSObject <NSApplicationDelegate, NSWindowDelegate>
+@interface AppDelegate : NSObject <NSApplicationDelegate, NSWindowDelegate, WKUIDelegate, WKNavigationDelegate>
 @property (strong, nonatomic) NSWindow *window;
 @property (strong, nonatomic) WKWebView *webView;
+@property (strong, nonatomic) NSTask *serverTask;
 @end
 
 @implementation AppDelegate
@@ -32,39 +33,69 @@
     [self.window setMinSize:NSMakeSize(960, 640)];
     [self.window setDelegate:self];
 
-    WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
-    // Allow local file read, remote tile loading, and modern dev tools
-    [config.preferences setValue:@YES forKey:@"developerExtrasEnabled"];
-    [[config preferences] setValue:@YES forKey:@"allowFileAccessFromFileURLs"];
-    [config setValue:@YES forKey:@"allowUniversalAccessFromFileURLs"];
+    // Sunucuyu başlat (server.py)
+    [self startPythonServer];
 
-    WKWebpagePreferences *webpagePreferences = [[WKWebpagePreferences alloc] init];
-    webpagePreferences.allowsContentJavaScript = YES;
-    config.defaultWebpagePreferences = webpagePreferences;
+    WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
+    [config.preferences setValue:@YES forKey:@"developerExtrasEnabled"];
 
     self.webView = [[WKWebView alloc] initWithFrame:[[self.window contentView] bounds] configuration:config];
     [self.webView setAutoresizingMask:(NSViewWidthSizable | NSViewHeightSizable)];
     [self.webView setValue:@NO forKey:@"drawsBackground"];
+    
+    // Delegate atamaları (Geolocation ve sayfa yükleme için)
+    self.webView.UIDelegate = self;
+    self.webView.navigationDelegate = self;
 
     [[self.window contentView] addSubview:self.webView];
 
-    // Path to index.html
-    NSString *bundlePath = [[NSBundle mainBundle] resourcePath];
-    NSString *indexPath = [bundlePath stringByAppendingPathComponent:@"index.html"];
-
-    if (![[NSFileManager defaultManager] fileExistsAtPath:indexPath]) {
-        NSString *currentDir = [[NSFileManager defaultManager] currentDirectoryPath];
-        indexPath = [currentDir stringByAppendingPathComponent:@"index.html"];
-        bundlePath = currentDir;
-    }
-
-    NSURL *fileURL = [NSURL fileURLWithPath:indexPath];
-    NSURL *readAccessURL = [NSURL fileURLWithPath:bundlePath];
-
-    [self.webView loadFileURL:fileURL allowingReadAccessToURL:readAccessURL];
+    // Sunucunun ayağa kalkması için kısa bir süre bekleyip localhost'u yükle
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        NSURL *url = [NSURL URLWithString:@"http://127.0.0.1:8999"];
+        [self.webView loadRequest:[NSURLRequest requestWithURL:url]];
+    });
 
     [self.window makeKeyAndOrderFront:nil];
     [NSApp activateIgnoringOtherApps:YES];
+}
+
+- (void)startPythonServer {
+    NSString *bundlePath = [[NSBundle mainBundle] resourcePath];
+    NSString *serverPath = [bundlePath stringByAppendingPathComponent:@"server.py"];
+    if (![[NSFileManager defaultManager] fileExistsAtPath:serverPath]) {
+        serverPath = [[[NSFileManager defaultManager] currentDirectoryPath] stringByAppendingPathComponent:@"server.py"];
+    }
+
+    self.serverTask = [[NSTask alloc] init];
+    [self.serverTask setLaunchPath:@"/usr/bin/env"];
+    NSDictionary *env = [NSDictionary dictionaryWithObjectsAndKeys:@"1", @"ROTAM_NO_BROWSER", nil];
+    [self.serverTask setEnvironment:env];
+    [self.serverTask setArguments:@[@"python3", serverPath]];
+    [self.serverTask launch];
+}
+
+// Geolocation izni için WKUIDelegate metodu
+#if defined(__MAC_12_0) && __MAC_OS_X_VERSION_MAX_ALLOWED >= __MAC_12_0
+- (void)webView:(WKWebView *)webView requestDeviceOrientationAndMotionPermissionForOrigin:(WKSecurityOrigin *)origin initiatedByFrame:(WKFrameInfo *)frame decisionHandler:(void (^)(WKPermissionDecision decision))decisionHandler {
+    decisionHandler(WKPermissionDecisionGrant);
+}
+#endif
+
+// Eski veya genel permission istekleri için (Eğer WKWebView destekliyorsa)
+// Gerçekte MacOS üzerinde WKWebView konum izinlerini otomatik MacOS istemcisi üzerinden sorar.
+// Eğer yükleme hatası olursa sayfayı tekrar yükle
+- (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error {
+    NSLog(@"Yükleme hatası: %@. 1 saniye sonra tekrar deneniyor...", error.localizedDescription);
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        NSURL *url = [NSURL URLWithString:@"http://127.0.0.1:8999"];
+        [self.webView loadRequest:[NSURLRequest requestWithURL:url]];
+    });
+}
+
+- (void)applicationWillTerminate:(NSNotification *)aNotification {
+    if (self.serverTask && [self.serverTask isRunning]) {
+        [self.serverTask terminate];
+    }
 }
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender {
@@ -78,7 +109,6 @@ int main(int argc, const char * argv[]) {
         NSApplication *app = [NSApplication sharedApplication];
         AppDelegate *delegate = [[AppDelegate alloc] init];
         [app setDelegate:delegate];
-        [app setActivationPolicy:NSApplicationActivationPolicyRegular];
         [app run];
     }
     return 0;

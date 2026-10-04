@@ -17,9 +17,60 @@ mimetypes.add_type('application/javascript', '.js')
 mimetypes.add_type('text/css', '.css')
 mimetypes.add_type('image/svg+xml', '.svg')
 
-PORT = 8080
+PORT = 8999
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 db = Database()
+
+import subprocess
+import threading
+import time
+
+OVERPASS_MIRRORS = [
+    'https://overpass-api.de/api/interpreter',
+    'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+    'https://overpass.kumi.systems/api/interpreter',
+    'https://overpass.private.coffee/api/interpreter',
+]
+_poi_cache = {}
+_poi_lock = threading.Lock()
+
+
+def overpass_query(query):
+    """Overpass sorgusunu sırayla aynalarda dener. (sonuç_dict, ayna) döndürür."""
+    if not query or len(query) > 20000:
+        return None, None
+    with _poi_lock:
+        if query in _poi_cache:
+            return _poi_cache[query], 'cache'
+    for mirror in OVERPASS_MIRRORS:
+      for attempt in range(3):
+        try:
+            proc = subprocess.run(
+                ['curl', '-s', '-m', '20', '-A', 'Rotam/1.0 (desktop route planner)',
+                 '-w', '\n%{http_code}', '--data-urlencode', 'data@-', mirror],
+                input=query.encode('utf-8'), capture_output=True, timeout=25)
+            out = proc.stdout.decode('utf-8', errors='replace')
+            body, _, code = out.rpartition('\n')
+            code = code.strip()
+            if code == '429' and attempt < 2:
+                sys.stderr.write(f"[POI] {mirror} -> 429, {3 * (attempt + 1)} sn bekleniyor\n")
+                time.sleep(3 * (attempt + 1))
+                continue
+            if code != '200':
+                sys.stderr.write(f"[POI] {mirror} -> HTTP {code}\n")
+                break
+            result = json.loads(body)
+            if 'elements' not in result:
+                break
+            with _poi_lock:
+                if len(_poi_cache) > 200:
+                    _poi_cache.clear()
+                _poi_cache[query] = result
+            return result, mirror
+        except Exception as e:
+            sys.stderr.write(f"[POI] {mirror} hata: {e}\n")
+            break
+    return None, None
 
 class RotamHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
@@ -90,6 +141,14 @@ class RotamHandler(http.server.SimpleHTTPRequestHandler):
 
     # API POST HANDLERS
     def handle_api_post(self, path, data):
+        if path == '/api/poi':
+            result, mirror = overpass_query(data.get('query', ''))
+            if result is None:
+                self.send_json_response({'error': 'Tüm Overpass sunucuları yanıt vermedi.'}, status=502)
+            else:
+                result['_mirror'] = mirror
+                self.send_json_response(result)
+            return
         if path == '/api/routes':
             route_id = db.save_route(data)
             self.send_json_response({'success': True, 'id': route_id, 'message': 'Rota kaydedildi.'})
@@ -159,11 +218,17 @@ class RotamHandler(http.server.SimpleHTTPRequestHandler):
 
 def main():
     global PORT
-    socketserver.TCPServer.allow_reuse_address = True
+    cloud_port = os.environ.get('PORT')
+    if cloud_port:
+        PORT = int(cloud_port)
+    host = "0.0.0.0" if os.environ.get('CLOUD_RUN') or os.environ.get('PORT') else "127.0.0.1"
+    
+    socketserver.ThreadingTCPServer.allow_reuse_address = True
+    socketserver.ThreadingTCPServer.daemon_threads = True
     for attempt in range(10):
         try:
-            with socketserver.TCPServer(("127.0.0.1", PORT), RotamHandler) as httpd:
-                url = f"http://localhost:{PORT}"
+            with socketserver.ThreadingTCPServer((host, PORT), RotamHandler) as httpd:
+                url = f"http://{'localhost' if host == '127.0.0.1' else host}:{PORT}"
                 print("\n" + "=" * 60)
                 print(" 🏍️  Rotam - Sunucu & SQLite API Aktif!")
                 print(f" 🌐  Arayüz: {url}")
@@ -172,13 +237,15 @@ def main():
                 print("=" * 60 + "\n")
                 
                 try:
-                    import subprocess
-                    subprocess.Popen(['open', url], stderr=subprocess.DEVNULL)
+                    if not os.environ.get('ROTAM_NO_BROWSER') and not os.environ.get('PORT'):
+                        subprocess.Popen(['open', url], stderr=subprocess.DEVNULL)
                 except Exception:
                     pass
 
                 httpd.serve_forever()
         except OSError:
+            if cloud_port:
+                raise
             PORT += 1
 
 if __name__ == "__main__":

@@ -17,7 +17,7 @@ mimetypes.add_type('application/javascript', '.js')
 mimetypes.add_type('text/css', '.css')
 mimetypes.add_type('image/svg+xml', '.svg')
 
-PORT = 8080
+PORT = 8999
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 db = Database()
 
