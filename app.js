@@ -2122,3 +2122,114 @@ if (location.search.includes("selftest")) {
   st.src = "selftest.js?v=" + Date.now();
   document.body.appendChild(st);
 }
+
+function fallbackToIpLocation(wp, inputEl) {
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(async data => {
+        if (data.latitude && data.longitude) {
+          wp.lat = data.latitude;
+          wp.lon = data.longitude;
+          wp.name = data.city ? data.city + " (Tahmini)" : "Mevcut Konumum (IP)";
+          
+          const addr = await reverseGeocode(wp.lat, wp.lon);
+          if (addr) wp.name = addr;
+          
+          updateMarker(wp);
+          renderWaypointsUI();
+          calculateRoute();
+          map.setView([wp.lat, wp.lon], 13);
+          showToast("Konumunuz ağ (IP) üzerinden tahmini olarak bulundu.", "success");
+        } else {
+          throw new Error("Invalid IP data");
+        }
+      })
+      .catch(err => {
+        console.error("IP Location Error: ", err);
+        showToast("Konum alınamadı. Lütfen manuel giriniz.", "error");
+        if (inputEl) inputEl.value = wp.name || "";
+      });
+}
+
+// YENI YER EKLEME LOGIC
+let pendingNewPlace = { lat: null, lon: null };
+document.addEventListener('DOMContentLoaded', () => {
+    const btnShowAdd = document.getElementById('btn-show-add-place');
+    const formContainer = document.getElementById('add-place-form-container');
+    const btnCancel = document.getElementById('btn-cancel-add-place');
+    const btnGetCenter = document.getElementById('btn-get-map-center');
+    const btnSave = document.getElementById('btn-save-new-place');
+
+    if(btnShowAdd) {
+        btnShowAdd.addEventListener('click', () => {
+            formContainer.classList.remove('hidden');
+        });
+    }
+    
+    if(btnCancel) {
+        btnCancel.addEventListener('click', () => {
+            formContainer.classList.add('hidden');
+        });
+    }
+
+    if(btnGetCenter) {
+        btnGetCenter.addEventListener('click', () => {
+            if(!map) return;
+            const center = map.getCenter();
+            pendingNewPlace.lat = center.lat;
+            pendingNewPlace.lon = center.lng;
+            document.getElementById('new-place-lat').textContent = center.lat.toFixed(5);
+            document.getElementById('new-place-lon').textContent = center.lng.toFixed(5);
+            showToast("Haritanın tam ortasındaki koordinatlar alındı.", "ok");
+        });
+    }
+
+    if(btnSave) {
+        btnSave.addEventListener('click', async () => {
+            const name = document.getElementById('new-place-name').value.trim();
+            const cat = document.getElementById('new-place-category').value;
+            const desc = document.getElementById('new-place-desc').value.trim();
+            
+            if(!name) { showToast("Lütfen bir yer adı girin.", "error"); return; }
+            if(!pendingNewPlace.lat || !pendingNewPlace.lon) { showToast("Lütfen Harita Ortasından Al butonuna basarak konum belirleyin.", "error"); return; }
+
+            btnSave.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>';
+            initIcons();
+            
+            try {
+                const res = await fetch(window.API_BASE + '/api/places', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: name,
+                        category: cat,
+                        lat: pendingNewPlace.lat,
+                        lon: pendingNewPlace.lon,
+                        description: desc,
+                        rating: 5
+                    })
+                });
+                
+                if(res.ok) {
+                    showToast("Harika! Yeni yer başarıyla kaydedildi.", "success");
+                    formContainer.classList.add('hidden');
+                    document.getElementById('new-place-name').value = '';
+                    document.getElementById('new-place-desc').value = '';
+                    pendingNewPlace = { lat: null, lon: null };
+                    document.getElementById('new-place-lat').textContent = '-';
+                    document.getElementById('new-place-lon').textContent = '-';
+                    
+                    // Listeyi yenile
+                    loadHistoricPlaces();
+                } else {
+                    showToast("Kaydedilirken bir hata oluştu.", "error");
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Sunucuya bağlanılamadı.", "error");
+            } finally {
+                btnSave.textContent = "Kaydet";
+            }
+        });
+    }
+});

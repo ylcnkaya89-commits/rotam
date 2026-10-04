@@ -5,7 +5,7 @@ cd "$DIR"
 echo "🔨 Rotam macOS Masaüstü Uygulaması Derleniyor..."
 
 # Compile the Objective-C WebKit wrapper
-clang -fobjc-arc -framework Cocoa -framework WebKit main.m -o RotamAppBinary
+clang -fobjc-arc -framework Cocoa -framework WebKit -framework CoreLocation main.m -o RotamAppBinary
 
 # Create the standard macOS app bundle structure
 APP_DIR="Rotam.app"

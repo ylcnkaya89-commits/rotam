@@ -1,10 +1,12 @@
 #import <Cocoa/Cocoa.h>
 #import <WebKit/WebKit.h>
+#import <CoreLocation/CoreLocation.h>
 
-@interface AppDelegate : NSObject <NSApplicationDelegate, NSWindowDelegate, WKUIDelegate, WKNavigationDelegate>
+@interface AppDelegate : NSObject <NSApplicationDelegate, NSWindowDelegate, WKUIDelegate, WKNavigationDelegate, WKScriptMessageHandler, CLLocationManagerDelegate>
 @property (strong, nonatomic) NSWindow *window;
 @property (strong, nonatomic) WKWebView *webView;
 @property (strong, nonatomic) NSTask *serverTask;
+@property (strong, nonatomic) CLLocationManager *locationManager;
 @end
 
 @implementation AppDelegate
@@ -33,23 +35,23 @@
     [self.window setMinSize:NSMakeSize(960, 640)];
     [self.window setDelegate:self];
 
-    // Sunucuyu başlat (server.py)
     [self startPythonServer];
 
     WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
     [config.preferences setValue:@YES forKey:@"developerExtrasEnabled"];
+    
+    // JS to Native bridge for GPS
+    [config.userContentController addScriptMessageHandler:self name:@"gpsHandler"];
 
     self.webView = [[WKWebView alloc] initWithFrame:[[self.window contentView] bounds] configuration:config];
     [self.webView setAutoresizingMask:(NSViewWidthSizable | NSViewHeightSizable)];
     [self.webView setValue:@NO forKey:@"drawsBackground"];
     
-    // Delegate atamaları (Geolocation ve sayfa yükleme için)
     self.webView.UIDelegate = self;
     self.webView.navigationDelegate = self;
 
     [[self.window contentView] addSubview:self.webView];
 
-    // Sunucunun ayağa kalkması için kısa bir süre bekleyip localhost'u yükle
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         NSURL *url = [NSURL URLWithString:@"http://127.0.0.1:14832"];
         [self.webView loadRequest:[NSURLRequest requestWithURL:url]];
@@ -57,6 +59,38 @@
 
     [self.window makeKeyAndOrderFront:nil];
     [NSApp activateIgnoringOtherApps:YES];
+}
+
+// Handle JS messages
+- (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message {
+    if ([message.name isEqualToString:@"gpsHandler"]) {
+        [self requestNativeLocation];
+    }
+}
+
+// Native CoreLocation
+- (void)requestNativeLocation {
+    if (!self.locationManager) {
+        self.locationManager = [[CLLocationManager alloc] init];
+        self.locationManager.delegate = self;
+        self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+    }
+    [self.locationManager requestWhenInUseAuthorization];
+    [self.locationManager startUpdatingLocation];
+}
+
+- (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations {
+    CLLocation *location = [locations lastObject];
+    if (location) {
+        [self.locationManager stopUpdatingLocation];
+        NSString *js = [NSString stringWithFormat:@"window.onNativeLocation(%.6f, %.6f);", location.coordinate.latitude, location.coordinate.longitude];
+        [self.webView evaluateJavaScript:js completionHandler:nil];
+    }
+}
+
+- (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
+    [self.locationManager stopUpdatingLocation];
+    [self.webView evaluateJavaScript:@"window.onNativeLocationError();" completionHandler:nil];
 }
 
 - (void)startPythonServer {
@@ -74,18 +108,7 @@
     [self.serverTask launch];
 }
 
-// Geolocation izni için WKUIDelegate metodu
-#if defined(__MAC_12_0) && __MAC_OS_X_VERSION_MAX_ALLOWED >= __MAC_12_0
-- (void)webView:(WKWebView *)webView requestDeviceOrientationAndMotionPermissionForOrigin:(WKSecurityOrigin *)origin initiatedByFrame:(WKFrameInfo *)frame decisionHandler:(void (^)(WKPermissionDecision decision))decisionHandler {
-    decisionHandler(WKPermissionDecisionGrant);
-}
-#endif
-
-// Eski veya genel permission istekleri için (Eğer WKWebView destekliyorsa)
-// Gerçekte MacOS üzerinde WKWebView konum izinlerini otomatik MacOS istemcisi üzerinden sorar.
-// Eğer yükleme hatası olursa sayfayı tekrar yükle
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error {
-    NSLog(@"Yükleme hatası: %@. 1 saniye sonra tekrar deneniyor...", error.localizedDescription);
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         NSURL *url = [NSURL URLWithString:@"http://127.0.0.1:14832"];
         [self.webView loadRequest:[NSURLRequest requestWithURL:url]];

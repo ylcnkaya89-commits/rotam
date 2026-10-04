@@ -473,9 +473,56 @@
             <p class="text-xs text-slate-400">Tüm Türkiye'deki antik kentler, kaleler, manastırlar ve tarihi duraklar</p>
           </div>
         </div>
-        <button id="btn-close-historic-places" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
+        
+        <div class="flex items-center space-x-2">
+            <button id="btn-show-add-place" class="bg-brand-600 hover:bg-brand-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow flex items-center space-x-1 transition-colors">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>Yeni Yer Ekle</span>
+            </button>
+            <button id="btn-close-historic-places" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+      </div>
+
+      
+      <!-- Yeni Yer Ekleme Formu (Varsayılan olarak gizli) -->
+      <div id="add-place-form-container" class="hidden p-4 bg-slate-900 border-b border-slate-800">
+        <div class="space-y-3">
+            <div>
+                <label class="block text-[10px] text-slate-400 mb-1 uppercase tracking-wider font-semibold">Yer Adı</label>
+                <input type="text" id="new-place-name" placeholder="Örn: Gizli Şelale" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-brand-500 focus:outline-none">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[10px] text-slate-400 mb-1 uppercase tracking-wider font-semibold">Kategori</label>
+                    <select id="new-place-category" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+                        <option value="historic">Tarihi Yer</option>
+                        <option value="viewpoint">Manzara / Geçit</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] text-slate-400 mb-1 uppercase tracking-wider font-semibold">Konum</label>
+                    <button id="btn-get-map-center" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-lg px-3 py-2 text-xs transition-colors flex items-center justify-center space-x-1">
+                        <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+                        <span>Harita Ortasından Al</span>
+                    </button>
+                </div>
+            </div>
+            <div class="flex space-x-2 text-[10px] text-slate-500">
+                <span>Enlem: <span id="new-place-lat">-</span></span>
+                <span>Boylam: <span id="new-place-lon">-</span></span>
+            </div>
+            <div>
+                <label class="block text-[10px] text-slate-400 mb-1 uppercase tracking-wider font-semibold">Kısa Açıklama</label>
+                <input type="text" id="new-place-desc" placeholder="Kısa bir bilgi..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-brand-500 focus:outline-none">
+            </div>
+            <div class="pt-1 flex justify-end space-x-2">
+                <button id="btn-cancel-add-place" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 transition-colors">İptal</button>
+                <button id="btn-save-new-place" class="px-4 py-2 rounded-lg text-xs font-semibold text-white bg-brand-600 hover:bg-brand-500 transition-colors">Kaydet</button>
+            </div>
+        </div>
       </div>
 
       <!-- Arama ve Bölge Filtreleri -->
