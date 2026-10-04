@@ -6,11 +6,27 @@
 	<dict>
 		<key>Resources/app.js</key>
 		<data>
-		txjzK6aTDt9qiIulYxva4aCW9jQ=
+		CaKPUT0KIOOvyek4OSd7t3G5Qu8=
+		</data>
+		<key>Resources/database.py</key>
+		<data>
+		JNTLnPNwXtMqwI+xM4BzMCA5W6Y=
 		</data>
 		<key>Resources/index.html</key>
 		<data>
-		oHp8sGUebMbK/i3hj/UaZ8j6Gz8=
+		uJH4GBL3B9jsivYGXldjBi5pGSA=
+		</data>
+		<key>Resources/places_data.js</key>
+		<data>
+		BHw0yRM+Gezd3m9B7zHnj9dTK7c=
+		</data>
+		<key>Resources/rotam.db</key>
+		<data>
+		nFqfNGB3LO5TNhNldi5HohgqVsw=
+		</data>
+		<key>Resources/server.py</key>
+		<data>
+		FdVSrxGgc7p31GguvdADNRbeiT8=
 		</data>
 		<key>Resources/styles.css</key>
 		<data>
@@ -23,14 +39,42 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			bOUOmXSF6TcXqTNY8FYlSlQYpzQMzonZqzw6RYbWFaA=
+			iR5xYaNB2D40uIG+h1KMKUD9n1IbAIxRLVAe1jJ6To8=
+			</data>
+		</dict>
+		<key>Resources/database.py</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			fvowJJgmWr754HVJDCeamWzlwOrCUPiB0yOMlM1+hAo=
 			</data>
 		</dict>
 		<key>Resources/index.html</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			L9j2CQbEqIcRmQYSOq5BIL9LhVPkRbOx3uK6FGZWQWI=
+			8BvcfW02/4yiZqKwLHe0+tiL8jJlx8wnedmNjYPcR7g=
+			</data>
+		</dict>
+		<key>Resources/places_data.js</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			zgSj/zE4eE5RBnHk88vilY8zoZEIiQvLL6GViFP+cKw=
+			</data>
+		</dict>
+		<key>Resources/rotam.db</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			xX1IaLBQQDD7IY+GmszeKPyia4STn44Ask+Tmhv26KI=
+			</data>
+		</dict>
+		<key>Resources/server.py</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			drKjQBedj4XsuDjxzL0Cp4fgjBQifRVbkxmYXQ2ADk0=
 			</data>
 		</dict>
 		<key>Resources/styles.css</key>

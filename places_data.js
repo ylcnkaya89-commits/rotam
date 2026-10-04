@@ -1,4 +1,3 @@
-// Türkiye Geneli 145 Tarihi Eser, Antik Kent ve Dağ Geçidi Veri Tabanı
 window.DEFAULT_HISTORIC_PLACES = [
   {
     "id": 45,
@@ -56,7 +55,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 37.9392,
     "lon": 27.3409,
-    "description": "İzmir Selçuk; Dünyanın en iyi korunmuş Roma metropollerinden biri.",
+    "description": "İzmir Selçuk; Dünyanın en iyi korunmuş Roma metropollerinden biri. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -86,7 +85,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 37.9259,
     "lon": 29.1238,
-    "description": "Denizli Pamukkale; Beyaz travertenler, Kleopatra havuzu ve antik tiyatro.",
+    "description": "Denizli Pamukkale; Beyaz travertenler, Kleopatra havuzu ve antik tiyatro. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -96,7 +95,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 37.7089,
     "lon": 28.7239,
-    "description": "Aydın Karacasu; UNESCO korumasındaki heykeltıraşlık okulu ve 30.000 kişilik stadyum.",
+    "description": "Aydın Karacasu; UNESCO korumasındaki heykeltıraşlık okulu ve 30.000 kişilik stadyum. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -106,7 +105,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 36.6858,
     "lon": 27.3742,
-    "description": "Muğla Datça; Ege ile Akdeniz'in birleştiği en uç noktada gün batımı ve antik liman.",
+    "description": "Muğla Datça; Ege ile Akdeniz'in birleştiği en uç noktada gün batımı ve antik liman. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -156,7 +155,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 37.5606,
     "lon": 27.8286,
-    "description": "Aydın Karpuzlu; Devasa agora duvarları ve Büyük İskender ile Kraliçe Ada'nın buluşma yeri.",
+    "description": "Aydın Karpuzlu; Devasa agora duvarları ve Büyük İskender ile Kraliçe Ada'nın buluşma yeri. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -166,7 +165,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 37.9014,
     "lon": 28.1481,
-    "description": "Aydın Sultanhisar; Bir kanyonun iki yakasına kurulmuş amfi ve antik kütüphane.",
+    "description": "Aydın Sultanhisar; Bir kanyonun iki yakasına kurulmuş amfi ve antik kütüphane. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -186,7 +185,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 37.5303,
     "lon": 27.2781,
-    "description": "Aydın Didim yolu; Felsefenin doğduğu liman kenti ve görkemli Roma tiyatrosu.",
+    "description": "Aydın Didim yolu; Felsefenin doğduğu liman kenti ve görkemli Roma tiyatrosu. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -216,7 +215,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 39.2017,
     "lon": 29.6108,
-    "description": "Kütahya Çavdarhisar; Dünyanın ilk ticaret borsası ve en sağlam kalmış Zeus tapınağı.",
+    "description": "Kütahya Çavdarhisar; Dünyanın ilk ticaret borsası ve en sağlam kalmış Zeus tapınağı. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -226,7 +225,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 38.3589,
     "lon": 29.2181,
-    "description": "Uşak Ulubey Kanyonu; Üç tarafı derin kanyonla çevrili rüzgarlı yarımada kenti.",
+    "description": "Uşak Ulubey Kanyonu; Üç tarafı derin kanyonla çevrili rüzgarlı yarımada kenti. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -246,7 +245,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 36.8267,
     "lon": 28.6225,
-    "description": "Muğla Ortaca; Dalyan deltası sazlıkları ve dağa oyulmuş kral mezarları.",
+    "description": "Muğla Ortaca; Dalyan deltası sazlıkları ve dağa oyulmuş kral mezarları. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -256,7 +255,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 36.5539,
     "lon": 29.3533,
-    "description": "Muğla Seydikemer; Likya'nın spor kenti, kaya akropolü ve kanatlı at Pegasus efsanesi.",
+    "description": "Muğla Seydikemer; Likya'nın spor kenti, kaya akropolü ve kanatlı at Pegasus efsanesi. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -266,7 +265,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 36.4889,
     "lon": 29.2611,
-    "description": "Muğla Fethiye Babadağ etekleri; Dikey kayalara oyulmuş yüzlerce petek mezar.",
+    "description": "Muğla Fethiye Babadağ etekleri; Dikey kayalara oyulmuş yüzlerce petek mezar. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -276,7 +275,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 38.3828,
     "lon": 26.4789,
-    "description": "İzmir Çeşme Ildırı; Sakin balıkçı köyü virajlarında antik akropol ve adalar manzarası.",
+    "description": "İzmir Çeşme Ildırı; Sakin balıkçı köyü virajlarında antik akropol ve adalar manzarası. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -306,7 +305,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 37.1558,
     "lon": 29.4881,
-    "description": "Burdur Gölhisar; Gladyatörler kenti, 10.000 kişilik odeon ve renkli Medusa.",
+    "description": "Burdur Gölhisar; Gladyatörler kenti, 10.000 kişilik odeon ve renkli Medusa. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -316,7 +315,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 36.9822,
     "lon": 30.4639,
-    "description": "Antalya Güllük Dağı; 1050m zirvede Büyük İskender'in fethedemediği sarp dağ kenti.",
+    "description": "Antalya Güllük Dağı; 1050m zirvede Büyük İskender'in fethedemediği sarp dağ kenti. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -326,7 +325,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 37.5858,
     "lon": 30.9856,
-    "description": "Isparta Sütçüler; Çam ormanları içinde tertemiz taş döşeli antik caddeler.",
+    "description": "Isparta Sütçüler; Çam ormanları içinde tertemiz taş döşeli antik caddeler. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -346,7 +345,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 37.2289,
     "lon": 31.1278,
-    "description": "Antalya Manavgat; Köprülü Kanyon virajlarının zirvesinde fantastik taş kuleler.",
+    "description": "Antalya Manavgat; Köprülü Kanyon virajlarının zirvesinde fantastik taş kuleler. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -356,7 +355,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 36.5147,
     "lon": 30.0594,
-    "description": "Antalya Finike-Elmalı dağ yolu; Şahinkaya yamacına teras teras kurulu antik cennet.",
+    "description": "Antalya Finike-Elmalı dağ yolu; Şahinkaya yamacına teras teras kurulu antik cennet. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -366,7 +365,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 36.2608,
     "lon": 29.3142,
-    "description": "Antalya Kaş; Likya Birliği başkenti, kum tepeleri ve antik deniz feneri.",
+    "description": "Antalya Kaş; Likya Birliği başkenti, kum tepeleri ve antik deniz feneri. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -396,7 +395,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 36.2597,
     "lon": 29.985,
-    "description": "Antalya Demre; Kaya mezarları ve Noel Baba olarak bilinen Aziz Nikola.",
+    "description": "Antalya Demre; Kaya mezarları ve Noel Baba olarak bilinen Aziz Nikola. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -406,7 +405,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 36.5255,
     "lon": 30.5528,
-    "description": "Antalya Kemer; Çam ağaçlarının denizle buluştuğu korunaklı antik limanlar.",
+    "description": "Antalya Kemer; Çam ağaçlarının denizle buluştuğu korunaklı antik limanlar. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -426,7 +425,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 36.1906,
     "lon": 29.8617,
-    "description": "Antalya Demre/Üçağız; Karayolu bulunmayan, deniz içindeki lahitler ve kale.",
+    "description": "Antalya Demre/Üçağız; Karayolu bulunmayan, deniz içindeki lahitler ve kale. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -436,7 +435,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 36.0242,
     "lon": 32.8028,
-    "description": "Mersin Anamur; Türkiye'nin en güney burnunda denize inen surlar ve nekropol.",
+    "description": "Mersin Anamur; Türkiye'nin en güney burnunda denize inen surlar ve nekropol. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -446,7 +445,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 36.0817,
     "lon": 32.8981,
-    "description": "Mersin Anamur; Deniz kıyısında 39 kulesiyle Akdeniz'in en görkemli kalelerinden biri.",
+    "description": "Mersin Anamur; Deniz kıyısında 39 kulesiyle Akdeniz'in en görkemli kalelerinden biri. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -466,7 +465,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 36.5842,
     "lon": 33.9189,
-    "description": "Mersin Silifke; Toros dağlarında 1200m rakımlı Zeus Olbios Tapınağı ve 5 katlı kule.",
+    "description": "Mersin Silifke; Toros dağlarında 1200m rakımlı Zeus Olbios Tapınağı ve 5 katlı kule. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -476,7 +475,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 36.4639,
     "lon": 34.1486,
-    "description": "Mersin Erdemli; Kıyıdan 600m açıkta adaya inşa edilmiş efsanevi deniz kalesi.",
+    "description": "Mersin Erdemli; Kıyıdan 600m açıkta adaya inşa edilmiş efsanevi deniz kalesi. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -496,7 +495,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 37.2517,
     "lon": 35.8322,
-    "description": "Adana Kozan; Devasa zafer takı, sütunlu cadde ve ovanın ortasındaki dik kaya.",
+    "description": "Adana Kozan; Devasa zafer takı, sütunlu cadde ve ovanın ortasındaki dik kaya. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -506,7 +505,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 37.0142,
     "lon": 35.8089,
-    "description": "Adana Ceyhan; İpek yolu üzerinde sarp bir kayalığa tünemiş Orta Çağ hisarı.",
+    "description": "Adana Ceyhan; İpek yolu üzerinde sarp bir kayalığa tünemiş Orta Çağ hisarı. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -516,7 +515,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 37.2956,
     "lon": 36.2467,
-    "description": "Osmaniye Kadirli; Çam ormanları ve baraj gölü kenarında Hitit hiyeroglif yazıtları.",
+    "description": "Osmaniye Kadirli; Çam ormanları ve baraj gölü kenarında Hitit hiyeroglif yazıtları. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -576,7 +575,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 39.3364,
     "lon": 31.5858,
-    "description": "Eskişehir Sivrihisar; Ana Tanrıça Kybele'nin gökten düşen göktaşı kutsal mekanı.",
+    "description": "Eskişehir Sivrihisar; Ana Tanrıça Kybele'nin gökten düşen göktaşı kutsal mekanı. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -596,7 +595,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 40.0197,
     "lon": 34.6153,
-    "description": "Çorum Boğazkale; MÖ 17. yüzyıl Hitit İmparatorluğu'nun devasa başkenti.",
+    "description": "Çorum Boğazkale; MÖ 17. yüzyıl Hitit İmparatorluğu'nun devasa başkenti. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -686,7 +685,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 36.7903,
     "lon": 33.3528,
-    "description": "Mersin-Karaman sınırı; Toros Dağları'nda 1300m uçurum kenarında Doğu Roma şaheseri.",
+    "description": "Mersin-Karaman sınırı; Toros Dağları'nda 1300m uçurum kenarında Doğu Roma şaheseri. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -756,7 +755,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 39.9575,
     "lon": 26.2389,
-    "description": "Çanakkale Tevfikiye; Homeros'un İlyada Destanı'na konu olan 4000 yıllık efsane.",
+    "description": "Çanakkale Tevfikiye; Homeros'un İlyada Destanı'na konu olan 4000 yıllık efsane. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -776,7 +775,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 40.4178,
     "lon": 27.0694,
-    "description": "Çanakkale Biga Kemer; Marmara Denizi kıyısında antik liman kenti ve odeon.",
+    "description": "Çanakkale Biga Kemer; Marmara Denizi kıyısında antik liman kenti ve odeon. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -786,7 +785,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 40.3842,
     "lon": 27.8767,
-    "description": "Balıkesir Erdek; Antik dünyanın sekizinci harikası sayılan dev mermer tapınak.",
+    "description": "Balıkesir Erdek; Antik dünyanın sekizinci harikası sayılan dev mermer tapınak. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -796,7 +795,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 40.2039,
     "lon": 28.0536,
-    "description": "Balıkesir Bandırma; Manyas Kuş Gölü kıyısında Anadolu'daki tek Pers valilik merkezi.",
+    "description": "Balıkesir Bandırma; Manyas Kuş Gölü kıyısında Anadolu'daki tek Pers valilik merkezi. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -886,7 +885,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 41.6342,
     "lon": 28.0933,
-    "description": "Kırklareli Vize Kıyıköy; Karadeniz kıyısında yekpare kayanın içine oyulmuş manastır.",
+    "description": "Kırklareli Vize Kıyıköy; Karadeniz kıyısında yekpare kayanın içine oyulmuş manastır. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -896,7 +895,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 40.6903,
     "lon": 39.6583,
-    "description": "Trabzon Maçka; Karadağ'ın 300m sarp kayalıklarına oyulmuş 1600 yıllık manastır.",
+    "description": "Trabzon Maçka; Karadağ'ın 300m sarp kayalıklarına oyulmuş 1600 yıllık manastır. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -906,7 +905,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 40.7606,
     "lon": 39.5447,
-    "description": "Trabzon Maçka vadisi; Sümela'dan bile daha eski (MS 270) gizli manastır.",
+    "description": "Trabzon Maçka vadisi; Sümela'dan bile daha eski (MS 270) gizli manastır. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -916,7 +915,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 40.9298,
     "lon": 40.9614,
-    "description": "Rize Çamlıhemşin; Bulut denizinin üzerinde Fırtına Deresi'ne bakan kartal yuvası.",
+    "description": "Rize Çamlıhemşin; Bulut denizinin üzerinde Fırtına Deresi'ne bakan kartal yuvası. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -936,7 +935,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 40.6128,
     "lon": 39.7347,
-    "description": "Gümüşhane-Trabzon yayla sınırı; Sisler arasında 7 ayrı mahalleden oluşan taş Rum kenti.",
+    "description": "Gümüşhane-Trabzon yayla sınırı; Sisler arasında 7 ayrı mahalleden oluşan taş Rum kenti. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -946,7 +945,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 40.4858,
     "lon": 39.6381,
-    "description": "Gümüşhane Olucak; Dağların arasında sağlam kubbesiyle ayakta duran görkemli manastır.",
+    "description": "Gümüşhane Olucak; Dağların arasında sağlam kubbesiyle ayakta duran görkemli manastır. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -966,7 +965,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 41.7503,
     "lon": 32.3867,
-    "description": "Bartın Amasra; İki koyu birbirine bağlayan tarihi taş köprü ve ada kalesi.",
+    "description": "Bartın Amasra; İki koyu birbirine bağlayan tarihi taş köprü ve ada kalesi. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -976,7 +975,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 41.0328,
     "lon": 32.5517,
-    "description": "Karabük Eskipazar; \"Karadeniz'in Zeugması\" sayılan hayvan figürlü taban mozaikleri.",
+    "description": "Karabük Eskipazar; \"Karadeniz'in Zeugması\" sayılan hayvan figürlü taban mozaikleri. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1006,7 +1005,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 41.4689,
     "lon": 34.7672,
-    "description": "Sinop Boyabat; Gökırmak Vadisi'ne hakim sarp kayalıkta nehre inen gizli merdivenler.",
+    "description": "Sinop Boyabat; Gökırmak Vadisi'ne hakim sarp kayalıkta nehre inen gizli merdivenler. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1046,7 +1045,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 41.2436,
     "lon": 42.3689,
-    "description": "Artvin Şavşat; Dağ virajları arasında Gürcü Bagratlı krallarının kartal hisarları.",
+    "description": "Artvin Şavşat; Dağ virajları arasında Gürcü Bagratlı krallarının kartal hisarları. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1056,7 +1055,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 40.7761,
     "lon": 41.7247,
-    "description": "Artvin Yusufeli; Çoruh Vadisi tepelerinde kızıl taştan haç planlı dev katedral.",
+    "description": "Artvin Yusufeli; Çoruh Vadisi tepelerinde kızıl taştan haç planlı dev katedral. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1066,7 +1065,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 41.1089,
     "lon": 43.1428,
-    "description": "Ardahan Çıldır; Üç tarafı yüzlerce metrelik uçurumla çevrili nefes kesici kale.",
+    "description": "Ardahan Çıldır; Üç tarafı yüzlerce metrelik uçurumla çevrili nefes kesici kale. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1076,7 +1075,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 40.5075,
     "lon": 43.5728,
-    "description": "Kars Arpaçay; Türkiye-Ermenistan sınırında İpek Yolu üzerindeki katedral ve surlar.",
+    "description": "Kars Arpaçay; Türkiye-Ermenistan sınırında İpek Yolu üzerindeki katedral ve surlar. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1086,7 +1085,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 40.6178,
     "lon": 43.0911,
-    "description": "Kars; Rus ve Osmanlı mimarisinin birleştiği kale etekleri.",
+    "description": "Kars; Rus ve Osmanlı mimarisinin birleştiği kale etekleri. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1156,7 +1155,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 38.5028,
     "lon": 43.3403,
-    "description": "Van; 3000 yıl önce Urartu krallarının yaptırdığı devasa kaya kalesi ve çivi yazıları.",
+    "description": "Van; 3000 yıl önce Urartu krallarının yaptırdığı devasa kaya kalesi ve çivi yazıları. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1166,7 +1165,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 38.3517,
     "lon": 43.4589,
-    "description": "Van Gürpınar; Urartu Tanrısı Haldi tapınağı ve bazalt taş bloklar.",
+    "description": "Van Gürpınar; Urartu Tanrısı Haldi tapınağı ve bazalt taş bloklar. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1176,7 +1175,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 38.3189,
     "lon": 43.8017,
-    "description": "Van Güzelsu; Van-Hakkari dağ yolu üzerinde dik kayalığa tünemiş Orta Çağ şatosu.",
+    "description": "Van Güzelsu; Van-Hakkari dağ yolu üzerinde dik kayalığa tünemiş Orta Çağ şatosu. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1186,7 +1185,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 38.7067,
     "lon": 43.2106,
-    "description": "Van Tuşba; Van Gölü kıyısında en iyi korunmuş fildişi ve bronz süslemeli tapınak.",
+    "description": "Van Tuşba; Van Gölü kıyısında en iyi korunmuş fildişi ve bronz süslemeli tapınak. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1216,7 +1215,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 38.6258,
     "lon": 42.2356,
-    "description": "Bitlis Tatvan; Dünyanın ikinci büyük krater kalderasında buhar bacaları ve göller.",
+    "description": "Bitlis Tatvan; Dünyanın ikinci büyük krater kalderasında buhar bacaları ve göller. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1226,7 +1225,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 38.7036,
     "lon": 39.2558,
-    "description": "Elazığ Harput; Pisa kulesinden daha eğik minare ve MÖ Urartu Süt Kalesi.",
+    "description": "Elazığ Harput; Pisa kulesinden daha eğik minare ve MÖ Urartu Süt Kalesi. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1236,7 +1235,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 38.6947,
     "lon": 39.9328,
-    "description": "Elazığ Palu; Murat Nehri kanyonuna hakim sarp zirvede Kral Menua yazıtı.",
+    "description": "Elazığ Palu; Murat Nehri kanyonuna hakim sarp zirvede Kral Menua yazıtı. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1246,7 +1245,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 37.2232,
     "lon": 38.9224,
-    "description": "Şanlıurfa; 12.000 yıllık T biçimli dikilitaşlar, insanlık tarihinin bilinen ilk tapınağı.",
+    "description": "Şanlıurfa; 12.000 yıllık T biçimli dikilitaşlar, insanlık tarihinin bilinen ilk tapınağı. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1276,7 +1275,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 36.9856,
     "lon": 39.4678,
-    "description": "Şanlıurfa Harran çöl yolu; Gezegen tanrılarına adanmış kaya tapınakları.",
+    "description": "Şanlıurfa Harran çöl yolu; Gezegen tanrılarına adanmış kaya tapınakları. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1296,7 +1295,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 37.0589,
     "lon": 37.8667,
-    "description": "Gaziantep Nizip; Fırat kıyısında Çingene Kızı mozaiğinin çıkarıldığı Roma villaları.",
+    "description": "Gaziantep Nizip; Fırat kıyısında Çingene Kızı mozaiğinin çıkarıldığı Roma villaları. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1316,7 +1315,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 37.9806,
     "lon": 38.7408,
-    "description": "Adıyaman Kâhta; Kommagene Krallığı I. Antiochos'un dev tanrı heykelleri ve gün doğumu.",
+    "description": "Adıyaman Kâhta; Kommagene Krallığı I. Antiochos'un dev tanrı heykelleri ve gün doğumu. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1356,7 +1355,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 37.1772,
     "lon": 40.9417,
-    "description": "Mardin Nusaybin yolu; Doğu Roma'nın Sasani sınırındaki kaya garnizon şehri ve zindan.",
+    "description": "Mardin Nusaybin yolu; Doğu Roma'nın Sasani sınırındaki kaya garnizon şehri ve zindan. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1366,7 +1365,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 37.3189,
     "lon": 41.5367,
-    "description": "Mardin Midyat; MS 397 yılında kurulan, dünyada aralıksız ibadet edilen en eski Süryani manastırı.",
+    "description": "Mardin Midyat; MS 397 yılında kurulan, dünyada aralıksız ibadet edilen en eski Süryani manastırı. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1376,7 +1375,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 37.1681,
     "lon": 41.2217,
-    "description": "Mardin Nusaybin Bagok Dağları; Mezopotamya ovasına bakan 800m uçurum kartal yuvası.",
+    "description": "Mardin Nusaybin Bagok Dağları; Mezopotamya ovasına bakan 800m uçurum kartal yuvası. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1396,7 +1395,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 37.6083,
     "lon": 40.4992,
-    "description": "Diyarbakır Çınar; Roma'nın doğu sınır karakolu ve yerin altında keşfedilen Mithras tapınağı.",
+    "description": "Diyarbakır Çınar; Roma'nın doğu sınır karakolu ve yerin altında keşfedilen Mithras tapınağı. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1426,7 +1425,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 37.7128,
     "lon": 41.4153,
-    "description": "Batman; Dicle Nehri kıyısında binlerce yıllık kaya yerleşimleri ve türbeler.",
+    "description": "Batman; Dicle Nehri kıyısında binlerce yıllık kaya yerleşimleri ve türbeler. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },
@@ -1436,7 +1435,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "category": "historic",
     "lat": 37.4589,
     "lon": 42.0833,
-    "description": "Şırnak Güçlükonak; Dicle Boğazı'nda sarp kireçtaşı kayalıklarına oyulmuş hisar ve rölyefler.",
+    "description": "Şırnak Güçlükonak; Dicle Boğazı'nda sarp kireçtaşı kayalıklarına oyulmuş hisar ve rölyefler. (Müzekart Geçerlidir)",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
   },

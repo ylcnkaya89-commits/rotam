@@ -47,5 +47,8 @@ PLIST
 # Copy Web Assets and Python Server to the bundle
 cp index.html app.js styles.css places_data.js server.py database.py "$APP_DIR/Contents/Resources/"
 
+echo "🔐 Uygulama Mac Güvenlik Sistemleri İçin İmzalanıyor..."
+codesign -f -s - --deep "$APP_DIR"
+
 echo "✅ Başarılı! Masaüstü uygulaması hazır: $DIR/Rotam.app"
 echo "👉 Başlatmak için: open Rotam.app"

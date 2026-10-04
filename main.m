@@ -88,7 +88,16 @@
     }
 }
 
+
+- (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
+    if (status == kCLAuthorizationStatusDenied || status == kCLAuthorizationStatusRestricted) {
+        [self.locationManager stopUpdatingLocation];
+        [self.webView evaluateJavaScript:@"window.onNativeLocationError();" completionHandler:nil];
+    }
+}
+
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
+
     [self.locationManager stopUpdatingLocation];
     [self.webView evaluateJavaScript:@"window.onNativeLocationError();" completionHandler:nil];
 }

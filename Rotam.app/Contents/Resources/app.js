@@ -472,58 +472,80 @@ function renderWaypointsUI() {
       const inputEl = document.querySelector(`.wp-input[data-wp-id="${wpId}"]`);
       if (inputEl) inputEl.value = "Konum bulunuyor...";
 
+      // MAC NATIVE GPS (WKWebView Bridge)
+      if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.gpsHandler) {
+        window.onNativeLocation = async (lat, lon) => {
+          wp.lat = lat;
+          wp.lon = lon;
+          wp.name = "Mevcut Konumum (GPS)";
+          const addr = await reverseGeocode(wp.lat, wp.lon);
+          if (addr) wp.name = addr;
+          updateMarker(wp);
+          renderWaypointsUI();
+          calculateRoute();
+          map.setView([wp.lat, wp.lon], 15);
+          showToast("Konumunuz Mac GPS sensöründen alındı.", "success");
+        };
+        window.onNativeLocationError = () => {
+          showToast("Mac Konum Servisine erişilemedi. IP Ağına geçiliyor...", "error");
+          fallbackToIpLocation(wp, inputEl);
+        };
+        // Istegi Objective-C'ye gonder
+        window.webkit.messageHandlers.gpsHandler.postMessage("");
+        return;
+      }
+
+      // STANDART BROWSER GPS (HTML5)
       if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
           async (position) => {
             wp.lat = position.coords.latitude;
             wp.lon = position.coords.longitude;
             wp.name = "Mevcut Konumum";
-            
-            // Try to get a nicer name via reverse geocoding
             const addr = await reverseGeocode(wp.lat, wp.lon);
             if (addr) wp.name = addr;
-            
             updateMarker(wp);
             renderWaypointsUI();
             calculateRoute();
             map.setView([wp.lat, wp.lon], 15);
           },
-                    (error) => {
-            console.warn("Native GPS failed, falling back to IP location...", error);
-            fetch('https://ipapi.co/json/')
-              .then(res => res.json())
-              .then(async data => {
-                if (data.latitude && data.longitude) {
-                  wp.lat = data.latitude;
-                  wp.lon = data.longitude;
-                  wp.name = data.city ? data.city + " (Tahmini)" : "Mevcut Konumum (IP)";
-                  
-                  const addr = await reverseGeocode(wp.lat, wp.lon);
-                  if (addr) wp.name = addr;
-                  
-                  updateMarker(wp);
-                  renderWaypointsUI();
-                  calculateRoute();
-                  map.setView([wp.lat, wp.lon], 13);
-                  showToast("Konumunuz ağ (IP) üzerinden tahmini olarak bulundu.", "success");
-                } else {
-                  throw new Error("Invalid IP data");
-                }
-              })
-              .catch(err => {
-                console.error("IP Location Error: ", err);
-                showToast("Konum alınamadı. Lütfen manuel giriniz.", "error");
-                if (inputEl) inputEl.value = wp.name || "";
-              });
+          (error) => {
+            console.warn("HTML5 GPS failed, falling back to IP location...", error);
+            fallbackToIpLocation(wp, inputEl);
           },
           { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
       } else {
-        showToast("Tarayıcınız konum servisini desteklemiyor.", "error");
-        if (inputEl) inputEl.value = wp.name || "";
+        fallbackToIpLocation(wp, inputEl);
       }
     });
   });
+}
+
+function fallbackToIpLocation(wp, inputEl) {
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(async data => {
+        if (data.latitude && data.longitude) {
+          wp.lat = data.latitude;
+          wp.lon = data.longitude;
+          wp.name = data.city ? data.city + " (Tahmini)" : "Mevcut Konumum (IP)";
+          const addr = await reverseGeocode(wp.lat, wp.lon);
+          if (addr) wp.name = addr;
+          updateMarker(wp);
+          renderWaypointsUI();
+          calculateRoute();
+          map.setView([wp.lat, wp.lon], 13);
+          showToast("Konumunuz ağ (IP) üzerinden tahmini olarak bulundu.", "success");
+        } else {
+          throw new Error("Invalid IP data");
+        }
+      })
+      .catch(err => {
+        console.error("IP Location Error: ", err);
+        showToast("Konum alınamadı. Lütfen manuel giriniz.", "error");
+        if (inputEl) inputEl.value = wp.name || "";
+      });
 }
 
 function escapeHtml(text) {
