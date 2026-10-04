@@ -20,6 +20,13 @@ jobs:
     - name: Install Dependencies
       run: npm install
 
+    - name: Prepare Web Assets
+      run: |
+        mkdir www
+        cp index.html app.js styles.css places_data.js www/
+        # Update capacitor config to point to www
+        sed -i 's/"webDir": "."/"webDir": "www"/' capacitor.config.json
+
     - name: Add Android Platform
       run: npx cap add android
 
