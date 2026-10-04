@@ -443,6 +443,11 @@ function renderWaypointsUI() {
 
       <!-- Action Buttons -->
       <div class="flex items-center space-x-1 shrink-0">
+        ${isStart ? `
+          <button class="btn-gps-locate p-1.5 rounded-lg text-slate-500 hover:text-accent-400 hover:bg-slate-800 transition-colors" data-wp-id="${wp.id}" title="Konumumu Bul">
+            <i data-lucide="crosshair" class="w-4 h-4"></i>
+          </button>
+        ` : ''}
         ${isVia ? `
           <button class="btn-remove-wp p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-slate-800 transition-colors" data-wp-id="${wp.id}" title="Durağı Sil">
             <i data-lucide="x" class="w-3.5 h-3.5"></i>
@@ -456,6 +461,46 @@ function renderWaypointsUI() {
 
   initIcons();
   attachWaypointInputEvents();
+
+  // Attach GPS click handler
+  document.querySelectorAll('.btn-gps-locate').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const wpId = e.currentTarget.dataset.wpId;
+      const wp = state.waypoints.find(w => w.id === wpId);
+      if (!wp) return;
+      
+      const inputEl = document.querySelector(`.wp-input[data-wp-id="${wpId}"]`);
+      if (inputEl) inputEl.value = "Konum bulunuyor...";
+
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            wp.lat = position.coords.latitude;
+            wp.lon = position.coords.longitude;
+            wp.name = "Mevcut Konumum";
+            
+            // Try to get a nicer name via reverse geocoding
+            const addr = await reverseGeocode(wp.lat, wp.lon);
+            if (addr) wp.name = addr;
+            
+            updateMarker(wp);
+            renderWaypointsUI();
+            calculateRoute();
+            map.setView([wp.lat, wp.lon], 15);
+          },
+          (error) => {
+            console.error("GPS Error: ", error);
+            showToast("Konum alınamadı. Lütfen ayarlardan izin verin.", "error");
+            if (inputEl) inputEl.value = wp.name || "";
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+      } else {
+        showToast("Tarayıcınız konum servisini desteklemiyor.", "error");
+        if (inputEl) inputEl.value = wp.name || "";
+      }
+    });
+  });
 }
 
 function escapeHtml(text) {
@@ -1588,6 +1633,7 @@ function initEventListeners() {
 
   toggleBtn.addEventListener('click', () => {
     sidebar.classList.toggle('hidden');
+    sidebar.classList.toggle('flex');
     const isHidden = sidebar.classList.contains('hidden');
     toggleIcon.setAttribute('data-lucide', isHidden ? 'panel-left-open' : 'panel-left-close');
     initIcons();

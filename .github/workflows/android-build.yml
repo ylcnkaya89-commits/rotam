@@ -18,13 +18,14 @@ jobs:
         node-version: 18
 
     - name: Install Dependencies
-      run: npm install
+      run: |
+        npm install
+        npm install @capacitor/geolocation
 
     - name: Prepare Web Assets
       run: |
         mkdir www
         cp index.html app.js styles.css places_data.js www/
-        # Update capacitor config to point to www
         sed -i 's/"webDir": "."/"webDir": "www"/' capacitor.config.json
 
     - name: Add Android Platform
@@ -32,6 +33,14 @@ jobs:
 
     - name: Sync Capacitor
       run: npx cap sync android
+
+    - name: Add Location Permissions
+      run: |
+        MANIFEST="android/app/src/main/AndroidManifest.xml"
+        sed -i '/<uses-permission android:name="android.permission.INTERNET" \/>/a\
+        <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" \/>\
+        <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" \/>\
+        <uses-feature android:name="android.hardware.location.gps" />' $MANIFEST
 
     - name: Setup Java
       uses: actions/setup-java@v4
