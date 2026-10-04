@@ -18,9 +18,7 @@ jobs:
         node-version: 18
 
     - name: Install Dependencies
-      run: |
-        npm install
-        npm install @capacitor/geolocation
+      run: npm install
 
     - name: Prepare Web Assets
       run: |
@@ -41,8 +39,14 @@ jobs:
         path = 'android/app/src/main/AndroidManifest.xml'
         with open(path, 'r') as f:
             content = f.read()
+        
+        # Replace the self-closing INTERNET tag that Capacitor generates
         permissions = '<uses-permission android:name=\"android.permission.INTERNET\" />\n<uses-permission android:name=\"android.permission.ACCESS_COARSE_LOCATION\" />\n<uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\" />\n<uses-feature android:name=\"android.hardware.location.gps\" />'
+        
+        # Try both formats (with and without space before />)
         content = content.replace('<uses-permission android:name=\"android.permission.INTERNET\" />', permissions)
+        content = content.replace('<uses-permission android:name=\"android.permission.INTERNET\"/>', permissions)
+        
         with open(path, 'w') as f:
             f.write(content)
         "
