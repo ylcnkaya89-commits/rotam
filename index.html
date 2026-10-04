@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="tr" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rotam | Motosiklet ve Araç Gezi Rotası Planlayıcı</title>
+  <meta name="description" content="Motosiklet ve arabalar için virajlı, manzaralı gezi rotası planlayıcı. Otoyollardan kaçın, virajları ve dağ geçitlerini keşfet.">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              400: '#fb923c',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c',
+            },
+            accent: {
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Leaflet CSS & JS (Cloudflare CDN with unpkg fallback) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script>
+    if (typeof L === 'undefined') {
+      document.write('<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">');
+      document.write('<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><' + '/script>');
+    }
+  </script>
+
+  <!-- Lucide Icons with Fallback -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
+  <script>
+    if (typeof lucide === 'undefined') {
+      document.write('<script src="https://unpkg.com/lucide@latest"><' + '/script>');
+    }
+  </script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="h-full flex flex-col overflow-hidden font-sans selection:bg-brand-500 selection:text-white">
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="h-16 bg-slate-900/90 border-b border-slate-800 px-4 flex items-center justify-between z-30 shrink-0 backdrop-blur-md">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-amber-500 flex items-center justify-center shadow-lg shadow-brand-500/25">
+        <i data-lucide="compass" class="w-6 h-6 text-white"></i>
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <span class="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-brand-400 bg-clip-text text-transparent">Rotam</span>
+          <span class="px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase bg-brand-500/20 text-brand-400 border border-brand-500/30 rounded-full">Moto & Drive</span>
+        </div>
+        <p class="text-xs text-slate-400 hidden sm:block">Virajlı & Manzaralı Rota Keşif Platformu</p>
+      </div>
+    </div>
+
+    <!-- Sürüş Profili Seçici -->
+    <div class="hidden md:flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800">
+      <button id="profile-twisty" class="profile-btn flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-brand-600 text-white shadow-md shadow-brand-600/30" data-profile="twisty">
+        <i data-lucide="zap" class="w-4 h-4"></i>
+        <span>Virajlı & Manzaralı (Moto)</span>
+      </button>
+      <button id="profile-scenic" class="profile-btn flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all text-slate-400 hover:text-white" data-profile="scenic">
+        <i data-lucide="mountain" class="w-4 h-4"></i>
+        <span>Keyifli Sürüş (GT)</span>
+      </button>
+      <button id="profile-fastest" class="profile-btn flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all text-slate-400 hover:text-white" data-profile="fastest">
+        <i data-lucide="gauge" class="w-4 h-4"></i>
+        <span>En Hızlı (Otoyol)</span>
+      </button>
+    </div>
+
+    <!-- Hızlı Aksiyon Butonları -->
+    <div class="flex items-center space-x-2">
+      <!-- Rotayı Kaydet Butonu -->
+      <button id="btn-save-route-modal" disabled class="disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-1.5 bg-brand-600 hover:bg-brand-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-md shadow-brand-600/30 transition-all">
+        <i data-lucide="bookmark-plus" class="w-4 h-4"></i>
+        <span class="hidden sm:inline">Rotayı Kaydet</span>
+      </button>
+
+      <!-- Kaydedilen Rotalar Butonu -->
+      <button id="btn-open-saved-routes" class="flex items-center space-x-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 transition-colors">
+        <i data-lucide="folder-heart" class="w-4 h-4 text-rose-400"></i>
+        <span class="hidden sm:inline">Rotalarım</span>
+      </button>
+
+      <!-- Tarihi Yerler Butonu -->
+      <button id="btn-historic-places" class="flex items-center space-x-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 transition-colors">
+        <i data-lucide="landmark" class="w-4 h-4 text-amber-400"></i>
+        <span class="hidden sm:inline">Tarihi Yerler</span>
+      </button>
+
+      <!-- Hazır Efsane Rotalar Butonu -->
+      <button id="btn-presets" class="flex items-center space-x-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 transition-colors">
+        <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+        <span class="hidden sm:inline">Efsane Rotalar</span>
+      </button>
+
+      <!-- GPX İndir -->
+      <button id="btn-export-gpx" disabled class="disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 transition-colors" title="Navigasyon / GPS için GPX dosyasını indir">
+        <i data-lucide="download" class="w-4 h-4 text-accent-400"></i>
+        <span class="hidden sm:inline">GPX</span>
+      </button>
+
+      <!-- Google Maps'te Aç -->
+      <button id="btn-open-gmaps" disabled class="disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 transition-colors" title="Google Haritalar uygulamasında başlat">
+        <i data-lucide="navigation" class="w-4 h-4 text-green-400"></i>
+        <span class="hidden md:inline">Google Maps</span>
+      </button>
+
+      <!-- Mobil Menü Toggle Butonu -->
+      <button id="btn-toggle-sidebar" class="md:hidden p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white">
+        <i data-lucide="panel-left-close" id="sidebar-toggle-icon" class="w-5 h-5"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN APP CONTAINER -->
+  <div class="flex-1 flex overflow-hidden relative">
+
+    <!-- LEFT SIDEBAR: DURAKLAR & KOKPİT -->
+    <aside id="sidebar" class="w-full md:w-[410px] bg-slate-900/95 border-r border-slate-800 flex flex-col z-20 transition-all duration-300 ease-in-out absolute md:relative inset-y-0 left-0 shadow-2xl backdrop-blur-xl">
+
+      <!-- Mobil için Profil Seçici -->
+      <div class="flex md:hidden p-3 border-b border-slate-800 bg-slate-950">
+        <div class="grid grid-cols-3 gap-1 w-full">
+          <button class="profile-btn flex flex-col items-center justify-center p-2 rounded-lg text-[10px] font-medium bg-brand-600 text-white" data-profile="twisty">
+            <i data-lucide="zap" class="w-4 h-4 mb-1"></i>
+            Virajlı
+          </button>
+          <button class="profile-btn flex flex-col items-center justify-center p-2 rounded-lg text-[10px] font-medium text-slate-400 hover:text-white" data-profile="scenic">
+            <i data-lucide="mountain" class="w-4 h-4 mb-1"></i>
+            Keyifli
+          </button>
+          <button class="profile-btn flex flex-col items-center justify-center p-2 rounded-lg text-[10px] font-medium text-slate-400 hover:text-white" data-profile="fastest">
+            <i data-lucide="gauge" class="w-4 h-4 mb-1"></i>
+            Hızlı
+          </button>
+        </div>
+      </div>
+
+      <!-- Scrollable Sidebar Content -->
+      <div class="flex-1 overflow-y-auto p-4 space-y-4">
+
+        <!-- DURAKLAR BÖLÜMÜ -->
+        <div class="glass-card rounded-2xl p-4 border border-slate-800/80">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="map-pin" class="w-4 h-4 text-brand-400"></i>
+              <h2 class="text-sm font-semibold tracking-wide text-slate-200">Rota Durakları</h2>
+            </div>
+            <div class="flex items-center space-x-1">
+              <button id="btn-reverse-route" title="Rotayı Ters Çevir" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-colors">
+                <i data-lucide="arrow-up-down" class="w-4 h-4"></i>
+              </button>
+              <button id="btn-clear-all" title="Tümünü Temizle" class="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-slate-800 transition-colors">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Waypoints List Container -->
+          <div id="waypoints-container" class="space-y-2.5 relative">
+            <!-- Dinamik Waypoint Girişleri JS tarafından render edilir -->
+          </div>
+
+          <!-- Durak Ekle Butonu -->
+          <div class="mt-3 pt-2 border-t border-slate-800/60 flex items-center justify-between">
+            <button id="btn-add-waypoint" class="flex items-center space-x-1.5 text-xs text-brand-400 hover:text-brand-300 font-medium py-1 px-2 rounded-lg hover:bg-brand-500/10 transition-colors">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i>
+              <span>Ara Durak Ekle</span>
+            </button>
+            <span class="text-[11px] text-slate-500">veya haritaya tıkla</span>
+          </div>
+        </div>
+
+        <!-- ROTA ÖZETİ & KOKPİT GÖSTERGELERİ -->
+        <div id="route-summary-panel" class="hidden glass-card rounded-2xl p-4 border border-slate-800/80 animate-slide-in">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="activity" class="w-4 h-4 text-brand-400"></i>
+              <h3 class="text-sm font-semibold text-slate-200">Sürüş Göstergeleri</h3>
+            </div>
+            <span id="route-badge-mode" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-500/20 text-brand-400 border border-brand-500/30">
+              VİRAJLI
+            </span>
+          </div>
+
+          <!-- Metrik Kartları -->
+          <div class="grid grid-cols-2 gap-2.5">
+            <!-- Mesafe -->
+            <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800 flex items-center space-x-3">
+              <div class="p-2 rounded-lg bg-accent-500/10 text-accent-400">
+                <i data-lucide="route" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Mesafe</p>
+                <p id="stat-distance" class="text-base font-bold text-white">0 km</p>
+              </div>
+            </div>
+
+            <!-- Süre -->
+            <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800 flex items-center space-x-3">
+              <div class="p-2 rounded-lg bg-amber-500/10 text-amber-400">
+                <i data-lucide="clock" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Süre</p>
+                <p id="stat-duration" class="text-base font-bold text-white">0 sa 0 dk</p>
+              </div>
+            </div>
+
+            <!-- Viraj Yoğunluğu -->
+            <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800 flex items-center space-x-3">
+              <div class="p-2 rounded-lg bg-brand-500/10 text-brand-400">
+                <i data-lucide="git-commit" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Viraj Puanı</p>
+                <p id="stat-curviness" class="text-base font-bold text-brand-400">88 / 100</p>
+              </div>
+            </div>
+
+            <!-- Tırmanış / İniş -->
+            <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800 flex items-center space-x-3">
+              <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
+                <i data-lucide="trending-up" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Tırmanış</p>
+                <p id="stat-elevation" class="text-base font-bold text-emerald-400">+0 m</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Yakıt & Maliyet Tahmini -->
+          <div class="mt-3 bg-slate-950/50 p-2.5 rounded-xl border border-slate-800/80 flex items-center justify-between text-xs">
+            <div class="flex items-center space-x-2 text-slate-400">
+              <i data-lucide="fuel" class="w-4 h-4 text-amber-400"></i>
+              <span>Tahmini Yakıt:</span>
+            </div>
+            <div class="text-right">
+              <span id="stat-fuel-liters" class="font-bold text-slate-200">0 L</span>
+              <span class="text-slate-500 text-[11px]">(~<span id="stat-fuel-cost">0</span> TL)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- HAVA DURUMU KARTI -->
+        <div id="weather-panel" class="hidden glass-card rounded-2xl p-4 border border-slate-800/80 animate-slide-in">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="cloud-sun" class="w-4 h-4 text-sky-400"></i>
+              <h3 class="text-sm font-semibold text-slate-200">Bölgesel Hava & Rüzgar</h3>
+            </div>
+            <span class="text-[10px] text-slate-500">Motosiklet Durumu</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div id="weather-start" class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
+              <p class="text-[10px] text-slate-400 font-semibold truncate">BAŞLANGIÇ</p>
+              <div class="flex items-center justify-between mt-1">
+                <span id="weather-start-temp" class="text-sm font-bold text-white">--°C</span>
+                <span id="weather-start-wind" class="text-[10px] text-slate-400">-- km/s rüzgar</span>
+              </div>
+            </div>
+            <div id="weather-end" class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
+              <p class="text-[10px] text-slate-400 font-semibold truncate">VARIŞ</p>
+              <div class="flex items-center justify-between mt-1">
+                <span id="weather-end-temp" class="text-sm font-bold text-white">--°C</span>
+                <span id="weather-end-wind" class="text-[10px] text-slate-400">-- km/s rüzgar</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MOLA / KEŞİF NOKTALARI FİLTRESİ -->
+        <div class="glass-card rounded-2xl p-4 border border-slate-800/80">
+          <div class="flex items-center justify-between mb-2.5">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="map-pinned" class="w-4 h-4 text-purple-400"></i>
+              <h3 class="text-sm font-semibold text-slate-200">Rotada Keşfet (POI)</h3>
+            </div>
+          </div>
+          <p class="text-xs text-slate-400 mb-3">Rota üzerindeki benzinlik, manzara terası ve mola yerlerini haritada göster.</p>
+          <div class="grid grid-cols-4 gap-1.5">
+            <button id="poi-historic" class="poi-toggle flex flex-col items-center justify-center p-2 rounded-xl bg-slate-950 border border-slate-800 text-[10px] text-slate-300 hover:border-amber-500/50 hover:text-amber-400 transition-all">
+              <i data-lucide="landmark" class="w-4 h-4 mb-1 text-amber-400"></i>
+              <span>Tarihi Yer</span>
+            </button>
+            <button id="poi-viewpoint" class="poi-toggle flex flex-col items-center justify-center p-2 rounded-xl bg-slate-950 border border-slate-800 text-[10px] text-slate-300 hover:border-brand-500/50 hover:text-brand-400 transition-all">
+              <i data-lucide="eye" class="w-4 h-4 mb-1 text-orange-400"></i>
+              <span>Manzara</span>
+            </button>
+            <button id="poi-fuel" class="poi-toggle flex flex-col items-center justify-center p-2 rounded-xl bg-slate-950 border border-slate-800 text-[10px] text-slate-300 hover:border-brand-500/50 hover:text-brand-400 transition-all">
+              <i data-lucide="fuel" class="w-4 h-4 mb-1 text-emerald-400"></i>
+              <span>Benzinlik</span>
+            </button>
+            <button id="poi-cafe" class="poi-toggle flex flex-col items-center justify-center p-2 rounded-xl bg-slate-950 border border-slate-800 text-[10px] text-slate-300 hover:border-brand-500/50 hover:text-brand-400 transition-all">
+              <i data-lucide="coffee" class="w-4 h-4 mb-1 text-sky-400"></i>
+              <span>Kafe/Mola</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Sidebar Footer -->
+      <div class="p-3 border-t border-slate-800 bg-slate-950/80 text-[11px] text-slate-500 flex items-center justify-between">
+        <span>Rotam © 2026</span>
+        <span class="text-brand-400/80">Virajların Özgürlüğü</span>
+      </div>
+    </aside>
+
+    <!-- RIGHT/CENTER: INTERACTIVE MAP & FLOATING OVERLAYS -->
+    <main class="flex-1 relative w-full h-full overflow-hidden" style="min-height: 0;">
+      <!-- LEAFLET HARİTA DİVİ -->
+      <div id="map" class="w-full h-full" style="position: absolute; inset: 0; min-height: 100%; z-index: 1;"></div>
+
+      <!-- HARİTA ÜSTÜ FLOATING BİLGİ VE KONTROLLER -->
+      <!-- Katman Seçici (Harita Tipi) -->
+      <div class="absolute top-4 right-4 z-[500] flex flex-col space-y-2">
+        <div class="glass-panel p-1 rounded-xl shadow-2xl flex space-x-1 border border-slate-800">
+          <button id="tile-dark" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-white" title="Karanlık Mod Harita">
+            🌙 Dark
+          </button>
+          <button id="tile-topo" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Topografik Yükselti Haritası (Dağ & Virajlar)">
+            ⛰️ Topo
+          </button>
+          <button id="tile-osm" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Standart Sokak Haritası">
+            🗺️ Sokak
+          </button>
+          <button id="tile-sat" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Uydu Görüntüsü">
+            🛰️ Uydu
+          </button>
+        </div>
+      </div>
+
+      <!-- Harita İpucu Bildirimi -->
+      <div id="map-hint" class="absolute top-4 left-4 z-[500] glass-panel px-3 py-2 rounded-xl text-xs text-slate-300 flex items-center space-x-2 shadow-lg border border-slate-800/80 animate-pulse">
+        <i data-lucide="mouse-pointer-click" class="w-4 h-4 text-brand-400"></i>
+        <span>Haritaya tıklayarak başlangıç, durak ve varış belirleyin.</span>
+        <button onclick="document.getElementById('map-hint').remove()" class="text-slate-500 hover:text-slate-300 ml-1">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+
+      <!-- ALT PANEL: ETKİLEŞİMLİ YÜKSEKLİK & EĞİM PROFİLİ (ELEVATION PROFILE) -->
+      <div id="elevation-panel" class="hidden absolute bottom-4 left-4 right-4 z-[500] glass-panel rounded-2xl p-3 border border-slate-800 shadow-2xl backdrop-blur-xl animate-slide-in">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="mountain-snow" class="w-4 h-4 text-brand-400"></i>
+            <span class="text-xs font-semibold text-slate-200">Yükseklik & Geçit Profili</span>
+            <span id="elevation-hover-info" class="text-xs text-brand-400 font-mono font-medium ml-2"></span>
+          </div>
+          <div class="flex items-center space-x-3 text-[11px] text-slate-400">
+            <span>En Yüksek: <strong id="elevation-max" class="text-white">0 m</strong></span>
+            <span>En Düşük: <strong id="elevation-min" class="text-white">0 m</strong></span>
+            <button id="btn-toggle-elevation" class="text-slate-400 hover:text-white ml-2">
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Canvas Chart -->
+        <div class="h-28 w-full relative">
+          <canvas id="elevation-chart" class="w-full h-full block"></canvas>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- EFSANE ROTALAR MODAL -->
+  <div id="modal-presets" class="hidden fixed inset-0 z-[1000] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+      <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="sparkles" class="w-5 h-5 text-amber-400"></i>
+          <h3 class="text-base font-bold text-white">Efsane Motosiklet & Gezi Rotaları</h3>
+        </div>
+        <button id="btn-close-presets" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-4 overflow-y-auto space-y-3" id="presets-list">
+        <!-- Preset kartları JS ile dinamik doldurulur -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: KAYITLI ROTALARIM (SQLITE VERİTABANI) -->
+  <div id="modal-saved-routes" class="hidden fixed inset-0 z-[1000] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+      <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="folder-heart" class="w-5 h-5 text-rose-400"></i>
+          <h3 class="text-base font-bold text-white">Kayıtlı Gezi Rotalarım</h3>
+          <span class="px-2 py-0.5 text-[10px] rounded bg-slate-800 text-slate-400 font-mono">SQLite</span>
+        </div>
+        <button id="btn-close-saved-routes" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-4 overflow-y-auto space-y-3" id="saved-routes-list">
+        <!-- Rotalar JS tarafından veritabanından çekilip listelenir -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ROTAYI KAYDET -->
+  <div id="modal-save-route" class="hidden fixed inset-0 z-[1000] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+      <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="bookmark-plus" class="w-5 h-5 text-brand-400"></i>
+          <h3 class="text-base font-bold text-white">Rotayı Veritabanına Kaydet</h3>
+        </div>
+        <button id="btn-close-save-route" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-save-route" class="p-4 space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Rota Başlığı</label>
+          <input type="text" id="save-route-title" required placeholder="Örn: Ege Kıyı Virajları Turu" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Açıklama / Gezi Notları (İsteğe Bağlı)</label>
+          <textarea id="save-route-desc" rows="3" placeholder="Örn: Hafta sonu kahvaltısı ve viraj antrenmanı..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500"></textarea>
+        </div>
+        <div class="flex items-center space-x-2 pt-2">
+          <button type="submit" class="flex-1 bg-brand-600 hover:bg-brand-500 text-white font-semibold py-2 rounded-xl text-xs shadow-lg shadow-brand-600/30 transition-all">
+            Kaydet
+          </button>
+          <button type="button" id="btn-cancel-save-route" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs">
+            İptal
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: TÜRKİYE TARİHİ YERLER KEŞİF PLATFORMU -->
+  <div id="modal-historic-places" class="hidden fixed inset-0 z-[1000] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
+      <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
+            <i data-lucide="landmark" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Türkiye Tarihi Yerler & Antik Kentler</h3>
+            <p class="text-xs text-slate-400">Tüm Türkiye'deki antik kentler, kaleler, manastırlar ve tarihi duraklar</p>
+          </div>
+        </div>
+        <button id="btn-close-historic-places" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Arama ve Bölge Filtreleri -->
+      <div class="p-3 bg-slate-950/70 border-b border-slate-800 space-y-2.5">
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+          <input type="text" id="search-historic-input" placeholder="Tarihi yer ara (Örn: Efes, Sagalassos, Göbeklitepe, Sümela, Truva, Ani...)" class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+        </div>
+        
+        <!-- Bölge Filtre Butonları -->
+        <div class="flex flex-wrap gap-1 text-[11px]" id="region-filter-buttons">
+          <button class="region-filter-btn px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/40 font-medium" data-region="all">Tümü</button>
+          <button class="region-filter-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-region="Ege">Ege</button>
+          <button class="region-filter-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-region="Akdeniz">Akdeniz</button>
+          <button class="region-filter-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-region="İç Anadolu">İç Anadolu</button>
+          <button class="region-filter-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-region="Marmara">Marmara</button>
+          <button class="region-filter-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-region="Karadeniz">Karadeniz</button>
+          <button class="region-filter-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-region="Doğu & Güneydoğu">Doğu & Güneydoğu</button>
+        </div>
+      </div>
+
+      <!-- Tarihi Yerler Listesi -->
+      <div class="p-4 overflow-y-auto space-y-2.5" id="historic-places-list">
+        <!-- JS tarafından doldurulur -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Tarihi Yerler & Keşif Veritabanı -->
+  <script src="places_data.js"></script>
+  <!-- Main JavaScript Logic -->
+  <script src="app.js"></script>
+</body>
+</html>

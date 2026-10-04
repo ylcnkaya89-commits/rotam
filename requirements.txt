@@ -1,0 +1,3 @@
+# Requirements for Rotam Backend
+# No external dependencies needed as it uses Python standard library.
+# This file is provided for cloud platforms that expect a requirements.txt (e.g. Render/Heroku)
