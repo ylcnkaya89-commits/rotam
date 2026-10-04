@@ -1363,10 +1363,11 @@ function getPoiSearchArea(type) {
       contains: (lat, lon) => pts.some(p => haversineMeters(lat, lon, p[1], p[0]) <= cfg.radius * 1.5)
     };
   }
-  if (!map || map.getZoom() < 9) return null;
+  if (!map) return null;
   const b = map.getBounds();
   return {
     mode: 'bbox',
+    tooBigForOverpass: map.getZoom() < 8,
     clause: `(${b.getSouth().toFixed(5)},${b.getWest().toFixed(5)},${b.getNorth().toFixed(5)},${b.getEast().toFixed(5)})`,
     contains: (lat, lon) => b.contains([lat, lon])
   };
@@ -1385,7 +1386,7 @@ async function runOverpass(query) {
     console.warn('Yerel POI proxy erişilemedi:', e);
   }
   // 2) Doğrudan ayna (CORS destekli)
-  const res = await fetchWithTimeout('https://maps.mail.ru/osm/tools/overpass/api/interpreter', {
+  const res = await fetchWithTimeout('https://overpass-api.de/api/interpreter', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: 'data=' + encodeURIComponent(query)
@@ -1486,7 +1487,8 @@ async function fetchPoiMarkers(type, silent = false) {
   }
 
   let onlineError = null;
-  try {
+  if (!area.tooBigForOverpass) {
+    try {
     const query = `[out:json][timeout:25];(${cfg.filters.map(f => f + area.clause + ';').join('')});out center 80;`;
     const data = await runOverpass(query);
     (data.elements || []).forEach(el => {
@@ -1500,6 +1502,9 @@ async function fetchPoiMarkers(type, silent = false) {
   } catch (err) {
     onlineError = err;
     console.warn('POI çevrimiçi arama başarısız:', err);
+  }
+  } else {
+    onlineError = new Error('Harita çok uzak');
   }
 
   items.forEach(item => {
@@ -1530,6 +1535,8 @@ async function fetchPoiMarkers(type, silent = false) {
     const where = area.mode === 'route' ? 'rota boyunca' : 'görünen alanda';
     if (items.length) {
       showToast(`${items.length} adet ${cfg.title.toLowerCase()} ${where} bulundu${onlineError ? ' (yalnızca yerel veri)' : ''}.`, 'ok');
+    } else if (area.tooBigForOverpass) {
+      showToast('Daha fazla sonuç için haritaya yakınlaşın veya rota oluşturun.', 'info');
     } else if (onlineError) {
       showToast('Keşif sunucularına ulaşılamadı. Biraz sonra tekrar deneyin.', 'error');
     } else {

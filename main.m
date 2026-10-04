@@ -51,7 +51,7 @@
 
     // Sunucunun ayağa kalkması için kısa bir süre bekleyip localhost'u yükle
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        NSURL *url = [NSURL URLWithString:@"http://127.0.0.1:8999"];
+        NSURL *url = [NSURL URLWithString:@"http://127.0.0.1:14832"];
         [self.webView loadRequest:[NSURLRequest requestWithURL:url]];
     });
 
@@ -87,7 +87,7 @@
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error {
     NSLog(@"Yükleme hatası: %@. 1 saniye sonra tekrar deneniyor...", error.localizedDescription);
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        NSURL *url = [NSURL URLWithString:@"http://127.0.0.1:8999"];
+        NSURL *url = [NSURL URLWithString:@"http://127.0.0.1:14832"];
         [self.webView loadRequest:[NSURLRequest requestWithURL:url]];
     });
 }

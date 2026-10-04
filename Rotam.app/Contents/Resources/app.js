@@ -488,10 +488,33 @@ function renderWaypointsUI() {
             calculateRoute();
             map.setView([wp.lat, wp.lon], 15);
           },
-          (error) => {
-            console.error("GPS Error: ", error);
-            showToast("Konum alınamadı. Lütfen ayarlardan izin verin.", "error");
-            if (inputEl) inputEl.value = wp.name || "";
+                    (error) => {
+            console.warn("Native GPS failed, falling back to IP location...", error);
+            fetch('https://ipapi.co/json/')
+              .then(res => res.json())
+              .then(async data => {
+                if (data.latitude && data.longitude) {
+                  wp.lat = data.latitude;
+                  wp.lon = data.longitude;
+                  wp.name = data.city ? data.city + " (Tahmini)" : "Mevcut Konumum (IP)";
+                  
+                  const addr = await reverseGeocode(wp.lat, wp.lon);
+                  if (addr) wp.name = addr;
+                  
+                  updateMarker(wp);
+                  renderWaypointsUI();
+                  calculateRoute();
+                  map.setView([wp.lat, wp.lon], 13);
+                  showToast("Konumunuz ağ (IP) üzerinden tahmini olarak bulundu.", "success");
+                } else {
+                  throw new Error("Invalid IP data");
+                }
+              })
+              .catch(err => {
+                console.error("IP Location Error: ", err);
+                showToast("Konum alınamadı. Lütfen manuel giriniz.", "error");
+                if (inputEl) inputEl.value = wp.name || "";
+              });
           },
           { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );

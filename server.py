@@ -17,7 +17,7 @@ mimetypes.add_type('application/javascript', '.js')
 mimetypes.add_type('text/css', '.css')
 mimetypes.add_type('image/svg+xml', '.svg')
 
-PORT = 8999
+PORT = 14832
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 db = Database()
 
@@ -27,7 +27,7 @@ import time
 
 OVERPASS_MIRRORS = [
     'https://overpass-api.de/api/interpreter',
-    'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+    'https://overpass-api.de/api/interpreter',
     'https://overpass.kumi.systems/api/interpreter',
     'https://overpass.private.coffee/api/interpreter',
 ]
