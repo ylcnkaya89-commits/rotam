@@ -15,7 +15,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 18
+        node-version: 20
 
     - name: Install Dependencies
       run: |
@@ -24,7 +24,7 @@ jobs:
 
     - name: Prepare Web Assets
       run: |
-        mkdir www
+        mkdir -p www
         cp index.html app.js styles.css places_data.js www/
         sed -i 's/"webDir": "."/"webDir": "www"/' capacitor.config.json
 
@@ -37,10 +37,7 @@ jobs:
     - name: Add Location Permissions
       run: |
         MANIFEST="android/app/src/main/AndroidManifest.xml"
-        sed -i '/<uses-permission android:name="android.permission.INTERNET" \/>/a\
-        <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" \/>\
-        <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" \/>\
-        <uses-feature android:name="android.hardware.location.gps" />' $MANIFEST
+        sed -i 's|<uses-permission android:name="android.permission.INTERNET" />|<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n    <uses-feature android:name="android.hardware.location.gps" />|g' $MANIFEST
 
     - name: Setup Java
       uses: actions/setup-java@v4
