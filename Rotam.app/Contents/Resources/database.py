@@ -116,8 +116,23 @@ class Database:
 
             # Favori mola yerleri ve Kapsamlı Türkiye Tarihi Yerleri
             cursor.execute("SELECT COUNT(*) as cnt FROM favorite_places;")
-            if cursor.fetchone()['cnt'] < 100:
-                cursor.execute("DELETE FROM favorite_places;")
+            if cursor.fetchone()['cnt'] < 500:
+                places_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "places_data.js")
+                if os.path.exists(places_file):
+                    try:
+                        with open(places_file, 'r', encoding='utf-8') as pf:
+                            p_text = pf.read()
+                        s_idx = p_text.find('[')
+                        e_idx = p_text.rfind(']') + 1
+                        loaded_places = json.loads(p_text[s_idx:e_idx])
+                        for lp in loaded_places:
+                            cursor.execute('''
+                                INSERT OR IGNORE INTO favorite_places (name, category, lat, lon, description, rating)
+                                VALUES (?, ?, ?, ?, ?, ?);
+                            ''', (lp['name'], lp['category'], lp['lat'], lp['lon'], lp.get('description', ''), lp.get('rating', 5)))
+                        conn.commit()
+                    except Exception as pe:
+                        sys.stderr.write(f"Error loading places_data.js: {pe}\n")
                 places = [
                     # --- VİRAJLI GEÇİTLER & MANZARA NOKTALARI ---
                     ('Sakar Geçidi Seyir Terası', 'viewpoint', 37.0678, 28.3412, 'Muğla Akyaka; Gökova Körfezi manzarası, gün batımı için efsane motorcu durağı.', 5),

@@ -1,6 +1,7 @@
+// Türkiye Geneli Kapsamlı Tarihi Eser, Antik Kent, Müze, Benzinlik ve Dinlenme Tesisleri Veritabanı
 window.DEFAULT_HISTORIC_PLACES = [
   {
-    "id": 45,
+    "id": 1,
     "name": "Sakar Geçidi Seyir Terası",
     "category": "viewpoint",
     "lat": 37.0678,
@@ -10,7 +11,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 46,
+    "id": 2,
     "name": "Kaputaş Kanyonu & Seyir Noktası",
     "category": "viewpoint",
     "lat": 36.2287,
@@ -20,7 +21,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 47,
+    "id": 3,
     "name": "Bolu Dağı Eski Geçit Zirvesi",
     "category": "mountain_pass",
     "lat": 40.7421,
@@ -30,7 +31,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 48,
+    "id": 4,
     "name": "Ovit Dağı Zirve Geçidi (2640m)",
     "category": "mountain_pass",
     "lat": 40.6315,
@@ -40,7 +41,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 49,
+    "id": 5,
     "name": "Akyaka Azmak Kıyısı Mola Yeri",
     "category": "cafe",
     "lat": 37.0545,
@@ -50,7 +51,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 50,
+    "id": 6,
     "name": "Efes Antik Kenti & Celsus Kütüphanesi",
     "category": "historic",
     "lat": 37.9392,
@@ -60,7 +61,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 51,
+    "id": 7,
     "name": "Bergama Akropolü & Dik Tiyatro",
     "category": "historic",
     "lat": 39.1325,
@@ -70,7 +71,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 52,
+    "id": 8,
     "name": "Assos Athena Tapınağı & Behramkale",
     "category": "historic",
     "lat": 39.4912,
@@ -80,7 +81,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 53,
+    "id": 9,
     "name": "Hierapolis Antik Kenti & Travertenler",
     "category": "historic",
     "lat": 37.9259,
@@ -90,7 +91,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 54,
+    "id": 10,
     "name": "Afrodisias Antik Kenti & Devasa Stadyum",
     "category": "historic",
     "lat": 37.7089,
@@ -100,7 +101,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 55,
+    "id": 11,
     "name": "Knidos Antik Kenti & Deveboynu Feneri",
     "category": "historic",
     "lat": 36.6858,
@@ -110,7 +111,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 56,
+    "id": 12,
     "name": "Labranda Dağ Kutsal Alanı",
     "category": "historic",
     "lat": 37.4189,
@@ -120,7 +121,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 57,
+    "id": 13,
     "name": "Herakleia & Latmos Kaya Resimleri",
     "category": "historic",
     "lat": 37.5028,
@@ -130,7 +131,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 58,
+    "id": 14,
     "name": "Stratonikeia Gladyatörler Kenti",
     "category": "historic",
     "lat": 37.3139,
@@ -140,7 +141,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 59,
+    "id": 15,
     "name": "Lagina Hekate Kutsal Alanı",
     "category": "historic",
     "lat": 37.3789,
@@ -150,7 +151,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 60,
+    "id": 16,
     "name": "Alinda Antik Kenti & Kraliçe Ada Kalesi",
     "category": "historic",
     "lat": 37.5606,
@@ -160,7 +161,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 61,
+    "id": 17,
     "name": "Nysa Antik Kenti & Kütüphanesi",
     "category": "historic",
     "lat": 37.9014,
@@ -170,7 +171,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 62,
+    "id": 18,
     "name": "Priene Helenistik Şehri",
     "category": "historic",
     "lat": 37.6594,
@@ -180,7 +181,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 63,
+    "id": 19,
     "name": "Milet Antik Kenti & Faustina Hamamı",
     "category": "historic",
     "lat": 37.5303,
@@ -190,7 +191,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 64,
+    "id": 20,
     "name": "Didyma Apollon Kehanet Tapınağı",
     "category": "historic",
     "lat": 37.3847,
@@ -200,7 +201,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 65,
+    "id": 21,
     "name": "Sardes Lidya Başkenti & Artemis Tapınağı",
     "category": "historic",
     "lat": 38.4883,
@@ -210,7 +211,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 66,
+    "id": 22,
     "name": "Aizanoi Antik Kenti & Zeus Tapınağı",
     "category": "historic",
     "lat": 39.2017,
@@ -220,7 +221,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 67,
+    "id": 23,
     "name": "Blaundos Kanyon Antik Kenti",
     "category": "historic",
     "lat": 38.3589,
@@ -230,7 +231,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 68,
+    "id": 24,
     "name": "Clandras Tarihi Su Kemeri",
     "category": "historic",
     "lat": 38.3756,
@@ -240,7 +241,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 69,
+    "id": 25,
     "name": "Kaunos Antik Kenti & Dalyan Kaya Mezarları",
     "category": "historic",
     "lat": 36.8267,
@@ -250,7 +251,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 70,
+    "id": 26,
     "name": "Tlos Antik Kenti & Kronos Tapınağı",
     "category": "historic",
     "lat": 36.5539,
@@ -260,7 +261,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 71,
+    "id": 27,
     "name": "Pinara Antik Kenti & Arı Kovanı Mezarları",
     "category": "historic",
     "lat": 36.4889,
@@ -270,7 +271,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 72,
+    "id": 28,
     "name": "Erythrai Antik Kenti",
     "category": "historic",
     "lat": 38.3828,
@@ -280,7 +281,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 73,
+    "id": 29,
     "name": "Klazomenai Zeytinyağı İşliği",
     "category": "historic",
     "lat": 38.3619,
@@ -290,7 +291,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 74,
+    "id": 30,
     "name": "Sagalassos Antik Dağ Kenti",
     "category": "historic",
     "lat": 37.6766,
@@ -300,7 +301,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 75,
+    "id": 31,
     "name": "Kibyra Antik Kenti & Medusa Mozaiği",
     "category": "historic",
     "lat": 37.1558,
@@ -310,7 +311,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 76,
+    "id": 32,
     "name": "Termessos Kartal Yuvası Antik Kenti",
     "category": "historic",
     "lat": 36.9822,
@@ -320,7 +321,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 77,
+    "id": 33,
     "name": "Adada Antik Kenti & Kral Yolu",
     "category": "historic",
     "lat": 37.5858,
@@ -330,7 +331,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 78,
+    "id": 34,
     "name": "Antiochia ad Pisidiam (Yalvaç)",
     "category": "historic",
     "lat": 38.3056,
@@ -340,7 +341,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 79,
+    "id": 35,
     "name": "Selge Antik Kenti & Adam Kayalar",
     "category": "historic",
     "lat": 37.2289,
@@ -350,7 +351,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 80,
+    "id": 36,
     "name": "Arykanda Antik Kenti",
     "category": "historic",
     "lat": 36.5147,
@@ -360,7 +361,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 81,
+    "id": 37,
     "name": "Patara Antik Kenti & Meclis Binası",
     "category": "historic",
     "lat": 36.2608,
@@ -370,7 +371,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 82,
+    "id": 38,
     "name": "Xanthos Likya Başkenti",
     "category": "historic",
     "lat": 36.3567,
@@ -380,7 +381,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 83,
+    "id": 39,
     "name": "Letoon Kutsal Alanı",
     "category": "historic",
     "lat": 36.3325,
@@ -390,7 +391,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 84,
+    "id": 40,
     "name": "Myra Antik Kenti & Aziz Nikola Kilisesi",
     "category": "historic",
     "lat": 36.2597,
@@ -400,7 +401,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 85,
+    "id": 41,
     "name": "Phaselis Antik Kenti & 3 Liman",
     "category": "historic",
     "lat": 36.5255,
@@ -410,7 +411,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 86,
+    "id": 42,
     "name": "Aspendos Antik Tiyatrosu",
     "category": "historic",
     "lat": 36.9389,
@@ -420,7 +421,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 87,
+    "id": 43,
     "name": "Simena Kalesi & Batık Şehir Kekova",
     "category": "historic",
     "lat": 36.1906,
@@ -430,7 +431,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 88,
+    "id": 44,
     "name": "Anemurium Antik Kenti",
     "category": "historic",
     "lat": 36.0242,
@@ -440,7 +441,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 89,
+    "id": 45,
     "name": "Mamure Kalesi",
     "category": "historic",
     "lat": 36.0817,
@@ -450,7 +451,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 90,
+    "id": 46,
     "name": "Kanlıdivane (Kanytellis) Obruk Kenti",
     "category": "historic",
     "lat": 36.5244,
@@ -460,7 +461,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 91,
+    "id": 47,
     "name": "Uzuncaburç (Diokaesareia) Antik Kenti",
     "category": "historic",
     "lat": 36.5842,
@@ -470,7 +471,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 92,
+    "id": 48,
     "name": "Kızkalesi & Korykos Deniz Kalesi",
     "category": "historic",
     "lat": 36.4639,
@@ -480,7 +481,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 93,
+    "id": 49,
     "name": "Cennet & Cehennem Obrukları",
     "category": "historic",
     "lat": 36.5217,
@@ -490,7 +491,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 94,
+    "id": 50,
     "name": "Anavarza Antik Kenti & Kaya Kalesi",
     "category": "historic",
     "lat": 37.2517,
@@ -500,7 +501,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 95,
+    "id": 51,
     "name": "Yılankale (Şahmaran Kalesi)",
     "category": "historic",
     "lat": 37.0142,
@@ -510,7 +511,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 96,
+    "id": 52,
     "name": "Karatepe-Aslantaş Hitit Açık Hava Müzesi",
     "category": "historic",
     "lat": 37.2956,
@@ -520,7 +521,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 97,
+    "id": 53,
     "name": "Titus Tüneli & Beşikli Kaya Mağarası",
     "category": "historic",
     "lat": 36.1219,
@@ -530,7 +531,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 98,
+    "id": 54,
     "name": "Aziz Piyer (St. Pierre) Mağara Kilisesi",
     "category": "historic",
     "lat": 36.2089,
@@ -540,7 +541,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 99,
+    "id": 55,
     "name": "Göreme Tarihi Milli Parkı & Peri Bacaları",
     "category": "historic",
     "lat": 38.6431,
@@ -550,7 +551,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 100,
+    "id": 56,
     "name": "Midas Anıtı (Yazılıkaya) & Frig Vadisi",
     "category": "historic",
     "lat": 39.2003,
@@ -560,7 +561,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 101,
+    "id": 57,
     "name": "Ayazini Kaya Evleri & Metropolisi",
     "category": "historic",
     "lat": 39.0142,
@@ -570,7 +571,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 102,
+    "id": 58,
     "name": "Pessinus Antik Kenti & Kybele Tapınağı",
     "category": "historic",
     "lat": 39.3364,
@@ -580,7 +581,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 103,
+    "id": 59,
     "name": "Sivrihisar Ulu Camii (Ahşap Direkli)",
     "category": "historic",
     "lat": 39.4489,
@@ -590,7 +591,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 104,
+    "id": 60,
     "name": "Hattuşa Hitit Başkenti & Aslanlı Kapı",
     "category": "historic",
     "lat": 40.0197,
@@ -600,7 +601,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 105,
+    "id": 61,
     "name": "Alacahöyük Sfenksli Kapı",
     "category": "historic",
     "lat": 40.2333,
@@ -610,7 +611,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 106,
+    "id": 62,
     "name": "Gordion Kral Midas Tümülüsü",
     "category": "historic",
     "lat": 39.6508,
@@ -620,7 +621,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 107,
+    "id": 63,
     "name": "Çatalhöyük Neolitik Kenti",
     "category": "historic",
     "lat": 37.6675,
@@ -630,7 +631,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 108,
+    "id": 64,
     "name": "Ihlara Vadisi & Selime Katedrali",
     "category": "historic",
     "lat": 38.2436,
@@ -640,7 +641,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 109,
+    "id": 65,
     "name": "Derinkuyu & Kaymaklı Yeraltı Şehirleri",
     "category": "historic",
     "lat": 38.3736,
@@ -650,7 +651,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 110,
+    "id": 66,
     "name": "Soğanlı Vadisi Kubbeli Kaya Kiliseleri",
     "category": "historic",
     "lat": 38.3442,
@@ -660,7 +661,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 111,
+    "id": 67,
     "name": "Kültepe Kaniş Karum",
     "category": "historic",
     "lat": 38.8506,
@@ -670,7 +671,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 112,
+    "id": 68,
     "name": "Sultanhanı Kervansarayı",
     "category": "historic",
     "lat": 38.2458,
@@ -680,7 +681,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 113,
+    "id": 69,
     "name": "Alahan Manastırı",
     "category": "historic",
     "lat": 36.7903,
@@ -690,7 +691,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 114,
+    "id": 70,
     "name": "Binbirkilise (Karadağ Volkanı)",
     "category": "historic",
     "lat": 37.4089,
@@ -700,7 +701,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 115,
+    "id": 71,
     "name": "Taşkale Tarihi Tahıl Ambarları",
     "category": "historic",
     "lat": 37.3328,
@@ -710,7 +711,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 116,
+    "id": 72,
     "name": "Eflatunpınar Hitit Kutsal Su Anıtı",
     "category": "historic",
     "lat": 37.8189,
@@ -720,7 +721,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 117,
+    "id": 73,
     "name": "Kilistra Antik Kaya Kenti",
     "category": "historic",
     "lat": 37.6658,
@@ -730,7 +731,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 118,
+    "id": 74,
     "name": "Divriği Ulu Camii & Darüşşifası",
     "category": "historic",
     "lat": 39.3736,
@@ -740,7 +741,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 119,
+    "id": 75,
     "name": "Gelibolu Tarihi Alanı & Şehitlikler",
     "category": "historic",
     "lat": 40.0954,
@@ -750,7 +751,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 120,
+    "id": 76,
     "name": "Truva (Troya) Antik Kenti & Müzesi",
     "category": "historic",
     "lat": 39.9575,
@@ -760,7 +761,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 121,
+    "id": 77,
     "name": "Aleksandreia Troas Antik Limanı",
     "category": "historic",
     "lat": 39.7539,
@@ -770,7 +771,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 122,
+    "id": 78,
     "name": "Parion Antik Kenti",
     "category": "historic",
     "lat": 40.4178,
@@ -780,7 +781,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 123,
+    "id": 79,
     "name": "Kyzikos Antik Kenti & Hadrianus Tapınağı",
     "category": "historic",
     "lat": 40.3842,
@@ -790,7 +791,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 124,
+    "id": 80,
     "name": "Daskyleion Antik Kenti (Pers Satraplığı)",
     "category": "historic",
     "lat": 40.2039,
@@ -800,7 +801,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 125,
+    "id": 81,
     "name": "Apolyont (Gölyazı) Tarihi Yarımadası",
     "category": "historic",
     "lat": 40.1656,
@@ -810,7 +811,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 126,
+    "id": 82,
     "name": "Tirilye (Zeytinbağı) Taş Mektep & Fatih Camii",
     "category": "historic",
     "lat": 40.3922,
@@ -820,7 +821,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 127,
+    "id": 83,
     "name": "İznik Tarihi Surları & Lefke Kapısı",
     "category": "historic",
     "lat": 40.4286,
@@ -830,7 +831,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 128,
+    "id": 84,
     "name": "Cumalıkızık 700 Yıllık Osmanlı Köyü",
     "category": "historic",
     "lat": 40.1764,
@@ -840,7 +841,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 129,
+    "id": 85,
     "name": "Justinianus (Sangarios) Taş Köprüsü",
     "category": "historic",
     "lat": 40.7381,
@@ -850,7 +851,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 130,
+    "id": 86,
     "name": "Prusias ad Hypium Antik Tiyatrosu",
     "category": "historic",
     "lat": 40.9039,
@@ -860,7 +861,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 131,
+    "id": 87,
     "name": "Edirne Selimiye Camii & Külliyesi",
     "category": "historic",
     "lat": 41.6781,
@@ -870,7 +871,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 132,
+    "id": 88,
     "name": "Uzunköprü Tarihi Taş Köprüsü (174 Kemer)",
     "category": "historic",
     "lat": 41.2725,
@@ -880,7 +881,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 133,
+    "id": 89,
     "name": "Kıyıköy Aya Nikola Kaya Manastırı",
     "category": "historic",
     "lat": 41.6342,
@@ -890,7 +891,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 134,
+    "id": 90,
     "name": "Sümela Manastırı & Altındere Vadisi",
     "category": "historic",
     "lat": 40.6903,
@@ -900,7 +901,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 135,
+    "id": 91,
     "name": "Vazelon Manastırı & Çam Ormanları",
     "category": "historic",
     "lat": 40.7606,
@@ -910,7 +911,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 136,
+    "id": 92,
     "name": "Zilkale Kalesi & Fırtına Vadisi",
     "category": "historic",
     "lat": 40.9298,
@@ -920,7 +921,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 137,
+    "id": 93,
     "name": "Şenyuva Tarihi Taş Kemere Köprüsü",
     "category": "historic",
     "lat": 40.9881,
@@ -930,7 +931,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 138,
+    "id": 94,
     "name": "Santa Harabeleri (Dumanlı Yaylası)",
     "category": "historic",
     "lat": 40.6128,
@@ -940,7 +941,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 139,
+    "id": 95,
     "name": "İmera Manastırı & Krom Vadisi",
     "category": "historic",
     "lat": 40.4858,
@@ -950,7 +951,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 140,
+    "id": 96,
     "name": "Kuşkayası Yol Anıtı & Roma Kartalı",
     "category": "historic",
     "lat": 41.7214,
@@ -960,7 +961,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 141,
+    "id": 97,
     "name": "Amasra Ceneviz Kalesi & Kemere Köprüsü",
     "category": "historic",
     "lat": 41.7503,
@@ -970,7 +971,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 142,
+    "id": 98,
     "name": "Hadrianapolis Antik Kenti & Mozaikler",
     "category": "historic",
     "lat": 41.0328,
@@ -980,7 +981,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 143,
+    "id": 99,
     "name": "Safranbolu Tarihi Konakları & Cinci Han",
     "category": "historic",
     "lat": 41.2458,
@@ -990,7 +991,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 144,
+    "id": 100,
     "name": "Mahmut Bey Camii (Çivisiz Cami)",
     "category": "historic",
     "lat": 41.4806,
@@ -1000,7 +1001,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 145,
+    "id": 101,
     "name": "Boyabat Tarihi Kalesi & Yeraltı Tünelleri",
     "category": "historic",
     "lat": 41.4689,
@@ -1010,7 +1011,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 146,
+    "id": 102,
     "name": "Sinop Tarihi Cezaevi & Surları",
     "category": "historic",
     "lat": 42.0231,
@@ -1020,7 +1021,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 147,
+    "id": 103,
     "name": "Amasya Krallar Vadisi Kaya Mezarları",
     "category": "historic",
     "lat": 40.6534,
@@ -1030,7 +1031,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 148,
+    "id": 104,
     "name": "Yason Burnu & Yason Kilisesi",
     "category": "historic",
     "lat": 41.1308,
@@ -1040,7 +1041,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 149,
+    "id": 105,
     "name": "Şavşat Kalesi & Tibeti Kilisesi",
     "category": "historic",
     "lat": 41.2436,
@@ -1050,7 +1051,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 150,
+    "id": 106,
     "name": "İşhan (İshani) Manastırı",
     "category": "historic",
     "lat": 40.7761,
@@ -1060,7 +1061,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 151,
+    "id": 107,
     "name": "Şeytan Kalesi (Karaçay Kanyonu)",
     "category": "historic",
     "lat": 41.1089,
@@ -1070,7 +1071,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 152,
+    "id": 108,
     "name": "Ani Antik Kenti (1001 Kiliseli Şehir)",
     "category": "historic",
     "lat": 40.5075,
@@ -1080,7 +1081,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 153,
+    "id": 109,
     "name": "Kars Kalesi & Kümbet Camii (12 Havariler)",
     "category": "historic",
     "lat": 40.6178,
@@ -1090,7 +1091,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 154,
+    "id": 110,
     "name": "İshak Paşa Sarayı",
     "category": "historic",
     "lat": 39.5211,
@@ -1100,7 +1101,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 155,
+    "id": 111,
     "name": "Öşk Vank (Öşvank) Katedrali",
     "category": "historic",
     "lat": 40.5986,
@@ -1110,7 +1111,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 156,
+    "id": 112,
     "name": "Çobandede Tarihi İpek Yolu Köprüsü",
     "category": "historic",
     "lat": 39.9725,
@@ -1120,7 +1121,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 157,
+    "id": 113,
     "name": "Erzurum Çifte Minareli Medrese & Kale",
     "category": "historic",
     "lat": 39.9056,
@@ -1130,7 +1131,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 158,
+    "id": 114,
     "name": "Kemaliye (Eğin) Karanlık Kanyon Taş Yolu",
     "category": "historic",
     "lat": 39.2617,
@@ -1140,7 +1141,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 159,
+    "id": 115,
     "name": "Mama Hatun Külliyesi & Kervansarayı",
     "category": "historic",
     "lat": 39.7758,
@@ -1150,7 +1151,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 160,
+    "id": 116,
     "name": "Van Kalesi & Tuşpa Urartu Krallığı",
     "category": "historic",
     "lat": 38.5028,
@@ -1160,7 +1161,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 161,
+    "id": 117,
     "name": "Çavuştepe (Sardurihinili) Kalesi",
     "category": "historic",
     "lat": 38.3517,
@@ -1170,7 +1171,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 162,
+    "id": 118,
     "name": "Hoşap Kalesi (Kartal Yuvası)",
     "category": "historic",
     "lat": 38.3189,
@@ -1180,7 +1181,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 163,
+    "id": 119,
     "name": "Ayanis Urartu Kalesi & Tapınağı",
     "category": "historic",
     "lat": 38.7067,
@@ -1190,7 +1191,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 164,
+    "id": 120,
     "name": "Akdamar Adası Kutsal Haç Kilisesi",
     "category": "historic",
     "lat": 38.3411,
@@ -1200,7 +1201,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 165,
+    "id": 121,
     "name": "Ahlat Selçuklu Meydan Mezarlığı",
     "category": "historic",
     "lat": 38.7481,
@@ -1210,7 +1211,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 166,
+    "id": 122,
     "name": "Nemrut Krater Gölü & Kalderası",
     "category": "historic",
     "lat": 38.6258,
@@ -1220,7 +1221,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 167,
+    "id": 123,
     "name": "Harput Tarihi Kalesi & Eğri Minare",
     "category": "historic",
     "lat": 38.7036,
@@ -1230,7 +1231,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 168,
+    "id": 124,
     "name": "Palu Kalesi & Urartu Çivi Yazıtı",
     "category": "historic",
     "lat": 38.6947,
@@ -1240,7 +1241,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 169,
+    "id": 125,
     "name": "Göbeklitepe Tarihin Sıfır Noktası",
     "category": "historic",
     "lat": 37.2232,
@@ -1250,7 +1251,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 170,
+    "id": 126,
     "name": "Karahantepe Neolitik Kült Merkezi",
     "category": "historic",
     "lat": 37.0789,
@@ -1260,7 +1261,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 171,
+    "id": 127,
     "name": "Harran Kümbet Evleri & İlk İslam Üniversitesi",
     "category": "historic",
     "lat": 36.8617,
@@ -1270,7 +1271,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 172,
+    "id": 128,
     "name": "Şuayb Şehri & Soğmatar Harabeleri",
     "category": "historic",
     "lat": 36.9856,
@@ -1280,7 +1281,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 173,
+    "id": 129,
     "name": "Halfeti Batık Köy & Rumkale",
     "category": "historic",
     "lat": 37.2472,
@@ -1290,7 +1291,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 174,
+    "id": 130,
     "name": "Zeugma Antik Kenti & Belkıs Harabeleri",
     "category": "historic",
     "lat": 37.0589,
@@ -1300,7 +1301,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 175,
+    "id": 131,
     "name": "Yesemek Taş Ocağı ve Heykel Atölyesi",
     "category": "historic",
     "lat": 36.9017,
@@ -1310,7 +1311,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 176,
+    "id": 132,
     "name": "Nemrut Dağı Dev Tanrı Heykelleri (2150m)",
     "category": "historic",
     "lat": 37.9806,
@@ -1320,7 +1321,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 177,
+    "id": 133,
     "name": "Cendere Tarihi Roma Köprüsü",
     "category": "historic",
     "lat": 37.9317,
@@ -1330,7 +1331,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 178,
+    "id": 134,
     "name": "Kâhta Yeni Kale & Arsemia",
     "category": "historic",
     "lat": 37.9467,
@@ -1340,7 +1341,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 179,
+    "id": 135,
     "name": "Perre Antik Nekropol Kenti & Mozaik",
     "category": "historic",
     "lat": 37.7958,
@@ -1350,7 +1351,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 180,
+    "id": 136,
     "name": "Dara Antik Kenti & Dev Su Sarnıçları",
     "category": "historic",
     "lat": 37.1772,
@@ -1360,7 +1361,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 181,
+    "id": 137,
     "name": "Deyrulumur (Mor Gabriel) Manastırı",
     "category": "historic",
     "lat": 37.3189,
@@ -1370,7 +1371,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 182,
+    "id": 138,
     "name": "Mor Evgin (St. Eugenius) Manastırı",
     "category": "historic",
     "lat": 37.1681,
@@ -1380,7 +1381,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 183,
+    "id": 139,
     "name": "Diyarbakır Tarihi Surları & Hevsel Bahçeleri",
     "category": "historic",
     "lat": 37.9139,
@@ -1390,7 +1391,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 184,
+    "id": 140,
     "name": "Zerzevan Kalesi & Mithras Gizem Tapınağı",
     "category": "historic",
     "lat": 37.6083,
@@ -1400,7 +1401,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 185,
+    "id": 141,
     "name": "On Gözlü Köprü & Dicle Vadisi",
     "category": "historic",
     "lat": 37.8925,
@@ -1410,7 +1411,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 186,
+    "id": 142,
     "name": "Malabadi Köprüsü",
     "category": "historic",
     "lat": 38.1539,
@@ -1420,7 +1421,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 187,
+    "id": 143,
     "name": "Hasankeyf Tarihi Mağara Kenti & Kalesi",
     "category": "historic",
     "lat": 37.7128,
@@ -1430,7 +1431,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 188,
+    "id": 144,
     "name": "Finik Kalesi & Kaya Kabartmaları",
     "category": "historic",
     "lat": 37.4589,
@@ -1440,7 +1441,7 @@ window.DEFAULT_HISTORIC_PLACES = [
     "created_at": "2026-10-03 14:32:01"
   },
   {
-    "id": 189,
+    "id": 145,
     "name": "Cizre Kırmızı Medrese & Mem û Zîn Türbesi",
     "category": "historic",
     "lat": 37.3278,
@@ -1448,5 +1449,6425 @@ window.DEFAULT_HISTORIC_PLACES = [
     "description": "Şırnak Cizre; 14. yüzyıl kızıl tuğla mimarisi ve ünlü Doğu aşk destanı mekanı.",
     "rating": 5,
     "created_at": "2026-10-03 14:32:01"
+  },
+  {
+    "id": 146,
+    "name": "Meryem Ana Evi & Panaya Kapulu",
+    "category": "historic",
+    "lat": 37.9125,
+    "lon": 27.3331,
+    "description": "İzmir Selçuk; Bülbüldağı üzerinde Hz. Meryem'in son yıllarını geçirdiğine inanılan kutsal şapel. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 147,
+    "name": "St. John Bazilikası & Ayasuluk Kalesi",
+    "category": "historic",
+    "lat": 37.9525,
+    "lon": 27.3678,
+    "description": "İzmir Selçuk; Havari Yuhanna'nın mezarı üzerine kurulan devasa bazilika ve Selçuk Kalesi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 148,
+    "name": "Bergama Asklepion Antik Tedavi Merkezi",
+    "category": "historic",
+    "lat": 39.1189,
+    "lon": 27.1656,
+    "description": "İzmir Bergama; Antik dünyanın ilk psikoterapi ve telkinle şifa merkezi, uyku odaları. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 149,
+    "name": "Bergama Kızıl Avlu (Serapeion)",
+    "category": "historic",
+    "lat": 39.1219,
+    "lon": 27.1831,
+    "description": "İzmir Bergama; Roma döneminin devasa tuğla tapınağı ve Mısır tanrıları kült merkezi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 150,
+    "name": "Çandarlı Kalesi & Pitane Sahili",
+    "category": "historic",
+    "lat": 38.9344,
+    "lon": 26.9317,
+    "description": "İzmir Dikili; Ceneviz ve Osmanlı döneminden kalan sağlam 5 kuleli sahil hisarı.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 151,
+    "name": "Yeşilova Höyüğü & Neolitik Ziyaretçi Köyü",
+    "category": "historic",
+    "lat": 38.4236,
+    "lon": 27.2081,
+    "description": "İzmir Bornova; 8500 yıl önce İzmir'in ilk köy yerleşimi ve arkeopark alanı.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 152,
+    "name": "Smyrna Agorası & Roma Bazilikası",
+    "category": "historic",
+    "lat": 38.4189,
+    "lon": 27.1394,
+    "description": "İzmir Konak; Antik Smyrna kentinin kalbi, su kanalları ve dünyanın en zengin grafitileri. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 153,
+    "name": "Kadifekale (Pagos Dağı Kalesi)",
+    "category": "historic",
+    "lat": 38.4131,
+    "lon": 27.1472,
+    "description": "İzmir Konak; Büyük İskender'in rüyası üzerine kurulan muhteşem İzmir Körfezi manzaralı kale.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 154,
+    "name": "Metropolis Antik Kenti (Ana Tanrıça Kenti)",
+    "category": "historic",
+    "lat": 38.1256,
+    "lon": 27.3247,
+    "description": "İzmir Torbalı; Yamaç tiyatrosu, akropol ve zeytin ağaçları içindeki antik yerleşim. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 155,
+    "name": "Teos Antik Kenti & Dionysos Tapınağı",
+    "category": "historic",
+    "lat": 38.1764,
+    "lon": 26.7869,
+    "description": "İzmir Seferihisar Sığacık; Sanatçılar Birliği'nin kurulduğu zeytinlikler arasındaki İyon kenti. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 156,
+    "name": "Çeşme Kalesi & Cezayirli Gazi Hasan Paşa Anıtı",
+    "category": "historic",
+    "lat": 38.3236,
+    "lon": 26.3039,
+    "description": "İzmir Çeşme; 1508 II. Bayezid yapımı deniz kalesi ve Çeşme Deniz Savaşı Müzesi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 157,
+    "name": "Tralleis Antik Kenti & Üç Gözler",
+    "category": "historic",
+    "lat": 37.8631,
+    "lon": 27.8506,
+    "description": "Aydın Merkez; Antik gymnasionun heybetli 3 gözlü kemer kalıntısı ve Seikilos Ağıtı'nın doğum yeri.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 158,
+    "name": "Nysa Antik Kenti & Çift Katlı Kütüphane",
+    "category": "historic",
+    "lat": 37.9022,
+    "lon": 28.1469,
+    "description": "Aydın Sultanhisar; Strabon'un eğitim gördüğü vadi kanyonuna kurulu tiyatro ve antik kütüphane. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 159,
+    "name": "Magnesia ad Maeandrum Antik Kenti",
+    "category": "historic",
+    "lat": 37.8528,
+    "lon": 27.5264,
+    "description": "Aydın Germencik Ortaklar; Mimar Hermogenes'in Artemis Leukophryene Tapınağı ve 40.000 kişilik stadyum. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 160,
+    "name": "Alabanda Antik Kenti (Karia Atlar Kenti)",
+    "category": "historic",
+    "lat": 37.5947,
+    "lon": 28.0069,
+    "description": "Aydın Çine Doğanyurt; Senato binası, tiyatro ve zeytinlikler arasında geniş antik kalıntılar.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 161,
+    "name": "Alinda Antik Kenti & Kraliçe Ada Sarayı",
+    "category": "historic",
+    "lat": 37.5606,
+    "lon": 27.8286,
+    "description": "Aydın Karpuzlu; Helenistik dönemin devasa 3 katlı agorası ve sarp akropol surları.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 162,
+    "name": "Priene Antik Kenti & Athena Tapınağı",
+    "category": "historic",
+    "lat": 37.6594,
+    "lon": 27.2975,
+    "description": "Aydın Söke Güllübahçe; Samsun Dağı yamacında ızgara planlı mükemmel İyon kenti ve tiyatro. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 163,
+    "name": "Didim Apollon Tapınağı & Medusa Başı",
+    "category": "historic",
+    "lat": 37.385,
+    "lon": 27.2567,
+    "description": "Aydın Didim; Antik dünyanın en büyük ve görkemli kehanet tapınaklarından biri. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 164,
+    "name": "Bodrum Sualtı Arkeoloji Müzesi & St. Peter Kalesi",
+    "category": "historic",
+    "lat": 37.0319,
+    "lon": 27.4294,
+    "description": "Muğla Bodrum; Şövalyeler Kalesi içinde Uluburun Batığı ve dünyanın en önemli batık müzesi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 165,
+    "name": "Halikarnas Mozolesi (Dünyanın 7 Harikası)",
+    "category": "historic",
+    "lat": 37.0381,
+    "lon": 27.4242,
+    "description": "Muğla Bodrum Turgutreis Caddesi; Kral Mausolos adına yapılan anıt mezarın kalıntıları. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 166,
+    "name": "Pedasa Antik Kenti & Leleg Yolu",
+    "category": "historic",
+    "lat": 37.0681,
+    "lon": 27.3972,
+    "description": "Muğla Bodrum Konacık; 3000 yıllık Leleglerin taş kuleleri ve çam ormanı içi trekking rotası.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 167,
+    "name": "Euromos Zeus Lepsynos Tapınağı",
+    "category": "historic",
+    "lat": 37.3756,
+    "lon": 27.6719,
+    "description": "Muğla Milas Selimiye; Türkiye'de en iyi korunmuş 16 sütunu ayakta duran antik tapınak. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 168,
+    "name": "İassos Antik Kenti & Kıyıkışlacık",
+    "category": "historic",
+    "lat": 37.2781,
+    "lon": 27.5794,
+    "description": "Muğla Milas; Güllük Körfezi yarımadasında balık pazarı müzesi, tiyatro ve ortaçağ kalesi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 169,
+    "name": "Beçin Kalesi & Menteşe Beyliği Başkenti",
+    "category": "historic",
+    "lat": 37.2758,
+    "lon": 27.7789,
+    "description": "Muğla Milas; UNESCO geçici mirasındaki sarp kaya hisarı ve Ahmed Gazi Medresesi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 170,
+    "name": "Kaunos Antik Kenti & Kaya Mezarları",
+    "category": "historic",
+    "lat": 36.8258,
+    "lon": 28.6225,
+    "description": "Muğla Ortaca Dalyan; Çamur banyoları ve sazlık labirentleri karşısında kaya mezarları ve tiyatro. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 171,
+    "name": "Kayaköy Hayalet Köy & Kaya Kiliseleri",
+    "category": "historic",
+    "lat": 36.5747,
+    "lon": 29.0886,
+    "description": "Muğla Fethiye; Mübadele sonrası terk edilen yüzlerce taş ev ve terkedilmiş şapeller. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 172,
+    "name": "Letoon Antik Kenti & Kutsal Alanı",
+    "category": "historic",
+    "lat": 36.3325,
+    "lon": 29.2828,
+    "description": "Muğla Seydikemer Kumluova; UNESCO Dünya Mirası, Leto, Apollon ve Artemis tapınakları. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 173,
+    "name": "Pinara Antik Kenti & Delikli Kaya Mezarları",
+    "category": "historic",
+    "lat": 36.4889,
+    "lon": 29.2625,
+    "description": "Muğla Fethiye Minare Köyü; Babadağ eteklerinde petek gibi oyulmuş yüzlerce kaya mezarı.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 174,
+    "name": "Laodikeia Antik Kenti & Kutsal Hac Kilisesi",
+    "category": "historic",
+    "lat": 37.8356,
+    "lon": 29.1078,
+    "description": "Denizli Merkezefendi; İncil'deki 7 kiliseden biri, devasa stadyumu ve sütunlu caddeleri. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 175,
+    "name": "Tripolis Antik Kenti & Çarşı Caddesi",
+    "category": "historic",
+    "lat": 38.0436,
+    "lon": 28.9567,
+    "description": "Denizli Buldan Yenicekent; Menderes Vadisi manzaralı mozaikli konutlar ve anıtsal çeşme. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 176,
+    "name": "Hierapolis Antik Havuz (Kleopatra Havuzu)",
+    "category": "historic",
+    "lat": 37.9264,
+    "lon": 29.1247,
+    "description": "Denizli Pamukkale; Antik sütunlar ve mermer frizler arasında termal suyla yüzme keyfi.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 177,
+    "name": "Sardes Antik Kenti & Lidya Kral Yolu",
+    "category": "historic",
+    "lat": 38.4889,
+    "lon": 28.0403,
+    "description": "Manisa Salihli Sart; Paranın ilk basıldığı yer, anıtsal gymnasion ve antik sinagog. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 178,
+    "name": "Kula Peri Bacaları & Jeopark Alanı",
+    "category": "historic",
+    "lat": 38.5681,
+    "lon": 28.7456,
+    "description": "Manisa Kula; Türkiye'nin ilk UNESCO Avrupa Jeoparkı, volkanik koniler ve bazalt sütunlar.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 179,
+    "name": "Aizanoi Antik Kenti & Dünyanın İlk Borsası",
+    "category": "historic",
+    "lat": 39.2014,
+    "lon": 29.6108,
+    "description": "Kütahya Çavdarhisar; Zeus Tapınağı altında tonozlu sığınak, borsa yapısı ve stadyum-tiyatro kompleksi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 180,
+    "name": "Kütahya Kalesi & Döner Gazino",
+    "category": "historic",
+    "lat": 39.4181,
+    "lon": 29.9739,
+    "description": "Kütahya Merkez; 70 burçlu Bizans ve Osmanlı kalesi, şehre hakim çamlık tepesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 181,
+    "name": "Blaundos Antik Kenti & Kanyon Kalesi",
+    "category": "historic",
+    "lat": 38.3589,
+    "lon": 29.2178,
+    "description": "Uşak Ulubey Sülümenli; 150m derinliğindeki Ulubey Kanyonu yarımadasında kurulu Makedon kenti.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 182,
+    "name": "Clandras Tarihi Su Kemeri & Şelalesi",
+    "category": "historic",
+    "lat": 38.3847,
+    "lon": 29.4975,
+    "description": "Uşak Karahallı; Frigya döneminden Banaz Çayı kanyonuna kurulan 2500 yıllık tek kemerli köprü.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 183,
+    "name": "Kremna Antik Kenti (Uçurum Kenti)",
+    "category": "historic",
+    "lat": 37.4989,
+    "lon": 30.6869,
+    "description": "Burdur Bucak Çamlık; Toros Dağları'nda 1200m rakımlı uçurum kenarında Roma kolonisi.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 184,
+    "name": "Adada Antik Kenti & Antik Taş Kral Yolu",
+    "category": "historic",
+    "lat": 37.5689,
+    "lon": 30.9856,
+    "description": "Isparta Sütçüler Sağrak; Çam ormanları içinde bozulmamış İmparatorlar Tapınağı ve taş cadde.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 185,
+    "name": "Antiocheia Pisidia Antik Kenti & St. Paul",
+    "category": "historic",
+    "lat": 38.3056,
+    "lon": 31.1925,
+    "description": "Isparta Yalvaç; Havari Pavlus'un ilk vaazını verdiği kilise, su kemerleri ve Augustus Tapınağı. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 186,
+    "name": "Perge Antik Kenti & Kuleli Şehir Kapısı",
+    "category": "historic",
+    "lat": 36.9606,
+    "lon": 30.8528,
+    "description": "Antalya Aksu; Sütunlu su kanallı caddesi, stadyumu ve Helenistik yuvarlak kuleleri. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 187,
+    "name": "Aspendos Antik Tiyatrosu & Roma Su Kemerleri",
+    "category": "historic",
+    "lat": 36.9389,
+    "lon": 31.1722,
+    "description": "Antalya Serik Belkıs; Akustiği dünyada eşsiz 2000 yıllık Roma tiyatrosu ve dev su kemerleri. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 188,
+    "name": "Side Antik Kenti & Apollon Tapınağı",
+    "category": "historic",
+    "lat": 36.7647,
+    "lon": 31.3906,
+    "description": "Antalya Manavgat; Deniz kıyısında gün batımı tapınağı, antik liman ve tiyatro. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 189,
+    "name": "Selge Antik Kenti & Olukköprü (Eurymedon)",
+    "category": "historic",
+    "lat": 37.2281,
+    "lon": 31.1278,
+    "description": "Antalya Manavgat Köprülü Kanyon; Torosların kanyon virajları zirvesinde antik tiyatro ve kaya kuleler.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 190,
+    "name": "Phaselis Antik Kenti & Üç Liman Koyu",
+    "category": "historic",
+    "lat": 36.5256,
+    "lon": 30.5528,
+    "description": "Antalya Kemer Tekirova; Çam ormanı ve turkuaz denizle iç içe antik liman caddesi ve su kemeri. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 191,
+    "name": "Olympos Antik Kenti & Çıralı Yanartaş",
+    "category": "historic",
+    "lat": 36.3967,
+    "lon": 30.4736,
+    "description": "Antalya Kumluca; Musa Dağı deresi kenarında korsan Zeniketes kenti ve bin yıldır sönmeyen ateş. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 192,
+    "name": "Rhodiapolis Antik Kenti & Opramoas Anıtı",
+    "category": "historic",
+    "lat": 36.3811,
+    "lon": 30.2689,
+    "description": "Antalya Kumluca; Kumluca ovasına tepeden bakan antik zengin hayırsever Opramoas anıtı.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 193,
+    "name": "Arykanda Antik Kenti (Kartal Yuvası Teraslar)",
+    "category": "historic",
+    "lat": 36.5147,
+    "lon": 30.0603,
+    "description": "Antalya Finike-Elmalı dağ virajları; Şahinkaya yamacına basamaklar halinde kurulu tiyatro ve agora. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 194,
+    "name": "Limyra Antik Kenti & Pera Tapınağı",
+    "category": "historic",
+    "lat": 36.3422,
+    "lon": 30.1706,
+    "description": "Antalya Finike Yuvalılar; Toçak Dağı eteklerinde kaynak suları içindeki tiyatro ve Xatabura anıtı. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 195,
+    "name": "Myra Antik Kenti & Likya Kaya Mezarları",
+    "category": "historic",
+    "lat": 36.2597,
+    "lon": 29.9847,
+    "description": "Antalya Demre; Tiyatronun hemen bitişiğinde dağa oyulmuş kabartmalı ahşap ev taklidi mezarlar. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 196,
+    "name": "Aziz Nikolaos (Noel Baba) Anıt Müzesi",
+    "category": "historic",
+    "lat": 36.2442,
+    "lon": 29.9856,
+    "description": "Antalya Demre Merkez; 4. yüzyıl Piskoposu Noel Baba adına yapılan Bizans katedrali ve lahdi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 197,
+    "name": "Andriake Antik Limanı & Likya Uygarlıkları Müzesi",
+    "category": "historic",
+    "lat": 36.2289,
+    "lon": 29.9547,
+    "description": "Antalya Demre Çayağzı; Granarium dev tahıl ambarı binası, antik liman vinci ve sarnıçlar. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 198,
+    "name": "Antiphellos Antik Tiyatrosu & Kral Lahdi",
+    "category": "historic",
+    "lat": 36.1994,
+    "lon": 29.6367,
+    "description": "Antalya Kaş Merkez; Meis Adası'na karşı gün batımında denize bakan antik tiyatro ve Uzun Çarşı lahdi.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 199,
+    "name": "Xanthos Antik Kenti & Harpy Anıtı",
+    "category": "historic",
+    "lat": 36.3567,
+    "lon": 29.3181,
+    "description": "Antalya Kaş Kınık; UNESCO Dünya Mirası, Likya Birliği'nin bağımsızlık için ölen başkenti. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 200,
+    "name": "Alanya Kalesi & Kızılkule, Tersane",
+    "category": "historic",
+    "lat": 36.5336,
+    "lon": 31.9908,
+    "description": "Antalya Alanya; Selçuklu Sultanı Alaeddin Keykubad'ın 6 km surlu yarımada hisarı ve tersanesi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 201,
+    "name": "Syedra Antik Kenti & Sütunlu Cadde",
+    "category": "historic",
+    "lat": 36.4419,
+    "lon": 32.1528,
+    "description": "Antalya Alanya Seki; Muz bahçeleri üzerinden Akdeniz'e bakan vaftiz mağarası ve antik cadde. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 202,
+    "name": "Selinus Antik Kenti & Akropol Kalesi",
+    "category": "historic",
+    "lat": 36.2656,
+    "lon": 32.2856,
+    "description": "Antalya Gazipaşa; Roma İmparatoru Trajan'ın öldüğü sarp yalıyarı kalesi ve anıt köşkü.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 203,
+    "name": "İotape Antik Kenti & Koyu",
+    "category": "historic",
+    "lat": 36.3536,
+    "lon": 32.2239,
+    "description": "Antalya Alanya-Gazipaşa sahil yolu; Kommagene Kraliçesi Iotape adına kurulan kayalık koy kalıntıları.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 204,
+    "name": "Anemurium Antik Kenti & Roma Nekropolü",
+    "category": "historic",
+    "lat": 36.0247,
+    "lon": 32.8028,
+    "description": "Mersin Anamur Anamur Burnu; Türkiye anakarasının en güney ucunda 350 tonozlu mezarlı dev antik kent. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 205,
+    "name": "Mamure Kalesi & Hendekli Hisar",
+    "category": "historic",
+    "lat": 36.0792,
+    "lon": 32.8953,
+    "description": "Mersin Anamur Bozdoğan; Akdeniz kıyısında 39 kuleli hendekli muazzam korunmuş sahil kalesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 206,
+    "name": "Kelenderis Antik Kenti & Liman Mozaiği",
+    "category": "historic",
+    "lat": 36.1458,
+    "lon": 33.3236,
+    "description": "Mersin Aydıncık; Doğal limanda 1600 yıllık antik liman panosu mozaiği ve tiyatro.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 207,
+    "name": "Silifke Kalesi & Tekir Ambarı Sarnıcı",
+    "category": "historic",
+    "lat": 36.3756,
+    "lon": 33.9189,
+    "description": "Mersin Silifke; Göksu Vadisi'ne hakim tepe kalesi ve kayaya oyulmuş dev su deposu.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 208,
+    "name": "Cennet-Cehennem Obrukları & Meryem Ana Şapeli",
+    "category": "historic",
+    "lat": 36.4522,
+    "lon": 34.1061,
+    "description": "Mersin Silifke Narlıkuyu; 135m derinlikte yeraltı nehirli cennet obruğu ve mitolojik Typhon mağarası. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 209,
+    "name": "Kanlıdivane (Kanytellis) Antik Kenti & Kutsal Obruk",
+    "category": "historic",
+    "lat": 36.5256,
+    "lon": 34.1781,
+    "description": "Mersin Erdemli Ayaş; 60m derinliğindeki devasa kireçtaşı çöküntüsü etrafında bazilikalar ve kuleler. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 210,
+    "name": "Uzuncaburç (Diocaesarea) Antik Kenti & Zeus Tapınağı",
+    "category": "historic",
+    "lat": 36.5847,
+    "lon": 33.9272,
+    "description": "Mersin Silifke dağ virajları; 22 metre yüksekliğinde 5 katlı Helenistik kule ve 36 Korint sütunlu tapınak. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 211,
+    "name": "Kızkalesi (Deniz Kalesi) & Korykos Kara Kalesi",
+    "category": "historic",
+    "lat": 36.4628,
+    "lon": 34.1481,
+    "description": "Mersin Erdemli Kızkalesi; Sahilden 600m açıkta adacık üzerine kurulan efsanevi deniz hisarı. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 212,
+    "name": "Elaiussa Sebaste Antik Kenti & Agorası",
+    "category": "historic",
+    "lat": 36.4828,
+    "lon": 34.1706,
+    "description": "Mersin Erdemli Ayaş; Antik liman caddesi, su kemerleri ve deniz kenarındaki nekropol. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 213,
+    "name": "Adamkayalar Kaya Kabartmaları",
+    "category": "historic",
+    "lat": 36.4889,
+    "lon": 34.1264,
+    "description": "Mersin Erdemli Kızkalesi Şeytanderesi Kanyonu; 100m uçurum duvarına oyulmuş 11 insan figürlü gizemli kabartmalar.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 214,
+    "name": "Soli Pompeiopolis Antik Kenti & Sütunlu Cadde",
+    "category": "historic",
+    "lat": 36.7417,
+    "lon": 34.5406,
+    "description": "Mersin Mezitli sahili; Korsanlar kenti, Roma Generali Pompeius'un sütunlu anıt caddesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 215,
+    "name": "Tarsus Aziz Paul Kuyusu & Kleopatra Kapısı",
+    "category": "historic",
+    "lat": 36.9167,
+    "lon": 34.8967,
+    "description": "Mersin Tarsus; Hristiyanlığın kurucularından St. Paul'un doğduğu evin kuyusu ve Roma kapısı. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 216,
+    "name": "Anavarza Antik Kenti & Zafer Takı, Akropol",
+    "category": "historic",
+    "lat": 37.2536,
+    "lon": 35.8289,
+    "description": "Adana Kozan Dilekkaya; Çukurova ortasındaki 200m kaya platosunda muazzam sütunlu cadde ve kale. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 217,
+    "name": "Yılankale (Şahmeran Efsanesi Kalesi)",
+    "category": "historic",
+    "lat": 37.0139,
+    "lon": 35.7958,
+    "description": "Adana Ceyhan; İpek Yolu'nu denetleyen sarp kireçtaşı sırtında Haçlı ve Kilikya Ermeni kalesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 218,
+    "name": "Taşköprü (Justinianus Köprüsü)",
+    "category": "historic",
+    "lat": 36.9856,
+    "lon": 35.3353,
+    "description": "Adana Seyhan; Seyhan Nehri üzerinde Roma döneminden beri 1800 yıldır kullanılan tarihi taş köprü.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 219,
+    "name": "Misis Antik Kenti & Tarihi Taş Köprüsü",
+    "category": "historic",
+    "lat": 36.9536,
+    "lon": 35.6264,
+    "description": "Adana Yüreğir Yakapınar; Lokman Hekim'in ölümsüzlük iksirini düşürdüğü Ceyhan Nehri köprüsü.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 220,
+    "name": "Kastabala (Hierapolis) Antik Kenti",
+    "category": "historic",
+    "lat": 37.1772,
+    "lon": 36.1844,
+    "description": "Osmaniye Kesmeburun; Sütunlu cadde, tiyatro ve kaya tepesindeki ortaçağ kalesi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 221,
+    "name": "Karatepe-Aslantaş Açık Hava Müzesi & Çift Dilli Hitit Yazıtı",
+    "category": "historic",
+    "lat": 37.2917,
+    "lon": 36.2458,
+    "description": "Osmaniye Kadirli Aslantaş Barajı; Hitit hiyerogliflerinin çözülmesini sağlayan fenikece yazıtlar ve aslanlar. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 222,
+    "name": "Toprakkale (Kınık Kalesi)",
+    "category": "historic",
+    "lat": 37.0581,
+    "lon": 36.1436,
+    "description": "Osmaniye Toprakkale; Çukurova ile İskenderun körfezini bağlayan kavşaktaki siyah bazalt taşlı kale.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 223,
+    "name": "Titus Vespasianus Tüneli & Beşikli Mağara Mezarları",
+    "category": "historic",
+    "lat": 36.1189,
+    "lon": 35.9286,
+    "description": "Hatay Samandağ Çevlik; Dağın içi elle oyularak yapılan 1380m uzunluğunda Roma mühendislik harikası tünel. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 224,
+    "name": "St. Pierre (Aziz Petrus) Kaya Kilisesi",
+    "category": "historic",
+    "lat": 36.2089,
+    "lon": 36.1775,
+    "description": "Hatay Antakya Hacı Kürüş Dağı; Hristiyanlık adının dünyada ilk kez verildiği kutsal kaya mağarası katedrali. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 225,
+    "name": "Bakras Kalesi (Tapınak Şövalyeleri Kalesi)",
+    "category": "historic",
+    "lat": 36.4267,
+    "lon": 36.1917,
+    "description": "Hatay Belen Ötençay; Torosları Amik Ovası'na bağlayan Belen Geçidi'ndeki heybetli şövalye hisarı.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 226,
+    "name": "Payas Kalesi & Sokullu Mehmet Paşa Külliyesi",
+    "category": "historic",
+    "lat": 36.7536,
+    "lon": 36.2164,
+    "description": "Hatay Payas; Mimar Sinan eseri kervansaray, hamam, arasta ve deniz kenarındaki hendekli kale.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 227,
+    "name": "Göreme Açık Hava Müzesi & Karanlık Kilise",
+    "category": "historic",
+    "lat": 38.64,
+    "lon": 34.8292,
+    "description": "Nevşehir Göreme; UNESCO Dünya Mirası, kayalara oyulmuş 11. yüzyıl freskli Hristiyan manastırları. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 228,
+    "name": "Zelve Açık Hava Müzesi & Vadisi",
+    "category": "historic",
+    "lat": 38.6694,
+    "lon": 34.8639,
+    "description": "Nevşehir Avanos; Üç vadiden oluşan 9. yüzyıl kaya oyma manastır kompleksi ve camisi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 229,
+    "name": "Paşabağları Rahipler Vadisi & Aziz Simeon Şapeli",
+    "category": "historic",
+    "lat": 38.6775,
+    "lon": 34.8536,
+    "description": "Nevşehir Avanos; Çok başlı dev peri bacaları ve keşişlerin inzivaya çekildiği kaya hücreleri. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 230,
+    "name": "Uçhisar Kalesi & Zirve Seyir Noktası",
+    "category": "historic",
+    "lat": 38.63,
+    "lon": 34.8056,
+    "description": "Nevşehir Uçhisar; Kapadokya'nın en yüksek peri bacası zirvesi, tüm vadilere hakim gözetleme kalesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 231,
+    "name": "Ortahisar Kalesi",
+    "category": "historic",
+    "lat": 38.6206,
+    "lon": 34.8647,
+    "description": "Nevşehir Ürgüp Ortahisar; Dev yekpare kaya kütlesi içine oyulmuş sığınaklar ve tüneller kalesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 232,
+    "name": "Derinkuyu Yeraltı Şehri (8 Kat)",
+    "category": "historic",
+    "lat": 38.3736,
+    "lon": 34.7347,
+    "description": "Nevşehir Derinkuyu; 20.000 kişinin aylarca saklanabildiği havalandırma bacalı 85m derinliğinde yeraltı metropolü. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 233,
+    "name": "Kaymaklı Yeraltı Şehri",
+    "category": "historic",
+    "lat": 38.46,
+    "lon": 34.7522,
+    "description": "Nevşehir Kaymaklı; 4 katı ziyarete açık labirent tüneller, şırahaneler ve sürgü taşlı kapılar. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 234,
+    "name": "Özkonak Yeraltı Şehri & Haberleşme Delikleri",
+    "category": "historic",
+    "lat": 38.7567,
+    "lon": 34.9039,
+    "description": "Nevşehir Avanos Özkonak; Düşmana kızgın yağ dökmek için tasarlanmış özel savunma delikleri. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 235,
+    "name": "Mazı Yeraltı Şehri",
+    "category": "historic",
+    "lat": 38.4619,
+    "lon": 34.8389,
+    "description": "Nevşehir Ürgüp Mazı Köyü; Kayaya oyulmuş görkemli kilisesi ve hayvan ahırlarıyla saklı yeraltı şehri.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 236,
+    "name": "Güzelyurt Manastır Vadisi & Yüksek Kilise",
+    "category": "historic",
+    "lat": 38.2756,
+    "lon": 34.3756,
+    "description": "Aksaray Güzelyurt; Sivrihisar Dağı eteğinde 50 kiliseli vadi ve gölet manzaralı manastır.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 237,
+    "name": "Aşıklı Höyük (10.000 Yıllık İlk Köy)",
+    "category": "historic",
+    "lat": 38.3486,
+    "lon": 34.2289,
+    "description": "Aksaray Gülağaç Kızılkaya; Dünyanın ilk beyin ameliyatı kafatası ve kerpiç köy yerleşimi.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 238,
+    "name": "Sultanhanı Kervansarayı (İpek Yolu Zirvesi)",
+    "category": "historic",
+    "lat": 38.2458,
+    "lon": 33.5467,
+    "description": "Aksaray Sultanhanı; 1229 yapımı dünyanın en büyük ve en süslü Selçuklu kervansarayı köşk mescidi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 239,
+    "name": "Ağzıkara Han Kervansarayı",
+    "category": "historic",
+    "lat": 38.4389,
+    "lon": 34.1436,
+    "description": "Aksaray Ağzıkarahan; Kale gibi korunan anıtsal mermer taç kapılı Selçuklu hanı.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 240,
+    "name": "Saratlı Kırkgöz Yeraltı Şehri",
+    "category": "historic",
+    "lat": 38.4681,
+    "lon": 33.9856,
+    "description": "Aksaray Gülağaç Saratlı; Kuyu suları, ocaklar ve çok katlı sığınak galerileri.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 241,
+    "name": "Kültepe Kaniş-Karum Arkeolojik Alanı",
+    "category": "historic",
+    "lat": 38.8506,
+    "lon": 35.6339,
+    "description": "Kayseri Kocasinan; Anadolu'da yazılı tarihin ve ticaretin başladığı çivi yazılı tabletler kenti. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 242,
+    "name": "Gümüşler Manastırı & Gülümseyen Meryem Freski",
+    "category": "historic",
+    "lat": 37.9947,
+    "lon": 34.7672,
+    "description": "Niğde Gümüşler; Yekpare kaya avlusu içine oyulmuş freskleri bozulmamış eşsiz manastır. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 243,
+    "name": "Tyana Antik Kenti & Roma Su Kemerleri",
+    "category": "historic",
+    "lat": 37.8289,
+    "lon": 34.6147,
+    "description": "Niğde Bor Kemerhisar; Filozof Apollonius'un şehri ve ovanın ortasında uzanan Roma su kemerleri.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 244,
+    "name": "Çatalhöyük Neolitik Kenti (UNESCO)",
+    "category": "historic",
+    "lat": 37.6675,
+    "lon": 32.8283,
+    "description": "Konya Çumra; 9000 yıl önceki insanlığın sokaksız, çatılardan girilen ilk şehirleşme deneyimi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 245,
+    "name": "Boncuklu Höyük",
+    "category": "historic",
+    "lat": 37.8347,
+    "lon": 32.7856,
+    "description": "Konya Karatay Hayıroğlu; Çatalhöyük'ün atası sayılan 10.500 yıllık oval evler yerleşimi.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 246,
+    "name": "Kilistra Antik Kaya Kenti & Şapelleri",
+    "category": "historic",
+    "lat": 37.6658,
+    "lon": 32.2289,
+    "description": "Konya Meram Gökyurt; Kapadokya benzeri kaya şapelleri, sığınaklar ve Sümbüllü Kilise.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 247,
+    "name": "Fasıllar Hitit Kaya Anıtı (70 Tonluk Dev)",
+    "category": "historic",
+    "lat": 37.6636,
+    "lon": 31.8569,
+    "description": "Konya Beyşehir Fasıllar; Dünyanın en büyük monolitik Hitit açık hava tanrı heykellerinden biri.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 248,
+    "name": "Kubadabad Sarayı Harabeleri",
+    "category": "historic",
+    "lat": 37.7667,
+    "lon": 31.4028,
+    "description": "Konya Beyşehir Gölyaka; Selçuklu Sultanı Alaeddin Keykubad'ın çinili göl kenarı av köşkü sarayı.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 249,
+    "name": "Sille Tarihi Köyü & Aya Elena Kilisesi",
+    "category": "historic",
+    "lat": 37.9256,
+    "lon": 32.4217,
+    "description": "Konya Selçuklu Sille; 5000 yıllık taş evler, su kemerleri ve MS 327 yapımı freskli kilise.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 250,
+    "name": "Binbirkilise (Karadağ Volkan Kiliseleri)",
+    "category": "historic",
+    "lat": 37.4089,
+    "lon": 33.1558,
+    "description": "Karaman Karadağ volkan zirvesi; Sönmüş volkan kraterine saçılmış onlarca erken Bizans bazilikası.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 251,
+    "name": "Manazan Mağaraları (5 Katlı Kaya Şehir)",
+    "category": "historic",
+    "lat": 37.3189,
+    "lon": 33.5856,
+    "description": "Karaman Yeşildere; Kil kireçtaşı sarp yamaca oyulmuş 5 katlı devasa korunaklı kaya apartmanları.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 252,
+    "name": "Alahan Manastırı (Toroslar'ın Tacı)",
+    "category": "historic",
+    "lat": 36.7903,
+    "lon": 33.3528,
+    "description": "Mersin Mut Karaman zirve geçidi; Toros Dağları'nda 1300m uçurum kenarında Doğu Roma taş şaheseri. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 253,
+    "name": "Gordion Antik Kenti & Midas Tümülüsü",
+    "category": "historic",
+    "lat": 39.6508,
+    "lon": 31.9839,
+    "description": "Ankara Polatlı Yassıhöyük; UNESCO Dünya Mirası, Frigya başkenti ve dünyanın en eski ahşap mezar odası. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 254,
+    "name": "Anadolu Medeniyetleri Müzesi & Ankara Kalesi",
+    "category": "historic",
+    "lat": 39.9381,
+    "lon": 32.8617,
+    "description": "Ankara Altındağ Ulus; Mahmut Paşa Bedesteni içinde dünyanın en seçkin Paleolitik ve Hitit müzesi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 255,
+    "name": "Roma Hamamı & Augustus Tapınağı",
+    "category": "historic",
+    "lat": 39.9436,
+    "lon": 32.8547,
+    "description": "Ankara Altındağ Ulus; İmparator Caracalla hamamı ve İmparator Augustus'un vasiyet yazıtı tapınağı. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 256,
+    "name": "Gavurkale Hitit Kaya Kabartmaları",
+    "category": "historic",
+    "lat": 39.5856,
+    "lon": 32.6167,
+    "description": "Ankara Haymana Dereköy; 3300 yıllık tepe üstü Hitit ibadet yeri ve yürüyen tanrı kabartmaları.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 257,
+    "name": "Yazılıkaya Hitit Açık Hava Kutsal Tapınağı",
+    "category": "historic",
+    "lat": 40.0256,
+    "lon": 34.6319,
+    "description": "Çorum Boğazkale; Kayalara oyulmuş 63 Hitit tanrısının geçit töreni kabartmaları. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 258,
+    "name": "Alacahöyük Arkeolojik Alanı & Sfenksli Kapı",
+    "category": "historic",
+    "lat": 40.2339,
+    "lon": 34.6981,
+    "description": "Çorum Alaca; Kral mezarları, Hatti güneş kursları ve dev andezit sfenks heykelleri. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 259,
+    "name": "Şapinuva Hitit Kenti",
+    "category": "historic",
+    "lat": 40.2889,
+    "lon": 35.2536,
+    "description": "Çorum Ortaköy; Hitit idari merkezi, Ağılönü kurban alanı ve çivi yazılı arşiv depoları.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 260,
+    "name": "Yazılıkaya Midas Anıtı (Frig Vadisi Kalbi)",
+    "category": "historic",
+    "lat": 39.2017,
+    "lon": 30.7139,
+    "description": "Eskişehir Han Yazılıkaya Köyü; 17 metre yüksekliğinde kaya cephesine oyulmuş muazzam Frig cephesi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 261,
+    "name": "Gerdekkaya Mezar Anıtı",
+    "category": "historic",
+    "lat": 39.2556,
+    "lon": 30.6869,
+    "description": "Eskişehir Seyitgazi Çukurca; Dor düzeninde iki sütunlu kayaya oyulmuş görkemli Frig tapınak mezarı.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 262,
+    "name": "Ayazini Frig Kaya Kiliseleri & Avdalas Kalesi",
+    "category": "historic",
+    "lat": 38.9389,
+    "lon": 30.6722,
+    "description": "Afyonkarahisar İhsaniye Ayazini; Tüf kayalara oyulmuş oyma apartmanlar, şapeller ve Roma mezarları.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 263,
+    "name": "Afyonkarahisar Kalesi (226m Volkan Kayası)",
+    "category": "historic",
+    "lat": 38.7522,
+    "lon": 30.5367,
+    "description": "Afyonkarahisar Merkez; Şehrin ortasında göğe yükselen sarp volkanik kayalık zirvesinde Hitit hisarı.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 264,
+    "name": "Divriği Ulu Camii ve Darüşşifası (UNESCO)",
+    "category": "historic",
+    "lat": 39.3736,
+    "lon": 38.1189,
+    "description": "Sivas Divriği; Taş işçiliğinin dünyadaki mucizesi Cennet Kapısı ve gölge silueti. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 265,
+    "name": "Gelibolu Şehitler Abidesi & Morto Koyu",
+    "category": "historic",
+    "lat": 40.0494,
+    "lon": 26.2181,
+    "description": "Çanakkale Eceabat Seddülbahir; Çanakkale Boğazı girişinde Mehmetçik adına dikilen 41m dev anıt.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 266,
+    "name": "Conkbayırı Atatürk Zafer Anıtı & Siperler",
+    "category": "historic",
+    "lat": 40.2508,
+    "lon": 26.3189,
+    "description": "Çanakkale Eceabat; Mustafa Kemal'in saatinin parçalandığı tarihi tepe ve Anzak siperleri.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 267,
+    "name": "Kilitbahir Kalesi (Denizin Kilidi)",
+    "category": "historic",
+    "lat": 40.1478,
+    "lon": 26.3794,
+    "description": "Çanakkale Eceabat Kilitbahir; Fatih Sultan Mehmet'in boğazı kilitlemek için yaptırdığı üç yapraklı yonca kale. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 268,
+    "name": "Truva (Troya) Antik Kenti & Troya Müzesi",
+    "category": "historic",
+    "lat": 39.9575,
+    "lon": 26.2389,
+    "description": "Çanakkale Tevfikiye; Homeros İlyada Destanı 9 katmanlı 4000 yıllık efsane ve ödüllü çağdaş müze. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 269,
+    "name": "Babakale Kalesi (Asya'nın En Batı Ucu)",
+    "category": "historic",
+    "lat": 39.4794,
+    "lon": 26.0642,
+    "description": "Çanakkale Ayvacık Babakale; Asya Kıtası'nın en batı ucundaki Osmanlı korsan savunma kalesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 270,
+    "name": "Kyzikos Antik Kenti & Hadrian Tapınağı",
+    "category": "historic",
+    "lat": 40.3842,
+    "lon": 27.8767,
+    "description": "Balıkesir Erdek; Dünyanın sekizinci harikası sayılan devasa mermer sütunlu Hadrianus Tapınağı.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 271,
+    "name": "Daskyleion Antik Kenti (Pers Valilik Merkezi)",
+    "category": "historic",
+    "lat": 40.2039,
+    "lon": 28.0536,
+    "description": "Balıkesir Bandırma Ergili; Manyas Kuş Gölü kıyısında Anadolu'daki tek Pers Satraplık başkenti.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 272,
+    "name": "Antandros Antik Kenti & Roma Villası",
+    "category": "historic",
+    "lat": 39.5789,
+    "lon": 26.8286,
+    "description": "Balıkesir Edremit Altınoluk; Kaz Dağları eteklerinde Aeneas'ın gemilerini yaptığı mozaikli Roma villası.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 273,
+    "name": "İznik Tarihi Surları, Lefke Kapısı & Ayasofya",
+    "category": "historic",
+    "lat": 40.4286,
+    "lon": 29.7214,
+    "description": "Bursa İznik; 5 km uzunluğundaki 4 kapılı Roma surları ve Hristiyanlık konsillerinin toplandığı Ayasofya. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 274,
+    "name": "Akçakoca Ceneviz Kalesi & Sahili",
+    "category": "historic",
+    "lat": 41.0967,
+    "lon": 31.1444,
+    "description": "Düzce Akçakoca; Karadeniz yalıyarı kayalıklarında mavi bayraklı koy kenarı Ceneviz ticaret kalesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 275,
+    "name": "Edirne Selimiye Camii & Külliyesi (UNESCO)",
+    "category": "historic",
+    "lat": 41.6781,
+    "lon": 26.5594,
+    "description": "Edirne Merkez; Mimar Sinan'ın 'Ustalık Eserim' dediği dünya mimarlık zirvesi kubbe şaheseri.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 276,
+    "name": "Uzunköprü Tarihi Taş Köprüsü (1392m, 174 Kemer)",
+    "category": "historic",
+    "lat": 41.2725,
+    "lon": 26.6806,
+    "description": "Edirne Uzunköprü; Ergene Nehri üzerinde dünyanın en uzun taş kemer köprüsü (UNESCO).",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 277,
+    "name": "Vize Küçük Ayasofya (Gazi Süleyman Paşa) Kilisesi",
+    "category": "historic",
+    "lat": 41.5728,
+    "lon": 27.7667,
+    "description": "Kırklareli Vize; 6. yüzyıl I. Justinianus dönemi Trakya'nın en iyi korunmuş kubbeli bazilikası.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 278,
+    "name": "Sümela Manastırı (Meryem Ana)",
+    "category": "historic",
+    "lat": 40.6903,
+    "lon": 39.6583,
+    "description": "Trabzon Maçka Altındere; Karadağ'ın 300m sarp kayalıklarına oyulmuş 1600 yıllık dünya harikası manastır. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 279,
+    "name": "Vazelon Manastırı (MS 270)",
+    "category": "historic",
+    "lat": 40.7606,
+    "lon": 39.5447,
+    "description": "Trabzon Maçka vadisi; Sümela'dan bile daha eski tarihe sahip çam ormanları içinde saklı manastır.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 280,
+    "name": "Kuştul (Peristera) Manastırı",
+    "category": "historic",
+    "lat": 40.8106,
+    "lon": 39.6381,
+    "description": "Trabzon Maçka Esiroğlu; Vadiye hakim tek bir kaya bloğunun tepesine tünemiş tarihi manastır kalıntıları.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 281,
+    "name": "Trabzon Ayasofya Camii ve Müzesi",
+    "category": "historic",
+    "lat": 41.0028,
+    "lon": 39.6961,
+    "description": "Trabzon Ortahisar sahili; Komnenos Krallığı'nın incisi geç Bizans freskleri ve kabartmalı çan kulesi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 282,
+    "name": "Zilkale Kalesi & Fırtına Kanyonu",
+    "category": "historic",
+    "lat": 40.9298,
+    "lon": 40.9614,
+    "description": "Rize Çamlıhemşin; Bulut denizinin üzerinde Fırtına Vadisi'ne tepeden bakan efsanevi kartal kalesi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 283,
+    "name": "Ciha Kalesi (Hemşin Gözetleme Kulesi)",
+    "category": "historic",
+    "lat": 41.1319,
+    "lon": 41.1689,
+    "description": "Rize Pazar Hemşin Deresi; İpek Yolu gözetleme sistemi için sarp kayalık tepeye kurulan dairesel kale.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 284,
+    "name": "Şenyuva Tarihi Kemer Taş Köprüsü (1696)",
+    "category": "historic",
+    "lat": 40.9881,
+    "lon": 40.9842,
+    "description": "Rize Çamlıhemşin Fırtına Vadisi; Karadeniz dereleri üzerindeki en fotojenik tek gözlü tarihi kemer köprü.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 285,
+    "name": "İşhan (İshani) Katedrali & Manastırı",
+    "category": "historic",
+    "lat": 40.7761,
+    "lon": 41.7247,
+    "description": "Artvin Yusufeli Dağları; Çoruh Vadisi tepelerinde kızıl andezit taştan haç planlı 32m boyunda dev katedral.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 286,
+    "name": "Barhal (Parhali) Manastırı & Kilisesi",
+    "category": "historic",
+    "lat": 40.9678,
+    "lon": 41.4019,
+    "description": "Artvin Yusufeli Altıparmak; Kaçkar Dağları eteklerinde 10. yüzyıldan bugüne sağlam kalmış bazilika.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 287,
+    "name": "Dörtkilise Manastırı",
+    "category": "historic",
+    "lat": 40.7842,
+    "lon": 41.5189,
+    "description": "Artvin Yusufeli Tekkale vadisi; Vadi ormanı içinde Bagratlı kralı David'in yaptırdığı dev katedral kompleksi.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 288,
+    "name": "Santa Harabeleri (Dumanlı Sis Kenti)",
+    "category": "historic",
+    "lat": 40.6128,
+    "lon": 39.7347,
+    "description": "Gümüşhane Dumanlı Yaylası; Sisler denizinde 7 ayrı taş mahalleden ve kiliselerden oluşan tarihi Rum kenti.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 289,
+    "name": "Kuşkayası Yol Anıtı & Roma Kartalı Çeşmesi",
+    "category": "historic",
+    "lat": 41.7214,
+    "lon": 32.3556,
+    "description": "Bartın Amasra eski dağ yolu; MS 41-54 Roma askerlerinin dinlenmesi için kayaya oyulmuş çeşme ve kartal heykeli.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 290,
+    "name": "Amasra Ceneviz Kalesi & Kemere Taş Köprüsü",
+    "category": "historic",
+    "lat": 41.7503,
+    "lon": 32.3867,
+    "description": "Bartın Amasra; İki yarımadayı birbirine bağlayan tarihi taş köprü, Boztepe ve Ceneviz surları.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 291,
+    "name": "Hadrianapolis Antik Kenti & Mozaikleri",
+    "category": "historic",
+    "lat": 41.0328,
+    "lon": 32.5517,
+    "description": "Karabük Eskipazar Budaklar; 'Karadeniz'in Zeugması' sayılan Nil nehri hayvan figürlü taban mozaikleri. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 292,
+    "name": "Safranbolu Cinci Hanı & Tarihi Konaklar (UNESCO)",
+    "category": "historic",
+    "lat": 41.2458,
+    "lon": 32.6936,
+    "description": "Karabük Safranbolu; 1645 yapımı anıtsal kervansaray ve ahşap işçilikli Osmanlı sivil mimari harikaları.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 293,
+    "name": "Mahmut Bey Camii (Çivisiz Ahşap Şaheser, UNESCO)",
+    "category": "historic",
+    "lat": 41.4806,
+    "lon": 33.6842,
+    "description": "Kastamonu Kasaba Köyü; 1366 Candaroğulları yapımı, tek bir metal çivi çakılmadan bindirme ahşap oyma tavan.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 294,
+    "name": "Boyabat Kalesi & Yeraltı Tünelleri",
+    "category": "historic",
+    "lat": 41.4689,
+    "lon": 34.7672,
+    "description": "Sinop Boyabat; Gökırmak Vadisi'ne hakim sarp kayalıkta nehir yatağına inen basamaklı gizli dehlizler.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 295,
+    "name": "Sinop Tarihi Cezaevi & Üç Deniz Surları",
+    "category": "historic",
+    "lat": 42.0231,
+    "lon": 35.1481,
+    "description": "Sinop Merkez; Sabahattin Ali'nin şiirlerini yazdığı, Karadeniz dalgalarıyla çevrili tarihi kale cezaevi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 296,
+    "name": "Amasya Pontus Krallar Vadisi Kaya Mezarları",
+    "category": "historic",
+    "lat": 40.6534,
+    "lon": 35.8331,
+    "description": "Amasya Merkez; Yeşilırmak kıyısında Harşena Dağı kireçtaşı sarp kayalıklarına oyulmuş 5 anıtsal mezar. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 297,
+    "name": "Kurul Kalesi & Kybele Heykeli Kazısı",
+    "category": "historic",
+    "lat": 40.9419,
+    "lon": 37.8631,
+    "description": "Ordu Bayadı Köyü; 2100 yıllık Mithridates dönemi kaya kalesi ve Türkiye'de yerinde bulunan ilk mermer Kybele heykeli.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 298,
+    "name": "Meryem Ana Manastırı (Şebinkarahisar)",
+    "category": "historic",
+    "lat": 40.2981,
+    "lon": 38.4236,
+    "description": "Giresun Şebinkarahisar Kayadibi; Sarp kayalık yamaca oyulmuş Sümela'dan sonra bölgenin en büyük ikinci kaya manastırı.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 299,
+    "name": "Ani Antik Kenti (1001 Kiliseli Şehir, UNESCO)",
+    "category": "historic",
+    "lat": 40.5075,
+    "lon": 43.5728,
+    "description": "Kars Arpaçay Türkiye-Ermenistan sınırı; Arpaçay Kanyonu kıyısında devasa Ani Katedrali, surlar ve Manuçehr Camii. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 300,
+    "name": "Şeytan Kalesi & Karaçay Kanyonu",
+    "category": "historic",
+    "lat": 41.1089,
+    "lon": 43.1428,
+    "description": "Ardahan Çıldır Yıldırımtepe; Üç tarafı yüzlerce metrelik kanyon uçurumuyla çevrili Urartu ve ortaçağ kartal kalesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 301,
+    "name": "İshak Paşa Sarayı & Doğubayazıt Kalesi",
+    "category": "historic",
+    "lat": 39.5211,
+    "lon": 44.1294,
+    "description": "Ağrı Doğubayazıt; Ağrı Dağı manzaralı, dünyada ilk kalorifer sistemli barok-selçuklu saray şaheseri. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 302,
+    "name": "Çobandede Tarihi İpek Yolu Taş Köprüsü",
+    "category": "historic",
+    "lat": 39.9725,
+    "lon": 41.8842,
+    "description": "Erzurum Köprüköy; Aras ve Hasankale nehirlerinin kesiştiği 7 kemerli 1298 yapımı tarihi köprü.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 303,
+    "name": "Erzurum Çifte Minareli Medrese & Kalesi",
+    "category": "historic",
+    "lat": 39.9056,
+    "lon": 41.2778,
+    "description": "Erzurum Yakutiye; Selçuklu taş kabartma hayat ağacı taç kapısı ve çinili ikiz minareler. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 304,
+    "name": "Mama Hatun Külliyesi & Dairesel Kervansarayı",
+    "category": "historic",
+    "lat": 39.7758,
+    "lon": 40.3897,
+    "description": "Erzincan Tercan; Saltuklu Prensesi Mama Hatun adına yapılan dünyada benzersiz dairesel planlı türbe mimarisi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 305,
+    "name": "Akdamar Adası Kutsal Haç Kilisesi (Gevaş)",
+    "category": "historic",
+    "lat": 38.3411,
+    "lon": 43.0369,
+    "description": "Van Gevaş Van Gölü; 915-921 yapımı Tevrat ve İncil sahneleri kabartmalı kızıl tüf taşından göl adası şaheseri. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 306,
+    "name": "Çavuştepe (Sardurihinili) Urartu Kalesi",
+    "category": "historic",
+    "lat": 38.3517,
+    "lon": 43.4567,
+    "description": "Van Gürpınar; Kral II. Sarduri'nin yaptırdığı andezit taş işçiliği, saray ve Haldi tapınağı.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 307,
+    "name": "Hoşap Kalesi & Mahmudi Beyliği Kartal Yuvası",
+    "category": "historic",
+    "lat": 38.3189,
+    "lon": 43.8019,
+    "description": "Van Gürpınar Güzelsu; Sarp yalçın kaya üzerinde asma köprülü orijinal kapısıyla masalsı kartal kalesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 308,
+    "name": "Ahlat Selçuklu Meydan Mezarlığı & Kümbetler",
+    "category": "historic",
+    "lat": 38.7467,
+    "lon": 42.4842,
+    "description": "Bitlis Ahlat; 8000 adet 2 metre boyunda ejderha ve geometrik motifli Selçuklu mezar taşları müzesi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 309,
+    "name": "Harput Kalesi & Meryem Ana Kilisesi, Eğri Minare",
+    "category": "historic",
+    "lat": 38.7042,
+    "lon": 39.2567,
+    "description": "Elazığ Harput; Harput ovasına hakim süt kalesi, 1800 yıllık kaya kilisesi ve Pisa'dan eğik Ulu Cami.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 310,
+    "name": "Göbeklitepe Tarihin Sıfır Noktası (UNESCO)",
+    "category": "historic",
+    "lat": 37.2231,
+    "lon": 38.9225,
+    "description": "Şanlıurfa Haliliye Örencik; İnsanlık tarihini değiştiren 12.000 yıllık hayvan kabartmalı T biçimli dikilitaşlar tapınağı. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 311,
+    "name": "Karahantepe Neolitik Kült Alanı",
+    "category": "historic",
+    "lat": 37.0856,
+    "lon": 39.3019,
+    "description": "Şanlıurfa Haliliye Tek Tek Dağları; İnsan başlı sütunlar ve tarih öncesi ritüel havuzlarıyla Taş Tepeler projesinin incisi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 312,
+    "name": "Harran Antik Kenti & Konik Kümbet Evleri",
+    "category": "historic",
+    "lat": 36.8647,
+    "lon": 39.0306,
+    "description": "Şanlıurfa Harran; Dünyanın ilk İslam üniversitesi kalıntıları, astronomi kulesi ve harçsız kerpiç konik evler. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 313,
+    "name": "Şuayb Antik Kenti (Güneydoğu'nun Efes'i)",
+    "category": "historic",
+    "lat": 36.8536,
+    "lon": 39.4217,
+    "description": "Şanlıurfa Eyyübiye Tek Tek Dağları; Yüzlerce kayaya oyulmuş Roma yeraltı evi, sarnıçlar ve Şuayb Peygamber makamı.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 314,
+    "name": "Soğmatar Antik Kenti & Ay-Gezegen Tapınağı",
+    "category": "historic",
+    "lat": 36.9856,
+    "lon": 39.4689,
+    "description": "Şanlıurfa Eyyübiye Yağmurlu; Sabii pagan dininin Ay Tanrısı Sin ve 7 gezegen adına kayalara oyduğu kutsal tepe.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 315,
+    "name": "Halfeti Batık Köy & Savaşan Köyü Camii Minaresi",
+    "category": "historic",
+    "lat": 37.2472,
+    "lon": 37.8681,
+    "description": "Şanlıurfa Halfeti; Birecik Barajı gölü altında kalan taş konaklar ve suyun üstünde yükselen cami minaresi.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 316,
+    "name": "Rumkale & Fırat Nehri Kanyon Kalesi",
+    "category": "historic",
+    "lat": 37.2689,
+    "lon": 37.8389,
+    "description": "Gaziantep Yavuzeli Kasaba Köyü; Fırat ve Merzimen nehirlerinin kesiştiği yarımadada Aziz Yuhanna'nın İncil yazdığı sarp kale. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 317,
+    "name": "Zeugma Antik Kenti & Mozaik Villaları",
+    "category": "historic",
+    "lat": 37.0581,
+    "lon": 37.8667,
+    "description": "Gaziantep Nizip Belkıs; Fırat kıyısında Roma lejyon villaları, havuzları ve dünyaca ünlü mozaikler alanı. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 318,
+    "name": "Yesemek Açık Hava Müzesi ve Taş Ocağı",
+    "category": "historic",
+    "lat": 36.9019,
+    "lon": 36.7456,
+    "description": "Gaziantep İslahiye Yesemek; 3000 yıllık Geç Hitit dev taş sfenks ve aslan heykeltıraşlık atölyesi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 319,
+    "name": "Nemrut Dağı Zirve Tanrı Heykelleri (2150m, UNESCO)",
+    "category": "historic",
+    "lat": 37.9806,
+    "lon": 38.7408,
+    "description": "Adıyaman Kahta; Kommagene Kralı I. Antiochos'un 2150m dağ zirvesine yaptırdığı dev kireçtaşı tanrı başları ve tümülüs. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 320,
+    "name": "Cendere (Septimius Severus) Roma Taş Köprüsü",
+    "category": "historic",
+    "lat": 37.9317,
+    "lon": 38.6083,
+    "description": "Adıyaman Kahta Cendere Çayı; Roma Lejyonu'nun harçsız 92 devasa kesme taştan yaptığı 1800 yıllık anıtsal kemer köprü.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 321,
+    "name": "Arsameia (Nymphaios) Kommagene Başkenti",
+    "category": "historic",
+    "lat": 37.9422,
+    "lon": 38.6567,
+    "description": "Adıyaman Kahta Kocahisar; Kral Antiochos ve Herakles tokalaşma kabartması ve 158m kayaya oyulmuş gizemli dehliz.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 322,
+    "name": "Kahta Yeni Kale (Memlük Kalesi)",
+    "category": "historic",
+    "lat": 37.9536,
+    "lon": 38.6547,
+    "description": "Adıyaman Kahta Kocahisar; Sarp uçurum üzerine kurulan güvercinlikli, camili ve hamamlı heybetli kale.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 323,
+    "name": "Perre Antik Kenti & Nekropol Mağara Mezarları",
+    "category": "historic",
+    "lat": 37.7981,
+    "lon": 38.3056,
+    "description": "Adıyaman Merkez Örenli; Kommagene'nin beş büyük kentinden biri, kayalara oyulmuş yüzlerce galeri mezar. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 324,
+    "name": "Dara Antik Kenti (Mezopotamya'nın Efes'i) & Zindan Sarnıcı",
+    "category": "historic",
+    "lat": 37.1772,
+    "lon": 40.9536,
+    "description": "Mardin Artuklu Oğuz Köyü; İpek Yolu üzerinde kayalara oyulmuş dev katedral sarnıç, agora ve toplu mezarlık. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 325,
+    "name": "Deyrulzafaran Manastırı (Mor Hananyo)",
+    "category": "historic",
+    "lat": 37.2989,
+    "lon": 40.7928,
+    "description": "Mardin Artuklu; 5. yüzyıldan kalma Süryani Ortodoks Patrikhanesi merkezi ve Güneş Tapınağı temelleri.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 326,
+    "name": "Mor Gabriel Manastırı (Deyrulumur)",
+    "category": "historic",
+    "lat": 37.3189,
+    "lon": 41.4981,
+    "description": "Mardin Midyat Güngören; MS 397 yılında kurulan dünyanın en eski faal Süryani manastırlarından biri.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 327,
+    "name": "Mor Evgin (St. Eugenios) Manastırı",
+    "category": "historic",
+    "lat": 37.1856,
+    "lon": 41.2289,
+    "description": "Mardin Nusaybin Tur Abdin Dağları; Mezopotamya Ovası'na bakan 1000m rakımlı uçurumda Süryani manastır şaheseri.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 328,
+    "name": "Zerzevan Kalesi & Gizli Mithras Yeraltı Tapınağı",
+    "category": "historic",
+    "lat": 37.6089,
+    "lon": 40.5019,
+    "description": "Diyarbakır Çınar Demirölçek; Roma'nın doğudaki en stratejik sınır garnizonu ve dünyada sağlam kalan son Mithras tapınağı. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 329,
+    "name": "Diyarbakır Surları & Keçi Burcu, Hevsel Bahçeleri (UNESCO)",
+    "category": "historic",
+    "lat": 37.9136,
+    "lon": 40.2389,
+    "description": "Diyarbakır Sur; 5.5 km uzunluğuyla Çin Seddi'nden sonra dünyanın en uzun kalkan biçimli bazalt surları.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 330,
+    "name": "Malabadi Köprüsü (Artuklu Taş Şaheseri)",
+    "category": "historic",
+    "lat": 38.1542,
+    "lon": 41.2036,
+    "description": "Diyarbakır Silvan Batman Çayı; 1147 yapımı 38.6 metre açıklığıyla dünyanın en geniş sivri kemerli tarihi taş köprüsü.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 331,
+    "name": "Hasankeyf Antik Yerleşimi & Zeynel Bey Türbesi",
+    "category": "historic",
+    "lat": 37.7125,
+    "lon": 41.4117,
+    "description": "Batman Hasankeyf Dicle Nehri; Dicle Kanyonu kayalıklarına oyulmuş binlerce mağara ve taşınan Artuklu türbesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 12:00:00"
+  },
+  {
+    "id": 332,
+    "name": "Topkapı Sarayı Müzesi & Kutsal Emanetler",
+    "category": "historic",
+    "lat": 41.0115,
+    "lon": 28.9833,
+    "description": "İstanbul Fatih Sarayburnu; 400 yıl Osmanlı İmparatorluğu'nun yönetildiği Bab-ı Hümayun ve Harem dairesi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 333,
+    "name": "Ayasofya-i Kebir Cami-i Şerifi",
+    "category": "historic",
+    "lat": 41.0086,
+    "lon": 28.9802,
+    "description": "İstanbul Fatih Sultanahmet Meydanı; MS 537 İmparator Justinianus yapımı 1500 yıllık mimarlık harikası katedral ve cami.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 334,
+    "name": "Sultanahmet Camii & Hipodrom Dikilitaşları",
+    "category": "historic",
+    "lat": 41.0055,
+    "lon": 28.9768,
+    "description": "İstanbul Fatih; 6 minareli Mavi Cami, Mısır Dikilitaşı, Yılanlı Sütun ve Örme Dikilitaş.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 335,
+    "name": "Yerebatan Sarnıcı & Medusa Başları",
+    "category": "historic",
+    "lat": 41.0083,
+    "lon": 28.9778,
+    "description": "İstanbul Fatih Sultanahmet; 336 mermer sütunlu 6. yüzyıl yeraltı su sarayı ve ters Medusa kaideleri. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 336,
+    "name": "İstanbul Arkeoloji Müzeleri & İskender Lahdi",
+    "category": "historic",
+    "lat": 41.0117,
+    "lon": 28.9814,
+    "description": "İstanbul Gülhane Parkı içi; Osman Hamdi Bey'in kurduğu Sidon Kral Mezarları ve Kadeş Barış Antlaşması tableti. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 337,
+    "name": "Galata Kulesi & Tarihi Seyir Balkonu",
+    "category": "historic",
+    "lat": 41.0256,
+    "lon": 28.9742,
+    "description": "İstanbul Beyoğlu Bereketzade; 1348 Ceneviz yapımı Boğaz ve Haliç panoramalı tarihi fener kulesi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 338,
+    "name": "Rumeli Hisarı & Boğazkesen Kulesi",
+    "category": "historic",
+    "lat": 41.0847,
+    "lon": 29.0569,
+    "description": "İstanbul Sarıyer; Fatih Sultan Mehmet'in fetihten önce 4 ayda yaptırdığı Zağanos Paşa ve Halil Paşa kuleleri. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 339,
+    "name": "Anadolu Hisarı & Göksu Deresi",
+    "category": "historic",
+    "lat": 41.0825,
+    "lon": 29.0669,
+    "description": "İstanbul Beykoz; 1395 Yıldırım Bayezid yapımı Boğaz'ın en dar noktasındaki tarihi hisar.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 340,
+    "name": "Yedikule Hisarı & Altınkapı Zindanları",
+    "category": "historic",
+    "lat": 40.9936,
+    "lon": 28.9228,
+    "description": "İstanbul Fatih Yedikule; Doğu Roma zafer kapısı Altınkapı ve Osmanlı zindan kuleleri.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 341,
+    "name": "Kariye Camii (Chora Manastırı Mozaikleri)",
+    "category": "historic",
+    "lat": 41.0311,
+    "lon": 28.9392,
+    "description": "İstanbul Fatih Edirnekapı; 14. yüzyıl Doğu Roma Rönesansı altın yaldızlı mozaik ve fresk şaheserleri.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 342,
+    "name": "Kız Kulesi & Boğaz Efsaneleri Müzesi",
+    "category": "historic",
+    "lat": 41.0211,
+    "lon": 29.0042,
+    "description": "İstanbul Üsküdar Salacak açıkları; 2500 yıllık Leandros efsanesinin ada kulesi ve Boğaz panoraması. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 343,
+    "name": "Dolmabahçe Sarayı & Muayede Salonu",
+    "category": "historic",
+    "lat": 41.0392,
+    "lon": 29.0003,
+    "description": "İstanbul Beşiktaş sahili; Sultan Abdülmecid eseri 4.5 tonluk kristal avizeli neobarok sahil sarayı.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 344,
+    "name": "Yoros Kalesi & Ceneviz Boğaz Savunması",
+    "category": "historic",
+    "lat": 41.1786,
+    "lon": 29.1558,
+    "description": "İstanbul Beykoz Anadolu Kavağı; Karadeniz girişinde Boğaz'a hakim Doğu Roma ve Ceneviz kalesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 345,
+    "name": "Şerefiye (Theodosius) Sarnıcı",
+    "category": "historic",
+    "lat": 41.0075,
+    "lon": 28.9725,
+    "description": "İstanbul Fatih Piyer Loti caddesi; 1600 yıllık 32 Korint sütunlu sarnıç ve 360 derece projeksiyon mapping gösterisi.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 346,
+    "name": "Aydos Kalesi (İstanbul'un Fethinin Kilidi)",
+    "category": "historic",
+    "lat": 40.9458,
+    "lon": 29.2631,
+    "description": "İstanbul Sultanbeyli Aydos Tepesi; 11. yüzyıl Doğu Roma sınır kalesi ve Gözcü Kulesi parkuru.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 347,
+    "name": "Şeyh Edebali Türbesi & Osmanlı Kuruluş Vadisi",
+    "category": "historic",
+    "lat": 40.1417,
+    "lon": 29.9839,
+    "description": "Bilecik Merkez vadisi; Osmanlı Devleti'nin manevi kurucusu Şeyh Edebali'nin tarihi türbesi ve Orhan Gazi Camii.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 348,
+    "name": "Söğüt Ertuğrul Gazi Türbesi & Kuyulu Mescit",
+    "category": "historic",
+    "lat": 40.0189,
+    "lon": 30.1817,
+    "description": "Bilecik Söğüt; Osmanlı'nın ilk başkenti, Ertuğrul Gazi türbesi ve alp nöbet değişimi seremonisi.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 349,
+    "name": "Taraklı Tarihi Ahşap Konakları & Fenerli Ev",
+    "category": "historic",
+    "lat": 40.3956,
+    "lon": 30.4556,
+    "description": "Sakarya Taraklı; İpek Yolu üzerinde bozulmamış 300 yıllık Osmanlı mimarisi ve Yunus Paşa Camii.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 350,
+    "name": "Kasr-ı Hümayun Saray Müzesi & Saat Kulesi",
+    "category": "historic",
+    "lat": 40.7606,
+    "lon": 29.9239,
+    "description": "Kocaeli İzmit Merkez; Sultan Abdülaziz'in av köşkü sarayı, neobarok mermer cephe.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 351,
+    "name": "Dumlupınar Şehitliği & Kurtuluş Savaşı Anıtı",
+    "category": "historic",
+    "lat": 38.8681,
+    "lon": 29.9856,
+    "description": "Kütahya Dumlupınar; Başkomutanlık Meydan Muharebesi'nin kazanıldığı tarihi zafer tepesi ve anıt mezarlık.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 352,
+    "name": "Çini Müzesi (Yakup Çelebi İmareti)",
+    "category": "historic",
+    "lat": 39.4189,
+    "lon": 29.9806,
+    "description": "Kütahya Merkez; 1411 Germiyanoğlu yapımı külliye içinde 14. yüzyıldan bugüne Kütahya çini şaheserleri. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 353,
+    "name": "Uşak Arkeoloji Müzesi & Karun Hazineleri",
+    "category": "historic",
+    "lat": 38.6756,
+    "lon": 29.4056,
+    "description": "Uşak Merkez; Dünyaca ünlü Lidya Kralı Krezus'un Kanatlı Denizatı altın broşu ve paha biçilmez hazineleri. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 354,
+    "name": "Aigai Antik Kenti & Yunt Dağı Akropolü",
+    "category": "historic",
+    "lat": 38.8289,
+    "lon": 27.2025,
+    "description": "Manisa Köseler Köyü Yunt Dağları; 12 Aiol kentinden biri, 3 katlı pazar binası ve dağ virajları parkuru. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 355,
+    "name": "Karakurt Tarihi Kırkağaç Kervansarayı",
+    "category": "historic",
+    "lat": 39.1039,
+    "lon": 27.6719,
+    "description": "Manisa Kırkağaç; Tarihi İzmir-İstanbul atlı posta yolu üzerindeki sağlam Selçuklu menzil kervansarayı.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 356,
+    "name": "Marmaris Kalesi & Arkeoloji Müzesi",
+    "category": "historic",
+    "lat": 36.8506,
+    "lon": 28.2736,
+    "description": "Muğla Marmaris marina tepesi; 1522 Kanuni Sultan Süleyman'ın Rodos seferi kalesi ve Knidos buluntuları müzesi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 357,
+    "name": "Amos Antik Kenti & Tiyatrosu",
+    "category": "historic",
+    "lat": 36.7589,
+    "lon": 28.2678,
+    "description": "Muğla Marmaris Turunç Kumlubük; Çam ormanları içinden denize bakan kaya basamaklı tiyatro ve akropol surları.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 358,
+    "name": "Loryma (Bozukkale) Antik Kalesi",
+    "category": "historic",
+    "lat": 36.5706,
+    "lon": 28.0169,
+    "description": "Muğla Marmaris Bozburun Yarımadası; Antik limanı koruyan Rodos karşıtı 300 metre boyunda devasa taş bloklu sahil kalesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 359,
+    "name": "Keramos Antik Kenti & Gökova Surları",
+    "category": "historic",
+    "lat": 37.0456,
+    "lon": 27.9739,
+    "description": "Muğla Milas Ören; Gökova Körfezi'nin kuzey kıyısında antik Kurşunlu Yapı ve Zeus Chrysaoreus tapınağı.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 360,
+    "name": "Antalya Kaleiçi & Hadrianus (Üçkapılar) Zafer Takı",
+    "category": "historic",
+    "lat": 36.8856,
+    "lon": 30.7086,
+    "description": "Antalya Muratpaşa; MS 130 Roma İmparatoru Hadrianus adına yapılan mermer oymalı zafer kapısı ve tarihi konaklar.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 361,
+    "name": "Antalya Arkeoloji Müzesi & Tanrılar Salonu",
+    "category": "historic",
+    "lat": 36.8853,
+    "lon": 30.6789,
+    "description": "Antalya Konyaaltı; Perge heykeltıraşlık şaheserleri, Herakles Lahdi ve Yorgun Herakles heykeli. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 362,
+    "name": "Karain Mağarası (500.000 Yıllık İlk İnsan İzi)",
+    "category": "historic",
+    "lat": 37.0789,
+    "lon": 30.5706,
+    "description": "Antalya Döşemealtı Yağca; Anadolu'da bilinen en eski Paleolitik insan yerleşimi mağara galerileri. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 363,
+    "name": "Hıdırlık Kulesi & Karaalioğlu Parkı",
+    "category": "historic",
+    "lat": 36.8814,
+    "lon": 30.7042,
+    "description": "Antalya Kaleiçi güney ucu; 2. yüzyıl Roma deniz feneri ve anıt mezar silindirik kulesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 364,
+    "name": "Burdur Arkeoloji Müzesi",
+    "category": "historic",
+    "lat": 37.7214,
+    "lon": 30.2889,
+    "description": "Burdur Merkez; Sagalassos Antoninler Çeşmesi heykelleri, Kibyra Medusa frizleri ve Hacılar Neolitik seramikleri. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 365,
+    "name": "İnsuyu Mağarası (Türkiye'nin Turizme Açılan İlk Mağarası)",
+    "category": "historic",
+    "lat": 37.6589,
+    "lon": 30.3456,
+    "description": "Burdur Çatağıl Köyü; 525m uzunluğunda damlataş sarkıtları ve tarihi karstik yeraltı gölleri.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 366,
+    "name": "Ertokuş Medresesi (Atabey)",
+    "category": "historic",
+    "lat": 37.9506,
+    "lon": 30.6436,
+    "description": "Isparta Atabey; 1224 Selçuklu uç beyi Mübarizeddin Ertokuş'un kubbesinde rasathane aydınlık feneri olan medresesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 367,
+    "name": "Mevlana Celaleddin-i Rumi Müzesi & Yeşil Kubbe",
+    "category": "historic",
+    "lat": 37.8708,
+    "lon": 32.5053,
+    "description": "Konya Karatay; Kubbe-i Hadra altında Mevlana Türbesi, derviş hücreleri ve el yazması Mesnevi nüshaları. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 368,
+    "name": "Alaeddin Tepesi & Selçuklu Sultanları Kümbeti",
+    "category": "historic",
+    "lat": 37.8731,
+    "lon": 32.4933,
+    "description": "Konya Selçuklu; Şehrin kalbindeki höyük üzerinde Alaeddin Camii ve 8 Selçuklu sultanının yattığı türbe.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 369,
+    "name": "Karatay Medresesi Çini Eserler Müzesi",
+    "category": "historic",
+    "lat": 37.8753,
+    "lon": 32.4925,
+    "description": "Konya Selçuklu; 1251 Celaleddin Karatay yapımı gök kubbe mozaik çinili Selçuklu başyapıtı. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 370,
+    "name": "İnce Minareli Medrese Taş ve Ahşap Eserler Müzesi",
+    "category": "historic",
+    "lat": 37.8725,
+    "lon": 32.4897,
+    "description": "Konya Selçuklu; Barok Selçuklu taş kabartma taç kapısı ve çinili minare kalıntısı. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 371,
+    "name": "Anıtkabir & Atatürk ve Kurtuluş Savaşı Müzesi",
+    "category": "historic",
+    "lat": 39.925,
+    "lon": 32.8369,
+    "description": "Ankara Çankaya Anıttepe; Türkiye Cumhuriyeti'nin kurucusu Gazi Mustafa Kemal Atatürk'ün ebedi istirahatgahı ve Aslanlı Yol.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 372,
+    "name": "Birinci TBMM Binası (Kurtuluş Savaşı Müzesi)",
+    "category": "historic",
+    "lat": 39.9422,
+    "lon": 32.8542,
+    "description": "Ankara Ulus Meydanı; 23 Nisan 1920'de açılan ilk meclis salonu, İstiklal Madalyaları ve Riyaset Divanı. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 373,
+    "name": "İkinci TBMM Binası (Cumhuriyet Müzesi)",
+    "category": "historic",
+    "lat": 39.9397,
+    "lon": 32.8528,
+    "description": "Ankara Ulus; 1924-1960 arası Atatürk inkılaplarının ve cumhuriyetin şekillendiği tarihi meclis binası. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 374,
+    "name": "Ankara Etnografya Müzesi (Atatürk'ün İlk Kabri)",
+    "category": "historic",
+    "lat": 39.9331,
+    "lon": 28.8553,
+    "description": "Ankara Altındağ Namazgâh Tepesi; 1938-1953 arası Atatürk'ün naaşının korunduğu Selçuklu-Osmanlı sanat müzesi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 375,
+    "name": "Beypazarı Tarihi Yaşayan Müze & Konaklar",
+    "category": "historic",
+    "lat": 40.1681,
+    "lon": 31.9214,
+    "description": "Ankara Beypazarı; Geleneksel Türk Osmanlı ahşap mimarisi, telkâri gümüş atölyeleri ve yaşayan kültür evi.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 376,
+    "name": "İncesu Kanyonu & Kybele Kaya Kabartması",
+    "category": "historic",
+    "lat": 40.2367,
+    "lon": 35.1589,
+    "description": "Çorum Yozgat sınırı Ortaköy İncesu; 12 km uzunluğundaki kanyon duvarına oyulmuş 2. yy Helenistik Kybele kabartması.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 377,
+    "name": "İskilip Kaya Mezarları & Kalesi",
+    "category": "historic",
+    "lat": 40.7356,
+    "lon": 34.4756,
+    "description": "Çorum İskilip; Yüksek yalçın kaya kütlesi üzerine kurulu kale ve altındaki 2 sütunlu Paflagonya kaya mezarı.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 378,
+    "name": "Sivas Gök Medrese (Sahibiye)",
+    "category": "historic",
+    "lat": 39.7428,
+    "lon": 37.0189,
+    "description": "Sivas Merkez; 1271 Sahip Ata eseri mavi firuze çinili çift minaresi ve mermer kabartmalı anıtsal taç kapısı. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 379,
+    "name": "Sivas Buruciye & Çifte Minareli Medrese",
+    "category": "historic",
+    "lat": 39.7481,
+    "lon": 37.0156,
+    "description": "Sivas Kent Meydanı; Anadolu Selçuklu taş işçiliğinin şaheserleri olan yan yana iki anıtsal medrese. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 380,
+    "name": "Tokat Kalesi & Kazıklı Voyvoda Zindanları",
+    "category": "historic",
+    "lat": 40.3189,
+    "lon": 36.5489,
+    "description": "Tokat Merkez sarp kayalık tepe; Kont Drakula'nın hapsedildiği gizli dehlizleri olan sarp kaya hisarı.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 381,
+    "name": "Zile Kalesi (Veni Vidi Vici Sözünün Söylendiği Yer)",
+    "category": "historic",
+    "lat": 40.3019,
+    "lon": 35.8856,
+    "description": "Tokat Zile; Jül Sezar'ın Pontus Kralı Farnakes'i yenip 'Geldim, Gördüm, Yendim' dediği antik akropol kalesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 382,
+    "name": "Niksar Kalesi & Yağıbasan Medresesi (Anadolu'nun İlk Tıp Okulu)",
+    "category": "historic",
+    "lat": 40.5906,
+    "lon": 36.9536,
+    "description": "Tokat Niksar; Danişmentliler başkenti, 1157 yapımı kapalı kubbeli Anadolu'nun ilk tıp medresesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 383,
+    "name": "Ballıca Mağarası Tabiat Parkı (Soğan Sarkıtlar Harikası)",
+    "category": "historic",
+    "lat": 40.2289,
+    "lon": 36.3019,
+    "description": "Tokat Pazar Ballıca; Dünyanın en zengin mağara oluşumları, şifalı mikroklimalı dev salonlar.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 384,
+    "name": "Amasya Bimarhanesi (Sabuncuoğlu Tıp ve Cerrahi Müzesi)",
+    "category": "historic",
+    "lat": 40.6506,
+    "lon": 35.8306,
+    "description": "Amasya Yeşilırmak kıyısı; 1308 İlhanlı yapımı müzikle ve su sesiyle akıl hastalarının tedavi edildiği darüşşifa.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 385,
+    "name": "Harşena Kalesi & Kızlar Sarayı Tünelleri",
+    "category": "historic",
+    "lat": 40.6556,
+    "lon": 35.8317,
+    "description": "Amasya Harşena Dağı zirvesi; Pontus krallarından Osmanlı şehzadelerine asırlardır şehri koruyan taş kale.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 386,
+    "name": "Giresun Kalesi & Topal Osman Ağa Anıtı",
+    "category": "historic",
+    "lat": 40.9206,
+    "lon": 38.3889,
+    "description": "Giresun Merkez yarımadası; Karadeniz maviliklerine hakim volkanik kaya hisarı, mağaralar ve şehitlik.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 387,
+    "name": "Giresun Adası (Karadeniz'in Mitolojik Adası)",
+    "category": "historic",
+    "lat": 40.9289,
+    "lon": 38.4356,
+    "description": "Giresun açıkları; Amazon kadın savaşçılarının ve Herakles'in Altın Post mitolojisinde geçen antik adacık.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 388,
+    "name": "Trabzon Atatürk Köşkü & Soğuksu Koruluğu",
+    "category": "historic",
+    "lat": 40.9856,
+    "lon": 39.7028,
+    "description": "Trabzon Soğuksu çamlığı; 1890 Konstantin Kabayanidis eseri neorönesans köşk ve Atatürk'ün vasiyetini yazdığı oda. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 389,
+    "name": "Çal Mağarası & Kalesi (Dünyanın 2. En Uzun Mağarası)",
+    "category": "historic",
+    "lat": 40.8528,
+    "lon": 39.3856,
+    "description": "Trabzon Düzköy Çal beldesi; 8 km uzunluğundaki yeraltı su yolu, şelalesi ve ahşap yürüyüş parkuru.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 390,
+    "name": "Livane Kalesi (Artvin Merkez Kalesi)",
+    "category": "historic",
+    "lat": 41.1819,
+    "lon": 41.8189,
+    "description": "Artvin Çoruh Nehri kıyısı; 937 Bagratlı yapımı 70m dik kaya üzerine kartal gibi oturtulmuş kale.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 391,
+    "name": "Cehennem Deresi Kanyonu & Kalesi",
+    "category": "historic",
+    "lat": 41.1356,
+    "lon": 42.0689,
+    "description": "Artvin Ardanuç; Dünyanın sayılı dar ve derin kanyonlarından biri, sarp kaya duvarları ve tarihi gözetleme kulesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 392,
+    "name": "Baksı Müzesi (Sanatın Dağ Zirvesindeki Çığlığı)",
+    "category": "historic",
+    "lat": 40.3856,
+    "lon": 40.0889,
+    "description": "Bayburt Bayraktar Köyü; Çoruh Vadisi'ne bakan tepede Prof. Hüsamettin Koçan'ın kurduğu Avrupa Konseyi Müze Ödüllü çağdaş sanat vahası.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 393,
+    "name": "Bayburt Kalesi (Çinimaçin Kalesi)",
+    "category": "historic",
+    "lat": 40.2611,
+    "lon": 40.2228,
+    "description": "Bayburt Merkez; Dede Korkut hikayelerinde geçen, sarp kayalıkta mor çinili surlarıyla ünlü tarihi hisar.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 394,
+    "name": "Sarıkamış Katerina Av Köşkü",
+    "category": "historic",
+    "lat": 40.3347,
+    "lon": 42.5956,
+    "description": "Kars Sarıkamış çam ormanları; Çar II. Nikola'nın çivi kullanılmadan kütük geçirme (peç) tekniğiyle yaptırdığı Rus av köşkü.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 395,
+    "name": "Karakuş Tümülüsü & Kommagene Kraliçeler Anıtı",
+    "category": "historic",
+    "lat": 37.8681,
+    "lon": 38.5889,
+    "description": "Adıyaman Kahta Nemrut yolu; Kartal, aslan ve boğa kabartmalı sütunlarla çevrili Kommagene kadınlar mozolesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 396,
+    "name": "Haydaran Kaya Mezarları & Güneş Tanrısı Kabartması",
+    "category": "historic",
+    "lat": 37.9022,
+    "lon": 38.3589,
+    "description": "Adıyaman Taşgedik Köyü; Kaya yüzeyine oyulmuş Güneş Tanrısı Şamaş ve Kommagene Kralı kabartması.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 397,
+    "name": "Arslantepe Höyüğü & Açık Hava Saray Müzesi (UNESCO)",
+    "category": "historic",
+    "lat": 38.3828,
+    "lon": 38.3606,
+    "description": "Malatya Battalgazi Orduzu; Dünyanın ilk kerpiç devlet sarayı (MÖ 3300), ilk kılıçları ve taht odası. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 398,
+    "name": "Battalgazi Ulu Camii & Silahtar Mustafa Paşa Kervansarayı",
+    "category": "historic",
+    "lat": 38.4189,
+    "lon": 38.3689,
+    "description": "Malatya Eski Malatya Battalgazi; 1224 Selçuklu tuğla işçiliği şaheseri cami ve sağlam İpek Yolu kervansarayı.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 399,
+    "name": "Kahramanmaraş Kalesi & Kurtuluş Müzesi",
+    "category": "historic",
+    "lat": 37.5856,
+    "lon": 36.9278,
+    "description": "Kahramanmaraş Merkez; Hititlerden beri şehre tepeden bakan, Sütçü İmam ve Milli Mücadele bayrak kalesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 400,
+    "name": "Germenicia Antik Kenti Taban Mozaikleri",
+    "category": "historic",
+    "lat": 37.5756,
+    "lon": 36.9389,
+    "description": "Kahramanmaraş Dulkadiroğlu; Roma dönemi villalarının tabanında bulunan av sahneleri ve botanik mozaikleri.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 401,
+    "name": "Birecik Kalesi & Kelaynak Kuşları İstasyonu",
+    "category": "historic",
+    "lat": 37.0289,
+    "lon": 37.9781,
+    "description": "Şanlıurfa Birecik Fırat kıyısı; Fırat Nehri'ne bakan beyaz kalker kayalıkları üzerine kurulu Asur ve Haçlı kalesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 402,
+    "name": "Mardin Kasımiye Medresesi & Hayat Havuzu",
+    "category": "historic",
+    "lat": 37.3069,
+    "lon": 40.7289,
+    "description": "Mardin Artuklu; İnsan ömrünü temsil eden fıskiyeli su kanalı havuzu ve Mezopotamya Ovası panoraması. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 403,
+    "name": "Kırklar Kilisesi (Mor Behnam & Saro)",
+    "category": "historic",
+    "lat": 37.3136,
+    "lon": 40.7417,
+    "description": "Mardin Merkez; MS 6. yüzyıl yapımı 12 sütunlu taş oymacılığı harikası Süryani Ortodoks ibadethanesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 404,
+    "name": "Diyarbakır Ulu Camii & Sibernetiğin Babası El-Cezeri Güneş Saati",
+    "category": "historic",
+    "lat": 37.9139,
+    "lon": 40.2372,
+    "description": "Diyarbakır Sur; İslamiyet'in 5. Harem-i Şerif'i sayılan avlulu ulu mabet ve 800 yıllık güneş saati.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 405,
+    "name": "On Gözlü Tarihi Dicle Köprüsü",
+    "category": "historic",
+    "lat": 37.8906,
+    "lon": 40.2403,
+    "description": "Diyarbakır Sur Dicle Vadisi; 1065 Mervanoğulları yapımı bazalt taştan Dicle Nehri üzerindeki 10 kemerli türkülere konu köprü.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 406,
+    "name": "Meydan Medresesi & Zap Vadisi Asma Köprüleri",
+    "category": "historic",
+    "lat": 37.5767,
+    "lon": 43.7419,
+    "description": "Hakkari Merkez; 1700 yapımı Hakkari beylerinin iki katlı avlulu taş medresesi ve karlı Cilo Dağları.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 407,
+    "name": "Çemişgezek Tarihi İn Delikleri (Urartu Kaya Şehri)",
+    "category": "historic",
+    "lat": 39.0606,
+    "lon": 38.9189,
+    "description": "Tunceli Çemişgezek Tahar Kanyonu; Dikey kaya uçurumuna oyulmuş 25 odalı pencereli çok katlı sığınak şehri.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 408,
+    "name": "Pertek Kalesi (Keban Baraj Gölü Ada Kalesi)",
+    "category": "historic",
+    "lat": 38.8556,
+    "lon": 39.2789,
+    "description": "Tunceli Pertek Keban Baraj Gölü; Baraj sularının ortasında zümrüt ada gibi kalan Selçuklu ve Mengücek kalesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 409,
+    "name": "Kemah Kalesi & Sultan Melik Türbesi",
+    "category": "historic",
+    "lat": 39.5989,
+    "lon": 39.0289,
+    "description": "Erzincan Kemah Karasu Kanyonu; Dünyanın en sarp doğal tahkimatlı kalelerinden biri ve Mengücek hanedan mezarları.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 410,
+    "name": "Harput Meryem Ana Kaya Kilisesi (MS 179)",
+    "category": "historic",
+    "lat": 38.7056,
+    "lon": 39.2611,
+    "description": "Elazığ Harput; Dünyanın en eski Hristiyan mabetlerinden biri, Harput kalesinin kayalıklarına oyulmuş şapel.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 411,
+    "name": "Sivrice Hazar Gölü Batık Şehri",
+    "category": "historic",
+    "lat": 38.4847,
+    "lon": 39.3139,
+    "description": "Elazığ Sivrice Hazar Gölü; Göl suyunun altında kalan 11. yüzyıl Bizans kalesi, kilisesi ve batık kenti.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 412,
+    "name": "Malazgirt Zafer Anıtı & Tarihi Malazgirt Kalesi",
+    "category": "historic",
+    "lat": 39.1456,
+    "lon": 42.5419,
+    "description": "Muş Malazgirt; 1071 Sultan Alparslan'ın Anadolu'nun kapılarını açtığı tarihi meydan savaşı abidesi.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 413,
+    "name": "Tarihi Murat Köprüsü (12 Kemerli Selçuklu Şaheseri)",
+    "category": "historic",
+    "lat": 38.7756,
+    "lon": 41.4889,
+    "description": "Muş Merkez Murat Nehri; 143 metre boyunda Murat Nehri üzerinde 13. yüzyıl Selçuklu taş köprüsü.",
+    "rating": 5,
+    "created_at": "2026-10-04 15:00:00"
+  },
+  {
+    "id": 414,
+    "name": "Oksijen O-37 Dilovası Dinlenme Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 40.7881,
+    "lon": 29.5439,
+    "description": "Kocaeli Dilovası Otoyol Servis Alanı; 24 saat akaryakıt, restoranlar, market ve geniş otopark.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 415,
+    "name": "Oksijen O-68 Orhangazi Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 40.5125,
+    "lon": 29.3147,
+    "description": "Yalova-Bursa O-5 Otoyolu; Shell akaryakıt, yeme-içme alanı, kahve dükkanları ve çocuk oyun alanı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 416,
+    "name": "Oksijen O-124 Karacabey Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 40.1656,
+    "lon": 28.3289,
+    "description": "Bursa-Balıkesir O-5 Otoyolu; Geniş akaryakıt istasyonu, marka restoranlar ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 417,
+    "name": "Oksijen O-170 Balıkesir Tesisleri & Petrol Ofisi",
+    "category": "fuel",
+    "lat": 39.7342,
+    "lon": 27.9156,
+    "description": "Balıkesir O-5 Otoyolu; Petrol Ofisi istasyonu, yöresel ürünler, kahve ve restoranlar.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 418,
+    "name": "Oksijen O-218 Akhisar Dinlenme Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 39.0142,
+    "lon": 27.7856,
+    "description": "Manisa Akhisar O-5 Otoyolu; Shell akaryakıt, Akhisar köfte salonu ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 419,
+    "name": "Oksijen O-388 Manisa Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 38.6589,
+    "lon": 27.4236,
+    "description": "Manisa-İzmir Otoyol Girişi; Opet akaryakıt, market ve hızlı dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 420,
+    "name": "Susurluk Yasa Dinlenme Tesisleri & Opet",
+    "category": "cafe",
+    "lat": 39.9147,
+    "lon": 28.1639,
+    "description": "Balıkesir Susurluk; Meşhur köpüklü Susurluk ayranı, tostu ve çiğ böreğiyle efsane motorcu durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 421,
+    "name": "Susurluk Düzdağ Tostçusu & Dinlenme Noktası",
+    "category": "cafe",
+    "lat": 39.9056,
+    "lon": 28.1589,
+    "description": "Balıkesir Susurluk; Mihaliç peynirli geleneksel tost ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 422,
+    "name": "Susurluk Festiva Outlet & Mola Alanı",
+    "category": "cafe",
+    "lat": 39.8942,
+    "lon": 28.1525,
+    "description": "Balıkesir Susurluk Bursa-Balıkesir yolu; Açık hava alışveriş, kahve ve yemek molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 423,
+    "name": "Bolu Dağı Highway Outlet Dinlenme Tesisleri & Opet",
+    "category": "cafe",
+    "lat": 40.7514,
+    "lon": 31.4889,
+    "description": "Bolu Dağı TEM Otoyolu; Türkiye'nin en büyük otoyol dinlenme tesisi, alışveriş merkezi ve akaryakıt.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 424,
+    "name": "Bolu Dağı İsmail'in Yeri Et & Mola Tesisleri",
+    "category": "cafe",
+    "lat": 40.7389,
+    "lon": 31.4425,
+    "description": "Düzce Bolu Dağı eski geçit yolu; Sisli çam ormanları içinde meşhur et mangal ve dinlenme durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 425,
+    "name": "Pamukova Berceste Dinlenme Tesisleri & Petrol Ofisi",
+    "category": "cafe",
+    "lat": 40.5056,
+    "lon": 30.1589,
+    "description": "Sakarya-Bilecik D-650 yolu; Yöresel kahvaltı, ızgara, market ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 426,
+    "name": "Sapanca Kurtköy Dinlenme Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 40.6925,
+    "lon": 30.2289,
+    "description": "Kocaeli-Sakarya TEM Otoyolu; Göl manzarasına yakın 24 saat açık akaryakıt ve dinlenme alanı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 427,
+    "name": "Çamlıdere Çamlık Dinlenme Tesisleri & BP",
+    "category": "fuel",
+    "lat": 40.4856,
+    "lon": 32.4756,
+    "description": "Ankara-Gerede TEM Otoyolu; Çam ormanları eteğinde serin dağ havasıyla mola ve yakıt tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 428,
+    "name": "Gerede Esentepe Dinlenme Tesisleri & Karadeniz Kavşağı",
+    "category": "cafe",
+    "lat": 40.8125,
+    "lon": 32.2039,
+    "description": "Bolu Gerede; Karadeniz ve Doğu yolu ayrımında çamlık dinlenme parkı ve restoran.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 429,
+    "name": "Çine Madran Dinlenme Tesisleri & Köfte Mola",
+    "category": "cafe",
+    "lat": 37.6256,
+    "lon": 28.0589,
+    "description": "Aydın Çine yolu; Çine çöp şiş, yayık ayranı ve doğal kaynak suyu dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 430,
+    "name": "Selçuk Çamlık Mola Tesisleri & Buharlı Lokomotifler",
+    "category": "cafe",
+    "lat": 37.8925,
+    "lon": 27.4239,
+    "description": "İzmir Selçuk-Aydın yolu; Çamlık Açık Hava Buharlı Lokomotif Müzesi yanında gölgeli mola durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 431,
+    "name": "Muğla Sakar Tepe Zirve Mola Yeri & Çay Bahçesi",
+    "category": "cafe",
+    "lat": 37.0714,
+    "lon": 28.3456,
+    "description": "Muğla Ula Akyaka inişi; Gökova Körfezi'ne 700m tepeden bakan eşsiz manzaralı çay ve gözleme molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 432,
+    "name": "Fethiye Göcek Tüneli Girişi Mola Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 36.7589,
+    "lon": 28.9647,
+    "description": "Muğla Fethiye-Dalaman yolu; Göcek virajları öncesi akaryakıt, market ve serinleme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 433,
+    "name": "Dalaman Çayı Köprüsü Mola Alanı",
+    "category": "cafe",
+    "lat": 36.7725,
+    "lon": 28.8239,
+    "description": "Muğla Ortaca-Dalaman; Nehir kenarında narenciye bahçeleri arasında serin mola yeri.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 434,
+    "name": "Kalkan Seyir Kafe & Mola Noktası",
+    "category": "cafe",
+    "lat": 36.2689,
+    "lon": 29.4147,
+    "description": "Antalya Kaş Kalkan; Kalkan koyuna tepeden bakan viraj üstü kahve ve fotoğraf molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 435,
+    "name": "Finik-Kumluca Sahil Yolu Dinlenme Parkı",
+    "category": "cafe",
+    "lat": 36.3125,
+    "lon": 30.1589,
+    "description": "Antalya Finike sahili; Portakal bahçeleri ve Akdeniz dalgaları kenarında mola yeri.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 436,
+    "name": "Kemer Çamyuva Dinlenme Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 36.5625,
+    "lon": 30.5639,
+    "description": "Antalya Kemer D-400 yolu; Tahtalı Dağı manzaralı yakıt ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 437,
+    "name": "Afyon İkbal Dinlenme Tesisleri & Sucuk Mola",
+    "category": "cafe",
+    "lat": 38.7756,
+    "lon": 30.4856,
+    "description": "Afyonkarahisar İzmir-İstanbul-Antalya kavşağı; Meşhur Afyon sucuğu, kaymaklı ekmek kadayıfı ve büyük dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 438,
+    "name": "Afyon Cumhuriyet Tesisleri & Lokum Mola",
+    "category": "cafe",
+    "lat": 38.7889,
+    "lon": 30.5125,
+    "description": "Afyonkarahisar kavşağı; Yöresel ürünler, restoran ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 439,
+    "name": "Dinar Suçıkan Dinlenme Parkı & Mola Tesisleri",
+    "category": "cafe",
+    "lat": 38.0689,
+    "lon": 30.1656,
+    "description": "Afyon Dinar Antalya-Denizli yolu; Menderes Nehri'nin doğduğu kaynak suları etrafında serin mola tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 440,
+    "name": "Sivrihisar Başkent Dinlenme Tesisleri & Opet",
+    "category": "cafe",
+    "lat": 39.4589,
+    "lon": 31.5239,
+    "description": "Eskişehir Sivrihisar Ankara-İzmir yolu; Çift yönlü restoran, döner salonu, market ve akaryakıt.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 441,
+    "name": "Sivrihisar Nasreddin Hoca Dinlenme Tesisleri",
+    "category": "cafe",
+    "lat": 39.4656,
+    "lon": 31.5417,
+    "description": "Eskişehir Sivrihisar; Sivrihisar sarp kayalıkları manzaralı geleneksel dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 442,
+    "name": "Akseki Dinlenme Tesisleri & Toros Zirve Mola",
+    "category": "cafe",
+    "lat": 37.0456,
+    "lon": 31.7889,
+    "description": "Antalya Akseki Konya-Antalya yolu; Toros Dağları'nda 1400m rakımda serin dağ havası ve karlı zirveler molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 443,
+    "name": "Seydişehir Günaydın Dinlenme Tesisleri & Petrol Ofisi",
+    "category": "fuel",
+    "lat": 37.4239,
+    "lon": 31.8456,
+    "description": "Konya Seydişehir Antalya yolu; Toros Geçidi öncesi son yakıt ve restoran tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 444,
+    "name": "Kulu Makası Dinlenme Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 39.0917,
+    "lon": 32.9856,
+    "description": "Ankara-Konya-Aksaray kavşağı; 24 saat açık restoran, market ve akaryakıt merkezi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 445,
+    "name": "Şereflikoçhisar Tuz Gölü Mola Tesisleri & Panoramik Teras",
+    "category": "cafe",
+    "lat": 38.9389,
+    "lon": 33.5147,
+    "description": "Ankara-Aksaray yolu; Tuz Gölü'nün bembeyaz tuz kristalleri üzerinde yürüyüş ve gün batımı molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 446,
+    "name": "Aksaray Ağaçlı Dinlenme Tesisleri & Petrol Ofisi",
+    "category": "cafe",
+    "lat": 38.3756,
+    "lon": 34.0289,
+    "description": "Aksaray İpek Yolu kavşağı; Kapadokya girişinde Türkiye'nin en köklü ve modern dinlenme komplekslerinden biri.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 447,
+    "name": "Osmancık Koyunbaba Mola Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 40.9756,
+    "lon": 34.8089,
+    "description": "Çorum Osmancık D-100 Karadeniz yolu; Kızılırmak nehri kıyısında akaryakıt ve pirinç mola noktası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 448,
+    "name": "Havza Mola Tesisleri & Termal Dinlenme",
+    "category": "cafe",
+    "lat": 40.9814,
+    "lon": 35.6589,
+    "description": "Samsun Havza; Samsun-Ankara yolu üzerinde kaplıcalara yakın geniş dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 449,
+    "name": "Sungurlu Dağ Dinlenme Tesisleri & Baloğlu Mola",
+    "category": "cafe",
+    "lat": 40.1589,
+    "lon": 34.3756,
+    "description": "Çorum Sungurlu Ankara-Samsun yolu; Meşhur Sungurlu leblebisi, ızgara ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 450,
+    "name": "Ilgaz Dağı Zirve Mola Tesisleri & Dağ Evi",
+    "category": "cafe",
+    "lat": 41.0725,
+    "lon": 33.7389,
+    "description": "Çankırı-Kastamonu 1850m Ilgaz Geçidi; Çam ormanları içinde serin kış ve yaz dinlenme durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 451,
+    "name": "Perşembe Sahil Yolu Vona Mola Tesisleri",
+    "category": "cafe",
+    "lat": 41.0789,
+    "lon": 37.7656,
+    "description": "Ordu Perşembe eski sahil yolu; Karadeniz virajlarında deniz manzaralı balık ve çay molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 452,
+    "name": "Tirebolu Doğal Çay Mola Tesisleri",
+    "category": "cafe",
+    "lat": 41.0089,
+    "lon": 38.8147,
+    "description": "Giresun Tirebolu sahil yolu; Karadeniz kıyısında tarihi kale manzaralı 42 nolu Tirebolu çayı molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 453,
+    "name": "Hamsiköy Tarihi Sütlaç Mola Yeri",
+    "category": "cafe",
+    "lat": 40.7189,
+    "lon": 39.4889,
+    "description": "Trabzon Maçka Zigana Geçidi etekleri; Tarihi İpek Yolu üzerinde meşhur fırın sütlaç dinlenme durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 454,
+    "name": "Yeni Zigana Tüneli Girişi Dinlenme Tesisleri",
+    "category": "fuel",
+    "lat": 40.6425,
+    "lon": 39.4289,
+    "description": "Trabzon-Gümüşhane 14.5 km Zigana Tüneli; Tünel öncesi akaryakıt ve serin dağ molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 455,
+    "name": "Pozantı Şekerpınarı Dinlenme Tesisleri & Akpınar",
+    "category": "cafe",
+    "lat": 37.4589,
+    "lon": 34.8725,
+    "description": "Adana Pozantı Toros Dağları; Toros Kanyonu'nda buz gibi kaynak suları kenarında et ve alabalık molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 456,
+    "name": "Pozantı Park Dinlenme Tesisleri & Opet (O-21 Otoyolu)",
+    "category": "fuel",
+    "lat": 37.4389,
+    "lon": 34.8614,
+    "description": "Niğde-Adana O-21 Otoyolu; Toros Geçidi inişinde 24 saat açık otoyol servis alanı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 457,
+    "name": "Nurdağı Geçidi Mola Tesisleri & Çamlık",
+    "category": "cafe",
+    "lat": 37.1856,
+    "lon": 36.7389,
+    "description": "Gaziantep Nurdağı Adana-Antep yolu; Amanos Dağları virajlarında serin çam ormanı mola noktası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 458,
+    "name": "Birecik Köprü Başı Fırat Dinlenme Tesisleri",
+    "category": "cafe",
+    "lat": 37.0314,
+    "lon": 37.9725,
+    "description": "Şanlıurfa Birecik; Fırat Nehri kıyısında Birecik patlıcan kebabı ve nehir manzaralı mola.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 459,
+    "name": "Suruç Nar Dinlenme Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 36.9856,
+    "lon": 38.4189,
+    "description": "Şanlıurfa Suruç Şanlıurfa-Antep yolu; Akaryakıt, dinlenme tesisi ve yöresel ürünler.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 460,
+    "name": "Hilvan Mola Tesisleri (Diyarbakır-Urfa Yolu)",
+    "category": "cafe",
+    "lat": 37.5856,
+    "lon": 38.9589,
+    "description": "Şanlıurfa Hilvan; GAP bölgesi ana transit yolu üzerinde geniş gölgeli mola alanı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 461,
+    "name": "Keşan Beyendik Dinlenme Tesisleri & Satır Et",
+    "category": "cafe",
+    "lat": 40.8528,
+    "lon": 26.6389,
+    "description": "Edirne Keşan Çanakkale-İzmir kavşağı; Meşhur Keşan satır eti ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 462,
+    "name": "Gelibolu Bolayır Dinlenme Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 40.5189,
+    "lon": 26.7589,
+    "description": "Çanakkale Gelibolu İstanbul yolu; Saros Körfezi manzaralı yakıt ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 463,
+    "name": "Eceabat Feribot İskelesi Mola & Çay Bahçeleri",
+    "category": "cafe",
+    "lat": 40.1856,
+    "lon": 26.3589,
+    "description": "Çanakkale Eceabat Boğaz kıyısı; Çanakkale Boğazı gemi trafiği manzaralı feribot bekleme ve çay molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 464,
+    "name": "Ezine Peynir Mola Tesisleri & Geyikli Ayrımı",
+    "category": "cafe",
+    "lat": 39.8147,
+    "lon": 26.3389,
+    "description": "Çanakkale Ezine Truva-Assos yolu; Meşhur Ezine koyun peyniri ve zeytinyağı mola durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:00:00"
+  },
+  {
+    "id": 465,
+    "name": "O-4 Körfez Dinlenme Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 40.785,
+    "lon": 29.742,
+    "description": "Kocaeli Körfez TEM Otoyolu; İstanbul-Ankara yönü akaryakıt, market ve motorcu mola alanı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 466,
+    "name": "Hendek Meşhur Köfte & Petrol Ofisi Mola Tesisleri",
+    "category": "cafe",
+    "lat": 40.796,
+    "lon": 30.748,
+    "description": "Sakarya Hendek D-100 & TEM bağlantısı; Meşhur ıslama köfte ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 467,
+    "name": "Düzce Türsan Dinlenme Tesisleri & Opet",
+    "category": "cafe",
+    "lat": 40.812,
+    "lon": 31.254,
+    "description": "Düzce Otoyol çıkışı Bolu Dağı girişi; Geniş açık alanlı mola ve restoran tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 468,
+    "name": "Cankurtaran Geçidi Dinlenme Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 40.765,
+    "lon": 32.321,
+    "description": "Bolu-Ankara il sınırı Gerede Cankurtaran Geçidi; Yüksek rakım yakıt ve sıcak çay molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 469,
+    "name": "Tosya Çeltik Mola Tesisleri & Petrol Ofisi",
+    "category": "cafe",
+    "lat": 41.018,
+    "lon": 34.032,
+    "description": "Kastamonu Tosya D-100; Meşhur Tosya pirinci, pilav ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 470,
+    "name": "Osmancık Aygaz Dinlenme Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 40.972,
+    "lon": 34.801,
+    "description": "Çorum Osmancık D-100 İpekyolu; Karadeniz bağlantı hattı yakıt ve kahve molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 471,
+    "name": "Merzifon Dinlenme Tesisleri & BP",
+    "category": "fuel",
+    "lat": 40.871,
+    "lon": 35.462,
+    "description": "Amasya Merzifon Karadeniz-Anadolu kavşağı; 24 saat açık servis ve akaryakıt.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 472,
+    "name": "Erbaa Mola Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 40.678,
+    "lon": 36.567,
+    "description": "Tokat Erbaa D-100 karayolu; Doğu Karadeniz ve Erzincan güzergahı yakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 473,
+    "name": "Reşadiye Kelkit Vadisi Dinlenme Tesisleri",
+    "category": "cafe",
+    "lat": 40.389,
+    "lon": 37.332,
+    "description": "Tokat Reşadiye; Kelkit Irmağı kenarı doğal mola alanı ve çay bahçesi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 474,
+    "name": "Refahiye Kızıldağ Geçidi Dinlenme & Shell",
+    "category": "fuel",
+    "lat": 39.897,
+    "lon": 38.765,
+    "description": "Erzincan Refahiye Kızıldağ (2190m); Yüksek irtifa virajları sonrası sıcak mola ve yakıt.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 475,
+    "name": "Erzincan Sakaltutan Zirve Dinlenme Tesisleri",
+    "category": "cafe",
+    "lat": 39.876,
+    "lon": 39.231,
+    "description": "Erzincan-Erzurum yolu Sakaltutan Geçidi (2160m); Meşhur tır ve motorcu çorba durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 476,
+    "name": "Erzurum Aşkale Dinlenme Tesisleri & Petrol Ofisi",
+    "category": "fuel",
+    "lat": 39.921,
+    "lon": 40.692,
+    "description": "Erzurum Aşkale D-100; Kop Geçidi ve Trabzon ayrımı akaryakıt ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 477,
+    "name": "Pasinler Termal Mola Tesisleri & Opet",
+    "category": "cafe",
+    "lat": 39.978,
+    "lon": 41.674,
+    "description": "Erzurum Pasinler; Tarihi Hasankale ve termal kaynaklar yanı dinlenme alanı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 478,
+    "name": "Polatlı Dinlenme Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 39.584,
+    "lon": 32.145,
+    "description": "Ankara-Eskişehir-İzmir D-200 yolu; Sakarya Meydan Muharebesi anıtları yanı yakıt tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 479,
+    "name": "Uşak Banaz Mola Tesisleri & Petrol Ofisi",
+    "category": "fuel",
+    "lat": 38.742,
+    "lon": 29.756,
+    "description": "Uşak Banaz D-300; Afyon-İzmir ana arteri akaryakıt ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 480,
+    "name": "Kula Jeopark Dinlenme Tesisleri & Shell",
+    "category": "cafe",
+    "lat": 38.546,
+    "lon": 28.654,
+    "description": "Manisa Kula UNESCO Jeoparkı yanı; Kula evleri ve volkanik arazi manzaralı mola noktası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 481,
+    "name": "Salihli Odun Köfte Mola Tesisleri & Opet",
+    "category": "cafe",
+    "lat": 38.489,
+    "lon": 28.142,
+    "description": "Manisa Salihli; Meşhur tescilli Salihli odun köftesi ve dinlenme tesisleri.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 482,
+    "name": "Turgutlu Dinlenme Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 38.498,
+    "lon": 27.712,
+    "description": "Manisa Turgutlu İzmir giriş koridoru; Akaryakıt, oto bakım ve mola noktası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 483,
+    "name": "Gölbaşı Mogan Mola Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 39.791,
+    "lon": 32.805,
+    "description": "Ankara Konya-Adana çıkışı Gölbaşı; Mogan Gölü manzaralı yakıt ve kahve istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 484,
+    "name": "Şereflikoçhisar Dinlenme Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 38.932,
+    "lon": 33.542,
+    "description": "Ankara-Adana yolu Tuz Gölü güneyi; Akaryakıt ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 485,
+    "name": "Niğde Bor O-21 Dinlenme Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 37.892,
+    "lon": 34.561,
+    "description": "Niğde O-21 Otoyolu; Ankara-Akdeniz otoyolu modern akaryakıt ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 486,
+    "name": "Ulukışla Toros Dağları Mola Tesisleri & Petrol Ofisi",
+    "category": "cafe",
+    "lat": 37.548,
+    "lon": 34.482,
+    "description": "Niğde Ulukışla; Toros dağ geçidi başlangıcı serin dinlenme ve kahve molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 487,
+    "name": "Tarsus Çamtepe Otoyol Dinlenme Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 36.989,
+    "lon": 34.891,
+    "description": "Mersin Tarsus O-51 otoyolu; Çukurova girişi akaryakıt ve narenciye mola tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 488,
+    "name": "İskenderun Liman Yolu Dinlenme Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 36.589,
+    "lon": 36.178,
+    "description": "Hatay İskenderun Amanos dağları eteği; Akdeniz sahil yolu akaryakıt ve dinlenme.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 489,
+    "name": "Antakya Belen Geçidi Mola Tesisleri & Seyir Yeri",
+    "category": "cafe",
+    "lat": 36.489,
+    "lon": 36.195,
+    "description": "Hatay Belen Geçidi; Tarihi dağ geçidi virajları üzerinde Belen tavası ve çay molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 490,
+    "name": "Sandıklı Termal Dinlenme Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 38.468,
+    "lon": 30.271,
+    "description": "Afyon-Antalya D-650 yolu; Sandıklı Hüdai kaplıcaları kavşağı akaryakıt ve dinlenme.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 491,
+    "name": "Burdur Bucak Dinlenme Tesisleri & Toroslar Opet",
+    "category": "fuel",
+    "lat": 37.458,
+    "lon": 30.589,
+    "description": "Burdur Bucak Antalya yolu; Toros Dağları inişinde akaryakıt ve meşhur Bucak salebi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 492,
+    "name": "Çubukbeli Geçidi Dinlenme Tesisleri",
+    "category": "cafe",
+    "lat": 37.124,
+    "lon": 30.562,
+    "description": "Antalya-Burdur sınırı Çubukbeli (890m); Çam ormanları içinde motorcu çay ve kahve molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 493,
+    "name": "Antalya Kemer Göynük Mola Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 36.671,
+    "lon": 30.551,
+    "description": "Antalya D-400 Kemer yolu; Beydağları manzaralı akaryakıt ve market istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 494,
+    "name": "Finike Sahil Mola Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 36.301,
+    "lon": 30.142,
+    "description": "Antalya Finike sahil yolu; Meşhur Finike portakalı ve deniz kıyısı akaryakıt tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 495,
+    "name": "Demre Çayağzı Mola & Dinlenme Alanı",
+    "category": "cafe",
+    "lat": 36.248,
+    "lon": 29.982,
+    "description": "Antalya Demre; Likya sahili ve Andriake antik limanı yanı dinlenme noktası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 496,
+    "name": "Kaş Kalkan Seyir Terası & Çay Molası",
+    "category": "cafe",
+    "lat": 36.258,
+    "lon": 29.412,
+    "description": "Antalya Kaş-Kalkan D-400 virajları; Akdeniz ve adalar panoramalı motorcu dinlenme noktası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 497,
+    "name": "Ortaca Dalyan Yol Ayrımı Mola Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 36.842,
+    "lon": 28.765,
+    "description": "Muğla Ortaca-Dalyan kavşağı D-400; İztuzu ve Göcek yönü akaryakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 498,
+    "name": "Marmaris Gökova Kavşağı Akyaka Mola & Opet",
+    "category": "fuel",
+    "lat": 37.045,
+    "lon": 28.368,
+    "description": "Muğla Sakar Geçidi eteği Gökova kavşağı; Akaryakıt, lastik kontrolü ve soğuk içecek molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 499,
+    "name": "Datça Aktur Koyu Seyir & Dinlenme Noktası",
+    "category": "cafe",
+    "lat": 36.782,
+    "lon": 27.842,
+    "description": "Muğla Datça Yarımadası; Ege ve Akdeniz esintili çam ormanı sahil dinlenme yeri.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 500,
+    "name": "Kuşadası Söke Novada Outlet & Shell Dinlenme Tesisleri",
+    "category": "cafe",
+    "lat": 37.749,
+    "lon": 27.412,
+    "description": "Aydın Söke; Bodrum-Kuşadası-Didim yol ayrımı büyük mola ve alışveriş alanı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 501,
+    "name": "Didim Akbük Koyu Mola Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 37.418,
+    "lon": 27.429,
+    "description": "Aydın Didim-Milas sahil yolu; Akbük körfezi manzaralı yakıt ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 502,
+    "name": "Ayvalık Cunda Köprüsü Mola Alanı",
+    "category": "cafe",
+    "lat": 39.345,
+    "lon": 26.689,
+    "description": "Balıkesir Ayvalık; Türkiye’nin ilk boğaz köprüsü yanı deniz manzaralı çay ve tost molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 503,
+    "name": "Edremit Akçay Kordon Mola Yeri & Shell",
+    "category": "fuel",
+    "lat": 39.589,
+    "lon": 26.921,
+    "description": "Balıkesir Edremit Körfezi D-550; Kazdağları eteklerinde yakıt ve dinlenme.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 504,
+    "name": "Altınoluk Kazdağları Etekleri Mola Tesisleri",
+    "category": "cafe",
+    "lat": 39.578,
+    "lon": 26.745,
+    "description": "Balıkesir Altınoluk; Yüksek oksijenli Kazdağı havasında zeytinyağlı yemek ve kahve durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 505,
+    "name": "Tekirdağ Sahil Özcanlar Köfte & Shell Tesisleri",
+    "category": "cafe",
+    "lat": 40.978,
+    "lon": 27.512,
+    "description": "Tekirdağ D-110 sahil yolu; Meşhur Tekirdağ köftesi ve Marmara Denizi manzaralı mola tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 506,
+    "name": "Çorlu Orion Dinlenme Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 41.156,
+    "lon": 27.812,
+    "description": "Tekirdağ Çorlu D-100; Trakya sanayi ve otoyol koridoru akaryakıt ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 507,
+    "name": "Lüleburgaz Dinlenme Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 41.405,
+    "lon": 27.358,
+    "description": "Kırklareli Lüleburgaz TEM otoyolu; Avrupa transit hattı modern akaryakıt istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 508,
+    "name": "Edirne Havsa Dinlenme Tesisleri & Petrol Ofisi",
+    "category": "fuel",
+    "lat": 41.552,
+    "lon": 26.821,
+    "description": "Edirne Havsa TEM bağlantısı; Kapıkule ve Hamzabeyli gümrük yolu akaryakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 509,
+    "name": "Sinop Gerze Sahil Yolu Dinlenme Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 41.802,
+    "lon": 35.195,
+    "description": "Sinop Gerze Karadeniz sahil yolu; Karadeniz manzaralı yakıt ve mola istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 510,
+    "name": "Çarşamba Terme Mola Tesisleri & Opet",
+    "category": "cafe",
+    "lat": 41.212,
+    "lon": 36.985,
+    "description": "Samsun Terme D-010 Karadeniz Sahil Yolu; Meşhur Terme pidesi ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 511,
+    "name": "Fatsa Yalıköy Köfte & Dinlenme Noktası",
+    "category": "cafe",
+    "lat": 41.054,
+    "lon": 37.512,
+    "description": "Ordu Fatsa-Perşembe eski virajlı sahil yolu; Meşhur Yalıköy köftesi ve deniz manzarası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 512,
+    "name": "Trabzon Akçaabat Köfte Mola Tesisleri & Shell",
+    "category": "cafe",
+    "lat": 41.021,
+    "lon": 39.571,
+    "description": "Trabzon Akçaabat sahil yolu; Meşhur Akçaabat köftesi ve sahil dinlenme tesisleri.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 513,
+    "name": "Rize İyidere Dinlenme Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 41.018,
+    "lon": 40.354,
+    "description": "Rize İyidere Karadeniz sahil yolu ve Ovit Tüneli ayrımı; Akaryakıt ve Rize çayı durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 514,
+    "name": "Hopa Kemalpaşa Sarp Mola Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 41.482,
+    "lon": 41.524,
+    "description": "Artvin Sarp Sınır Kapısı koridoru; Türkiye'nin en doğu Karadeniz yakıt ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 515,
+    "name": "Silifke Taşucu Liman Yolu Dinlenme Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 36.319,
+    "lon": 33.882,
+    "description": "Mersin Silifke-Taşucu D-400; Kıbrıs feribot limanı ve Akdeniz virajları öncesi yakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 516,
+    "name": "Anamur Muz Diyarı Dinlenme Tesisleri & Opet",
+    "category": "cafe",
+    "lat": 36.082,
+    "lon": 32.842,
+    "description": "Mersin Anamur; Türkiye'nin en güney ucu, meşhur Anamur muzu ve deniz kıyısı mola alanı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "id": 517,
+    "name": "Alanya Gazipaşa Havalimanı Ayrımı Dinlenme & Shell",
+    "category": "fuel",
+    "lat": 36.298,
+    "lon": 32.305,
+    "description": "Antalya Gazipaşa D-400 sahil koridoru; Toroslar ve Akdeniz manzaralı yakıt ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:10:00"
+  },
+  {
+    "name": "Nemrut Dağı Zirvesi & Devasa Tanrı Heykelleri",
+    "category": "historic",
+    "lat": 37.9806,
+    "lon": 38.7408,
+    "description": "Adıyaman Kahta; 2150m zirvede UNESCO Dünya Mirası, Kral I. Antiochos'un anıt mezarı ve gündoğumu terasları. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 518
+  },
+  {
+    "name": "Arsemia Antik Ören Yeri & Herakles Kabartması",
+    "category": "historic",
+    "lat": 37.9439,
+    "lon": 38.6575,
+    "description": "Adıyaman Kahta Kocahisar; Kommagene Krallığı'nın yazlık başkenti, Kral Antiochos ve Herakles tokalaşma steli. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 519
+  },
+  {
+    "name": "Karakuş Tümülüsü & Kartallı Sütun",
+    "category": "historic",
+    "lat": 37.8694,
+    "lon": 38.5878,
+    "description": "Adıyaman Kahta; Kommagene krallık ailesi kadınları anıt mezarı ve kartal kabartmalı Dor sütunu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 520
+  },
+  {
+    "name": "Perre Antik Kenti & Nekropol Kaya Mezarları",
+    "category": "historic",
+    "lat": 37.7958,
+    "lon": 38.2917,
+    "description": "Adıyaman Merkez Örenli; Kommagene'nin 5 büyük kentinden biri, kayalara oyulmuş yüzlerce lahit ve mozaikli bazilika. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 521
+  },
+  {
+    "name": "Balıklıgöl & Aynzeliha Gölü",
+    "category": "historic",
+    "lat": 37.1472,
+    "lon": 38.7847,
+    "description": "Şanlıurfa Eyyübiye; Hz. İbrahim'in ateşe atıldığı yer olduğuna inanılan kutsal göl, balıklar ve Rızvaniye Camii.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 522
+  },
+  {
+    "name": "Şanlıurfa Arkeoloji Müzesi & Haleplibahçe Mozaikleri",
+    "category": "historic",
+    "lat": 37.1539,
+    "lon": 38.7806,
+    "description": "Şanlıurfa Merkez; Türkiye'nin en büyük müze kompleksi, Neolitik çağ salonu ve Amazon kraliçeleri mozaikleri. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 523
+  },
+  {
+    "name": "Harran Tarihi Kümbet Evleri & İlk İslam Üniversitesi",
+    "category": "historic",
+    "lat": 36.8647,
+    "lon": 39.0278,
+    "description": "Şanlıurfa Harran; Konik kubbeli kerpiç kümbet evler, tarihi surlar ve Emevi Ulu Camii kalıntıları.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 524
+  },
+  {
+    "name": "Harran Kalesi & Sarayı",
+    "category": "historic",
+    "lat": 36.8622,
+    "lon": 39.0306,
+    "description": "Şanlıurfa Harran; Sabii tapınağı üzerine kurulan 3 katlı revaklı Güneydoğu kalesi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 525
+  },
+  {
+    "name": "Şuayb Şehri Antik Kenti (Güneydoğu Efes)",
+    "category": "historic",
+    "lat": 36.9856,
+    "lon": 39.3306,
+    "description": "Şanlıurfa Eyyübiye Özkent; Roma dönemi kaya mezarları, yeraltı ibadethaneleri ve Hz. Şuayb peygamber makamı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 526
+  },
+  {
+    "name": "Soğmatar Antik Kenti & Ay Tanrısı Sin Tapınağı",
+    "category": "historic",
+    "lat": 37.0117,
+    "lon": 39.4219,
+    "description": "Şanlıurfa Eyyübiye Yağmurlu; Sabii gezegen tanrıları kutsal alanı, Süryanice kaya yazıtları ve Kutsal Tepe.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 527
+  },
+  {
+    "name": "Halfeti Batık Köy & Savaşan Fırat Kanyonu",
+    "category": "historic",
+    "lat": 37.2472,
+    "lon": 37.8689,
+    "description": "Şanlıurfa Halfeti; Birecik Barajı suları altında kalan minaresiyle ünlü batık köy ve tekne rotası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 528
+  },
+  {
+    "name": "Gaziantep Kalesi & Panorama Müzesi",
+    "category": "historic",
+    "lat": 37.0664,
+    "lon": 37.3831,
+    "description": "Gaziantep Şahinbey; 6000 yıllık tepe hisarı, 12 kule ve Antep savunması kahramanlık müzesi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 529
+  },
+  {
+    "name": "Tarihi Tahmis Kahvesi (1635 Menengiç Kahvesi)",
+    "category": "historic",
+    "lat": 37.0653,
+    "lon": 37.3856,
+    "description": "Gaziantep Şahinbey Arasa Meydanı; 400 yıllık tarihi ahşap kahvehane, menengiç kahvesi ve Antep baklavası durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 530
+  },
+  {
+    "name": "Yesemek Açık Hava Müzesi & Heykel Atölyesi",
+    "category": "historic",
+    "lat": 36.8958,
+    "lon": 36.7486,
+    "description": "Gaziantep İslahiye; UNESCO geçici mirası, MÖ 900 Geç Hitit dönemi 500'den fazla sfenks ve aslan heykeli. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 531
+  },
+  {
+    "name": "Dülük Antik Kenti & Mitras Yeraltı Tapınağı",
+    "category": "historic",
+    "lat": 37.1239,
+    "lon": 37.3547,
+    "description": "Gaziantep Şehitkamil Dülük Köyü; İpekyolu üzerinde dünyanın bilinen en eski yerleşimlerinden biri ve Mitraizm tapınağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 532
+  },
+  {
+    "name": "Mardin Taş Konakları & Eski Mardin Çarşısı",
+    "category": "historic",
+    "lat": 37.3131,
+    "lon": 40.7386,
+    "description": "Mardin Artuklu; Sarı kalker taşından oyma işlemeli tarihi konaklar, dar abbaralar ve Mezopotamya Ovası manzarası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 533
+  },
+  {
+    "name": "Dara Antik Kenti & Devasa Yeraltı Zindanları",
+    "category": "historic",
+    "lat": 37.1789,
+    "lon": 40.9419,
+    "description": "Mardin Nusaybin Oğuz Köyü; Doğu Roma'nın Pers sınır garnizon kenti, kayaya oyulmuş 3 katlı nekropol ve su sarnıçları. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 534
+  },
+  {
+    "name": "Kasımiye Medresesi & Hayat Çeşmesi",
+    "category": "historic",
+    "lat": 37.3086,
+    "lon": 40.7231,
+    "description": "Mardin Artuklu; 15. yüzyıl Akkoyunlu eseri taş işçiliği başyapıtı, felsefi havuzu ve Mezopotamya manzarası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 535
+  },
+  {
+    "name": "Zinciriye (Sultan İsa) Medresesi",
+    "category": "historic",
+    "lat": 37.3181,
+    "lon": 40.7372,
+    "description": "Mardin Artuklu kale eteği; 1385 Artuklu sultanı yapımı çift kubbeli muazzam medrese ve terasa açılan taçkapı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 536
+  },
+  {
+    "name": "Mardin Ulu Camii & Yivli Minare",
+    "category": "historic",
+    "lat": 37.3128,
+    "lon": 40.7419,
+    "description": "Mardin Artuklu; 1176 Artuklu Kutbeddin İlgazi eseri, Mezopotamya'ya bakan ikonik minare ve avlu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 537
+  },
+  {
+    "name": "Midyat Konuk Evi & Taş Oyma Konak",
+    "category": "historic",
+    "lat": 37.4189,
+    "lon": 41.3417,
+    "description": "Mardin Midyat merkez; Geleneksel Midyat taş mimarisinin en görkemli 3 katlı konağı ve telkâri çarşısı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 538
+  },
+  {
+    "name": "Diyarbakır Ulu Camii & Güneş Saati",
+    "category": "historic",
+    "lat": 37.9139,
+    "lon": 40.2372,
+    "description": "Diyarbakır Sur; 639 İslam fethi sonrası dönüştürülen Anadolu'nun en eski camisi, El-Cezeri'nin güneş saati.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 539
+  },
+  {
+    "name": "Diyarbakır Surları & Dağkapı-Urfa Kapısı",
+    "category": "historic",
+    "lat": 37.9189,
+    "lon": 40.2339,
+    "description": "Diyarbakır Sur; Çin Seddi'nden sonra dünyanın en uzun ve bozulmamış 5.5 km bazalt taş surları (UNESCO).",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 540
+  },
+  {
+    "name": "On Gözlü Köprü (Dicle Köprüsü)",
+    "category": "historic",
+    "lat": 37.8919,
+    "lon": 40.2406,
+    "description": "Diyarbakır Sur Kırklar Dağı eteği; Dicle Nehri üzerinde 1065 yapımı 10 kemerli tarihi bazalt köprü.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 541
+  },
+  {
+    "name": "Zerzevan Kalesi & Yeraltı Mithras Tapınağı",
+    "category": "historic",
+    "lat": 37.6089,
+    "lon": 40.5008,
+    "description": "Diyarbakır Çınar Demirölçek; Roma'nın doğu sınır lejyon kalesi, 2017'de keşfedilen gizemli Mithras tapınağı ve sarnıçlar. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 542
+  },
+  {
+    "name": "Malabadi Köprüsü (Artuklu Taş Kemer Şaheseri)",
+    "category": "historic",
+    "lat": 38.1542,
+    "lon": 41.2008,
+    "description": "Diyarbakır Silvan Batman sınırı; 1147 Artuklu yapımı dünyanın en geniş taş kemerli köprülerinden biri (40.86m).",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 543
+  },
+  {
+    "name": "Hasankeyf Kalesi & Zeynel Bey Türbesi",
+    "category": "historic",
+    "lat": 37.7139,
+    "lon": 41.4167,
+    "description": "Batman Hasankeyf; Ilısu Barajı kıyısında korunan 12. yüzyıl Artuklu kalesi ve turkuaz sırlı çinili Akkoyunlu türbesi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 544
+  },
+  {
+    "name": "Van Kalesi & Tuşpa Urartu Kral Mezarları",
+    "category": "historic",
+    "lat": 38.5019,
+    "lon": 43.3406,
+    "description": "Van İpekyolu; MÖ 840 Urartu Kralı I. Sarduri'nin diktiği Analıkız yazıtı, kayadan oyma kral mezarları ve surlar. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 545
+  },
+  {
+    "name": "Akdamar Kilisesi (Surp Haç) & Badem Çiçekleri",
+    "category": "historic",
+    "lat": 38.3411,
+    "lon": 43.0369,
+    "description": "Van Gevaş Akdamar Adası; 10. yüzyıl Vaspurakan Krallığı eseri dış kabartmaları Tevrat sahneleriyle bezeli ada kilisesi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 546
+  },
+  {
+    "name": "Hoşap Kalesi (Kartal Yuvası Hisar)",
+    "category": "historic",
+    "lat": 38.3189,
+    "lon": 43.8008,
+    "description": "Van Gürpınar Güzelsu; 1643 Mahmudi Beyi Sarı Süleyman yapımı yalçın kaya kütlesi üzerindeki masalsı kale. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 547
+  },
+  {
+    "name": "İshak Paşa Sarayı & Doğubayazıt Ovası",
+    "category": "historic",
+    "lat": 39.5217,
+    "lon": 44.1289,
+    "description": "Ağrı Doğubayazıt; Lale Devri son şaheseri, saray, harem dairesi, cami ve Ağrı Dağı silüeti. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 548
+  },
+  {
+    "name": "Ani Harabeleri & Büyük Katedral (Fethiye Camii)",
+    "category": "historic",
+    "lat": 40.5108,
+    "lon": 43.5728,
+    "description": "Kars Arpaçay sınırı; 1001 Kiliseli Şehir UNESCO Dünya Mirası, Mimar Trdat'ın katedrali, Menuçehr Camii ve İpekyolu Köprüsü. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 549
+  },
+  {
+    "name": "Kars Kalesi & Celal Baba Türbesi",
+    "category": "historic",
+    "lat": 40.6181,
+    "lon": 43.0906,
+    "description": "Kars Merkez Kaleiçi; 1153 Saltuklu Sultanı Melik İzzeddin yapımı bazalt taş kale ve Kars Çayı manzarası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 550
+  },
+  {
+    "name": "12 Havariler Kilisesi (Kümbet Camii)",
+    "category": "historic",
+    "lat": 40.6139,
+    "lon": 43.0917,
+    "description": "Kars Merkez Kale eteği; 10. yüzyıl Bagratlı Kralı Abbas eseri bazalt kubbeli tarihi mabet.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 551
+  },
+  {
+    "name": "Çıldır Gölü & Şeytan Kalesi (Karaçay Kanyonu)",
+    "category": "historic",
+    "lat": 41.0917,
+    "lon": 43.1489,
+    "description": "Ardahan Çıldır Yıldırımtepe; Derin kanyon uçurumunda tek geçitli ortaçağ kartal yuvası kalesi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 552
+  },
+  {
+    "name": "Çifte Minareli Medrese (Hatuniye)",
+    "category": "historic",
+    "lat": 39.9056,
+    "lon": 41.2778,
+    "description": "Erzurum Yakutiye; Selçuklu Sultanı I. Alaeddin Keykubad'ın kızı Hüdâvent Hatun eseri turkuaz çinili çifte minare. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 553
+  },
+  {
+    "name": "Yakutiye Medresesi Türk-İslam Eserleri Müzesi",
+    "category": "historic",
+    "lat": 39.9069,
+    "lon": 41.2719,
+    "description": "Erzurum Merkez Kent Meydanı; 1310 İlhanlı Hoca Yakut yapımı kabartmalı hayat ağacı taçkapılı medrese. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 554
+  },
+  {
+    "name": "Erzurum Kalesi & Tepsi Minare Saat Kulesi",
+    "category": "historic",
+    "lat": 39.9078,
+    "lon": 41.2764,
+    "description": "Erzurum Yakutiye; MS 5. yüzyıl Roma İmparatoru Theodosius yapımı iç kale ve şehre hakim saat kulesi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 555
+  },
+  {
+    "name": "Üç Kümbetler & Emir Saltuk Türbesi",
+    "category": "historic",
+    "lat": 39.9039,
+    "lon": 41.2786,
+    "description": "Erzurum Merkez; 12. yüzyıl Saltuklu mimarisinin üçgen alınlıklı taş kümbet şaheserleri.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 556
+  },
+  {
+    "name": "Tortum Şelalesi & Seyir Balkonu",
+    "category": "viewpoint",
+    "lat": 40.6558,
+    "lon": 41.6547,
+    "description": "Erzurum Uzundere Tortum Gölü çıkışı; 48 metreden vadiye dökülen Türkiye'nin en görkemli şelalesi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 557
+  },
+  {
+    "name": "Öşk Vank Gürcü Manastırı Katedrali",
+    "category": "historic",
+    "lat": 40.5489,
+    "lon": 41.5367,
+    "description": "Erzurum Uzundere Çamlıyamaç Köyü; 10. yüzyıl Bagratlı Gürcü Krallığı'nın dev kubbeli taş katedrali.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 558
+  },
+  {
+    "name": "Kemaliye (Eğin) Karanlık Kanyon & Taş Yolu",
+    "category": "historic",
+    "lat": 39.2619,
+    "lon": 38.4989,
+    "description": "Erzincan Kemaliye Fırat Vadisi; İnsan eliyle 132 yılda kayalara oyulmuş 25 tünelli motorcu efsane yolu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 559
+  },
+  {
+    "name": "Harput Kalesi (Süt Kalesi) & Tarihi Mahalle",
+    "category": "historic",
+    "lat": 38.7056,
+    "lon": 39.2558,
+    "description": "Elazığ Harput tepesi; Urartu yapımı harcında süt kullanıldığı rivayet edilen sarp kale ve kütüphane.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 560
+  },
+  {
+    "name": "Harput Ulu Camii (Eğik Minareli Cami)",
+    "category": "historic",
+    "lat": 38.7039,
+    "lon": 39.2536,
+    "description": "Elazığ Harput; Pisa Kulesi'nden daha eğik 1157 Artuklu tuğla minaresi ve iç avlusu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 561
+  },
+  {
+    "name": "Arslantepe Höyüğü Açık Hava Müzesi",
+    "category": "historic",
+    "lat": 38.3817,
+    "lon": 38.3589,
+    "description": "Malatya Battalgazi Orduzu; UNESCO Dünya Mirası, MÖ 3300 dünyanın bilinen ilk kerpiç saray kompleksi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 562
+  },
+  {
+    "name": "Divriği Ulu Camii ve Darüşşifası (Cennet Kapısı)",
+    "category": "historic",
+    "lat": 39.3739,
+    "lon": 38.1239,
+    "description": "Sivas Divriği; UNESCO Dünya Mirası, taşın dantel gibi işlendiği ikindi vakti namaz kılan insan gölgesi beliren taçkapılar. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 563
+  },
+  {
+    "name": "Sivas Gök Medrese & Mermer Taçkapı",
+    "category": "historic",
+    "lat": 39.7431,
+    "lon": 37.0147,
+    "description": "Sivas Merkez; 1271 Sahip Ata Fahreddin Ali yapımı kabartmalı taçkapısı ve çift minaresiyle Selçuklu incisi. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 564
+  },
+  {
+    "name": "Sivas Çifte Minareli Medrese & Buruciye Medresesi",
+    "category": "historic",
+    "lat": 39.7481,
+    "lon": 37.0153,
+    "description": "Sivas Kent Meydanı; 1271 İlhanlı Veziri Şemseddin Cüveyni eseri çinili minareler ve Buruciye türbesi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 565
+  },
+  {
+    "name": "Tokat Kalesi & Kont Drakula'nın Zindanı",
+    "category": "historic",
+    "lat": 40.3189,
+    "lon": 36.5519,
+    "description": "Tokat Merkez sarp kaya tepesi; 28 kuleli doğal hisar, gizli suyolu ve Eflak Prensi Vlad'ın esir tutulduğu zindan.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 566
+  },
+  {
+    "name": "Ballıca Mağarası Tabiat Parkı",
+    "category": "historic",
+    "lat": 40.2289,
+    "lon": 36.2978,
+    "description": "Tokat Pazar Ballıca; UNESCO geçici mirası, dünyanın en nadir soğan sarkıtları ve devasa mağara salonları. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 567
+  },
+  {
+    "name": "Amasya Kralkaya Mezarları (Pontus Kralları)",
+    "category": "historic",
+    "lat": 40.6539,
+    "lon": 35.8317,
+    "description": "Amasya Harşena Dağı yamacı; Yeşilırmak kıyısında dik kayalara oyulmuş 5 dev Pontus kral mezarı. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 568
+  },
+  {
+    "name": "Amasya Bimarhane (Darüşşifa Sabuncuoğlu Müzesi)",
+    "category": "historic",
+    "lat": 40.6517,
+    "lon": 35.8306,
+    "description": "Amasya Merkez Yeşilırmak kıyısı; 1308 İlhanlı yapımı su sesi ve müzikle ruhsal tedavi merkezi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 569
+  },
+  {
+    "name": "Hattuşa Hitit Başkenti Aslanlı Kapı & Yerkapı",
+    "category": "historic",
+    "lat": 40.0167,
+    "lon": 34.6167,
+    "description": "Çorum Boğazkale; UNESCO Dünya Mirası, MÖ 1600 Hitit İmparatorluğu kalbi, 70 metrelik taş potern tüneli. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 570
+  },
+  {
+    "name": "Sümela Manastırı (Meryem Ana Manastırı)",
+    "category": "historic",
+    "lat": 40.6903,
+    "lon": 39.6586,
+    "description": "Trabzon Maçka Altındere Vadisi; Karadağ'ın 300 metre dik yamacına oyulmuş 1600 yıllık freskli kaya manastırı. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 571
+  },
+  {
+    "name": "Zilkale (Çamlıhemşin Fırtına Vadisi)",
+    "category": "historic",
+    "lat": 40.9317,
+    "lon": 40.9631,
+    "description": "Rize Çamlıhemşin; Fırtına Deresi kanyonuna 100m yükseklikten bakan masalsı ortaçağ gözetleme hisarı. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 572
+  },
+  {
+    "name": "Şenyuva (Çinçiva) Tarihi Taş Kemer Köprüsü",
+    "category": "historic",
+    "lat": 40.9889,
+    "lon": 40.9806,
+    "description": "Rize Çamlıhemşin Fırtına Vadisi; 1696 yapımı Fırtına Deresi üzerindeki en eski tek kemerli köprü.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 573
+  },
+  {
+    "name": "Şavşat Kalesi & Karagöl Tabiat Parkı",
+    "category": "historic",
+    "lat": 41.2489,
+    "lon": 42.4189,
+    "description": "Artvin Şavşat Söğütlü; Sakin Şehir (Cittaslow) Şavşat'ın vadisine hakim Bagratlı kalesi ve göl rotası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 574
+  },
+  {
+    "name": "Mençuna Şelalesi (Kamilet Vadisi)",
+    "category": "viewpoint",
+    "lat": 41.2889,
+    "lon": 41.3547,
+    "description": "Artvin Arhavi Kamilet Vadisi; 100 metre yükseklikten dökülen Doğu Karadeniz'in en bakir çift kademeli şelalesi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 575
+  },
+  {
+    "name": "Giresun Kalesi & Seyir Terası",
+    "category": "historic",
+    "lat": 40.9189,
+    "lon": 38.3889,
+    "description": "Giresun Merkez sahil burnu; Şehre ve Karadeniz'e hakim antik Pontus kalesi ve çay bahçesi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 576
+  },
+  {
+    "name": "Yason Burnu Yarımadası & Tarihi Yason Kilisesi",
+    "category": "historic",
+    "lat": 41.1319,
+    "lon": 37.6831,
+    "description": "Ordu Perşembe eski virajlı sahil yolu; Argonotlar ve Altın Post efsanesinin geçtiği burun ve 1869 taş kilisesi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 577
+  },
+  {
+    "name": "Sinop Tarihi Cezaevi ve Kalesi (Anadolu Alkatrazı)",
+    "category": "historic",
+    "lat": 42.0256,
+    "lon": 35.1506,
+    "description": "Sinop Merkez Kaleiçi; Sabahattin Ali ve nice edebiyatçının kaldığı tarihi burçlar, koğuşlar ve zindanlar. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 578
+  },
+  {
+    "name": "İnceburun Deniz Feneri (Türkiye'nin En Kuzey Ucu)",
+    "category": "viewpoint",
+    "lat": 42.0989,
+    "lon": 34.9547,
+    "description": "Sinop İnceburun; Türkiye ana karasının en kuzey noktası, volkanik bazalt kayalar ve 1863 feneri.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 579
+  },
+  {
+    "name": "Safranbolu Tarihi Çarşı & Cinci Hanı",
+    "category": "historic",
+    "lat": 41.2458,
+    "lon": 32.6931,
+    "description": "Karabük Safranbolu; UNESCO Dünya Mirası, 300 yıllık ahşap çatkılı Osmanlı konakları ve Arasta Çarşısı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 580
+  },
+  {
+    "name": "Kristal Cam Teras & İncekaya Su Kemeri",
+    "category": "viewpoint",
+    "lat": 41.2689,
+    "lon": 32.6847,
+    "description": "Karabük Safranbolu Tokatlı Kanyonu; 80 metre kanyon tabanına bakan cam teras ve Sadrazam İzzet Mehmet Paşa kemeri.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 581
+  },
+  {
+    "name": "Amasra Kalesi & Kemere Köprüsü",
+    "category": "historic",
+    "lat": 41.7489,
+    "lon": 32.3872,
+    "description": "Bartın Amasra Boztepe; Karadeniz'in incisi Amasra adasını karaya bağlayan Roma köprüsü ve Ceneviz surları.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 582
+  },
+  {
+    "name": "Kastamonu Kalesi & Şehre Hakim Tepesi",
+    "category": "historic",
+    "lat": 41.3789,
+    "lon": 33.7719,
+    "description": "Kastamonu Merkez; 112m yüksekliğinde kaya tepesinde 12. yüzyıl Komnenos yapımı kale ve panoramik seyir terası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 583
+  },
+  {
+    "name": "Mahmut Bey Camii (Çivisiz Ahşap Şaheser)",
+    "category": "historic",
+    "lat": 41.4817,
+    "lon": 33.6931,
+    "description": "Kastamonu Kasaba Köyü; UNESCO Dünya Mirası, 1366 Candaroğlu eseri tek bir çivi çakılmadan bindirme tekniğiyle yapılan cami.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 584
+  },
+  {
+    "name": "Midas Anıtı (Yazılıkaya Frig Kaya Cephesi)",
+    "category": "historic",
+    "lat": 39.2017,
+    "lon": 30.7139,
+    "description": "Eskişehir Han Yazılıkaya; Frigya Vadisi'nin kalbinde 17 metre yüksekliğinde tek parça tüf kayaya oyulmuş tapınak cephesi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 585
+  },
+  {
+    "name": "Odunpazarı Tarihi Evleri & Kurşunlu Külliyesi",
+    "category": "historic",
+    "lat": 39.7619,
+    "lon": 30.5256,
+    "description": "Eskişehir Odunpazarı; Renkli cumbalı Osmanlı evleri, Lületaşı Müzesi ve 1517 Mimar Sinan öncesi külliye.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 586
+  },
+  {
+    "name": "Sivrihisar Ulu Camii (67 Ahşap Direkli Cami)",
+    "category": "historic",
+    "lat": 39.4489,
+    "lon": 31.5367,
+    "description": "Eskişehir Sivrihisar; UNESCO Dünya Mirası, 1274 Selçuklu eseri sedir ağacı sütunlu ve ceviz minberli devasa ibadethane.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 587
+  },
+  {
+    "name": "Afyonkarahisar Kalesi (226 Metrelik Volkanik Zirve)",
+    "category": "historic",
+    "lat": 38.7558,
+    "lon": 30.5367,
+    "description": "Afyonkarahisar Merkez; MÖ 1350 Hitit Kralı II. Murşili'den beri savunulan yalçın volkanik kaya zirvesi ve 550 basamak.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 588
+  },
+  {
+    "name": "Ayazini Frig Kaya Yerleşimi & Kaya Kiliseleri",
+    "category": "historic",
+    "lat": 39.0289,
+    "lon": 30.5519,
+    "description": "Afyonkarahisar İhsaniye; Frig ve Bizans döneminde kayalara oyulmuş onlarca kilise, şapel, mezar odası ve kaya konutları.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 589
+  },
+  {
+    "name": "Gordion Antik Kenti & Kral Midas Tümülüsü",
+    "category": "historic",
+    "lat": 39.6517,
+    "lon": 31.9819,
+    "description": "Ankara Polatlı Yassıhöyük; UNESCO Dünya Mirası, MÖ 740 Kral Midas'ın ahşap mezar odası ve Frig başkenti surları. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 590
+  },
+  {
+    "name": "Ankara Kalesi & Kaleiçi Tarihi Sokakları",
+    "category": "historic",
+    "lat": 39.9419,
+    "lon": 32.8647,
+    "description": "Ankara Altındağ; Galat, Roma, Selçuklu ve Osmanlı izlerini taşıyan başkente hakim tarihi tepe kalesi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 591
+  },
+  {
+    "name": "Anadolu Medeniyetleri Müzesi (Tarihi Kurşunlu Han)",
+    "category": "historic",
+    "lat": 39.9389,
+    "lon": 32.8619,
+    "description": "Ankara Altındağ kale eteği; Paleolitik, Neolitik, Hitit ve Urartu şaheserleriyle Avrupa'da Yılın Müzesi seçilen hazine. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 592
+  },
+  {
+    "name": "Beypazarı Tarihi Evleri & Hıdırlık Seyir Tepesi",
+    "category": "historic",
+    "lat": 40.1681,
+    "lon": 31.9219,
+    "description": "Ankara Beypazarı; Gümüşçüler çarşısı, 3 katlı ahşap konaklar, havuç lokumu ve güveç mola yeri.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 593
+  },
+  {
+    "name": "Çatalhöyük Neolitik Kenti (İlk Şehir Yerleşimi)",
+    "category": "historic",
+    "lat": 37.6672,
+    "lon": 32.8278,
+    "description": "Konya Çumra; 9000 yıl önce 8000 kişinin bir arada yaşadığı UNESCO Dünya Mirası çatıdan girilen neolitik kerpiç evler.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 594
+  },
+  {
+    "name": "Beyşehir Eşrefoğlu Camii (Ahşap Direkli UNESCO Cami)",
+    "category": "historic",
+    "lat": 37.6836,
+    "lon": 31.7219,
+    "description": "Konya Beyşehir Gölü kıyısı; 1299 yapımı sedir ağacından 46 sütunlu, karlık havuzlu ve çini mozaikli ahşap başyapıt.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 595
+  },
+  {
+    "name": "Ihlara Vadisi Kanyonu & Kaya Kiliseleri",
+    "category": "historic",
+    "lat": 38.2389,
+    "lon": 34.3019,
+    "description": "Aksaray Güzelyurt; Melendiz Çayı boyunca 14 km kanyon içinde kayalara oyulmuş Ağaçaltı, Yılanlı ve Sümbüllü kiliseleri. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 596
+  },
+  {
+    "name": "Selime Katedrali & Kaya Kalesi",
+    "category": "historic",
+    "lat": 38.2989,
+    "lon": 34.2589,
+    "description": "Aksaray Güzelyurt Selime; Kapadokya'nın en büyük dini kompleksi, devasa kaya sütunları ve mutfak bacaları. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 597
+  },
+  {
+    "name": "Sultanhanı Kervansarayı (Anadolu'nun En Büyüğü)",
+    "category": "historic",
+    "lat": 38.2428,
+    "lon": 33.5467,
+    "description": "Aksaray Sultanhanı D-300; 1229 Selçuklu Sultanı I. Alaeddin Keykubad eseri mermer köşk mescidli kervansaray. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 598
+  },
+  {
+    "name": "Derinkuyu Yeraltı Şehri (8 Katlı Sığınak)",
+    "category": "historic",
+    "lat": 38.3739,
+    "lon": 34.7347,
+    "description": "Nevşehir Derinkuyu; 20.000 kişinin aylarca yaşayabileceği 85m derinlikte havalandırma bacalı yeraltı şehri. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 599
+  },
+  {
+    "name": "Uçhisar Kalesi (Kapadokya'nın Zirvesi)",
+    "category": "historic",
+    "lat": 38.6303,
+    "lon": 34.8056,
+    "description": "Nevşehir Uçhisar; Bölgenin en yüksek peribacası kayalığı, tüm Kapadokya ve Erciyes Dağı panoraması.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 600
+  },
+  {
+    "name": "Gümüşler Manastırı (Gülen Meryem Freski)",
+    "category": "historic",
+    "lat": 38.0019,
+    "lon": 34.7219,
+    "description": "Niğde Merkez Gümüşler Beldesi; Yekpare kaya içine oyulmuş kapalı avlulu manastır ve dünyada tek olan Gülen Meryem freski. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 601
+  },
+  {
+    "name": "Termessos Antik Kenti (Büyük İskender'in Alamadığı Kent)",
+    "category": "historic",
+    "lat": 36.9822,
+    "lon": 30.4642,
+    "description": "Antalya Güllük Dağı zirvesi; 1050m rakımda bulutlar üzerindeki kartal yuvası tiyatro, lahitler ve sarnıçlar. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 602
+  },
+  {
+    "name": "Aspendos Antik Tiyatrosu (Akustik Harikası)",
+    "category": "historic",
+    "lat": 36.9389,
+    "lon": 31.1722,
+    "description": "Antalya Serik Belkıs; Mimar Zenon eseri, MS 2. yüzyıldan günümüze sahne binasıyla eksiksiz ulaşan 12.000 kişilik tiyatro. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 603
+  },
+  {
+    "name": "Phaselis Antik Kenti & 3 Limanlı Çamlık Koyları",
+    "category": "historic",
+    "lat": 36.5256,
+    "lon": 30.5531,
+    "description": "Antalya Kemer Tekirova; Su kemerleri, agora ve çam ağaçları içindeki turkuaz lagün limanları. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 604
+  },
+  {
+    "name": "Olympos Antik Kenti & Çıralı Yanartaş (Chimaera)",
+    "category": "historic",
+    "lat": 36.4389,
+    "lon": 30.4756,
+    "description": "Antalya Kumluca; Dere kenarı lahitler, korsan Zeniketes kalesi ve bin yıldır sönmeyen ebedi ateş. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 605
+  },
+  {
+    "name": "Arykanda Antik Kenti (Teraslar Kenti)",
+    "category": "historic",
+    "lat": 36.5139,
+    "lon": 30.0606,
+    "description": "Antalya Finike-Elmalı yolu Arif Köyü; Şahinkaya eteklerinde basamak basamak kurulu stadyum, tiyatro ve çam manzarası. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 606
+  },
+  {
+    "name": "Myra Antik Kenti & Kaya Mezarları",
+    "category": "historic",
+    "lat": 36.2589,
+    "lon": 29.9847,
+    "description": "Antalya Demre; Likya'nın en görkemli ahşap ev mimarili kaya mezarları kabartmaları ve Roma tiyatrosu. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 607
+  },
+  {
+    "name": "St. Nicholas (Noel Baba) Anıt Müzesi",
+    "category": "historic",
+    "lat": 36.2442,
+    "lon": 29.9856,
+    "description": "Antalya Demre merkez; Noel Baba'nın piskoposluk yaptığı ve lahdinin bulunduğu 4. yüzyıl bazilikası. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 608
+  },
+  {
+    "name": "Simena Kalesi & Kekova Batık Şehir",
+    "category": "historic",
+    "lat": 36.1911,
+    "lon": 29.8606,
+    "description": "Antalya Kaş Kaleköy; Karayolu olmayan dünyanın en küçük amfitiyatrolu şövalye kalesi ve deniz içindeki lahit.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 609
+  },
+  {
+    "name": "Patara Antik Kenti & Dünyanın İlk Demokratik Meclisi",
+    "category": "historic",
+    "lat": 36.2606,
+    "lon": 29.3142,
+    "description": "Antalya Kaş Gelemiş; Likya Birliği Meclis Binası, Deniz Feneri, Sütunlu Cadde ve 18 km kum tepeleri sahili. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 610
+  },
+  {
+    "name": "Xanthos Antik Kenti (Likya'nın Fedakar Başkenti)",
+    "category": "historic",
+    "lat": 36.3567,
+    "lon": 29.3189,
+    "description": "Antalya Kaş Kınık; UNESCO Dünya Mirası, Harpy Anıtı, Dikme mezarlar ve tiyatro. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 611
+  },
+  {
+    "name": "Sagalassos Antik Kenti & Antoninler Çeşmesi",
+    "category": "historic",
+    "lat": 37.6775,
+    "lon": 30.5217,
+    "description": "Burdur Ağlasun; 1750m rakımda Toros Dağları'nda şırıl şırıl suyu akan 1800 yıllık mermer çeşme ve tiyatro. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 612
+  },
+  {
+    "name": "Pisidia Antiokheia & St. Paul Bazilikası",
+    "category": "historic",
+    "lat": 38.3056,
+    "lon": 31.1894,
+    "description": "Isparta Yalvaç; Havari Pavlus'un vaaz verdiği ilk metropol kenti, su kemerleri ve Augustus Tapınağı. (Müzekart Geçerlidir)",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 613
+  },
+  {
+    "name": "Eğirdir Kalesi & Dündar Bey Medresesi",
+    "category": "historic",
+    "lat": 37.8747,
+    "lon": 30.8528,
+    "description": "Isparta Eğirdir Gölü burnu; 1202 Hamidoğulları Taş Medresesi, kale ve göl kenarı balıkçı motorcu durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 614
+  },
+  {
+    "name": "O-4 Körfez Kuzey Otoyol Tesisleri & Petrol Ofisi",
+    "category": "fuel",
+    "lat": 40.789,
+    "lon": 29.754,
+    "description": "Kocaeli Körfez TEM Otoyolu; Ankara-İstanbul yönü akaryakıt, oto yıkama ve market.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 615
+  },
+  {
+    "name": "O-4 Düzce Kaynaşlı Dinlenme Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 40.781,
+    "lon": 31.312,
+    "description": "Düzce Kaynaşlı TEM çıkışı Bolu Tüneli öncesi; 24 saat akaryakıt ve market.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 616
+  },
+  {
+    "name": "O-4 Bolu Dağı Tüneli Çıkışı Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 40.751,
+    "lon": 31.512,
+    "description": "Bolu Tüneli doğu çıkışı TEM otoyolu; Yüksek kapasiteli yakıt ikmali ve sıcak çay durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 617
+  },
+  {
+    "name": "O-4 Dörtdivan Dinlenme Tesisleri & Petrol Ofisi",
+    "category": "fuel",
+    "lat": 40.725,
+    "lon": 32.065,
+    "description": "Bolu Dörtdivan TEM otoyolu; Karadeniz ve Ankara ayrımı öncesi akaryakıt istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 618
+  },
+  {
+    "name": "O-4 Kızılcahamam Çeltikçi Otoyol Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 40.485,
+    "lon": 32.485,
+    "description": "Ankara Kızılcahamam TEM koridoru; Akaryakıt, oto lastik ve çam ormanı molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 619
+  },
+  {
+    "name": "O-5 Yalova Altınova Otoyol Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 40.678,
+    "lon": 29.495,
+    "description": "Yalova Altınova O-5 otoyolu; Osmangazi Köprüsü güney ayağı yakıt istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 620
+  },
+  {
+    "name": "O-5 Gemlik Otoyol Dinlenme Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 40.432,
+    "lon": 29.215,
+    "description": "Bursa Gemlik O-5 otoyolu; Zeytin diyarı koridoru modern yakıt ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 621
+  },
+  {
+    "name": "O-5 Bursa Batı Otoyol Tesisleri & Petrol Ofisi",
+    "category": "fuel",
+    "lat": 40.225,
+    "lon": 28.785,
+    "description": "Bursa Nilüfer O-5 otoyolu; İzmir ve Çanakkale yönü modern akaryakıt alanı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 622
+  },
+  {
+    "name": "O-5 Balıkesir Savaştepe Otoyol Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 39.412,
+    "lon": 27.685,
+    "description": "Balıkesir Savaştepe O-5; Ege geçişi geniş akaryakıt ve elektrikli şarj istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 623
+  },
+  {
+    "name": "O-5 Manisa Saruhanlı Otoyol Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 38.745,
+    "lon": 27.565,
+    "description": "Manisa Saruhanlı O-5; İzmir girişi öncesi son büyük otoyol akaryakıt istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 624
+  },
+  {
+    "name": "O-21 Gölbaşı İncek Otoyol Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 39.754,
+    "lon": 32.745,
+    "description": "Ankara çıkışı O-21 Niğde Otoyolu başlangıcı; Akaryakıt ve kahve istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 625
+  },
+  {
+    "name": "O-21 Kulu Otoyol Dinlenme Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 39.115,
+    "lon": 33.155,
+    "description": "Konya Kulu O-21 otoyolu; İç Anadolu otoyol koridoru yakıt tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 626
+  },
+  {
+    "name": "O-21 Evren Otoyol Tesisleri & Petrol Ofisi",
+    "category": "fuel",
+    "lat": 38.985,
+    "lon": 33.512,
+    "description": "Ankara Evren O-21 otoyolu; Tuz Gölü doğusu akaryakıt ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 627
+  },
+  {
+    "name": "O-21 Ortaköy Otoyol Dinlenme Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 38.654,
+    "lon": 33.895,
+    "description": "Aksaray Ortaköy O-21 otoyolu; Kapadokya geçişi akaryakıt istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 628
+  },
+  {
+    "name": "O-21 Niğde Güney Otoyol Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 37.785,
+    "lon": 34.615,
+    "description": "Niğde Bor O-21 otoyolu; Toroslar ve Çukurova inişi öncesi akaryakıt noktası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 629
+  },
+  {
+    "name": "O-21 Pozantı Güney Otoyol Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 37.385,
+    "lon": 34.912,
+    "description": "Adana Pozantı O-21 otoyolu; Toros Dağları eteklerinde yakıt ve serin dağ havası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 630
+  },
+  {
+    "name": "O-31 Torbalı Otoyol Dinlenme Tesisleri & Petrol Ofisi",
+    "category": "fuel",
+    "lat": 38.155,
+    "lon": 27.365,
+    "description": "İzmir Torbalı O-31 İzmir-Aydın otoyolu; Selçuk ve Efes ayrımı yakıt tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 631
+  },
+  {
+    "name": "O-31 Germencik Otoyol Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 37.865,
+    "lon": 27.615,
+    "description": "Aydın Germencik O-31 otoyolu; Aydın-Denizli bağlantısı akaryakıt noktası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 632
+  },
+  {
+    "name": "O-32 Urla Otoyol Dinlenme Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 38.295,
+    "lon": 26.745,
+    "description": "İzmir Urla O-32 İzmir-Çeşme otoyolu; Yarımada geçişi yakıt ve market alanı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 633
+  },
+  {
+    "name": "D-100 Gerede Karabük Kavşağı Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 40.812,
+    "lon": 32.245,
+    "description": "Bolu Gerede D-100; Karadeniz ve Doğu Anadolu ayrımı akaryakıt istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 634
+  },
+  {
+    "name": "D-100 Ilgaz Tüneli Girişi Akaryakıt Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 41.045,
+    "lon": 33.725,
+    "description": "Kastamonu Ilgaz D-100; Ilgaz Dağı geçişi öncesi yakıt ve çay durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 635
+  },
+  {
+    "name": "D-100 Osmancık Pirinç Vadisi Tesisleri & Petrol Ofisi",
+    "category": "fuel",
+    "lat": 40.985,
+    "lon": 34.825,
+    "description": "Çorum Osmancık D-100; İpekyolu hattı 24 saat açık akaryakıt tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 636
+  },
+  {
+    "name": "D-100 Taşova Amasya Yolu Akaryakıt Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 40.785,
+    "lon": 36.315,
+    "description": "Amasya Taşova D-100; Tokat ve Erbaa ayrımı akaryakıt istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 637
+  },
+  {
+    "name": "D-100 Suşehri Dinlenme Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 40.165,
+    "lon": 38.085,
+    "description": "Sivas Suşehri D-100; Kelkit Vadisi ve Erzincan yolu akaryakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 638
+  },
+  {
+    "name": "D-100 Refahiye Dadaş Dinlenme Tesisleri & Petrol Ofisi",
+    "category": "fuel",
+    "lat": 39.912,
+    "lon": 38.745,
+    "description": "Erzincan Refahiye D-100; Kızıldağ Geçidi öncesi yakıt ve motorcu durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 639
+  },
+  {
+    "name": "D-100 Tercan Baraj Yanı Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 39.785,
+    "lon": 40.415,
+    "description": "Erzincan Tercan D-100; Mama Hatun Külliyesi civarı akaryakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 640
+  },
+  {
+    "name": "D-100 Erzurum Pasinler Çıkışı Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 39.985,
+    "lon": 41.695,
+    "description": "Erzurum Pasinler D-100; Kars ve Ağrı ayrımı akaryakıt istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 641
+  },
+  {
+    "name": "D-100 Horasan Aras Vadisi Tesisleri & Petrol Ofisi",
+    "category": "fuel",
+    "lat": 40.045,
+    "lon": 42.185,
+    "description": "Erzurum Horasan D-100; Ağrı Dağı ve İran transit koridoru yakıt tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 642
+  },
+  {
+    "name": "D-100 Eleşkirt Ovası Akaryakıt Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 39.815,
+    "lon": 42.695,
+    "description": "Ağrı Eleşkirt D-100; Yüksek irtifa dağ geçişi öncesi akaryakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 643
+  },
+  {
+    "name": "D-200 Sivrihisar Eskişehir Çıkışı & Shell",
+    "category": "fuel",
+    "lat": 39.465,
+    "lon": 31.515,
+    "description": "Eskişehir Sivrihisar D-200; Ankara-İzmir bölünmüş yolu akaryakıt istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 644
+  },
+  {
+    "name": "D-200 Kırıkkale Yahşihan Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 39.845,
+    "lon": 33.465,
+    "description": "Kırıkkale Yahşihan D-200; Kızılırmak kıyısı akaryakıt ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 645
+  },
+  {
+    "name": "D-200 Yozgat Yerköy Dinlenme Tesisleri & Petrol Ofisi",
+    "category": "fuel",
+    "lat": 39.645,
+    "lon": 34.485,
+    "description": "Yozgat Yerköy D-200; Ankara-Sivas karayolu akaryakıt ve çay molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 646
+  },
+  {
+    "name": "D-200 Sorgun Termal Akaryakıt Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 39.815,
+    "lon": 35.195,
+    "description": "Yozgat Sorgun D-200; Doğu Anadolu ana arteri akaryakıt tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 647
+  },
+  {
+    "name": "D-200 Yıldızeli Akaryakıt & Dinlenme Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 39.875,
+    "lon": 36.645,
+    "description": "Sivas Yıldızeli D-200; Çamlıbel Geçidi ayrımı akaryakıt istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 648
+  },
+  {
+    "name": "D-300 Kula Peri Bacaları Çıkışı & Petrol Ofisi",
+    "category": "fuel",
+    "lat": 38.565,
+    "lon": 28.715,
+    "description": "Manisa Kula D-300; Uşak-İzmir ana arteri akaryakıt tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 649
+  },
+  {
+    "name": "D-300 Uşak Çevre Yolu Akaryakıt Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 38.685,
+    "lon": 29.415,
+    "description": "Uşak D-300 çevre yolu; Afyon-İzmir geçişi modern akaryakıt istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 650
+  },
+  {
+    "name": "D-300 Afyon Dumlupınar Kavşağı Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 38.765,
+    "lon": 30.515,
+    "description": "Afyonkarahisar D-300; Türkiye'nin kavşak noktası akaryakıt ve sucuk merkezi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 651
+  },
+  {
+    "name": "D-300 Akşehir Nasreddin Hoca Akaryakıt & Shell",
+    "category": "fuel",
+    "lat": 38.365,
+    "lon": 31.425,
+    "description": "Konya Akşehir D-300; Meyve bahçeleri arasında akaryakıt ve mola durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 652
+  },
+  {
+    "name": "D-300 Ilgın Kaplıcalar Kavşağı Tesisleri & Petrol Ofisi",
+    "category": "fuel",
+    "lat": 38.285,
+    "lon": 31.915,
+    "description": "Konya Ilgın D-300; Termal su diyarı akaryakıt ve market istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 653
+  },
+  {
+    "name": "D-300 Kadınhanı Yol Üstü Akaryakıt & Opet",
+    "category": "fuel",
+    "lat": 38.245,
+    "lon": 32.225,
+    "description": "Konya Kadınhanı D-300; Tahinli pide ve yakıt ikmal noktası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 654
+  },
+  {
+    "name": "D-300 Karapınar Çölü Girişi Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 37.715,
+    "lon": 33.545,
+    "description": "Konya Karapınar D-300; Meke Krater Gölü civarı akaryakıt istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 655
+  },
+  {
+    "name": "D-300 Ereğli İvriz Yolu Akaryakıt Tesisleri & Petrol Ofisi",
+    "category": "fuel",
+    "lat": 37.515,
+    "lon": 34.055,
+    "description": "Konya Ereğli D-300; Toroslar öncesi akaryakıt ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 656
+  },
+  {
+    "name": "D-300 Kayseri İncesu Girişi Akaryakıt & Opet",
+    "category": "fuel",
+    "lat": 38.625,
+    "lon": 35.215,
+    "description": "Kayseri İncesu D-300; Erciyes Dağı manzaralı akaryakıt istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 657
+  },
+  {
+    "name": "D-300 Pınarbaşı Uzunyayla Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 38.725,
+    "lon": 36.395,
+    "description": "Kayseri Pınarbaşı D-300; Malatya-Gürün geçişi akaryakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 658
+  },
+  {
+    "name": "D-300 Gürün Şuğul Kanyonu Ayrımı & Petrol Ofisi",
+    "category": "fuel",
+    "lat": 38.745,
+    "lon": 37.185,
+    "description": "Sivas Gürün D-300; Tohma Çayı kıyısı akaryakıt istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 659
+  },
+  {
+    "name": "D-300 Darende Somuncu Baba Kavşağı & Opet",
+    "category": "fuel",
+    "lat": 38.565,
+    "lon": 37.495,
+    "description": "Malatya Darende D-300; Tohma Kanyonu girişi akaryakıt ve dinlenme.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 660
+  },
+  {
+    "name": "D-400 Kalkan Kaş Arası Sahil Akaryakıt & Shell",
+    "category": "fuel",
+    "lat": 36.245,
+    "lon": 29.515,
+    "description": "Antalya Kaş D-400; Kaputaş Kanyonu yakınlarında deniz manzaralı yakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 661
+  },
+  {
+    "name": "D-400 Demre Likya Sahil Yolu Akaryakıt & Petrol Ofisi",
+    "category": "fuel",
+    "lat": 36.255,
+    "lon": 30.015,
+    "description": "Antalya Demre D-400; Finike-Kaş arası virajlar öncesi akaryakıt.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 662
+  },
+  {
+    "name": "D-400 Finike Kumluca Sahil Akaryakıt & Shell",
+    "category": "fuel",
+    "lat": 36.325,
+    "lon": 30.215,
+    "description": "Antalya Kumluca D-400; Narenciye bahçeleri yanı modern akaryakıt alanı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 663
+  },
+  {
+    "name": "D-400 Manavgat Alanya Otoyol Yolu & Opet",
+    "category": "fuel",
+    "lat": 36.785,
+    "lon": 31.445,
+    "description": "Antalya Manavgat D-400; Şelale kavşağı akaryakıt ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 664
+  },
+  {
+    "name": "D-400 Alanya Mahmutlar Akaryakıt Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 36.495,
+    "lon": 32.095,
+    "description": "Antalya Alanya D-400; Gazipaşa ve Toros virajları öncesi yakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 665
+  },
+  {
+    "name": "D-400 Anamur Bozyazı Sahil Yolu Tesisleri & Petrol Ofisi",
+    "category": "fuel",
+    "lat": 36.115,
+    "lon": 32.965,
+    "description": "Mersin Bozyazı D-400; Akdeniz sahil yolu akaryakıt ve muz molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 666
+  },
+  {
+    "name": "D-400 Aydıncık Liman Girişi Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 36.145,
+    "lon": 33.325,
+    "description": "Mersin Aydıncık D-400; Gilindire Mağarası yolu akaryakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 667
+  },
+  {
+    "name": "D-400 Silifke Atakent Susanoğlu & Opet",
+    "category": "fuel",
+    "lat": 36.425,
+    "lon": 34.125,
+    "description": "Mersin Silifke D-400; Cennet-Cehennem obrukları civarı akaryakıt tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 668
+  },
+  {
+    "name": "D-400 Erdemli Kızkalesi Sahil Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 36.515,
+    "lon": 34.255,
+    "description": "Mersin Erdemli D-400; Kızkalesi manzaralı akaryakıt ve dinlenme alanı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 669
+  },
+  {
+    "name": "D-400 Ceyhan Yumurtalık Serbest Bölge Tesisleri & Opet",
+    "category": "fuel",
+    "lat": 37.015,
+    "lon": 35.815,
+    "description": "Adana Ceyhan D-400; Çukurova ve İskenderun bağlantısı yakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 670
+  },
+  {
+    "name": "D-400 Osmaniye Toprakkale Kavşağı Tesisleri & Petrol Ofisi",
+    "category": "fuel",
+    "lat": 37.065,
+    "lon": 36.145,
+    "description": "Osmaniye Toprakkale D-400; Çukurova-Gaziantep otoyol kavşağı akaryakıtı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 671
+  },
+  {
+    "name": "Bolu Dağı Koru Otel Dinlenme Tesisleri",
+    "category": "cafe",
+    "lat": 40.735,
+    "lon": 31.445,
+    "description": "Bolu Dağı D-100 zirvesi; Çam ormanları içinde serin kahve, et mangal ve motorcu toplanma alanı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 672
+  },
+  {
+    "name": "Geyve Boğazı Ali Fuat Paşa Dinlenme Parkı",
+    "category": "cafe",
+    "lat": 40.515,
+    "lon": 30.295,
+    "description": "Sakarya Geyve D-650; Sakarya Nehri kenarında nehir manzaralı çay ve fındık molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 673
+  },
+  {
+    "name": "Bilecik Vezirhan Tarihi Kervansaray Mola Parkı",
+    "category": "cafe",
+    "lat": 40.245,
+    "lon": 30.045,
+    "description": "Bilecik Vezirhan D-650; Köprülü Mehmet Paşa Kervansarayı yanı mola ve kahve alanı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 674
+  },
+  {
+    "name": "Bozüyük Sarar Outlet Dinlenme Tesisleri",
+    "category": "cafe",
+    "lat": 39.915,
+    "lon": 30.065,
+    "description": "Bilecik Bozüyük D-200 / D-650 kesişimi; Eskişehir-Bursa-Kütahya kavşağı büyük dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 675
+  },
+  {
+    "name": "Kütahya Porselen Çini Mola & Restoran Tesisleri",
+    "category": "cafe",
+    "lat": 39.435,
+    "lon": 29.995,
+    "description": "Kütahya D-650 çevre yolu; Porselen mağazası, kafeterya ve yöresel yemek molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 676
+  },
+  {
+    "name": "Afyon Kolaylı Dinlenme Tesisleri & Sucuk Döner",
+    "category": "cafe",
+    "lat": 38.745,
+    "lon": 30.465,
+    "description": "Afyonkarahisar İzmir-Antalya kavşağı; Meşhur sucuk ekmek, kaymaklı ekmek kadayıfı ve kahve.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 677
+  },
+  {
+    "name": "Dinar Suçıkan Şelaleleri Dinlenme Parkı",
+    "category": "cafe",
+    "lat": 38.075,
+    "lon": 30.165,
+    "description": "Afyon Dinar D-650; Menderes Nehri'nin doğduğu kaynak şelalesi kenarında serin dinlenme.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 678
+  },
+  {
+    "name": "Keçiborlu Lavanta Vadisi Mola Noktası",
+    "category": "cafe",
+    "lat": 37.945,
+    "lon": 30.295,
+    "description": "Isparta Keçiborlu D-650; Kuyucak lavanta tarlaları girişi lavanta dondurması ve çay molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 679
+  },
+  {
+    "name": "Burdur Gölü Halk Plajı Seyir & Mola Tesisleri",
+    "category": "cafe",
+    "lat": 37.745,
+    "lon": 30.255,
+    "description": "Burdur Gölü kenarı D-650; Burdur Gölü panoraması eşliğinde ceviz ezmesi ve kahve molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 680
+  },
+  {
+    "name": "Bucak Meşhur Salebi Dinlenme Noktası",
+    "category": "cafe",
+    "lat": 37.465,
+    "lon": 30.595,
+    "description": "Burdur Bucak D-650; Toroslar dağ salebi ve keçi sütlü dondurma motorcu lezzet durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 681
+  },
+  {
+    "name": "Korkuteli Seyir Tepe Mola & Şiş Köfte Tesisleri",
+    "category": "cafe",
+    "lat": 37.065,
+    "lon": 30.195,
+    "description": "Antalya Korkuteli yayla yolu; Meşhur Korkuteli şiş köftesi ve piyaz molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 682
+  },
+  {
+    "name": "Manavgat Çetinkaya Dinlenme Tesisleri",
+    "category": "cafe",
+    "lat": 36.795,
+    "lon": 31.465,
+    "description": "Antalya Manavgat D-400; Akdeniz sahil yolu geniş otoparklı dinlenme ve restoran tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 683
+  },
+  {
+    "name": "Alanya Dim Çayı Boğazı Mola Restoranları",
+    "category": "cafe",
+    "lat": 36.535,
+    "lon": 32.065,
+    "description": "Antalya Alanya Dim Çayı; Su üzerine kurulu masalarda serin ayak sokarak dinlenme ve balık ziyafeti.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 684
+  },
+  {
+    "name": "Gazipaşa Yalan Dünya Mağarası Mola Alanı",
+    "category": "cafe",
+    "lat": 36.245,
+    "lon": 32.395,
+    "description": "Antalya Gazipaşa Beyrebucak; 5 milyon yıllık mağara girişi dağ manzaralı köy çayı molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 685
+  },
+  {
+    "name": "Aydıncık Liman İçi Çay Bahçesi & Balıkçı Mola",
+    "category": "cafe",
+    "lat": 36.145,
+    "lon": 33.325,
+    "description": "Mersin Aydıncık sahil yolu; Akdeniz kıyısında balıkçı tekneleri arasında çay ve dinlenme.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 686
+  },
+  {
+    "name": "Silifke Narlıkuyu Cennet Obrukları Balık & Mola",
+    "category": "cafe",
+    "lat": 36.445,
+    "lon": 34.115,
+    "description": "Mersin Silifke Narlıkuyu; Soğuk tatlı su kaynağı koyunda taze kaya koruğu ve lokma tatlısı durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 687
+  },
+  {
+    "name": "Tarsus Şelalesi Çay Bahçeleri & Mola Tesisleri",
+    "category": "cafe",
+    "lat": 36.935,
+    "lon": 34.895,
+    "description": "Mersin Tarsus Berdan Nehri; Çağlayan şelale manzarası eşliğinde meşhur Tarsus cezeryesi ve kahve.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 688
+  },
+  {
+    "name": "Pozantı Akpınar Dinlenme Tesisleri & Toros Yaylası",
+    "category": "cafe",
+    "lat": 37.425,
+    "lon": 34.875,
+    "description": "Adana Pozantı O-21 / D-750; Şekerpınarı soğuk su kaynakları kıyısında et mangal ve dinlenme.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 689
+  },
+  {
+    "name": "Sivrihisar Gözleme & Tarihi Çeşme Mola Yeri",
+    "category": "cafe",
+    "lat": 39.455,
+    "lon": 31.525,
+    "description": "Eskişehir Sivrihisar D-200 kavşağı; Sıcak saç gözlemesi, ayran ve çay molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 690
+  },
+  {
+    "name": "Polatlı Gordion Dinlenme Parkı & Mola Yeri",
+    "category": "cafe",
+    "lat": 39.585,
+    "lon": 32.135,
+    "description": "Ankara Polatlı D-200 yolu; Sakarya Meydan Muharebesi müzesi yakınlarında dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 691
+  },
+  {
+    "name": "Aksaray Ağaçlı Dinlenme Tesisleri & Melendiz Park",
+    "category": "cafe",
+    "lat": 38.365,
+    "lon": 34.025,
+    "description": "Aksaray D-300 / D-750 kavşağı; Türkiye'nin en köklü ve modern otoyol dinlenme tesislerinden biri.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 692
+  },
+  {
+    "name": "Kayseri İncesu Kervansaray Çarşı Mola Yeri",
+    "category": "cafe",
+    "lat": 38.625,
+    "lon": 35.195,
+    "description": "Kayseri İncesu D-300; Merzifonlu Kara Mustafa Paşa Kervansarayı avlusunda tarihi mola.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 693
+  },
+  {
+    "name": "Gürün Gökpınar Gölü Doğal Dinlenme Alanı",
+    "category": "cafe",
+    "lat": 38.655,
+    "lon": 37.305,
+    "description": "Sivas Gürün; Turkuaz berraklıkta doğal krater akvaryum gölü kıyısında muazzam çay molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 694
+  },
+  {
+    "name": "Darende Tohma Kanyonu Rafting & Mola Tesisi",
+    "category": "cafe",
+    "lat": 38.545,
+    "lon": 37.485,
+    "description": "Malatya Darende Somuncu Baba civarı; Kanyon içi ahşap yürüyüş yolu ve nehir boyu dinlenme.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 695
+  },
+  {
+    "name": "Erzincan Girlevik Şelalesi Doğa Dinlenme Parkı",
+    "category": "cafe",
+    "lat": 39.565,
+    "lon": 39.715,
+    "description": "Erzincan Çağlayan Beldesi; 30 metreden basamak basamak dökülen doğal şelale ve alabalık durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 696
+  },
+  {
+    "name": "Gümüşhane Pestil & Köme Mola Tesisleri",
+    "category": "cafe",
+    "lat": 40.455,
+    "lon": 39.475,
+    "description": "Gümüşhane Merkez D-885 yolu; Meşhur tescilli Gümüşhane dut pestili, köme ve kuşburnu çayı molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 697
+  },
+  {
+    "name": "Zigana Dağı Hamsiköy Tarihi Sütlaç Durağı",
+    "category": "cafe",
+    "lat": 40.675,
+    "lon": 39.485,
+    "description": "Trabzon Maçka Hamsiköy eski dağ virajları yolu; Taş fırında pişen meşhur fındıklı Hamsiköy sütlacı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 698
+  },
+  {
+    "name": "Rize Fırtına Vadisi Zipline & Çay Mola Alanı",
+    "category": "cafe",
+    "lat": 41.045,
+    "lon": 41.015,
+    "description": "Rize Çamlıhemşin Fırtına Deresi; Dere kenarında muhlama, taze demlenmiş Rize çayı ve dinlenme.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 699
+  },
+  {
+    "name": "Artvin Borçka Karagöl Doğa Dinlenme Tesisleri",
+    "category": "cafe",
+    "lat": 41.365,
+    "lon": 41.855,
+    "description": "Artvin Borçka Karagöl Tabiat Parkı; Heyelan set gölü etrafında çam ormanları içinde huzur durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 700
+  },
+  {
+    "name": "Sinop Akliman & Hamsilos Koyu Dinlenme Parkı",
+    "category": "cafe",
+    "lat": 42.055,
+    "lon": 35.045,
+    "description": "Sinop Akliman; Türkiye'nin tek fiyord benzeri deniz koyunda çam ağaçları altında sahil molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 701
+  },
+  {
+    "name": "Kastamonu Ecevit Çorbası Tarihi Mola Tesisleri",
+    "category": "cafe",
+    "lat": 41.655,
+    "lon": 33.725,
+    "description": "Kastamonu Küre Dağları İnebolu yolu; İstiklal Yolu üzerindeki tarihi Ecevit çorbası durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 702
+  },
+  {
+    "name": "Bartın Çakraz Koyu Sahil Balıkçı Dinlenme Yeri",
+    "category": "cafe",
+    "lat": 41.785,
+    "lon": 32.485,
+    "description": "Bartın Çakraz Karadeniz sahil virajları; Karadeniz balıkları ve Amasra salatası sahil durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 703
+  },
+  {
+    "name": "Düzce Akçakoca Çınaraltı Sahil Mola Yeri",
+    "category": "cafe",
+    "lat": 41.085,
+    "lon": 31.115,
+    "description": "Düzce Akçakoca Karadeniz sahil yolu; Asırlık çınar altında deniz manzaralı kahve ve fındık molası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 704
+  },
+  {
+    "name": "Yalova Termal Kaplıcaları Çınar Tesisleri",
+    "category": "cafe",
+    "lat": 40.605,
+    "lon": 29.185,
+    "description": "Yalova Termal; Tarihi Roma kaplıcaları ve Atatürk Köşkü yanında doğa içi dinlenme durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:25:00",
+    "id": 705
+  },
+  {
+    "name": "Kadıköy Sahil Shell İstasyonu",
+    "category": "fuel",
+    "lat": 40.9902,
+    "lon": 29.0264,
+    "description": "İstanbul Kadıköy Rıhtım & Sahil Yolu; 24 saat açık akaryakıt ve market.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 706
+  },
+  {
+    "name": "Bostancı Sahil Opet İstasyonu",
+    "category": "fuel",
+    "lat": 40.9531,
+    "lon": 29.0942,
+    "description": "İstanbul Kadıköy Bostancı Sahil Yolu; Bağdat Caddesi çıkışı akaryakıt ve oto yıkama.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 707
+  },
+  {
+    "name": "Maltepe D-100 Shell İstasyonu",
+    "category": "fuel",
+    "lat": 40.9328,
+    "lon": 29.1419,
+    "description": "İstanbul Maltepe D-100 (E-5) Karayolu; Kadıköy-Kartal yönü modern akaryakıt istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 708
+  },
+  {
+    "name": "Kartal D-100 Petrol Ofisi",
+    "category": "fuel",
+    "lat": 40.9019,
+    "lon": 29.1942,
+    "description": "İstanbul Kartal E-5 üzeri; Yakacık ve sahil kavşağı akaryakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 709
+  },
+  {
+    "name": "Pendik Sahil Opet İstasyonu",
+    "category": "fuel",
+    "lat": 40.8756,
+    "lon": 29.2319,
+    "description": "İstanbul Pendik Sahil Bulvarı & Marina karşısı; Akaryakıt ve kahve durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 710
+  },
+  {
+    "name": "Tuzla D-100 Shell İstasyonu",
+    "category": "fuel",
+    "lat": 40.8428,
+    "lon": 29.3142,
+    "description": "İstanbul Tuzla İçmeler E-5; Kocaeli il sınırı öncesi 24 saat açık istasyon.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 711
+  },
+  {
+    "name": "Ataşehir TEM Opet İstasyonu",
+    "category": "fuel",
+    "lat": 40.9889,
+    "lon": 29.1189,
+    "description": "İstanbul Ataşehir O-4 TEM bağlantısı; Finans Merkezi civarı modern akaryakıt tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 712
+  },
+  {
+    "name": "Ümraniye Şile Otoyolu Shell",
+    "category": "fuel",
+    "lat": 41.0256,
+    "lon": 29.1242,
+    "description": "İstanbul Ümraniye Tepeüstü; Şile ve Karadeniz otobanı başlangıcı yakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 713
+  },
+  {
+    "name": "Çekmeköy Şile Yolu Petrol Ofisi",
+    "category": "fuel",
+    "lat": 41.0519,
+    "lon": 29.1842,
+    "description": "İstanbul Çekmeköy Taşdelen; Şile virajlı motorcu rotası girişi yakıt tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 714
+  },
+  {
+    "name": "Şile Sahil Opet İstasyonu",
+    "category": "fuel",
+    "lat": 41.1719,
+    "lon": 29.6119,
+    "description": "İstanbul Şile giriş kavşağı; Ağva ve Karadeniz sahil yolu motorcu yakıt noktası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 715
+  },
+  {
+    "name": "Sabiha Gökçen Havalimanı Yolu Shell",
+    "category": "fuel",
+    "lat": 40.9119,
+    "lon": 29.3089,
+    "description": "İstanbul Kurtköy; Havalimanı kavşağı ve Formula 1 pisti yolu akaryakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 716
+  },
+  {
+    "name": "Beykoz Kavacık O-2 Shell İstasyonu",
+    "category": "fuel",
+    "lat": 41.0919,
+    "lon": 29.0942,
+    "description": "İstanbul Beykoz FSM Köprüsü çıkışı; Boğaz geçişi akaryakıt ve market.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 717
+  },
+  {
+    "name": "Beşiktaş Barbaros Bulvarı Opet",
+    "category": "fuel",
+    "lat": 41.0519,
+    "lon": 29.0069,
+    "description": "İstanbul Beşiktaş Balmumcu; Boğaziçi Köprüsü katılımı akaryakıt istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 718
+  },
+  {
+    "name": "Sarıyer Maslak Büyükdere Cad. Shell",
+    "category": "fuel",
+    "lat": 41.1119,
+    "lon": 29.0289,
+    "description": "İstanbul Sarıyer Maslak; Hacıosman ve Kilyos sahil yolu akaryakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 719
+  },
+  {
+    "name": "Sarıyer Çayırbaşı Petrol Ofisi",
+    "category": "fuel",
+    "lat": 41.1542,
+    "lon": 29.0419,
+    "description": "İstanbul Sarıyer Kordon; Rumeli Kavağı ve Kilyos virajları öncesi yakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 720
+  },
+  {
+    "name": "Kilyos Sahil Opet İstasyonu",
+    "category": "fuel",
+    "lat": 41.2419,
+    "lon": 29.0289,
+    "description": "İstanbul Sarıyer Kilyos; Karadeniz sahili motorcu ve gezi rotası yakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 721
+  },
+  {
+    "name": "Bakırköy Sahil Yolu Shell",
+    "category": "fuel",
+    "lat": 40.9756,
+    "lon": 28.8719,
+    "description": "İstanbul Bakırköy Kennedy Caddesi; Sahil yolu Ataköy Marina civarı akaryakıt.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 722
+  },
+  {
+    "name": "Merter D-100 Opet İstasyonu",
+    "category": "fuel",
+    "lat": 40.9989,
+    "lon": 28.8919,
+    "description": "İstanbul Merter E-5; Haliç ve Topkapı yönü 24 saat açık istasyon.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 723
+  },
+  {
+    "name": "Cevizlibağ D-100 Petrol Ofisi",
+    "category": "fuel",
+    "lat": 41.0119,
+    "lon": 28.9142,
+    "description": "İstanbul Zeytinburnu E-5; Tarihi Yarımada girişi akaryakıt ve market.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 724
+  },
+  {
+    "name": "Şirinevler D-100 Shell İstasyonu",
+    "category": "fuel",
+    "lat": 40.9942,
+    "lon": 28.8456,
+    "description": "İstanbul Bahçelievler E-5; Atatürk Havalimanı kavşağı akaryakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 725
+  },
+  {
+    "name": "Avcılar D-100 Opet İstasyonu",
+    "category": "fuel",
+    "lat": 40.9856,
+    "lon": 28.7189,
+    "description": "İstanbul Avcılar E-5; Küçükçekmece Gölü manzaralı akaryakıt tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 726
+  },
+  {
+    "name": "Beylikdüzü D-100 Shell İstasyonu",
+    "category": "fuel",
+    "lat": 41.0089,
+    "lon": 28.6419,
+    "description": "İstanbul Beylikdüzü E-5; Tüyap Fuar Merkezi yanı modern istasyon.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 727
+  },
+  {
+    "name": "Büyükçekmece Sahil Petrol Ofisi",
+    "category": "fuel",
+    "lat": 41.0219,
+    "lon": 28.5789,
+    "description": "İstanbul Büyükçekmece Kordon; Mimar Sinan Köprüsü civarı yakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 728
+  },
+  {
+    "name": "Silivri Sahil Opet İstasyonu",
+    "category": "fuel",
+    "lat": 41.0742,
+    "lon": 28.2489,
+    "description": "İstanbul Silivri D-100; Trakya ve Tekirdağ yönü sahil akaryakıt tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 729
+  },
+  {
+    "name": "Mahmutbey Gişeler TEM Shell",
+    "category": "fuel",
+    "lat": 41.0619,
+    "lon": 28.8189,
+    "description": "İstanbul Bağcılar TEM Otoyolu; Edirne yönü otoyol başlangıcı dev istasyon.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 730
+  },
+  {
+    "name": "Hadımköy Gişeler Opet İstasyonu",
+    "category": "fuel",
+    "lat": 41.0856,
+    "lon": 28.6189,
+    "description": "İstanbul Çatalca-Hadımköy TEM otoyolu ayrımı; Akaryakıt ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 731
+  },
+  {
+    "name": "Kuzey Marmara O-7 Fenertepe Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 41.1719,
+    "lon": 28.7856,
+    "description": "İstanbul Başakşehir Kuzey Marmara Otoyolu; İstanbul Havalimanı koridoru yakıt tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 732
+  },
+  {
+    "name": "İstanbul Havalimanı Girişi Petrol Ofisi",
+    "category": "fuel",
+    "lat": 41.2589,
+    "lon": 28.7419,
+    "description": "İstanbul Arnavutköy; Yeni havalimanı ana giriş arteri akaryakıt tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 733
+  },
+  {
+    "name": "Ankara Eskişehir Yolu ODTÜ Karşısı Opet",
+    "category": "fuel",
+    "lat": 39.9119,
+    "lon": 32.7842,
+    "description": "Ankara Çankaya D-200; Bakanlıklar ve üniversiteler koridoru modern istasyon.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 734
+  },
+  {
+    "name": "Ankara Çukurambar Shell İstasyonu",
+    "category": "fuel",
+    "lat": 39.9056,
+    "lon": 32.8119,
+    "description": "Ankara Çankaya Çukurambar; Konya yolu bağlantısı akaryakıt ve kahve.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 735
+  },
+  {
+    "name": "Ankara Bilkent Köprüsü Petrol Ofisi",
+    "category": "fuel",
+    "lat": 39.8989,
+    "lon": 32.7489,
+    "description": "Ankara Eskişehir Yolu Bilkent kavşağı; 24 saat açık istasyon.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 736
+  },
+  {
+    "name": "Ankara Ümitköy Çayyolu Shell",
+    "category": "fuel",
+    "lat": 39.8889,
+    "lon": 32.7019,
+    "description": "Ankara Çankaya Ümitköy; İncek ve çevre yolu bağlantısı akaryakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 737
+  },
+  {
+    "name": "Ankara Konya Yolu Balgat Opet",
+    "category": "fuel",
+    "lat": 39.8942,
+    "lon": 32.8242,
+    "description": "Ankara Çankaya Konya Yolu D-750; Şehir çıkışı modern akaryakıt tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 738
+  },
+  {
+    "name": "Ankara Kepekli Rampası Shell İstasyonu",
+    "category": "fuel",
+    "lat": 39.8419,
+    "lon": 32.8189,
+    "description": "Ankara Gölbaşı girişi D-750; Dik yokuş çıkışı panoramik Ankara manzaralı yakıt.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 739
+  },
+  {
+    "name": "Ankara İstanbul Yolu Batıkent Opet",
+    "category": "fuel",
+    "lat": 39.9689,
+    "lon": 32.7319,
+    "description": "Ankara Yenimahalle D-750 / FSM Bulvarı; İstanbul çıkışı geniş akaryakıt tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 740
+  },
+  {
+    "name": "Ankara Eryaman Göksu Parkı Shell",
+    "category": "fuel",
+    "lat": 39.9889,
+    "lon": 32.6489,
+    "description": "Ankara Etimesgut Eryaman; İstanbul yolu üzeri göl parkı yanı istasyon.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 741
+  },
+  {
+    "name": "Ankara Samsun Yolu Mamak Petrol Ofisi",
+    "category": "fuel",
+    "lat": 39.9319,
+    "lon": 32.9242,
+    "description": "Ankara Mamak D-200; Karadeniz ve Doğu Anadolu çıkışı akaryakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 742
+  },
+  {
+    "name": "Ankara O-20 Çevre Yolu İncek Tesisleri & Shell",
+    "category": "fuel",
+    "lat": 39.8256,
+    "lon": 32.7119,
+    "description": "Ankara O-20 Çevre Otoyolu batı aksı; Çevre yolu transit yakıt istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 743
+  },
+  {
+    "name": "İzmir Balçova Çeşme Yolu Shell",
+    "category": "fuel",
+    "lat": 38.3889,
+    "lon": 27.0456,
+    "description": "İzmir Balçova O-32 otoban girişi; İnciraltı ve Çeşme yönü akaryakıt.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 744
+  },
+  {
+    "name": "İzmir Narlıdere Opet İstasyonu",
+    "category": "fuel",
+    "lat": 38.3919,
+    "lon": 26.9942,
+    "description": "İzmir Narlıdere Mithatpaşa Caddesi; Urla-Çeşme eski sahil yolu yakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 745
+  },
+  {
+    "name": "İzmir Güzelbahçe Sahil BP İstasyonu",
+    "category": "fuel",
+    "lat": 38.3742,
+    "lon": 26.8889,
+    "description": "İzmir Güzelbahçe sahil kordonu; Balıkçı barınağı civarı motorcu durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 746
+  },
+  {
+    "name": "İzmir Urla Kalabak Shell İstasyonu",
+    "category": "fuel",
+    "lat": 38.3419,
+    "lon": 26.7856,
+    "description": "İzmir Urla sahil yolu; Çeşmealtı ve bağ yolu rotası girişi yakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 747
+  },
+  {
+    "name": "İzmir Çeşme Ilıca Opet İstasyonu",
+    "category": "fuel",
+    "lat": 38.3142,
+    "lon": 26.3542,
+    "description": "İzmir Çeşme Ilıca kavşağı; Alaçatı ve marina yönü 24 saat açık istasyon.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 748
+  },
+  {
+    "name": "İzmir Çiğli Anadolu Cad. Shell",
+    "category": "fuel",
+    "lat": 38.4989,
+    "lon": 27.0589,
+    "description": "İzmir Çiğli; Foça ve Dikili yönü Çanakkale asfaltı akaryakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 749
+  },
+  {
+    "name": "İzmir Karşıyaka Girne Cad. Opet",
+    "category": "fuel",
+    "lat": 38.4619,
+    "lon": 27.1142,
+    "description": "İzmir Karşıyaka sahil girişi; Akaryakıt ve oto bakım alanı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 750
+  },
+  {
+    "name": "İzmir Bornova Ankara Cad. Petrol Ofisi",
+    "category": "fuel",
+    "lat": 38.4489,
+    "lon": 27.2142,
+    "description": "İzmir Bornova Ege Üniversitesi çıkışı; Manisa ve Ankara otobanı girişi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 751
+  },
+  {
+    "name": "İzmir Gaziemir Akçay Cad. Opet",
+    "category": "fuel",
+    "lat": 38.3289,
+    "lon": 27.1342,
+    "description": "İzmir Gaziemir; Adnan Menderes Havalimanı ve Aydın otoyolu bağlantısı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 752
+  },
+  {
+    "name": "İzmir Foça Bağarası Shell İstasyonu",
+    "category": "fuel",
+    "lat": 38.6719,
+    "lon": 26.8456,
+    "description": "İzmir Foça yolu; Eski Foça virajlı sahil rotası girişi yakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 753
+  },
+  {
+    "name": "Bursa Nilüfer İzmir Yolu Opet",
+    "category": "fuel",
+    "lat": 40.2119,
+    "lon": 28.9419,
+    "description": "Bursa Nilüfer D-200; Görükle ve Balıkesir yönü geniş modern istasyon.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 754
+  },
+  {
+    "name": "Bursa Mudanya Yolu Shell İstasyonu",
+    "category": "fuel",
+    "lat": 40.2456,
+    "lon": 28.9856,
+    "description": "Bursa Osmangazi Mudanya Bulvarı; Feribot iskelesi rotası akaryakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 755
+  },
+  {
+    "name": "Bursa Yalova Yolu Ovaakça Petrol Ofisi",
+    "category": "fuel",
+    "lat": 40.3119,
+    "lon": 29.0689,
+    "description": "Bursa Osmangazi D-575; Gemlik ve İstanbul yönü akaryakıt tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 756
+  },
+  {
+    "name": "Bursa İnegöl Mobilya Sanayi Shell",
+    "category": "fuel",
+    "lat": 40.0819,
+    "lon": 29.5142,
+    "description": "Bursa İnegöl D-200; Meşhur İnegöl köftesi ve Eskişehir yolu yakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 757
+  },
+  {
+    "name": "Bursa Karacabey Bandırma Ayrımı Opet",
+    "category": "fuel",
+    "lat": 40.2189,
+    "lon": 28.3542,
+    "description": "Bursa Karacabey D-200; Çanakkale ve Balıkesir yol ayrımı yakıt tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 758
+  },
+  {
+    "name": "Antalya Konyaaltı Akdeniz Bulvarı Shell",
+    "category": "fuel",
+    "lat": 36.8719,
+    "lon": 30.6389,
+    "description": "Antalya Konyaaltı sahil kordonu; Kemer ve Kaş yolu başlangıcı modern istasyon.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 759
+  },
+  {
+    "name": "Antalya Muratpaşa Lara Opet İstasyonu",
+    "category": "fuel",
+    "lat": 36.8589,
+    "lon": 30.7419,
+    "description": "Antalya Lara plajlar yolu; Düden Şelalesi civarı akaryakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 760
+  },
+  {
+    "name": "Antalya Kepez Sakarya Bulvarı Petrol Ofisi",
+    "category": "fuel",
+    "lat": 36.9219,
+    "lon": 30.6842,
+    "description": "Antalya Kepez D-650 Burdur yolu çıkışı; Toroslar tırmanışı öncesi yakıt.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 761
+  },
+  {
+    "name": "Antalya Aksu Havalimanı Kavşağı Shell",
+    "category": "fuel",
+    "lat": 36.9189,
+    "lon": 30.8019,
+    "description": "Antalya Aksu D-400; Alanya ve Manavgat yönü havalimanı çıkışı istasyon.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 762
+  },
+  {
+    "name": "Antalya Kemer Girişi Opet İstasyonu",
+    "category": "fuel",
+    "lat": 36.6219,
+    "lon": 30.5542,
+    "description": "Antalya Kemer D-400 sahil koridoru; Marina ve Çamyuva ayrımı yakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 763
+  },
+  {
+    "name": "Antalya Alanya Çevre Yolu Shell",
+    "category": "fuel",
+    "lat": 36.5519,
+    "lon": 32.0142,
+    "description": "Antalya Alanya D-400 çevre yolu; Kale ve liman girişi modern istasyon.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 764
+  },
+  {
+    "name": "Antalya Manavgat Şelale Yolu Opet",
+    "category": "fuel",
+    "lat": 36.7919,
+    "lon": 31.4389,
+    "description": "Antalya Manavgat D-400; Side antik kenti ve Alanya sahil yolu yakıtı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 765
+  },
+  {
+    "name": "Antalya Kaş Otogar Yanı Shell İstasyonu",
+    "category": "fuel",
+    "lat": 36.2042,
+    "lon": 29.6389,
+    "description": "Antalya Kaş D-400; Meis manzaralı virajlar öncesi merkezi yakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 766
+  },
+  {
+    "name": "Antalya Kalkan Çarşı Petrol Ofisi",
+    "category": "fuel",
+    "lat": 36.2642,
+    "lon": 29.4189,
+    "description": "Antalya Kaş Kalkan kavşağı D-400; Kaputaş ve Patara ayrımı yakıt noktası.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 767
+  },
+  {
+    "name": "Muğla Bodrum Yalıkavak Yolu Shell",
+    "category": "fuel",
+    "lat": 37.0619,
+    "lon": 27.3542,
+    "description": "Muğla Bodrum Torba-Yalıkavak kavşağı; Yarımada gezi rotası yakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 768
+  },
+  {
+    "name": "Muğla Bodrum Turgutreis Opet İstasyonu",
+    "category": "fuel",
+    "lat": 37.0042,
+    "lon": 27.2689,
+    "description": "Muğla Bodrum Turgutreis marina yolu; Kos manzaralı sahil yakıt istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 769
+  },
+  {
+    "name": "Muğla Fethiye Ölüdeniz Yolu Shell",
+    "category": "fuel",
+    "lat": 36.6289,
+    "lon": 29.1242,
+    "description": "Muğla Fethiye Ovacık; Babadağ teleferik ve Belcekız plajı yolu yakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 770
+  },
+  {
+    "name": "Muğla Marmaris Şehir Girişi Opet",
+    "category": "fuel",
+    "lat": 36.8689,
+    "lon": 28.2619,
+    "description": "Muğla Marmaris Datça yolu ayrımı; Çam ormanları içinde modern istasyon.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 771
+  },
+  {
+    "name": "Muğla Datça Çarşı Shell İstasyonu",
+    "category": "fuel",
+    "lat": 36.7289,
+    "lon": 27.6842,
+    "description": "Muğla Datça ilçe merkezi; Knidos Antik Kenti yolu öncesi son büyük yakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 772
+  },
+  {
+    "name": "Düzce Şehir İçi D-100 Shell",
+    "category": "fuel",
+    "lat": 40.8419,
+    "lon": 31.1589,
+    "description": "Düzce Merkez E-5 üzeri; Akçakoca ve Bolu Dağı geçişi akaryakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 773
+  },
+  {
+    "name": "Bolu Şehir Çıkışı Opet İstasyonu",
+    "category": "fuel",
+    "lat": 40.7389,
+    "lon": 31.6242,
+    "description": "Bolu D-100 Ankara çıkışı; Abant ve Gölcük yolu ayrımı yakıt tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 774
+  },
+  {
+    "name": "Çorum Şehir Girişi D-100 Shell",
+    "category": "fuel",
+    "lat": 40.5419,
+    "lon": 34.9542,
+    "description": "Çorum Merkez D-100; Leblebiciler sitesi civarı 24 saat açık istasyon.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 775
+  },
+  {
+    "name": "Amasya Şehir İçi Petrol Ofisi",
+    "category": "fuel",
+    "lat": 40.6489,
+    "lon": 35.8189,
+    "description": "Amasya Merkez Yeşilırmak kıyısı yolu; Şehzadeler kenti giriş akaryakıtı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 776
+  },
+  {
+    "name": "Samsun İlkadım Sahil Shell",
+    "category": "fuel",
+    "lat": 41.2856,
+    "lon": 36.3319,
+    "description": "Samsun Sahil Bulvarı D-010; Karadeniz liman koridoru akaryakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 777
+  },
+  {
+    "name": "Ordu Altınordu Sahil Opet",
+    "category": "fuel",
+    "lat": 40.9856,
+    "lon": 37.8819,
+    "description": "Ordu Merkez sahil yolu D-010; Boztepe teleferik civarı akaryakıt istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 778
+  },
+  {
+    "name": "Giresun Merkez Karadeniz Shell",
+    "category": "fuel",
+    "lat": 40.9142,
+    "lon": 38.3942,
+    "description": "Giresun sahil yolu D-010; Ada manzaralı akaryakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 779
+  },
+  {
+    "name": "Trabzon Yomra Sahil Petrol Ofisi",
+    "category": "fuel",
+    "lat": 40.9619,
+    "lon": 39.8542,
+    "description": "Trabzon Yomra Karadeniz Sahil Yolu D-010; Rize yönü transit istasyon.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 780
+  },
+  {
+    "name": "Rize Merkez Sahil Opet İstasyonu",
+    "category": "fuel",
+    "lat": 41.0289,
+    "lon": 40.5219,
+    "description": "Rize Merkez sahil dolgu alanı D-010; Çay fabrikaları civarı akaryakıt.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 781
+  },
+  {
+    "name": "Eskişehir Çevre Yolu Tepebaşı Shell",
+    "category": "fuel",
+    "lat": 39.7856,
+    "lon": 30.5089,
+    "description": "Eskişehir D-200 çevre yolu; Bursa-Ankara bölünmüş yolu akaryakıt istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 782
+  },
+  {
+    "name": "Konya Şehir Girişi İstanbul Yolu Opet",
+    "category": "fuel",
+    "lat": 37.9419,
+    "lon": 32.4989,
+    "description": "Konya Selçuklu D-300; Otogar ve Meram ayrımı geniş akaryakıt tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 783
+  },
+  {
+    "name": "Kayseri Çevre Yolu Erciyes Shell",
+    "category": "fuel",
+    "lat": 38.7319,
+    "lon": 35.4819,
+    "description": "Kayseri D-300 çevre yolu; Erciyes Kayak Merkezi kavşağı yakıt istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 784
+  },
+  {
+    "name": "Gaziantep İpekyolu Bulvarı Opet",
+    "category": "fuel",
+    "lat": 37.0719,
+    "lon": 37.3689,
+    "description": "Gaziantep Şehitkamil D-400; Şanlıurfa ve Adana otoyolu bağlantısı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 785
+  },
+  {
+    "name": "Şanlıurfa Diyarbakır Yolu Shell",
+    "category": "fuel",
+    "lat": 37.1842,
+    "lon": 38.7942,
+    "description": "Şanlıurfa Karaköprü D-885; Göbeklitepe kavşağı akaryakıt durağı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 786
+  },
+  {
+    "name": "Diyarbakır Şanlıurfa Bulvarı Petrol Ofisi",
+    "category": "fuel",
+    "lat": 37.9319,
+    "lon": 40.1856,
+    "description": "Diyarbakır Kayapınar D-360; Şehir girişi modern akaryakıt alanı.",
+    "rating": 5,
+    "created_at": "2026-10-05 18:35:00",
+    "id": 787
   }
 ];

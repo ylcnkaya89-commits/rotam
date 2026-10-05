@@ -2,7 +2,7 @@
 <html lang="tr" class="h-full bg-slate-950 text-slate-100">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Rotam | Motosiklet ve Araç Gezi Rotası Planlayıcı</title>
   <meta name="description" content="Motosiklet ve arabalar için virajlı, manzaralı gezi rotası planlayıcı. Otoyollardan kaçın, virajları ve dağ geçitlerini keşfet.">
 
@@ -51,16 +51,72 @@
     }
   </script>
 
+  <!-- Favicon & App Icons -->
+  <link rel="icon" type="image/png" href="rotam_logo.png">
+  <link rel="apple-touch-icon" href="rotam_logo.png">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Apple iOS & iPadOS Web App Support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Rotam">
+  <meta name="theme-color" content="#0f172a">
+
   <!-- Custom Styles -->
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="h-full flex flex-col overflow-hidden font-sans selection:bg-brand-500 selection:text-white">
 
+  <!-- AÇILIŞ ANİMASYONU (SPLASH SCREEN) -->
+  <div id="splash-screen" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center select-none overflow-hidden cursor-pointer" onclick="dismissSplashScreen()" title="Tıkla ve Hemen Başla">
+    <!-- Ortam Işığı & Dönen Pusula Halkası -->
+    <div class="splash-ambient-glow"></div>
+    <div class="splash-compass-ring"></div>
+
+    <div class="relative z-10 flex flex-col items-center max-w-sm px-6 text-center pointer-events-auto">
+      <!-- Logo Kartı -->
+      <div class="splash-logo-card w-28 h-28 sm:w-36 sm:h-36 rounded-3xl p-1 bg-gradient-to-br from-amber-500 via-brand-500 to-orange-600 mb-6 relative">
+        <div class="w-full h-full bg-slate-950 rounded-[22px] overflow-hidden flex items-center justify-center p-0.5 relative shadow-inner">
+          <img src="rotam_logo.png" alt="Rotam Logo" class="w-full h-full object-cover rounded-[20px]">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none"></div>
+        </div>
+      </div>
+
+      <!-- Marka Başlığı -->
+      <h1 class="text-3xl sm:text-4xl font-black tracking-[0.25em] splash-shimmer-text uppercase drop-shadow-lg">
+        ROTAM
+      </h1>
+      <p class="text-xs sm:text-sm font-semibold tracking-[0.3em] text-brand-400 uppercase mt-2">
+        Virajların Özgürlüğü
+      </p>
+      <p class="text-[11px] text-slate-400 mt-1 font-medium">
+        Motosiklet & Gezi Rota Planlayıcı
+      </p>
+
+      <!-- İlerleme Çubuğu & Yükleme Durumu -->
+      <div class="w-56 sm:w-64 mt-7 flex flex-col items-center space-y-2">
+        <div class="w-full h-1.5 bg-slate-900/90 rounded-full overflow-hidden border border-slate-800/80 p-0.5 shadow-inner">
+          <div id="splash-progress-bar" class="h-full bg-gradient-to-r from-amber-500 via-brand-500 to-emerald-400 rounded-full transition-all duration-300 ease-out shadow-sm shadow-amber-500/50" style="width: 15%;"></div>
+        </div>
+        <div class="flex items-center justify-between w-full text-[10px] text-slate-400 font-medium px-0.5">
+          <span id="splash-status-text" class="truncate">Sistem hazırlanıyor...</span>
+          <span id="splash-percent-text" class="text-brand-400 font-semibold ml-2">15%</span>
+        </div>
+      </div>
+
+      <!-- Hızlı Geçiş İpucu -->
+      <span class="text-[10px] text-slate-500 hover:text-slate-300 mt-5 transition-colors flex items-center space-x-1">
+        <span>Tıkla ve Başla</span>
+        <span>➔</span>
+      </span>
+    </div>
+  </div>
+
   <!-- TOP NAVIGATION BAR -->
   <header class="h-16 bg-slate-900/90 border-b border-slate-800 px-4 flex items-center justify-between z-30 shrink-0 backdrop-blur-md">
     <div class="flex items-center space-x-3">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-amber-500 flex items-center justify-center shadow-lg shadow-brand-500/25">
-        <i data-lucide="compass" class="w-6 h-6 text-white"></i>
+      <div class="w-10 h-10 rounded-xl overflow-hidden border border-amber-500/40 shadow-lg shadow-brand-500/25 shrink-0 bg-slate-950 flex items-center justify-center group cursor-pointer hover:border-amber-400 transition-all">
+        <img src="rotam_logo.png" alt="Rotam Logo" class="w-full h-full object-cover">
       </div>
       <div>
         <div class="flex items-center space-x-2">
@@ -249,18 +305,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Yakıt & Maliyet Tahmini -->
-          <div class="mt-3 bg-slate-950/50 p-2.5 rounded-xl border border-slate-800/80 flex items-center justify-between text-xs">
-            <div class="flex items-center space-x-2 text-slate-400">
-              <i data-lucide="fuel" class="w-4 h-4 text-amber-400"></i>
-              <span>Tahmini Yakıt:</span>
-            </div>
-            <div class="text-right">
-              <span id="stat-fuel-liters" class="font-bold text-slate-200">0 L</span>
-              <span class="text-slate-500 text-[11px]">(~<span id="stat-fuel-cost">0</span> TL)</span>
-            </div>
-          </div>
         </div>
 
         <!-- HAVA DURUMU KARTI -->
@@ -291,15 +335,62 @@
           </div>
         </div>
 
-        <!-- MOLA / KEŞİF NOKTALARI FİLTRESİ -->
+        <!-- MOLA / KEŞİF NOKTALARI FİLTRESİ & 50 KM ROTA ANALİZİ -->
         <div class="glass-card rounded-2xl p-4 border border-slate-800/80">
-          <div class="flex items-center justify-between mb-2.5">
+          <div class="flex items-center justify-between mb-2">
             <div class="flex items-center space-x-2">
-              <i data-lucide="map-pinned" class="w-4 h-4 text-purple-400"></i>
+              <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
               <h3 class="text-sm font-semibold text-slate-200">Rotada Keşfet (POI)</h3>
             </div>
+            <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full font-semibold">50 km Koridor</span>
           </div>
-          <p class="text-xs text-slate-400 mb-3">Rota üzerindeki benzinlik, manzara terası ve mola yerlerini haritada göster.</p>
+          <p class="text-xs text-slate-400 mb-3">Güzergah boyunca 50 km çevredeki tüm tarihi kentleri, müzeleri, benzinlikleri ve dinlenme tesislerini analiz et.</p>
+
+          <!-- 50 KM ROTA ANALİZ VE TÜMÜNÜ İŞARETLE BUTONU -->
+          <button id="btn-analyze-route-pois" class="w-full mb-3 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center space-x-2 shadow-lg shadow-amber-500/20 active:scale-[0.98] transition-all">
+            <i data-lucide="compass" class="w-4 h-4"></i>
+            <span>Rotayı Analiz Et (Tüm POI'ler & 50 km)</span>
+          </button>
+
+          <!-- ANALİZ ÖZET KARTI (Başlangıçta gizli, rota analiz edilince açılır) -->
+          <div id="corridor-analysis-badge" class="hidden mb-3 p-3 rounded-xl bg-slate-950/80 border border-amber-500/30 text-xs">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-bold text-amber-400 flex items-center space-x-1.5">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i>
+                <span>50 km Koridoru Analiz Edildi</span>
+              </span>
+              <span id="corridor-total-count" class="font-bold text-white bg-amber-500/20 px-2 py-0.5 rounded-md text-[10px] border border-amber-500/30">0 Nokta</span>
+            </div>
+            <div class="grid grid-cols-2 gap-1.5 text-[11px] text-slate-300 mt-2 pt-2 border-t border-slate-800">
+              <button id="pill-filter-historic" onclick="toggleCorridorCategory('historic')" title="Tarihi yerleri aç/kapat" class="flex items-center space-x-1.5 p-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-amber-500/30 text-left transition-all">
+                <span class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span>
+                <span class="truncate">Tarihi: <strong id="corridor-historic-count" class="text-amber-400 font-bold">0</strong></span>
+              </button>
+              <button id="pill-filter-viewpoint" onclick="toggleCorridorCategory('viewpoint')" title="Manzara noktalarını aç/kapat" class="flex items-center space-x-1.5 p-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-orange-500/30 text-left transition-all">
+                <span class="w-2 h-2 rounded-full bg-orange-400 shrink-0"></span>
+                <span class="truncate">Manzara: <strong id="corridor-viewpoint-count" class="text-orange-400 font-bold">0</strong></span>
+              </button>
+              <button id="pill-filter-fuel" onclick="toggleCorridorCategory('fuel')" title="Benzinlikleri aç/kapat" class="flex items-center space-x-1.5 p-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-emerald-500/30 text-left transition-all">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+                <span class="truncate">Benzin: <strong id="corridor-fuel-count" class="text-emerald-400 font-bold">0</strong></span>
+              </button>
+              <button id="pill-filter-cafe" onclick="toggleCorridorCategory('cafe')" title="Mola tesislerini aç/kapat" class="flex items-center space-x-1.5 p-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-sky-500/30 text-left transition-all">
+                <span class="w-2 h-2 rounded-full bg-sky-400 shrink-0"></span>
+                <span class="truncate">Mola: <strong id="corridor-cafe-count" class="text-sky-400 font-bold">0</strong></span>
+              </button>
+            </div>
+            <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-800/80 text-[10px]">
+              <button onclick="focusAllCorridorPois()" class="text-brand-400 hover:text-brand-300 font-semibold flex items-center space-x-1">
+                <i data-lucide="maximize-2" class="w-3 h-3"></i>
+                <span>Tümünü Göster</span>
+              </button>
+              <button onclick="clearAllPoiMarkers()" class="text-slate-400 hover:text-red-400 font-semibold flex items-center space-x-1">
+                <i data-lucide="trash-2" class="w-3 h-3"></i>
+                <span>Haritayı Temizle</span>
+              </button>
+            </div>
+          </div>
+
           <div class="grid grid-cols-4 gap-1.5">
             <button id="poi-historic" class="poi-toggle flex flex-col items-center justify-center p-2 rounded-xl bg-slate-950 border border-slate-800 text-[10px] text-slate-300 hover:border-amber-500/50 hover:text-amber-400 transition-all">
               <i data-lucide="landmark" class="w-4 h-4 mb-1 text-amber-400"></i>

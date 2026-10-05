@@ -163,8 +163,60 @@ function createTileLayers() {
   };
 }
 
+// AÇILIŞ ANİMASYONU (SPLASH SCREEN)
+let splashDismissed = false;
+
+window.dismissSplashScreen = function() {
+  if (splashDismissed) return;
+  splashDismissed = true;
+  const splash = document.getElementById('splash-screen');
+  if (!splash) return;
+
+  splash.style.opacity = '0';
+  splash.style.transform = 'scale(1.04)';
+  splash.style.pointerEvents = 'none';
+
+  setTimeout(() => {
+    if (splash.parentNode) splash.parentNode.removeChild(splash);
+    if (map) {
+      setTimeout(() => map.invalidateSize(), 100);
+    }
+  }, 650);
+};
+
+function updateSplashProgress(percent, statusText) {
+  const bar = document.getElementById('splash-progress-bar');
+  const txt = document.getElementById('splash-status-text');
+  const pct = document.getElementById('splash-percent-text');
+  if (bar && bar.style) bar.style.width = percent + '%';
+  if (txt && statusText) txt.textContent = statusText;
+  if (pct) pct.textContent = percent + '%';
+}
+
+function initSplashScreenSequence() {
+  const steps = [
+    { delay: 300, pct: 35, text: 'Harita ve viraj profilleri yükleniyor...' },
+    { delay: 700, pct: 68, text: 'Keşif veritabanı (787 nokta) senkronize edildi...' },
+    { delay: 1150, pct: 92, text: 'Benzinlik & mola ağları hazırlanıyor...' },
+    { delay: 1550, pct: 100, text: 'Hazır. Virajların özgürlüğüne hoş geldiniz!' }
+  ];
+
+  steps.forEach(step => {
+    setTimeout(() => {
+      if (!splashDismissed) {
+        updateSplashProgress(step.pct, step.text);
+      }
+    }, step.delay);
+  });
+
+  setTimeout(() => {
+    window.dismissSplashScreen();
+  }, 1950);
+}
+
 // Robust App Bootstrap - runs immediately so all buttons and UI are active
 function startApp() {
+  initSplashScreenSequence();
   initIcons();
   initEventListeners();
   renderWaypointsUI();
@@ -175,6 +227,11 @@ function startApp() {
   }
   loadHistoricPlaces();
   initMapWhenReady();
+
+  // PWA Service Worker (iOS & Android Offline Support)
+  if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration note:', err));
+  }
 }
 
 if (document.readyState === 'loading') {
@@ -798,8 +855,8 @@ async function calculateRoute() {
     // İstatistikleri ve viraj puanını hesapla
     displayRouteStats(route);
 
-    // Aktif keşif (POI) katmanlarını yeni rotaya göre yenile
-    if (state.activePoiTypes.size) refreshActivePois();
+        // Aktif keşif (POI) katmanlarını yeni rotaya göre yenile
+    analyzeRouteCorridor(50000, true);
 
     // Yükseklik profilini çek ve çiz
     fetchAndDisplayElevation(route.geometry.coordinates);
@@ -882,11 +939,15 @@ function displayRouteStats(route) {
     curvinessElem.className = 'text-base font-bold text-sky-400';
   }
 
-  // Update Fuel & Cost Estimation
-  const fuelLiters = ((route.distance / 1000) * (state.fuelConsumption / 100)).toFixed(1);
-  const fuelCost = Math.round(fuelLiters * state.fuelPricePerLiter);
-  document.getElementById('stat-fuel-liters').textContent = `${fuelLiters} L`;
-  document.getElementById('stat-fuel-cost').textContent = fuelCost;
+  // Update Fuel & Cost Estimation (if present in DOM)
+  const fuelLitersEl = document.getElementById('stat-fuel-liters');
+  const fuelCostEl = document.getElementById('stat-fuel-cost');
+  if (fuelLitersEl && fuelCostEl) {
+    const fuelLiters = ((route.distance / 1000) * (state.fuelConsumption / 100)).toFixed(1);
+    const fuelCost = Math.round(fuelLiters * state.fuelPricePerLiter);
+    fuelLitersEl.textContent = `${fuelLiters} L`;
+    fuelCostEl.textContent = fuelCost;
+  }
 
   // Update Profile Badge
   const badge = document.getElementById('route-badge-mode');
@@ -1333,27 +1394,33 @@ function showRoutingLoading(isLoading) {
 // POINTS OF INTEREST (POI) — rota boyunca (veya görünen haritada) keşif noktaları
 const POI_TYPES = {
   historic: {
-    title: 'Tarihi Yer', color: '#f59e0b', fill: '#d97706', radius: 5000,
+    title: 'Tarihi Yer & Müze', color: '#f59e0b', fill: '#d97706', radius: 50000,
     filters: [
-      'node["historic"~"castle|ruins|archaeological_site|monument|fort|city_gate|tomb|memorial|church|mosque|monastery"]["name"]',
-      'way["historic"~"castle|ruins|archaeological_site|fort"]["name"]'
+      'node["historic"~"castle|ruins|archaeological_site|fort|monastery|aqueduct|tomb|city_gate|tower|caravanserai"]["name"]',
+      'way["historic"~"castle|ruins|archaeological_site|fort|monastery|aqueduct|tomb|city_gate|tower|caravanserai"]["name"]',
+      'relation["historic"~"castle|ruins|archaeological_site|fort|monastery"]["name"]',
+      'node["tourism"="museum"]["name"]',
+      'way["tourism"="museum"]["name"]',
+      'relation["tourism"="museum"]["name"]',
+      'node["tourism"~"archaeological_site|attraction"]["historic"]["name"]',
+      'way["tourism"~"archaeological_site|attraction"]["historic"]["name"]'
     ],
     localCategories: ['historic']
   },
   viewpoint: {
-    title: 'Manzara Noktası', color: '#f97316', fill: '#ea580c', radius: 5000,
+    title: 'Manzara Noktası', color: '#f97316', fill: '#ea580c', radius: 50000,
     filters: ['node["tourism"="viewpoint"]', 'node["mountain_pass"="yes"]["name"]'],
     localCategories: ['viewpoint', 'mountain_pass']
   },
   fuel: {
-    title: 'Benzinlik', color: '#10b981', fill: '#059669', radius: 1500,
+    title: 'Benzinlik & Yakıt', color: '#10b981', fill: '#059669', radius: 50000, overpassRadius: 5000,
     filters: ['node["amenity"="fuel"]', 'way["amenity"="fuel"]'],
-    localCategories: []
+    localCategories: ['fuel']
   },
   cafe: {
-    title: 'Kafe / Mola', color: '#0ea5e9', fill: '#0284c7', radius: 1500,
-    filters: ['node["amenity"~"cafe|restaurant"]'],
-    localCategories: []
+    title: 'Mola & Dinlenme', color: '#0ea5e9', fill: '#0284c7', radius: 50000, overpassRadius: 5000,
+    filters: ['node["amenity"~"cafe|restaurant"]', 'node["highway"="services"]'],
+    localCategories: ['cafe', 'rest_area']
   }
 };
 state.poiList = [];
@@ -1363,6 +1430,18 @@ function haversineMeters(lat1, lon1, lat2, lon2) {
   const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
   const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+function minDistanceToRoute(lat, lon, routeCoords) {
+  if (!routeCoords || routeCoords.length === 0) return Infinity;
+  let minDist = Infinity;
+  const step = Math.max(1, Math.floor(routeCoords.length / 150));
+  for (let i = 0; i < routeCoords.length; i += step) {
+    const p = routeCoords[i];
+    const d = haversineMeters(lat, lon, p[1], p[0]);
+    if (d < minDist) minDist = d;
+  }
+  return minDist;
 }
 
 function sampleRouteCoords(maxPoints) {
@@ -1378,43 +1457,82 @@ function sampleRouteCoords(maxPoints) {
 function getPoiSearchArea(type) {
   const cfg = POI_TYPES[type];
   if (state.routeData && state.routeData.geometry && state.routeData.geometry.coordinates.length > 1) {
-    const pts = sampleRouteCoords(70);
+    const pts = sampleRouteCoords(40);
+    // Calculate bbox with buffer
+    let minLat = 90, maxLat = -90, minLon = 180, maxLon = -180;
+    pts.forEach(p => {
+      minLat = Math.min(minLat, p[1]);
+      maxLat = Math.max(maxLat, p[1]);
+      minLon = Math.min(minLon, p[0]);
+      maxLon = Math.max(maxLon, p[0]);
+    });
+    // Add ~0.1 deg buffer (approx 11km)
+    minLat -= 0.1; maxLat += 0.1; minLon -= 0.1; maxLon += 0.1;
+    
+    const searchRadius = cfg.radius || 50000;
+    const overpassRadius = cfg.overpassRadius || searchRadius;
+
+    const bboxStr = `${minLat.toFixed(5)},${minLon.toFixed(5)},${maxLat.toFixed(5)},${maxLon.toFixed(5)}`;
     return {
       mode: 'route',
-      clause: `(around:${cfg.radius},${pts.map(p => `${p[1].toFixed(5)},${p[0].toFixed(5)}`).join(',')})`,
-      contains: (lat, lon) => pts.some(p => haversineMeters(lat, lon, p[1], p[0]) <= cfg.radius * 1.5)
+      bbox: bboxStr,
+      clause: `(${bboxStr})`,
+      contains: (lat, lon) => minDistanceToRoute(lat, lon, state.routeData.geometry.coordinates) <= searchRadius
     };
   }
   if (!map) return null;
   const b = map.getBounds();
   return {
     mode: 'bbox',
-    tooBigForOverpass: map.getZoom() < 8,
+    tooBigForOverpass: map.getZoom() < 6,
+    bbox: `${b.getSouth().toFixed(5)},${b.getWest().toFixed(5)},${b.getNorth().toFixed(5)},${b.getEast().toFixed(5)}`,
     clause: `(${b.getSouth().toFixed(5)},${b.getWest().toFixed(5)},${b.getNorth().toFixed(5)},${b.getEast().toFixed(5)})`,
     contains: (lat, lon) => b.contains([lat, lon])
   };
 }
 
+const OVERPASS_MIRRORS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://lz4.overpass-api.de/api/interpreter',
+  'https://z.overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter'
+];
+
 async function runOverpass(query) {
-  // 1) Yerel sunucu (birden fazla Overpass aynasını dener)
+  // 1) Yerel sunucu
   try {
     const res = await fetchWithTimeout(window.API_BASE + '/api/poi', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query })
-    }, 70000);
-    if (res.ok) return await res.json();
+    }, 15000);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.elements) return data;
+    }
   } catch (e) {
-    console.warn('Yerel POI proxy erişilemedi:', e);
+    console.warn('Yerel POI proxy deneniyor...', e);
   }
-  // 2) Doğrudan ayna (CORS destekli)
-  const res = await fetchWithTimeout('https://overpass-api.de/api/interpreter', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: 'data=' + encodeURIComponent(query)
-  }, 30000);
-  if (!res.ok) throw new Error('Overpass HTTP ' + res.status);
-  return await res.json();
+
+  // 2) Doğrudan halka açık aynaları sırayla dene
+  for (const mirror of OVERPASS_MIRRORS) {
+    try {
+      const res = await fetchWithTimeout(mirror, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'data=' + encodeURIComponent(query)
+      }, 15000);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.elements) return data;
+      }
+    } catch (err) {
+      console.warn(`Overpass ayna (${mirror}) başarısız:`, err);
+    }
+  }
+
+  throw new Error('Tüm Overpass sunucuları yanıt vermedi.');
 }
 
 function showToast(message, kind = 'info') {
@@ -1461,19 +1579,17 @@ async function togglePoi(type, button) {
   state.activePoiTypes.add(type);
   setPoiButtonState(button, true, true);
   const count = await fetchPoiMarkers(type);
-  setPoiButtonState(button, count > 0, false);
-  if (count === 0) state.activePoiTypes.delete(type);
+  setPoiButtonState(button, true, false);
+  
 }
 
 // Rota değiştiğinde aktif POI katmanlarını yenile
 async function refreshActivePois() {
   for (const type of Array.from(state.activePoiTypes)) {
     const btn = document.getElementById('poi-' + type);
-    removePoiMarkers(type);
     setPoiButtonState(btn, true, true);
-    const count = await fetchPoiMarkers(type, true);
-    setPoiButtonState(btn, count > 0, false);
-    if (count === 0) state.activePoiTypes.delete(type);
+    const count = await fetchPoiMarkers(type, true, true);
+    setPoiButtonState(btn, true, false);
   }
 }
 
@@ -1487,7 +1603,7 @@ function removePoiMarkers(type) {
   });
 }
 
-async function fetchPoiMarkers(type, silent = false) {
+async function fetchPoiMarkers(type, silent = false, clearOld = false) {
   const cfg = POI_TYPES[type];
   const area = getPoiSearchArea(type);
   if (!cfg || !area) return 0;
@@ -1511,7 +1627,7 @@ async function fetchPoiMarkers(type, silent = false) {
   let onlineError = null;
   if (!area.tooBigForOverpass) {
     try {
-    const query = `[out:json][timeout:25];(${cfg.filters.map(f => f + area.clause + ';').join('')});out center 80;`;
+    const query = `[out:json][timeout:25];(${cfg.filters.map(f => f + area.clause + ';').join('')});out center 350;`;
     const data = await runOverpass(query);
     (data.elements || []).forEach(el => {
       const lat = el.lat ?? el.center?.lat;
@@ -1529,24 +1645,45 @@ async function fetchPoiMarkers(type, silent = false) {
     onlineError = new Error('Harita çok uzak');
   }
 
+  if (clearOld) removePoiMarkers(type);
+  const routeCoords = state.routeData && state.routeData.geometry ? state.routeData.geometry.coordinates : null;
+
   items.forEach(item => {
+    let distKm = null;
+    if (routeCoords && routeCoords.length > 0) {
+      const d = minDistanceToRoute(item.lat, item.lon, routeCoords);
+      if (d !== Infinity) distKm = (d / 1000).toFixed(1);
+    }
+    item.distKm = distKm;
+
     const idx = state.poiList.push(item) - 1;
+    const radius = type === 'historic' ? 8 : (type === 'fuel' ? 7.5 : 7);
     const marker = L.circleMarker([item.lat, item.lon], {
-      radius: type === 'historic' ? 7 : 6,
+      radius: radius,
       color: cfg.color,
       fillColor: cfg.fill,
-      fillOpacity: 0.9,
+      fillOpacity: 0.95,
       weight: 2
     }).addTo(map);
+
+    let badgeStyle = 'bg-amber-500/20 text-amber-300';
+    if (type === 'viewpoint') badgeStyle = 'bg-orange-500/20 text-orange-300';
+    else if (type === 'fuel') badgeStyle = 'bg-emerald-500/20 text-emerald-300';
+    else if (type === 'cafe') badgeStyle = 'bg-sky-500/20 text-sky-300';
+
+    const safeName = escapeHtml(item.name).replace(/'/g, "\\'");
     marker.bindPopup(`
-      <div class="text-xs">
-        <strong style="color:${cfg.color}">${cfg.title}</strong>
-        <p class="font-medium text-white mt-1">${escapeHtml(item.name)}</p>
-        ${item.desc ? `<p class="text-[10px] text-slate-400 mt-0.5">${escapeHtml(item.desc)}</p>` : ''}
-        <div class="flex items-center space-x-1.5 mt-2">
-          <button onclick="poiAction(${idx}, 'via')" class="text-[10px] bg-brand-600 hover:bg-brand-500 text-white px-2 py-1 rounded font-medium">Rotaya Ekle</button>
-          <button onclick="poiAction(${idx}, 'start')" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-1 rounded">Başlangıç</button>
-          <button onclick="poiAction(${idx}, 'end')" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-1 rounded">Varış</button>
+      <div class="text-xs p-1">
+        <div class="flex items-center justify-between mb-1.5 gap-2">
+          <strong style="color:${cfg.color}" class="font-bold flex items-center gap-1">${cfg.title}</strong>
+          ${distKm ? `<span class="text-[10px] ${badgeStyle} px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">📍 Rotadan ${distKm} km</span>` : ''}
+        </div>
+        <p class="font-bold text-white text-sm mt-0.5">${escapeHtml(item.name)}</p>
+        ${item.desc ? `<p class="text-[11px] text-slate-300 mt-1 leading-relaxed">${escapeHtml(item.desc)}</p>` : ''}
+        <div class="flex items-center space-x-1.5 mt-3 pt-2 border-t border-slate-800">
+          <button onclick="addPoiToRoute(${item.lat}, ${item.lon}, '${safeName}')" class="text-[10px] bg-brand-600 hover:bg-brand-500 text-white px-2.5 py-1.5 rounded-lg font-semibold shadow-md shadow-brand-600/30">Rotaya Ekle</button>
+          <button onclick="setPoiAsEndpoint(${item.lat}, ${item.lon}, '${safeName}', 'start')" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1.5 rounded-lg">Başlangıç</button>
+          <button onclick="setPoiAsEndpoint(${item.lat}, ${item.lon}, '${safeName}', 'end')" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1.5 rounded-lg">Varış</button>
         </div>
       </div>
     `);
@@ -1554,15 +1691,13 @@ async function fetchPoiMarkers(type, silent = false) {
   });
 
   if (!silent) {
-    const where = area.mode === 'route' ? 'rota boyunca' : 'görünen alanda';
+    const where = area.mode === 'route' ? 'rota koridorunda' : 'bu bölgede';
     if (items.length) {
-      showToast(`${items.length} adet ${cfg.title.toLowerCase()} ${where} bulundu${onlineError ? ' (yalnızca yerel veri)' : ''}.`, 'ok');
+      showToast(`${items.length} adet ${cfg.title.toLowerCase()} ${where} keşfedildi.`, 'ok');
     } else if (area.tooBigForOverpass) {
-      showToast('Daha fazla sonuç için haritaya yakınlaşın veya rota oluşturun.', 'info');
-    } else if (onlineError) {
-      showToast('Keşif sunucularına ulaşılamadı. Biraz sonra tekrar deneyin.', 'error');
+      showToast('Daha detaylı keşif için haritaya biraz daha yakınlaşın.', 'info');
     } else {
-      showToast(`${where[0].toUpperCase() + where.slice(1)} ${cfg.title.toLowerCase()} bulunamadı.`, 'info');
+      showToast(`${where[0].toUpperCase() + where.slice(1)} kayıtlı ${cfg.title.toLowerCase()} bulunamadı.`, 'info');
     }
   }
   return items.length;
@@ -1604,6 +1739,12 @@ window.addPoiToRoute = function(lat, lon, name) {
 
 // Event Listeners Setup
 function initEventListeners() {
+  // 50 km Rota Analiz Butonu
+  const btnAnalyzeCorridor = document.getElementById('btn-analyze-route-pois');
+  if (btnAnalyzeCorridor) {
+    btnAnalyzeCorridor.addEventListener('click', () => analyzeRouteCorridor(50000, false));
+  }
+
   // Profile Buttons
   document.querySelectorAll('.profile-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1940,13 +2081,10 @@ async function loadHistoricPlaces() {
     const res = await fetch(window.API_BASE + '/api/places');
     if (res.ok) {
       const dbPlaces = await res.json();
-      const userHistoric = dbPlaces.filter(p => p.category === 'historic' || p.category === 'mountain_pass' || p.category === 'viewpoint');
-      
-      // Combine predefined places with user-saved places, avoiding exact duplicates by name
       const defaultPlaces = window.DEFAULT_HISTORIC_PLACES || [];
       const combined = [...defaultPlaces];
       
-      userHistoric.forEach(up => {
+      dbPlaces.forEach(up => {
         if (!combined.some(dp => dp.name === up.name)) {
           combined.push(up);
         }
@@ -1974,22 +2112,22 @@ function filterHistoricPlaces(query) {
       const combined = `${name} ${desc}`;
 
       if (region === 'Ege') {
-        return ['ege', 'izmir', 'aydın', 'muğla', 'denizli', 'manisa', 'uşak', 'kütahya', 'milas', 'selçuk', 'didim', 'datça', 'fethiye', 'seydikemer', 'bergama', 'assos', 'karia', 'iyonya', 'knidos', 'labranda', 'alinda', 'stratoni', 'nysa', 'priene', 'milet', 'sardes', 'aizanoi', 'blaundos', 'clandras', 'kaunos', 'tlos', 'pinara'].some(k => combined.includes(k));
+        return ['ege', 'izmir', 'aydın', 'muğla', 'denizli', 'manisa', 'uşak', 'kütahya', 'milas', 'selçuk', 'didim', 'datça', 'fethiye', 'seydikemer', 'bergama', 'assos', 'karia', 'iyonya', 'knidos', 'labranda', 'alinda', 'stratoni', 'nysa', 'priene', 'milet', 'sardes', 'aizanoi', 'blaundos', 'clandras', 'kaunos', 'tlos', 'pinara', 'çeşme', 'urla', 'bodrum', 'kuşadası', 'torbalı', 'tire', 'ödemiş', 'erythrai', 'klazomenai', 'seferihisar', 'sığacık', 'dikili', 'çandarlı', 'bornova', 'konak', 'karpuzlu', 'çine', 'sultanhisar', 'germencik', 'ortaklar', 'bafa', 'kapıkırı', 'beçin', 'yatağan', 'kayaköy', 'buldan', 'yenicekent', 'salihli', 'kula', 'çavdarhisar', 'ulubey', 'karahallı'].some(k => combined.includes(k));
       }
       if (region === 'Akdeniz') {
-        return ['akdeniz', 'antalya', 'burdur', 'isparta', 'mersin', 'adana', 'osmaniye', 'hatay', 'kaş', 'kemer', 'demre', 'anamur', 'silifke', 'alanya', 'sagalassos', 'kibyra', 'termessos', 'adada', 'selge', 'arykanda', 'patara', 'xanthos', 'letoon', 'myra', 'phaselis', 'aspendos', 'simena', 'kekova', 'anemurium', 'mamure', 'kanlıdivane', 'uzuncaburç', 'kızkalesi', 'cennet', 'anavarza', 'yılankale', 'karatepe', 'titus'].some(k => combined.includes(k));
+        return ['akdeniz', 'antalya', 'burdur', 'isparta', 'mersin', 'adana', 'osmaniye', 'hatay', 'kaş', 'kemer', 'demre', 'anamur', 'silifke', 'alanya', 'sagalassos', 'kibyra', 'termessos', 'adada', 'selge', 'arykanda', 'patara', 'xanthos', 'letoon', 'myra', 'phaselis', 'aspendos', 'simena', 'kekova', 'anemurium', 'mamure', 'kanlıdivane', 'uzuncaburç', 'kızkalesi', 'cennet', 'anavarza', 'yılankale', 'karatepe', 'titus', 'gölhisar', 'ağlasun', 'bucak', 'çamlık', 'sütçüler', 'yalvaç', 'korkuteli', 'aksu', 'serik', 'belkıs', 'manavgat', 'köprülü', 'kumluca', 'çıralı', 'finike', 'elmalı', 'üçağız', 'kınık', 'seki', 'gazipaşa', 'bozyazı', 'aydıncık', 'narlıkuyu', 'erdemli', 'ayaş', 'mezitli', 'tarsus', 'kozan', 'ceyhan', 'seyhan', 'yüreğir', 'kadirli', 'düziçi', 'toprakkale', 'samandağ', 'çevlik', 'antakya', 'belen', 'payas', 'dörtyol'].some(k => combined.includes(k));
       }
       if (region === 'İç Anadolu') {
-        return ['iç anadolu', 'kapadokya', 'konya', 'ankara', 'çorum', 'sivas', 'eskişehir', 'afyon', 'aksaray', 'nevşehir', 'kayseri', 'karaman', 'niğde', 'göreme', 'midas', 'yazılıkaya', 'ayazini', 'pessinus', 'sivrihisar', 'hattuşa', 'alacahöyük', 'gordion', 'çatalhöyük', 'ihlara', 'selime', 'derinkuyu', 'kaymaklı', 'soğanlı', 'kültepe', 'sultanhanı', 'alahan', 'binbirkilise', 'taşkale', 'eflatunpınar', 'kilistra', 'divriği'].some(k => combined.includes(k));
+        return ['iç anadolu', 'kapadokya', 'konya', 'ankara', 'çorum', 'sivas', 'eskişehir', 'afyon', 'aksaray', 'nevşehir', 'kayseri', 'karaman', 'niğde', 'göreme', 'midas', 'yazılıkaya', 'ayazini', 'pessinus', 'sivrihisar', 'hattuşa', 'alacahöyük', 'gordion', 'çatalhöyük', 'ihlara', 'selime', 'derinkuyu', 'kaymaklı', 'soğanlı', 'kültepe', 'sultanhanı', 'alahan', 'binbirkilise', 'taşkale', 'eflatunpınar', 'kilistra', 'divriği', 'avanos', 'ürgüp', 'uçhisar', 'ortahisar', 'özkonak', 'mazı', 'güzelyurt', 'aşıklı', 'gülağaç', 'ağzıkarahan', 'saratlı', 'yeşilhisar', 'kocasinan', 'gümüşler', 'bor', 'kemerhisar', 'çumra', 'karatay', 'meram', 'gökyurt', 'beyşehir', 'fasıllar', 'selçuklu', 'sille', 'manazan', 'yeşildere', 'mut', 'polatlı', 'yassıhöyük', 'altındağ', 'ulus', 'çankaya', 'haymana', 'boğazkale', 'alaca', 'ortaköy', 'şapinuva', 'han', 'ihsaniye', 'dumlupınar'].some(k => combined.includes(k));
       }
       if (region === 'Marmara') {
-        return ['marmara', 'trakya', 'çanakkale', 'edirne', 'bursa', 'balıkesir', 'kırklareli', 'tekirdağ', 'sakarya', 'düzce', 'kocaeli', 'gelibolu', 'şehitlik', 'truva', 'troas', 'parion', 'kyzikos', 'daskyleion', 'gölyazı', 'tirilye', 'iznik', 'cumalıkızık', 'justinianus', 'prusias', 'konuralp', 'selimiye', 'uzunköprü', 'kıyıköy', 'bolu'].some(k => combined.includes(k));
+        return ['marmara', 'trakya', 'çanakkale', 'edirne', 'bursa', 'balıkesir', 'kırklareli', 'tekirdağ', 'sakarya', 'düzce', 'kocaeli', 'gelibolu', 'şehitlik', 'truva', 'troas', 'parion', 'kyzikos', 'daskyleion', 'gölyazı', 'tirilye', 'iznik', 'cumalıkızık', 'justinianus', 'prusias', 'konuralp', 'selimiye', 'uzunköprü', 'kıyıköy', 'bolu', 'istanbul', 'fatih', 'sarayburnu', 'sultanahmet', 'gülhane', 'beyoğlu', 'galata', 'sarıyer', 'rumeli hisarı', 'beykoz', 'anadolu hisarı', 'yedikule', 'kariye', 'üsküdar', 'kız kulesi', 'beşiktaş', 'dolmabahçe', 'sultanbeyli', 'aydos', 'bilecik', 'söğüt', 'taraklı', 'izmit', 'eceabat', 'seddülbahir', 'kilitbahir', 'tevfikiye', 'babakale', 'ayvacık', 'erdek', 'bandırma', 'ergili', 'edremit', 'altınoluk', 'akçakoca', 'vize'].some(k => combined.includes(k));
       }
       if (region === 'Karadeniz') {
-        return ['karadeniz', 'trabzon', 'rize', 'artvin', 'gümüşhane', 'amasya', 'sinop', 'kastamonu', 'karabük', 'bartın', 'zonguldak', 'ordu', 'giresun', 'samsun', 'sümela', 'vazelon', 'zilkale', 'şenyuva', 'fırtına', 'santa', 'imera', 'kuşkayası', 'amasra', 'hadrianapolis', 'safranbolu', 'mahmut bey', 'boyabat', 'yason', 'şavşat', 'işhan', 'ovit'].some(k => combined.includes(k));
+        return ['karadeniz', 'trabzon', 'rize', 'artvin', 'gümüşhane', 'amasya', 'sinop', 'kastamonu', 'karabük', 'bartın', 'zonguldak', 'ordu', 'giresun', 'samsun', 'sümela', 'vazelon', 'zilkale', 'şenyuva', 'fırtına', 'santa', 'imera', 'kuşkayası', 'amasra', 'hadrianapolis', 'safranbolu', 'mahmut bey', 'boyabat', 'yason', 'şavşat', 'işhan', 'ovit', 'maçka', 'altındere', 'esiroğlu', 'kuştul', 'ortahisar', 'çamlıhemşin', 'pazar', 'hemşin', 'cevizli', 'yusufeli', 'barhal', 'parhali', 'altıparmak', 'tekkale', 'dörtkilise', 'dumanlı', 'olucak', 'krom', 'eskipazar', 'kasaba', 'şebinkarahisar', 'bayadı', 'kurul', 'tokat', 'zile', 'niksar', 'ballıca', 'bayburt', 'baksı'].some(k => combined.includes(k));
       }
       if (region === 'Doğu & Güneydoğu') {
-        return ['doğu', 'güneydoğu', 'mezopotamya', 'urfa', 'şanlıurfa', 'mardin', 'diyarbakır', 'gaziantep', 'adıyaman', 'batman', 'şırnak', 'van', 'kars', 'ağrı', 'erzurum', 'erzincan', 'ardahan', 'bitlis', 'elazığ', 'çıldır', 'şeytan kalesi', 'ani', 'ishak paşa', 'öşk vank', 'çobandede', 'kemaliye', 'tuşpa', 'çavuştepe', 'hoşap', 'ayanis', 'akdamar', 'ahlat', 'nemrut', 'harput', 'palu', 'göbeklitepe', 'karahantepe', 'harran', 'şuayb', 'soğmatar', 'halfeti', 'rumkale', 'zeugma', 'yesemek', 'cendere', 'arsemia', 'perre', 'dara', 'mor gabriel', 'mor evgin', 'zerzevan', 'malabadi', 'hasankeyf', 'finik', 'cizre'].some(k => combined.includes(k));
+        return ['doğu', 'güneydoğu', 'mezopotamya', 'urfa', 'şanlıurfa', 'mardin', 'diyarbakır', 'gaziantep', 'adıyaman', 'batman', 'şırnak', 'van', 'kars', 'ağrı', 'erzurum', 'erzincan', 'ardahan', 'bitlis', 'elazığ', 'çıldır', 'şeytan kalesi', 'ani', 'ishak paşa', 'öşk vank', 'çobandede', 'kemaliye', 'tuşpa', 'çavuştepe', 'hoşap', 'ayanis', 'akdamar', 'ahlat', 'nemrut', 'harput', 'palu', 'göbeklitepe', 'karahantepe', 'harran', 'şuayb', 'soğmatar', 'halfeti', 'rumkale', 'zeugma', 'yesemek', 'cendere', 'arsemia', 'perre', 'dara', 'mor gabriel', 'mor evgin', 'zerzevan', 'malabadi', 'hasankeyf', 'finik', 'cizre', 'arpaçay', 'yıldırımtepe', 'doğubayazıt', 'uzundere', 'çamlıyamaç', 'köprüköy', 'yakutiye', 'tercan', 'ipekyolu', 'gevaş', 'gürpınar', 'güzelsu', 'örencik', 'haliliye', 'eyyübiye', 'yağmurlu', 'yavuzeli', 'nizip', 'belkıs', 'islahiye', 'kahta', 'kocahisar', 'örenli', 'artuklu', 'oğuz', 'midyat', 'güngören', 'nusaybin', 'çınar', 'demirölçek', 'sur', 'silvan', 'malatya', 'battalgazi', 'kahramanmaraş', 'birecik', 'hakkari', 'tunceli', 'çemişgezek', 'pertek', 'kemah', 'muş', 'malazgirt', 'sarıkamış'].some(k => combined.includes(k));
       }
       return true;
     });
@@ -2089,8 +2227,10 @@ window.flyToHistoricSpot = function(lat, lon, name) {
 };
 
 window.addHistoricSpotToRoute = function(lat, lon, name, type) {
+  const startWp = state.waypoints.find(w => w.type === 'start');
+  const endWp = state.waypoints.find(w => w.type === 'end');
+
   if (type === 'start') {
-    const startWp = state.waypoints.find(w => w.type === 'start');
     if (startWp) {
       startWp.lat = lat;
       startWp.lon = lon;
@@ -2098,7 +2238,6 @@ window.addHistoricSpotToRoute = function(lat, lon, name, type) {
       updateMarker(startWp);
     }
   } else if (type === 'end') {
-    const endWp = state.waypoints.find(w => w.type === 'end');
     if (endWp) {
       endWp.lat = lat;
       endWp.lon = lon;
@@ -2106,22 +2245,44 @@ window.addHistoricSpotToRoute = function(lat, lon, name, type) {
       updateMarker(endWp);
     }
   } else {
-    // Via
-    const newWp = {
-      id: 'historic_' + Date.now(),
-      type: 'via',
-      name: name,
-      lat: lat,
-      lon: lon,
-      marker: null
-    };
-    state.waypoints.splice(state.waypoints.length - 1, 0, newWp);
-    updateMarker(newWp);
+    // 'via' veya akıllı rota ekleme:
+    if (startWp && startWp.lat === null) {
+      startWp.lat = lat;
+      startWp.lon = lon;
+      startWp.name = name;
+      updateMarker(startWp);
+    } else if (endWp && endWp.lat === null) {
+      endWp.lat = lat;
+      endWp.lon = lon;
+      endWp.name = name;
+      updateMarker(endWp);
+    } else {
+      const newWp = {
+        id: 'historic_' + Date.now(),
+        type: 'via',
+        name: name,
+        lat: lat,
+        lon: lon,
+        marker: null
+      };
+      // Rotadaki en uygun sıraya ekle (toplam sapmayı en aza indir)
+      let bestIdx = state.waypoints.length - 1, bestCost = Infinity;
+      for (let i = 1; i < state.waypoints.length; i++) {
+        const a = state.waypoints[i - 1], b = state.waypoints[i];
+        if (a.lat === null || b.lat === null) continue;
+        const cost = haversineMeters(a.lat, a.lon, lat, lon) + haversineMeters(lat, lon, b.lat, b.lon) - haversineMeters(a.lat, a.lon, b.lat, b.lon);
+        if (cost < bestCost) { bestCost = cost; bestIdx = i; }
+      }
+      state.waypoints.splice(bestIdx, 0, newWp);
+      updateMarker(newWp);
+    }
   }
 
   renderWaypointsUI();
   calculateRoute();
-  document.getElementById('modal-historic-places').classList.add('hidden');
+  const modal = document.getElementById('modal-historic-places');
+  if (modal) modal.classList.add('hidden');
+  showToast(`"${name}" rotaya eklendi.`, 'ok');
 };
 
 window.searchAndFlyToHistoricPlace = async function(query) {
@@ -2255,3 +2416,253 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// 50 KM GÜZERGAH KORİDORU ANALİZİ & TÜM POI'LERİ İŞARETLEME
+async function analyzeRouteCorridor(radiusMeters = 50000, isAuto = false) {
+  if (!state.routeData || !state.routeData.geometry || !state.routeData.geometry.coordinates) {
+    if (!isAuto) showToast('Lütfen önce başlangıç ve varış noktası seçerek bir rota oluşturun.', 'info');
+    return;
+  }
+
+  const btnAnalyze = document.getElementById('btn-analyze-route-pois');
+  if (btnAnalyze && !isAuto) {
+    btnAnalyze.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>50 km Koridoru Taranıyor...</span>';
+    initIcons();
+  }
+
+  // Önceki POI katmanlarını temizle
+  removePoiMarkers('historic');
+  removePoiMarkers('viewpoint');
+  removePoiMarkers('fuel');
+  removePoiMarkers('cafe');
+  state.activePoiTypes.clear();
+
+  const coords = state.routeData.geometry.coordinates;
+  const localPlaces = (state.allHistoricPlaces && state.allHistoricPlaces.length) ? state.allHistoricPlaces : (window.DEFAULT_HISTORIC_PLACES || []);
+  
+  let historicCount = 0;
+  let viewpointCount = 0;
+  let fuelCount = 0;
+  let cafeCount = 0;
+  const seenKeys = new Set();
+  const addedMarkers = [];
+
+  function addCorridorMarker(p, poiType, distKm) {
+    const key = `${p.lat.toFixed(4)},${p.lon.toFixed(4)}`;
+    if (seenKeys.has(key)) return false;
+    seenKeys.add(key);
+
+    if (poiType === 'fuel') fuelCount++;
+    else if (poiType === 'cafe') cafeCount++;
+    else if (poiType === 'viewpoint') viewpointCount++;
+    else historicCount++;
+
+    const cfg = POI_TYPES[poiType] || POI_TYPES.historic;
+    const item = {
+      lat: p.lat,
+      lon: p.lon,
+      name: p.name,
+      desc: p.description || '',
+      category: poiType,
+      distKm: distKm
+    };
+
+    const idx = state.poiList.push(item) - 1;
+    const radius = (poiType === 'historic') ? 8 : (poiType === 'fuel' ? 7.5 : 7);
+    const marker = L.circleMarker([p.lat, p.lon], {
+      radius: radius,
+      color: cfg.color,
+      fillColor: cfg.fill,
+      fillOpacity: 0.95,
+      weight: 2
+    }).addTo(map);
+
+    let badgeStyle = 'bg-amber-500/20 text-amber-300';
+    if (poiType === 'viewpoint') badgeStyle = 'bg-orange-500/20 text-orange-300';
+    else if (poiType === 'fuel') badgeStyle = 'bg-emerald-500/20 text-emerald-300';
+    else if (poiType === 'cafe') badgeStyle = 'bg-sky-500/20 text-sky-300';
+
+    const safeName = escapeHtml(p.name).replace(/'/g, "\\'");
+    marker.bindPopup(`
+      <div class="text-xs p-1">
+        <div class="flex items-center justify-between mb-1.5 gap-2">
+          <strong style="color:${cfg.color}" class="font-bold flex items-center gap-1">${cfg.title}</strong>
+          <span class="text-[10px] ${badgeStyle} px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">📍 Rotadan ${distKm} km</span>
+        </div>
+        <p class="font-bold text-white text-sm mt-0.5">${escapeHtml(p.name)}</p>
+        ${item.desc ? `<p class="text-[11px] text-slate-300 mt-1 leading-relaxed">${escapeHtml(item.desc)}</p>` : ''}
+        <div class="flex items-center space-x-1.5 mt-3 pt-2 border-t border-slate-800">
+          <button onclick="addPoiToRoute(${p.lat}, ${p.lon}, '${safeName}')" class="text-[10px] bg-brand-600 hover:bg-brand-500 text-white px-2.5 py-1.5 rounded-lg font-semibold shadow-md shadow-brand-600/30">
+            Rotaya Ekle
+          </button>
+          <button onclick="setPoiAsEndpoint(${p.lat}, ${p.lon}, '${safeName}', 'start')" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1.5 rounded-lg">
+            Başlangıç
+          </button>
+          <button onclick="setPoiAsEndpoint(${p.lat}, ${p.lon}, '${safeName}', 'end')" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1.5 rounded-lg">
+            Varış
+          </button>
+        </div>
+      </div>
+    `);
+
+    state.poiMarkers.push({ poiType, marker });
+    addedMarkers.push(marker);
+    return true;
+  }
+
+  // 1) Yerel veritabanını anında ekle (0 gecikme)
+  localPlaces.forEach(p => {
+    const distMeters = minDistanceToRoute(p.lat, p.lon, coords);
+    if (distMeters <= radiusMeters) {
+      const distKm = (distMeters / 1000).toFixed(1);
+      let poiType = 'historic';
+      if (p.category === 'fuel') poiType = 'fuel';
+      else if (p.category === 'cafe' || p.category === 'rest_area') poiType = 'cafe';
+      else if (p.category === 'viewpoint' || p.category === 'mountain_pass') poiType = 'viewpoint';
+      addCorridorMarker(p, poiType, distKm);
+    }
+  });
+
+  function updateCorridorDisplay() {
+    state.activePoiTypes.add('historic');
+    state.activePoiTypes.add('viewpoint');
+    state.activePoiTypes.add('fuel');
+    state.activePoiTypes.add('cafe');
+
+    const btnH = document.getElementById('poi-historic');
+    const btnV = document.getElementById('poi-viewpoint');
+    const btnF = document.getElementById('poi-fuel');
+    const btnC = document.getElementById('poi-cafe');
+    if (btnH) setPoiButtonState(btnH, true, false);
+    if (btnV) setPoiButtonState(btnV, true, false);
+    if (btnF) setPoiButtonState(btnF, true, false);
+    if (btnC) setPoiButtonState(btnC, true, false);
+
+    const totalCorridor = historicCount + viewpointCount + fuelCount + cafeCount;
+    const badge = document.getElementById('corridor-analysis-badge');
+    const totalCountEl = document.getElementById('corridor-total-count');
+    const histCountEl = document.getElementById('corridor-historic-count');
+    const viewCountEl = document.getElementById('corridor-viewpoint-count');
+    const fuelCountEl = document.getElementById('corridor-fuel-count');
+    const cafeCountEl = document.getElementById('corridor-cafe-count');
+
+    if (badge) badge.classList.remove('hidden');
+    if (totalCountEl) totalCountEl.textContent = `${totalCorridor} Nokta`;
+    if (histCountEl) histCountEl.textContent = historicCount;
+    if (viewCountEl) viewCountEl.textContent = viewpointCount;
+    if (fuelCountEl) fuelCountEl.textContent = fuelCount;
+    if (cafeCountEl) cafeCountEl.textContent = cafeCount;
+
+    if (btnAnalyze) {
+      btnAnalyze.innerHTML = '<i data-lucide="compass" class="w-4 h-4"></i><span>Rotayı Yeniden Analiz Et (50 km)</span>';
+      initIcons();
+    }
+  }
+
+  updateCorridorDisplay();
+
+  state.corridorHiddenCategories = {};
+  ['historic', 'viewpoint', 'fuel', 'cafe'].forEach(c => {
+    const pill = document.getElementById('pill-filter-' + c);
+    if (pill) {
+      pill.classList.remove('opacity-40', 'line-through', 'border-dashed', 'bg-slate-950/40');
+      pill.classList.add('bg-slate-900/90');
+    }
+  });
+
+  const totalCorridor = historicCount + viewpointCount + fuelCount + cafeCount;
+  showToast(`🎯 50 km Koridoru: ${totalCorridor} nokta bulundu (${historicCount} Tarihi, ${viewpointCount} Manzara, ${fuelCount} Benzinlik, ${cafeCount} Mola)`, 'ok');
+
+  // 2) Canlı OpenStreetMap Benzinlik ve Dinlenme Tesisi Taraması (Arka Planda)
+  let minLat = 90, maxLat = -90, minLon = 180, maxLon = -180;
+  coords.forEach(pt => {
+    minLat = Math.min(minLat, pt[1]);
+    maxLat = Math.max(maxLat, pt[1]);
+    minLon = Math.min(minLon, pt[0]);
+    maxLon = Math.max(maxLon, pt[0]);
+  });
+  // ~0.06 deg buffer (~6-7 km corridor around route for live stations)
+  minLat -= 0.06; maxLat += 0.06; minLon -= 0.06; maxLon += 0.06;
+  const bbox = `${minLat.toFixed(5)},${minLon.toFixed(5)},${maxLat.toFixed(5)},${maxLon.toFixed(5)}`;
+
+  (async () => {
+    try {
+      const q = `[out:json][timeout:20];(node["amenity"="fuel"](${bbox});node["highway"="services"](${bbox}););out 150;`;
+      const data = await runOverpass(q);
+      if (data && data.elements && data.elements.length > 0) {
+        let addedLive = 0;
+        data.elements.forEach(el => {
+          const lat = el.lat ?? el.center?.lat;
+          const lon = el.lon ?? el.center?.lon;
+          if (lat == null || lon == null) return;
+          const distMeters = minDistanceToRoute(lat, lon, coords);
+          // Rota koridorunda 10 km içerisindeki tüm gerçek benzinlikler
+          if (distMeters <= 10000) {
+            const distKm = (distMeters / 1000).toFixed(1);
+            const tags = el.tags || {};
+            const isService = tags.highway === 'services';
+            const poiType = isService ? 'cafe' : 'fuel';
+            const brand = tags.brand || tags.operator || tags.name || (isService ? 'Karayolu Dinlenme Tesisi' : 'Akaryakıt İstasyonu');
+            const name = tags['name:tr'] || tags.name || brand;
+            const desc = tags.operator ? `İşletmeci: ${tags.operator}` : (tags.brand ? `Marka: ${tags.brand}` : '24 Saat Açık İstasyon');
+            if (addCorridorMarker({ lat, lon, name, description: desc }, poiType, distKm)) {
+              addedLive++;
+            }
+          }
+        });
+        if (addedLive > 0) {
+          updateCorridorDisplay();
+        }
+      }
+    } catch (e) {
+      console.warn('Canlı benzinlik araması arka plan notu:', e);
+    }
+  })();
+}
+
+window.toggleCorridorCategory = function(cat) {
+  state.corridorHiddenCategories = state.corridorHiddenCategories || {};
+  state.corridorHiddenCategories[cat] = !state.corridorHiddenCategories[cat];
+  const isHidden = state.corridorHiddenCategories[cat];
+
+  state.poiMarkers.forEach(m => {
+    if (m.poiType === cat) {
+      if (isHidden) {
+        if (map && map.hasLayer(m.marker)) map.removeLayer(m.marker);
+      } else {
+        if (map && !map.hasLayer(m.marker)) m.marker.addTo(map);
+      }
+    }
+  });
+
+  const pill = document.getElementById('pill-filter-' + cat);
+  if (pill) {
+    if (isHidden) {
+      pill.classList.add('opacity-40', 'line-through', 'border-dashed');
+      pill.classList.remove('bg-slate-900/90');
+      pill.classList.add('bg-slate-950/40');
+    } else {
+      pill.classList.remove('opacity-40', 'line-through', 'border-dashed', 'bg-slate-950/40');
+      pill.classList.add('bg-slate-900/90');
+    }
+  }
+};
+
+window.clearAllPoiMarkers = function() {
+  state.activePoiTypes.clear();
+  state.poiMarkers.forEach(m => { if (map) map.removeLayer(m.marker); });
+  state.poiMarkers = [];
+  state.poiList = [];
+  document.querySelectorAll('.poi-toggle').forEach(btn => setPoiButtonState(btn, false, false));
+  document.getElementById('corridor-analysis-badge')?.classList.add('hidden');
+  showToast('Haritadaki tüm keşif işaretçileri temizlendi.', 'info');
+};
+
+window.focusAllCorridorPois = function() {
+  if (!map || state.poiMarkers.length === 0) return;
+  const activeMarkers = state.poiMarkers.filter(m => map.hasLayer(m.marker)).map(m => m.marker);
+  if (activeMarkers.length === 0) return;
+  const group = new L.featureGroup(activeMarkers);
+  if (routePolyline) group.addLayer(routePolyline);
+  map.fitBounds(group.getBounds(), { padding: [40, 40] });
+};

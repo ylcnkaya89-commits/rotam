@@ -4,84 +4,128 @@
 <dict>
 	<key>files</key>
 	<dict>
+		<key>Resources/AppIcon.icns</key>
+		<data>
+		9/S2Zy/pXUjd2Je3qWvcKiZ9ceE=
+		</data>
 		<key>Resources/app.js</key>
 		<data>
-		CaKPUT0KIOOvyek4OSd7t3G5Qu8=
+		Z1KRlGewRlG9IePVaulNuhjMFV4=
 		</data>
 		<key>Resources/database.py</key>
 		<data>
-		JNTLnPNwXtMqwI+xM4BzMCA5W6Y=
+		KeSO2ihCBy48LP+olcjGtdxrZZU=
 		</data>
 		<key>Resources/index.html</key>
 		<data>
-		uJH4GBL3B9jsivYGXldjBi5pGSA=
+		8Xh/7KrS4Y038eZer/LQ+zGnHJQ=
+		</data>
+		<key>Resources/manifest.json</key>
+		<data>
+		6lh5Aoc7uox6yK3rqwEZoHebMeY=
 		</data>
 		<key>Resources/places_data.js</key>
 		<data>
-		BHw0yRM+Gezd3m9B7zHnj9dTK7c=
+		Z1rG/x9CYPxvEu7sBMRLGJ981Ks=
 		</data>
 		<key>Resources/rotam.db</key>
 		<data>
-		nFqfNGB3LO5TNhNldi5HohgqVsw=
+		rNG3GGCpty6du0wc7WQAh4QTGoA=
+		</data>
+		<key>Resources/rotam_logo.png</key>
+		<data>
+		nfyS9XpoRzYybCcPvBBWtjOEORs=
 		</data>
 		<key>Resources/server.py</key>
 		<data>
-		FdVSrxGgc7p31GguvdADNRbeiT8=
+		52cJb2inEBeMghpklTA86UR1Ffk=
 		</data>
 		<key>Resources/styles.css</key>
 		<data>
-		VBrX7dDva1YiOASmFPJZzlTc5Zk=
+		HHguqjMyZVzxzmaaN8Gc822JKVQ=
+		</data>
+		<key>Resources/sw.js</key>
+		<data>
+		2Lo0BgSUz+Ufczqezx2GdCquCCs=
 		</data>
 	</dict>
 	<key>files2</key>
 	<dict>
+		<key>Resources/AppIcon.icns</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			W0UoMKdKXZlDZGXfBOcL7Q2y1Fmf0/mhu58sAVwXBQE=
+			</data>
+		</dict>
 		<key>Resources/app.js</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			iR5xYaNB2D40uIG+h1KMKUD9n1IbAIxRLVAe1jJ6To8=
+			If4yXF6CWq7G2KgITUNlbwNDRVU5cejHuE5C85Kg4ek=
 			</data>
 		</dict>
 		<key>Resources/database.py</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			fvowJJgmWr754HVJDCeamWzlwOrCUPiB0yOMlM1+hAo=
+			KVNGwDXhWVU6YkMZjsonoRYYPo+MWk2IXkk9+LB9DIs=
 			</data>
 		</dict>
 		<key>Resources/index.html</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			8BvcfW02/4yiZqKwLHe0+tiL8jJlx8wnedmNjYPcR7g=
+			bw+EuL9qvBNwqfzBr+qUSic3A9j3ewj7MLTgg29SIqo=
+			</data>
+		</dict>
+		<key>Resources/manifest.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			tz4IMTwldsUolCA1GQYy+70SR8SUq0KfyBszBivwd3I=
 			</data>
 		</dict>
 		<key>Resources/places_data.js</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			zgSj/zE4eE5RBnHk88vilY8zoZEIiQvLL6GViFP+cKw=
+			5po5AUa62c9OPXIbCKaU3Spxhum4EpQbNaDRdkyVB1c=
 			</data>
 		</dict>
 		<key>Resources/rotam.db</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			xX1IaLBQQDD7IY+GmszeKPyia4STn44Ask+Tmhv26KI=
+			3FIG2ufxE/C/FF7qx05PPpErKp0Dm//gAfUyjQIElOY=
+			</data>
+		</dict>
+		<key>Resources/rotam_logo.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			TRkFJOHJunJg0Fy7/akf9zIPS6DMwCZpvubXjXASeV8=
 			</data>
 		</dict>
 		<key>Resources/server.py</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			drKjQBedj4XsuDjxzL0Cp4fgjBQifRVbkxmYXQ2ADk0=
+			lDOolQnw6gjAWCYV8wfYi6QrCzqIP8IaWyTF4dQPbOQ=
 			</data>
 		</dict>
 		<key>Resources/styles.css</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			KhJt51WHkb7xe6IEVosCbkSHUj6QM9AOYXLgZeAEc1g=
+			hQ5NIsESBvfOJO2NzOAFFTBnG7WJE/K0nNmAnWp028s=
+			</data>
+		</dict>
+		<key>Resources/sw.js</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			BgngpiXWyPutkrbKT3Rk9ghWErj2yl7kNrLbivibTdo=
 			</data>
 		</dict>
 	</dict>

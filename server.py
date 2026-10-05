@@ -26,7 +26,8 @@ import threading
 import time
 
 OVERPASS_MIRRORS = [
-    'https://overpass-api.de/api/interpreter',
+    'https://z.overpass-api.de/api/interpreter',
+    'https://lz4.overpass-api.de/api/interpreter',
     'https://overpass-api.de/api/interpreter',
     'https://overpass.kumi.systems/api/interpreter',
     'https://overpass.private.coffee/api/interpreter',
@@ -43,12 +44,12 @@ def overpass_query(query):
         if query in _poi_cache:
             return _poi_cache[query], 'cache'
     for mirror in OVERPASS_MIRRORS:
-      for attempt in range(3):
+      for attempt in range(1):
         try:
             proc = subprocess.run(
-                ['curl', '-s', '-m', '20', '-A', 'Rotam/1.0 (desktop route planner)',
+                ['curl', '-s', '-m', '8', '-A', 'Rotam/1.0 (desktop route planner)',
                  '-w', '\n%{http_code}', '--data-urlencode', 'data@-', mirror],
-                input=query.encode('utf-8'), capture_output=True, timeout=25)
+                input=query.encode('utf-8'), capture_output=True, timeout=10)
             out = proc.stdout.decode('utf-8', errors='replace')
             body, _, code = out.rpartition('\n')
             code = code.strip()
@@ -221,20 +222,28 @@ def main():
     cloud_port = os.environ.get('PORT')
     if cloud_port:
         PORT = int(cloud_port)
-    host = "0.0.0.0" if os.environ.get('CLOUD_RUN') or os.environ.get('PORT') else "127.0.0.1"
+    host = "0.0.0.0"
     
+    local_ip = "127.0.0.1"
+    try:
+        local_ip = socket.gethostbyname(socket.gethostname())
+    except Exception:
+        pass
+
     socketserver.ThreadingTCPServer.allow_reuse_address = True
     socketserver.ThreadingTCPServer.daemon_threads = True
     for attempt in range(10):
         try:
             with socketserver.ThreadingTCPServer((host, PORT), RotamHandler) as httpd:
-                url = f"http://{'localhost' if host == '127.0.0.1' else host}:{PORT}"
-                print("\n" + "=" * 60)
+                url = f"http://localhost:{PORT}"
+                phone_url = f"http://{local_ip}:{PORT}"
+                print("\n" + "=" * 65)
                 print(" 🏍️  Rotam - Sunucu & SQLite API Aktif!")
-                print(f" 🌐  Arayüz: {url}")
+                print(f" 💻  Bu Bilgisayar: {url}")
+                print(f" 📱  iPhone / iPad (Aynı Wi-Fi): {phone_url}")
                 print(f" 💾  Veritabanı: {os.path.join(DIRECTORY, 'rotam.db')}")
                 print(" 🛑  Durdurmak için: Ctrl+C")
-                print("=" * 60 + "\n")
+                print("=" * 65 + "\n")
                 
                 try:
                     if not os.environ.get('ROTAM_NO_BROWSER') and not os.environ.get('PORT'):
