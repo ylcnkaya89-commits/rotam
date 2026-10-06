@@ -20,7 +20,10 @@ const state = {
   activeTileLayer: null,
   poiMarkers: [],
   highlightMarkers: [],
-  activePoiCategories: new Set(['historic', 'nature', 'photography', 'beach', 'gastronomy', 'cafe', 'fuel', 'ev_charge', 'camping']),
+  activePoiCategories: new Set([
+    'historic', 'nature', 'photography', 'beach', 'gastronomy', 'cafe',
+    'fuel', 'ev_charge', 'camping', 'viewpoint', 'mountain_pass'
+  ]),
   allPlaces: [],
   corridorPois: [],
   smartRecommendations: [],
@@ -50,6 +53,73 @@ const CATEGORY_CONFIG = {
   viewpoint: { title: 'Seyir Noktası & Geçit', icon: 'mountain', emoji: '🌄', color: '#ea580c', fill: '#f97316', pinClass: 'pin-viewpoint' },
   mountain_pass: { title: 'Dağ Geçidi', icon: 'mountain-snow', emoji: '⛰️', color: '#4f46e5', fill: '#6366f1', pinClass: 'pin-mountain_pass' }
 };
+
+// 6 Primary Category Filter Groups Mapping all 871 Places Harmoniously
+const CATEGORY_GROUPS = {
+  historic: ['historic'],
+  nature: ['nature', 'camping'],
+  photography: ['photography', 'viewpoint', 'mountain_pass'],
+  beach: ['beach'],
+  gastronomy: ['gastronomy', 'cafe'],
+  fuel: ['fuel', 'ev_charge']
+};
+
+// Modern Glassmorphic Non-Blocking Toast Notification System
+function showToast(message, type = 'info') {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] flex flex-col items-center space-y-2 pointer-events-none px-4 w-full max-w-md';
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  const typeStyles = {
+    success: 'border-emerald-500/50 bg-slate-900/95 text-emerald-300 shadow-emerald-500/10',
+    info: 'border-amber-500/50 bg-slate-900/95 text-amber-200 shadow-amber-500/10',
+    warning: 'border-orange-500/50 bg-slate-900/95 text-orange-200 shadow-orange-500/10',
+    error: 'border-rose-500/50 bg-slate-900/95 text-rose-200 shadow-rose-500/10'
+  };
+  const iconMap = {
+    success: 'check-circle-2',
+    info: 'info',
+    warning: 'alert-triangle',
+    error: 'alert-circle'
+  };
+
+  const style = typeStyles[type] || typeStyles.info;
+  const icon = iconMap[type] || 'info';
+
+  toast.className = `pointer-events-auto backdrop-blur-md px-4 py-3 rounded-2xl border ${style} shadow-2xl flex items-center space-x-3 text-xs font-medium transform transition-all duration-300 ease-out translate-y-4 opacity-0 cursor-pointer max-w-full`;
+  toast.innerHTML = `
+    <i data-lucide="${icon}" class="w-4 h-4 shrink-0"></i>
+    <span class="flex-1 leading-snug">${escapeHtml(message)}</span>
+    <button class="text-slate-400 hover:text-white p-0.5 ml-2" onclick="this.parentElement.remove()">
+      <i data-lucide="x" class="w-3.5 h-3.5"></i>
+    </button>
+  `;
+
+  container.appendChild(toast);
+  initIcons();
+
+  requestAnimationFrame(() => {
+    toast.classList.remove('translate-y-4', 'opacity-0');
+    toast.classList.add('translate-y-0', 'opacity-100');
+  });
+
+  const timer = setTimeout(() => {
+    toast.classList.add('opacity-0', 'translate-y-2');
+    setTimeout(() => toast.remove(), 300);
+  }, 3800);
+
+  toast.addEventListener('click', (e) => {
+    if (e.target.closest('button')) return;
+    clearTimeout(timer);
+    toast.classList.add('opacity-0', 'translate-y-2');
+    setTimeout(() => toast.remove(), 200);
+  });
+}
 
 // Initial Database Loader (Merging default places with local storage additions)
 function initPlacesDatabase() {
@@ -284,6 +354,9 @@ function dismissSplashScreen() {
 
 // Homepage Hero Planner Toggle
 function showHomepagePlanner() {
+  if (window.innerWidth < 768) {
+    closeRightPanel();
+  }
   const sidebar = document.getElementById('sidebar');
   if (window.innerWidth >= 768 && sidebar) {
     sidebar.classList.remove('hidden');
@@ -294,8 +367,8 @@ function showHomepagePlanner() {
     return;
   }
   if (sidebar) {
-    sidebar.classList.toggle('hidden');
-    sidebar.classList.toggle('flex');
+    sidebar.classList.remove('hidden');
+    sidebar.classList.add('flex');
     initIcons();
     if (map) setTimeout(() => map.invalidateSize(), 200);
   }
@@ -461,7 +534,7 @@ function setHeroEnd(city) {
 // GPS Location for Start Point
 function useCurrentLocationForStart() {
   if (!navigator.geolocation) {
-    alert('Tarayıcınız konum servisini desteklemiyor.');
+    showToast('Tarayıcınız konum servisini desteklemiyor.', 'warning');
     return;
   }
   const input = document.getElementById('hero-start-input');
@@ -479,9 +552,10 @@ function useCurrentLocationForStart() {
       if (input) input.value = '📍 Mevcut Konumum';
       updateWaypointsListUI();
       updateWaypointMarkers();
+      showToast('Mevcut konumunuz başlangıç noktası olarak ayarlandı.', 'success');
     },
     (err) => {
-      alert('Konum alınamadı: ' + err.message);
+      showToast('Konum alınamadı: ' + err.message, 'error');
       if (input) input.value = '';
     },
     { enableHighAccuracy: true, timeout: 10000 }
@@ -515,7 +589,7 @@ async function submitHeroRoute() {
   const endVal = document.getElementById('hero-end-input')?.value.trim();
 
   if (!startVal || !endVal) {
-    alert('Lütfen başlangıç ve varış noktalarını girin.');
+    showToast('Lütfen başlangıç ve varış noktalarını girin.', 'warning');
     return;
   }
 
@@ -532,12 +606,12 @@ async function submitHeroRoute() {
 
   if (!startCoord) {
     showLoadingBanner(false);
-    alert(`"${startVal}" konumu bulunamadı. Lütfen kontrol edip tekrar deneyin.`);
+    showToast(`"${startVal}" konumu bulunamadı. Lütfen kontrol edip tekrar deneyin.`, 'warning');
     return;
   }
   if (!endCoord) {
     showLoadingBanner(false);
-    alert(`"${endVal}" konumu bulunamadı. Lütfen kontrol edip tekrar deneyin.`);
+    showToast(`"${endVal}" konumu bulunamadı. Lütfen kontrol edip tekrar deneyin.`, 'warning');
     return;
   }
 
@@ -620,10 +694,12 @@ function addWaypointField() {
 function removeWaypoint(index) {
   if (index <= 0 || index >= state.waypoints.length - 1) return;
   const wp = state.waypoints[index];
-  if (wp.marker && map) map.removeLayer(wp.marker);
+  const name = wp ? (wp.name || 'Durak') : 'Durak';
+  if (wp && wp.marker && map) map.removeLayer(wp.marker);
   state.waypoints.splice(index, 1);
   updateWaypointsListUI();
   calculateRouteMain();
+  showToast(`"${name}" rotadan kaldırıldı.`, 'info');
 }
 
 function reverseRoute() {
@@ -659,6 +735,8 @@ function clearRouteDisplay() {
   clearPoiMarkers();
   state.routeData = null;
   state.routeAlternatives = [];
+  state.corridorPois = [];
+  state.smartRecommendations = [];
   renderInitialHighlights();
 
   if (map) {
@@ -673,11 +751,24 @@ function clearRouteDisplay() {
   document.getElementById('mobile-mini-cockpit')?.classList.add('hidden');
   document.getElementById('btn-mobile-open-planner')?.classList.remove('hidden');
   document.getElementById('badge-right-panel-poi-count')?.classList.add('hidden');
-  document.getElementById('sidebar-shortcut-corridor-count')?.replaceChildren();
+
+  const corridorTotal = document.getElementById('corridor-total-count');
+  if (corridorTotal) corridorTotal.textContent = '0 Nokta';
+
+  const sidebarCount = document.getElementById('sidebar-shortcut-corridor-count');
+  if (sidebarCount) sidebarCount.textContent = '0 Keşif';
+
+  ['historic', 'nature', 'photography', 'beach', 'gastronomy', 'fuel'].forEach(cat => {
+    const pill = document.getElementById(`count-pill-${cat}`);
+    if (pill) pill.textContent = '0';
+  });
+
   document.getElementById('btn-export-gpx')?.setAttribute('disabled', 'true');
   document.getElementById('btn-open-gmaps')?.setAttribute('disabled', 'true');
   document.getElementById('btn-save-route-modal')?.setAttribute('disabled', 'true');
+
   renderCorridorPoiList();
+  generateSmartStopRecommendations(null);
   renderJourneyTimeline();
 }
 
@@ -786,7 +877,7 @@ async function calculateRouteMain() {
   const validPoints = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
   if (validPoints.length < 2) {
     showLoadingBanner(false);
-    alert('Lütfen en az başlangıç ve varış noktası girin veya haritadan 2 nokta seçin.');
+    showToast('Lütfen en az başlangıç ve varış noktası girin veya haritadan 2 nokta seçin.', 'warning');
     return;
   }
 
@@ -801,7 +892,7 @@ async function calculateRouteMain() {
 
     if (!alternatives || alternatives.length === 0) {
       showLoadingBanner(false);
-      alert('Seçilen noktalar arasında uygun bir güzergah bulunamadı.');
+      showToast('Seçilen noktalar arasında uygun bir güzergah bulunamadı.', 'warning');
       return;
     }
 
@@ -858,7 +949,7 @@ async function calculateRouteMain() {
 
   } catch (error) {
     console.error('Route calculation error:', error);
-    alert('Rota hesaplanırken bir hata oluştu. Lütfen bağlantınızı kontrol edin.');
+    showToast('Rota hesaplanırken bir hata oluştu. Lütfen bağlantınızı kontrol edin.', 'error');
   } finally {
     showLoadingBanner(false);
   }
@@ -1184,10 +1275,7 @@ function analyzeRouteCorridor(route, radiusMeters = 50000) {
     photography: 0,
     beach: 0,
     gastronomy: 0,
-    cafe: 0,
-    fuel: 0,
-    ev_charge: 0,
-    camping: 0
+    fuel: 0
   };
 
   state.allPlaces.forEach(p => {
@@ -1195,8 +1283,20 @@ function analyzeRouteCorridor(route, radiusMeters = 50000) {
     if (distMeters <= radiusMeters) {
       const distKm = (distMeters / 1000).toFixed(1);
       const cat = p.category || 'historic';
-      if (counts[cat] !== undefined) counts[cat]++;
-      else counts.historic++;
+
+      if (cat === 'nature' || cat === 'camping') {
+        counts.nature++;
+      } else if (cat === 'photography' || cat === 'viewpoint' || cat === 'mountain_pass') {
+        counts.photography++;
+      } else if (cat === 'gastronomy' || cat === 'cafe') {
+        counts.gastronomy++;
+      } else if (cat === 'fuel' || cat === 'ev_charge') {
+        counts.fuel++;
+      } else if (cat === 'beach') {
+        counts.beach++;
+      } else {
+        counts.historic++;
+      }
 
       found.push({ ...p, distKm: parseFloat(distKm) });
     }
@@ -1244,9 +1344,12 @@ function analyzeRouteCorridor(route, radiusMeters = 50000) {
   if (countPills.photography) countPills.photography.textContent = counts.photography;
   if (countPills.beach) countPills.beach.textContent = counts.beach;
   if (countPills.gastronomy) countPills.gastronomy.textContent = counts.gastronomy;
-  if (countPills.fuel) countPills.fuel.textContent = counts.fuel + counts.ev_charge;
+  if (countPills.fuel) countPills.fuel.textContent = counts.fuel;
 
-  // Plot Markers on Map
+  // Visual filter pill states
+  updatePoiCategoryFilterUI();
+
+  // Plot Markers on Map & Right List
   renderCorridorPoiMarkers();
   renderCorridorPoiList();
 }
@@ -1276,7 +1379,6 @@ function renderCorridorPoiMarkers() {
 
     const marker = L.marker([p.lat, p.lon], { icon }).addTo(map);
 
-    const safeName = escapeHtml(p.name).replace(/'/g, "\\'");
     marker.bindPopup(`
       <div class="text-xs p-1">
         <div class="flex items-center justify-between mb-1.5 gap-2">
@@ -1289,7 +1391,7 @@ function renderCorridorPoiMarkers() {
         <p class="font-bold text-white text-sm mt-0.5">${escapeHtml(p.name)}</p>
         ${p.description ? `<p class="text-[11px] text-slate-300 mt-1 leading-relaxed">${escapeHtml(p.description)}</p>` : ''}
         <div class="flex items-center space-x-1.5 mt-3 pt-2 border-t border-slate-800">
-          <button onclick="addPoiToRoute(${p.lat}, ${p.lon}, '${safeName}')" class="text-[10px] bg-brand-600 hover:bg-brand-500 text-white px-2.5 py-1.5 rounded-lg font-semibold shadow-md shadow-brand-600/30">
+          <button onclick="addPlaceByIdToRoute(${p.id})" class="text-[10px] bg-brand-600 hover:bg-brand-500 text-white px-2.5 py-1.5 rounded-lg font-semibold shadow-md shadow-brand-600/30">
             Rotaya Ekle
           </button>
           <button onclick="openPlaceDetailById(${p.id})" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1.5 rounded-lg">
@@ -1310,13 +1412,37 @@ function clearPoiMarkers() {
   state.poiMarkers = [];
 }
 
-// Toggle Corridor Filter Category
-function togglePoiCategoryFilter(category) {
-  if (state.activePoiCategories.has(category)) {
-    state.activePoiCategories.delete(category);
-  } else {
-    state.activePoiCategories.add(category);
-  }
+// Update Filter Pill Active/Inactive Visual States
+function updatePoiCategoryFilterUI() {
+  Object.keys(CATEGORY_GROUPS).forEach(key => {
+    const btn = document.getElementById(`filter-pill-${key}`);
+    if (!btn) return;
+    const primary = CATEGORY_GROUPS[key][0];
+    const isActive = state.activePoiCategories.has(primary);
+    if (isActive) {
+      btn.classList.remove('opacity-40', 'border-slate-900', 'bg-slate-950/40');
+      btn.classList.add('opacity-100', 'border-slate-800', 'bg-slate-950');
+    } else {
+      btn.classList.remove('opacity-100', 'border-slate-800', 'bg-slate-950');
+      btn.classList.add('opacity-40', 'border-slate-900', 'bg-slate-950/40');
+    }
+  });
+}
+
+// Toggle Corridor Filter Category Group
+function togglePoiCategoryFilter(groupKey) {
+  const members = CATEGORY_GROUPS[groupKey] || [groupKey];
+  const isCurrentlyActive = state.activePoiCategories.has(members[0]);
+
+  members.forEach(cat => {
+    if (isCurrentlyActive) {
+      state.activePoiCategories.delete(cat);
+    } else {
+      state.activePoiCategories.add(cat);
+    }
+  });
+
+  updatePoiCategoryFilterUI();
   renderCorridorPoiMarkers();
   renderCorridorPoiList();
 }
@@ -1360,7 +1486,6 @@ function renderCorridorPoiList() {
     const cfg = CATEGORY_CONFIG[p.category] || CATEGORY_CONFIG.historic;
     const div = document.createElement('div');
     div.className = 'glass-card p-2.5 rounded-xl border border-slate-800/80 flex items-start justify-between space-x-2 text-xs hover:border-slate-700 transition-all';
-    const safeName = escapeHtml(p.name).replace(/'/g, "\\'");
 
     div.innerHTML = `
       <div class="min-w-0 flex-1">
@@ -1375,7 +1500,7 @@ function renderCorridorPoiList() {
         </div>
       </div>
       <div class="flex flex-col space-y-1 shrink-0">
-        <button onclick="addPoiToRoute(${p.lat}, ${p.lon}, '${safeName}')" class="p-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-[10px] font-semibold flex items-center space-x-1 shadow-sm" title="Rotaya Ekle">
+        <button onclick="addPlaceByIdToRoute(${p.id})" class="p-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-[10px] font-semibold flex items-center space-x-1 shadow-sm" title="Rotaya Ekle">
           <i data-lucide="plus" class="w-3 h-3"></i>
           <span>Ekle</span>
         </button>
@@ -1422,7 +1547,6 @@ function generateSmartStopRecommendations(route) {
     const cfg = CATEGORY_CONFIG[p.category] || CATEGORY_CONFIG.historic;
     const detourKm = (p.distKm * 1.8).toFixed(1);
     const detourMin = Math.round((detourKm / 45) * 60);
-    const safeName = escapeHtml(p.name).replace(/'/g, "\\'");
 
     const card = document.createElement('div');
     card.className = 'glass-card p-3 rounded-2xl border border-amber-500/30 bg-slate-950/80 space-y-2 text-xs animate-slide-in';
@@ -1441,7 +1565,7 @@ function generateSmartStopRecommendations(route) {
       <p class="text-[11px] text-slate-300 leading-relaxed">${escapeHtml(p.description || '')}</p>
       <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1.5 border-t border-slate-800">
         <span>Önerilen Mola: ${p.recommended_duration || '1-2 saat'}</span>
-        <button onclick="addPoiToRoute(${p.lat}, ${p.lon}, '${safeName}')" class="bg-brand-600 hover:bg-brand-500 text-white font-bold px-2.5 py-1 rounded-lg shadow-sm shadow-brand-600/30 flex items-center space-x-1">
+        <button onclick="addPlaceByIdToRoute(${p.id})" class="bg-brand-600 hover:bg-brand-500 text-white font-bold px-2.5 py-1 rounded-lg shadow-sm shadow-brand-600/30 flex items-center space-x-1">
           <i data-lucide="plus" class="w-3 h-3"></i>
           <span>ROTAYA EKLE</span>
         </button>
@@ -1454,9 +1578,28 @@ function generateSmartStopRecommendations(route) {
   initIcons();
 }
 
+// Add Place by Database ID to Route
+function addPlaceByIdToRoute(id) {
+  const place = state.allPlaces.find(p => p.id === id);
+  if (!place) return;
+  addPoiToRoute(place.lat, place.lon, place.name);
+}
+
 // Add POI to Route as an Optimal Intermediate Waypoint
 function addPoiToRoute(lat, lon, name) {
-  const insertIndex = state.waypoints.length - 1;
+  // Prevent duplicate additions
+  const isDuplicate = state.waypoints.some(w => {
+    if (w.lat === null || w.lon === null) return false;
+    const dist = haversineMeters(w.lat, w.lon, lat, lon);
+    return dist < 120 || (w.name && w.name.trim().toLowerCase() === name.trim().toLowerCase());
+  });
+
+  if (isDuplicate) {
+    showToast(`"${name}" zaten rotanızda durak olarak ekli.`, 'info');
+    return;
+  }
+
+  const insertIndex = Math.max(1, state.waypoints.length - 1);
   const newWp = {
     id: 'wp-' + Date.now(),
     type: 'waypoint',
@@ -1471,7 +1614,7 @@ function addPoiToRoute(lat, lon, name) {
   updateWaypointMarkers();
   calculateRouteMain();
 
-  alert(`"${name}" rotanıza başarıyla eklendi! Rota güncelleniyor.`);
+  showToast(`"${name}" rotanıza durak olarak eklendi! Güzergah güncelleniyor...`, 'success');
 }
 
 // Reordering stops along the route
@@ -1552,6 +1695,7 @@ function renderJourneyTimeline() {
     const isStart = idx === 0;
     const isEnd = idx === valid.length - 1;
     const isWaypoint = !isStart && !isEnd;
+    const realIdx = state.waypoints.indexOf(wp);
 
     const div = document.createElement('div');
     div.className = 'timeline-item flex items-start space-x-3 text-xs relative pb-4';
@@ -1570,25 +1714,25 @@ function renderJourneyTimeline() {
             <span>${icon}</span>
             <span>${label}</span>
           </span>
-          ${isWaypoint ? `
+          ${isWaypoint && realIdx > 0 ? `
             <div class="flex items-center space-x-1">
-              ${idx > 1 ? `
-                <button onclick="moveWaypointUp(${idx})" class="p-1 text-slate-400 hover:text-white" title="Yukarı Taşı">
+              ${realIdx > 1 ? `
+                <button onclick="moveWaypointUp(${realIdx})" class="p-1 text-slate-400 hover:text-white" title="Yukarı Taşı">
                   <i data-lucide="chevron-up" class="w-3 h-3"></i>
                 </button>
               ` : ''}
-              ${idx < valid.length - 2 ? `
-                <button onclick="moveWaypointDown(${idx})" class="p-1 text-slate-400 hover:text-white" title="Aşağı Taşı">
+              ${realIdx < state.waypoints.length - 2 ? `
+                <button onclick="moveWaypointDown(${realIdx})" class="p-1 text-slate-400 hover:text-white" title="Aşağı Taşı">
                   <i data-lucide="chevron-down" class="w-3 h-3"></i>
                 </button>
               ` : ''}
-              <button onclick="removeWaypoint(${idx})" class="p-1 text-slate-500 hover:text-red-400" title="Durağı Kaldır">
+              <button onclick="removeWaypoint(${realIdx})" class="p-1 text-slate-500 hover:text-red-400" title="Durağı Kaldır">
                 <i data-lucide="trash-2" class="w-3 h-3"></i>
               </button>
             </div>
           ` : ''}
         </div>
-        <p class="font-bold text-white text-xs mt-0.5">${escapeHtml(wp.name || 'İsimsiz Nokta')}</p>
+        <p class="font-bold text-white text-xs mt-0.5">${escapeHtml(wp.name || (isStart ? 'Başlangıç Konumu' : isEnd ? 'Varış Konumu' : 'İsimsiz Durak'))}</p>
         <p class="text-[10px] text-slate-400 mt-0.5">${isStart ? 'Çıkış Noktası' : isEnd ? 'Hedef Varış' : 'Planlanan Durak'}</p>
       </div>
     `;
@@ -1880,7 +2024,7 @@ function haversineMeters(lat1, lon1, lat2, lon2) {
 function minDistanceToRoute(lat, lon, routeCoords) {
   if (!routeCoords || routeCoords.length === 0) return Infinity;
   let minDist = Infinity;
-  const step = Math.max(1, Math.floor(routeCoords.length / 150));
+  const step = Math.max(1, Math.floor(routeCoords.length / 350));
   for (let i = 0; i < routeCoords.length; i += step) {
     const p = routeCoords[i];
     const d = haversineMeters(lat, lon, p[1], p[0]);
@@ -2127,7 +2271,7 @@ function handleSaveRouteSubmit(e) {
   localStorage.setItem('rotam_saved_routes', JSON.stringify(savedList));
 
   closeSaveRouteModal();
-  alert('Rota başarıyla kaydedildi!');
+  showToast('Rota başarıyla kaydedildi!', 'success');
 }
 
 function openSavedRoutesModal() {
@@ -2292,7 +2436,7 @@ function submitAdminNewPlace() {
   const desc = document.getElementById('admin-place-desc')?.value.trim();
 
   if (!name || isNaN(lat) || isNaN(lon)) {
-    alert('Lütfen mekan adı, enlem ve boylam değerlerini eksiksiz girin.');
+    showToast('Lütfen mekan adı, enlem ve boylam değerlerini eksiksiz girin.', 'warning');
     return;
   }
 
@@ -2322,7 +2466,7 @@ function submitAdminNewPlace() {
   updateAdminStats();
   renderAdminPlacesList();
   toggleAdminAddForm();
-  alert('Yeni mekan başarıyla eklendi!');
+  showToast('Yeni mekan başarıyla eklendi!', 'success');
 }
 
 function renderAdminPlacesList() {
@@ -2403,16 +2547,16 @@ function importPlacesJsonBackup(event) {
     try {
       const parsed = JSON.parse(e.target.result);
       if (!Array.isArray(parsed)) {
-        alert('Hata: Yüklenen JSON dosyası geçerli bir mekan listesi içermiyor.');
+        showToast('Hata: Yüklenen JSON dosyası geçerli bir mekan listesi içermiyor.', 'error');
         return;
       }
       state.allPlaces = parsed;
       localStorage.setItem('rotam_custom_places', JSON.stringify(parsed));
       updateAdminStats();
       renderAdminPlacesList();
-      alert(`Başarılı! ${parsed.length} mekan başarıyla geri yüklendi.`);
+      showToast(`Başarılı! ${parsed.length} mekan başarıyla geri yüklendi.`, 'success');
     } catch (err) {
-      alert('Dosya okuma hatası: ' + err.message);
+      showToast('Dosya okuma hatası: ' + err.message, 'error');
     }
   };
   reader.readAsText(file);
@@ -2509,7 +2653,7 @@ function parseGpxFile(file) {
       const trkpts = xmlDoc.getElementsByTagName('trkpt');
 
       if (!trkpts || trkpts.length === 0) {
-        alert('GPX dosyasında iz noktası (trkpt) bulunamadı.');
+        showToast('GPX dosyasında iz noktası (trkpt) bulunamadı.', 'warning');
         return;
       }
 
@@ -2554,9 +2698,9 @@ function parseGpxFile(file) {
       updateWaypointsListUI();
       updateWaypointMarkers();
 
-      alert(`GPX rotası yüklendi: ${(totalDist / 1000).toFixed(1)} km`);
+      showToast(`GPX rotası yüklendi: ${(totalDist / 1000).toFixed(1)} km`, 'success');
     } catch (err) {
-      alert('GPX işleme hatası: ' + err.message);
+      showToast('GPX işleme hatası: ' + err.message, 'error');
     }
   };
   reader.readAsText(file);
