@@ -1282,42 +1282,92 @@
 
   <!-- MODAL: MEKAN DETAY PENCERESİ (DESTINATION DETAIL) -->
   <div id="modal-place-detail" class="hidden fixed inset-0 z-[1100] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="responsive-modal-card bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col">
-      <div class="p-4 border-b border-slate-800 flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-          <span id="place-detail-icon" class="text-xl">📍</span>
-          <div>
-            <h3 id="place-detail-name" class="text-base font-bold text-white">Mekan Adı</h3>
-            <span id="place-detail-cat-badge" class="text-[10px] text-amber-400 font-semibold">Tarih</span>
-          </div>
+    <div class="responsive-modal-card bg-slate-900 border border-slate-800 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      
+      <!-- HERO RESİM / KAPAK ALANI -->
+      <div id="place-detail-hero" class="relative w-full h-48 sm:h-56 bg-slate-950 shrink-0 overflow-hidden">
+        <!-- Gerçek Fotoğraf -->
+        <img id="place-detail-img" src="" alt="Mekan Fotoğrafı" class="w-full h-full object-cover transition-opacity duration-500 opacity-0">
+        
+        <!-- Yükleniyor / Skeleton Shimmer -->
+        <div id="place-detail-img-skeleton" class="absolute inset-0 bg-slate-800/80 animate-pulse flex flex-col items-center justify-center space-y-2 text-slate-400">
+          <i data-lucide="image" class="w-8 h-8 opacity-60"></i>
+          <span class="text-[11px] font-medium">Fotoğraf arşivden taranıyor...</span>
         </div>
-        <button onclick="closePlaceDetailModal()" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
+
+        <!-- Fotoğraf Bulunamadı Fallback -->
+        <div id="place-detail-fallback-emoji" class="hidden absolute inset-0 bg-gradient-to-br from-slate-900 to-slate-950 flex items-center justify-center text-5xl">
+          🏛️
+        </div>
+
+        <!-- Karartma / Gradient Katmanı -->
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/30 to-black/60 pointer-events-none"></div>
+
+        <!-- Üst Kontroller: Kategori & Kapat -->
+        <div class="absolute top-3 inset-x-3 flex items-center justify-between z-10">
+          <span id="place-detail-cat-badge" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-950/80 backdrop-blur-md text-amber-400 border border-amber-500/30 shadow-md">
+            Tarih & Antik Kent
+          </span>
+          <button onclick="closePlaceDetailModal()" class="p-1.5 rounded-full bg-slate-950/80 backdrop-blur-md text-slate-300 hover:text-white hover:bg-slate-800 transition-colors shadow-md" title="Kapat">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Alt Bilgi: Başlık & Konum -->
+        <div class="absolute bottom-3 inset-x-4 z-10 flex items-end justify-between">
+          <div class="min-w-0 pr-2">
+            <h3 id="place-detail-name" class="text-lg sm:text-xl font-black text-white drop-shadow-md leading-tight">Mekan Adı</h3>
+            <div class="flex items-center space-x-1.5 mt-0.5 text-[11px] text-slate-200">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
+              <span id="place-detail-city" class="font-medium">Türkiye</span>
+            </div>
+          </div>
+          <span id="place-detail-img-source" class="text-[9px] bg-black/60 text-slate-300 px-2 py-0.5 rounded-md backdrop-blur-sm shrink-0 whitespace-nowrap hidden">
+            Wikimedia Commons
+          </span>
+        </div>
       </div>
 
-      <div class="p-5 space-y-3.5 text-xs">
-        <p id="place-detail-desc" class="text-slate-300 leading-relaxed"></p>
+      <!-- İÇERİK VE DETAYLAR -->
+      <div class="p-5 space-y-3.5 text-xs overflow-y-auto">
+        <p id="place-detail-desc" class="text-slate-300 leading-relaxed text-xs"></p>
 
-        <div class="grid grid-cols-2 gap-2 bg-slate-950 p-3 rounded-xl border border-slate-800">
+        <!-- Google Maps Canlı Fotoğraf ve 360° Butonu -->
+        <a id="btn-place-gmaps-photos" href="#" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-slate-950 to-slate-900 border border-slate-800 hover:border-amber-500/50 hover:bg-slate-850 transition-all group shadow-sm">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
+              <i data-lucide="camera" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <p class="font-bold text-white group-hover:text-amber-400 transition-colors">Google Maps'te Tüm Fotoğrafları & Yorumları Gör</p>
+              <p class="text-[10px] text-slate-400">360° sokak görünümleri, drone ve gezgin çekimleri</p>
+            </div>
+          </div>
+          <i data-lucide="external-link" class="w-4 h-4 text-slate-400 group-hover:text-amber-400 shrink-0 ml-2"></i>
+        </a>
+
+        <!-- Hızlı Bilgiler -->
+        <div class="grid grid-cols-2 gap-2 bg-slate-950/80 p-3 rounded-xl border border-slate-800/80">
           <div>
-            <span class="text-[10px] text-slate-500 uppercase font-semibold">En Uygun Zaman</span>
+            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">En Uygun Zaman</span>
             <p id="place-detail-time" class="text-white font-medium mt-0.5">-</p>
           </div>
           <div>
-            <span class="text-[10px] text-slate-500 uppercase font-semibold">Önerilen Mola</span>
+            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Önerilen Mola</span>
             <p id="place-detail-duration" class="text-white font-medium mt-0.5">-</p>
           </div>
         </div>
 
+        <!-- Etiketler -->
         <div id="place-detail-tags-container" class="flex flex-wrap gap-1"></div>
 
+        <!-- Eylemler -->
         <div class="pt-2 flex items-center space-x-2">
-          <button id="btn-place-add-to-route" class="flex-1 bg-brand-600 hover:bg-brand-500 text-white font-bold py-2.5 rounded-xl text-xs shadow-lg shadow-brand-600/30 flex items-center justify-center space-x-1.5 transition-all">
+          <button id="btn-place-add-to-route" class="flex-1 bg-brand-600 hover:bg-brand-500 text-white font-bold py-2.5 rounded-xl text-xs shadow-lg shadow-brand-600/30 flex items-center justify-center space-x-1.5 active:scale-95 transition-all">
             <i data-lucide="plus-circle" class="w-4 h-4"></i>
             <span>ROTAMA EKLE</span>
           </button>
-          <button id="btn-place-set-destination" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2.5 rounded-xl text-xs border border-slate-700 flex items-center justify-center space-x-1.5 transition-all">
+          <button id="btn-place-set-destination" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2.5 rounded-xl text-xs border border-slate-700 flex items-center justify-center space-x-1.5 active:scale-95 transition-all">
             <i data-lucide="flag" class="w-4 h-4 text-rose-400"></i>
             <span>HEDEF YAP</span>
           </button>

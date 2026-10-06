@@ -2115,11 +2115,15 @@ function filterDiscoverPlaces() {
       <div class="flex items-center justify-between pt-2 border-t border-slate-800/80 text-[10px]">
         <span class="text-slate-400">⏱️ ${p.recommended_duration || '1 saat'}</span>
         <div class="flex items-center space-x-1.5">
-          <button onclick="setAsDestination(${p.lat}, ${p.lon}, '${safeName}')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold">
-            Hedef Yap
+          <button onclick="openPlaceDetailById(${p.id})" class="px-2 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/30 flex items-center space-x-1" title="Fotoğraflar ve Detaylar">
+            <i data-lucide="camera" class="w-3 h-3"></i>
+            <span>Fotoğraf</span>
           </button>
-          <button onclick="addPoiToRoute(${p.lat}, ${p.lon}, '${safeName}')" class="px-2.5 py-1 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-semibold">
-            Rotaya Ekle
+          <button onclick="setAsDestination(${p.lat}, ${p.lon}, '${safeName}')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold">
+            Hedef
+          </button>
+          <button onclick="addPoiToRoute(${p.lat}, ${p.lon}, '${safeName}')" class="px-2 py-1 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-semibold">
+            Ekle
           </button>
         </div>
       </div>
@@ -2562,44 +2566,192 @@ function importPlacesJsonBackup(event) {
   reader.readAsText(file);
 }
 
-// MODAL: MEKAN DETAY PENCERESİ
-function openPlaceDetailById(id) {
+// REAL PHOTO ENGINE: WIKIMEDIA COMMONS & OPEN ARCHIVES
+const placePhotoCache = new Map();
+
+async function fetchPlacePhoto(place) {
+  if (!place || !place.name) return null;
+  const cacheKey = place.id ? String(place.id) : place.name.trim();
+  if (placePhotoCache.has(cacheKey)) {
+    return placePhotoCache.get(cacheKey);
+  }
+
+  // Pre-configured custom image URL support
+  if (place.image_url) {
+    const res = { url: place.image_url, source: 'Özel Arşiv' };
+    placePhotoCache.set(cacheKey, res);
+    return res;
+  }
+
+  // 1. Search Turkish Wikipedia with Generator Search (CORS origin=*)
+  try {
+    const searchUrl = `https://tr.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(place.name)}&gsrlimit=1&prop=pageimages|pageterms&piprop=thumbnail&pithumbsize=800&format=json&origin=*`;
+    const response = await fetch(searchUrl);
+    if (response.ok) {
+      const data = await response.json();
+      const pages = data?.query?.pages;
+      if (pages) {
+        for (const pid in pages) {
+          const p = pages[pid];
+          if (p.thumbnail && p.thumbnail.source) {
+            const photoInfo = {
+              url: p.thumbnail.source,
+              source: 'Wikimedia Commons',
+              title: p.title || place.name
+            };
+            placePhotoCache.set(cacheKey, photoInfo);
+            return photoInfo;
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Wikipedia fotoğraf getirme hatası:', err);
+  }
+
+  // 2. Shortened query fallback if name has more than 2 words (e.g. "Sagalassos Antik Kenti" -> "Sagalassos")
+  const words = place.name.trim().split(/\s+/);
+  if (words.length > 2) {
+    try {
+      const shortened = words.slice(0, 2).join(' ');
+      const searchUrl2 = `https://tr.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(shortened)}&gsrlimit=1&prop=pageimages|pageterms&piprop=thumbnail&pithumbsize=800&format=json&origin=*`;
+      const response2 = await fetch(searchUrl2);
+      if (response2.ok) {
+        const data2 = await response2.json();
+        const pages2 = data2?.query?.pages;
+        if (pages2) {
+          for (const pid in pages2) {
+            const p2 = pages2[pid];
+            if (p2.thumbnail && p2.thumbnail.source) {
+              const photoInfo = {
+                url: p2.thumbnail.source,
+                source: 'Wikimedia Commons',
+                title: p2.title || place.name
+              };
+              placePhotoCache.set(cacheKey, photoInfo);
+              return photoInfo;
+            }
+          }
+        }
+      }
+    } catch (e) {}
+  }
+
+  placePhotoCache.set(cacheKey, null);
+  return null;
+}
+
+// MODAL: MEKAN DETAY PENCERESİ (GERÇEK FOTOĞRAF & GOOGLE MAPS)
+async function openPlaceDetailById(id) {
   const place = state.allPlaces.find(p => p.id === id);
   if (!place) return;
 
   const modal = document.getElementById('modal-place-detail');
   const cfg = CATEGORY_CONFIG[place.category] || CATEGORY_CONFIG.historic;
 
-  document.getElementById('place-detail-icon').textContent = cfg.emoji;
-  document.getElementById('place-detail-name').textContent = place.name;
-  document.getElementById('place-detail-cat-badge').textContent = cfg.title;
-  document.getElementById('place-detail-desc').textContent = place.description || 'Bu mekan hakkında henüz detaylı açıklama girilmemiş.';
-  document.getElementById('place-detail-time').textContent = place.best_time || 'Tüm Yıl Boyunca';
-  document.getElementById('place-detail-duration').textContent = place.recommended_duration || '1 saat';
+  // Bilgi Alanları
+  const nameEl = document.getElementById('place-detail-name');
+  if (nameEl) nameEl.textContent = place.name;
 
-  const tagsCont = document.getElementById('place-detail-tags-container');
-  tagsCont.innerHTML = '';
-  if (place.tags && Array.isArray(place.tags)) {
-    place.tags.forEach(t => {
-      const span = document.createElement('span');
-      span.className = 'text-[9px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full';
-      span.textContent = `#${t}`;
-      tagsCont.appendChild(span);
-    });
+  const catBadge = document.getElementById('place-detail-cat-badge');
+  if (catBadge) {
+    catBadge.textContent = `${cfg.emoji} ${cfg.title}`;
+    catBadge.style.borderColor = `${cfg.color}60`;
+    catBadge.style.color = cfg.color;
   }
 
+  const cityEl = document.getElementById('place-detail-city');
+  if (cityEl) cityEl.textContent = place.city || place.region || 'Türkiye';
+
+  const descEl = document.getElementById('place-detail-desc');
+  if (descEl) descEl.textContent = place.description || 'Bu mekan hakkında henüz detaylı açıklama girilmemiş.';
+
+  const timeEl = document.getElementById('place-detail-time');
+  if (timeEl) timeEl.textContent = place.best_time || 'Tüm Yıl Boyunca';
+
+  const durEl = document.getElementById('place-detail-duration');
+  if (durEl) durEl.textContent = place.recommended_duration || '1-2 saat';
+
+  // Google Maps Canlı Fotoğraf ve 360° Linki
+  const gmapsBtn = document.getElementById('btn-place-gmaps-photos');
+  if (gmapsBtn) {
+    const q = encodeURIComponent(`${place.name} ${place.city || ''}`);
+    gmapsBtn.href = `https://www.google.com/maps/search/?api=1&query=${q}`;
+  }
+
+  // Etiketler
+  const tagsCont = document.getElementById('place-detail-tags-container');
+  if (tagsCont) {
+    tagsCont.innerHTML = '';
+    if (place.tags && Array.isArray(place.tags)) {
+      place.tags.forEach(t => {
+        const span = document.createElement('span');
+        span.className = 'text-[9px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full';
+        span.textContent = `#${t}`;
+        tagsCont.appendChild(span);
+      });
+    }
+  }
+
+  // Buton Eylemleri
   const safeName = escapeHtml(place.name).replace(/'/g, "\\'");
-  document.getElementById('btn-place-add-to-route').onclick = () => {
-    addPoiToRoute(place.lat, place.lon, safeName);
-    closePlaceDetailModal();
-  };
+  const btnAdd = document.getElementById('btn-place-add-to-route');
+  if (btnAdd) {
+    btnAdd.onclick = () => {
+      addPoiToRoute(place.lat, place.lon, safeName);
+      closePlaceDetailModal();
+    };
+  }
 
-  document.getElementById('btn-place-set-destination').onclick = () => {
-    setAsDestination(place.lat, place.lon, safeName);
-    closePlaceDetailModal();
-  };
+  const btnDest = document.getElementById('btn-place-set-destination');
+  if (btnDest) {
+    btnDest.onclick = () => {
+      setAsDestination(place.lat, place.lon, safeName);
+      closePlaceDetailModal();
+    };
+  }
 
+  // Modal'ı hemen aç (kullanıcı beklemesin)
   modal.classList.remove('hidden');
+  initIcons();
+
+  // Gerçek Fotoğrafı Asenkron Olarak Yükle
+  const imgEl = document.getElementById('place-detail-img');
+  const skeletonEl = document.getElementById('place-detail-img-skeleton');
+  const sourceBadge = document.getElementById('place-detail-img-source');
+  const fallbackEmoji = document.getElementById('place-detail-fallback-emoji');
+
+  if (imgEl && skeletonEl) {
+    imgEl.classList.add('opacity-0');
+    skeletonEl.classList.remove('hidden');
+    if (fallbackEmoji) fallbackEmoji.classList.add('hidden');
+    if (sourceBadge) sourceBadge.classList.add('hidden');
+
+    const photoInfo = await fetchPlacePhoto(place);
+
+    // Kullanıcı bu sırada başka mekana geçmişse çakışmayı önle
+    if (document.getElementById('place-detail-name')?.textContent !== place.name) return;
+
+    skeletonEl.classList.add('hidden');
+
+    if (photoInfo && photoInfo.url) {
+      imgEl.src = photoInfo.url;
+      imgEl.alt = place.name;
+      imgEl.onload = () => {
+        imgEl.classList.remove('opacity-0');
+      };
+      if (sourceBadge) {
+        sourceBadge.textContent = `📸 ${photoInfo.source}`;
+        sourceBadge.classList.remove('hidden');
+      }
+    } else {
+      imgEl.src = '';
+      if (fallbackEmoji) {
+        fallbackEmoji.textContent = cfg.emoji;
+        fallbackEmoji.classList.remove('hidden');
+      }
+    }
+  }
 }
 
 function closePlaceDetailModal() {
