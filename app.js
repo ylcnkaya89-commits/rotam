@@ -673,9 +673,12 @@ function clearRouteDisplay() {
   document.getElementById('mobile-mini-cockpit')?.classList.add('hidden');
   document.getElementById('btn-mobile-open-planner')?.classList.remove('hidden');
   document.getElementById('badge-right-panel-poi-count')?.classList.add('hidden');
+  document.getElementById('sidebar-shortcut-corridor-count')?.replaceChildren();
   document.getElementById('btn-export-gpx')?.setAttribute('disabled', 'true');
   document.getElementById('btn-open-gmaps')?.setAttribute('disabled', 'true');
   document.getElementById('btn-save-route-modal')?.setAttribute('disabled', 'true');
+  renderCorridorPoiList();
+  renderJourneyTimeline();
 }
 
 // Waypoint Map Click & Markers
@@ -1222,6 +1225,11 @@ function analyzeRouteCorridor(route, radiusMeters = 50000) {
     mobileMiniPois.textContent = `${found.length} Keşif`;
   }
 
+  const sidebarShortcutCount = document.getElementById('sidebar-shortcut-corridor-count');
+  if (sidebarShortcutCount) {
+    sidebarShortcutCount.textContent = `${found.length} Keşif`;
+  }
+
   const countPills = {
     historic: document.getElementById('count-pill-historic'),
     nature: document.getElementById('count-pill-nature'),
@@ -1319,16 +1327,36 @@ function renderCorridorPoiList() {
   const countLabel = document.getElementById('route-poi-list-count');
   if (!container) return;
 
+  if (!state.routeData || !state.corridorPois || state.corridorPois.length === 0) {
+    if (countLabel) countLabel.textContent = 'Rota bekleniyor';
+    container.innerHTML = `
+      <div class="glass-card p-4 rounded-2xl border border-slate-800 text-center space-y-2.5 my-2">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 mx-auto flex items-center justify-center">
+          <i data-lucide="radar" class="w-5 h-5"></i>
+        </div>
+        <p class="text-xs font-bold text-white">Rotada Keşif Bekleniyor</p>
+        <p class="text-[11px] text-slate-400 leading-relaxed">
+          Bir başlangıç ve varış noktası seçip rotanızı oluşturduğunuzda, güzergahınızın 50 km koridorundaki tarihi yerler, doğa harikaları, seyir tepeleri ve lezzet durakları burada taranıp listelenecektir.
+        </p>
+        <button onclick="showHomepagePlanner()" class="mt-1 bg-gradient-to-r from-brand-600 to-amber-600 hover:from-brand-500 hover:to-orange-500 text-white font-bold text-xs py-2 px-4 rounded-xl shadow-lg shadow-brand-600/30 active:scale-95 transition-all">
+          Rotanı Oluştur
+        </button>
+      </div>
+    `;
+    initIcons();
+    return;
+  }
+
   const filtered = state.corridorPois.filter(p => state.activePoiCategories.has(p.category || 'historic'));
   if (countLabel) countLabel.textContent = `${filtered.length} yer listeleniyor`;
 
   container.innerHTML = '';
   if (filtered.length === 0) {
-    container.innerHTML = '<p class="text-xs text-slate-500 py-3 text-center">Bu kategoride koridorda nokta bulunamadı.</p>';
+    container.innerHTML = '<p class="text-xs text-slate-500 py-3 text-center">Bu kategoride koridorda nokta bulunamadı. Filtreleri genişletin.</p>';
     return;
   }
 
-  filtered.slice(0, 30).forEach(p => {
+  filtered.slice(0, 35).forEach(p => {
     const cfg = CATEGORY_CONFIG[p.category] || CATEGORY_CONFIG.historic;
     const div = document.createElement('div');
     div.className = 'glass-card p-2.5 rounded-xl border border-slate-800/80 flex items-start justify-between space-x-2 text-xs hover:border-slate-700 transition-all';
@@ -1340,13 +1368,21 @@ function renderCorridorPoiList() {
           <span>${cfg.emoji}</span>
           <p class="font-bold text-white truncate">${escapeHtml(p.name)}</p>
         </div>
-        <p class="text-[10px] text-slate-400 truncate mt-0.5">${escapeHtml(p.description || '')}</p>
-        <span class="text-[9px] text-amber-400 font-semibold">📍 Rotadan ${p.distKm} km</span>
+        <p class="text-[10px] text-slate-400 line-clamp-2 mt-0.5">${escapeHtml(p.description || '')}</p>
+        <div class="flex items-center space-x-2 mt-1">
+          <span class="text-[9px] text-amber-400 font-semibold">📍 Rotadan ${p.distKm} km</span>
+          ${p.recommended_duration ? `<span class="text-[9px] text-slate-400">⏱️ ${p.recommended_duration}</span>` : ''}
+        </div>
       </div>
-      <button onclick="addPoiToRoute(${p.lat}, ${p.lon}, '${safeName}')" class="shrink-0 p-1.5 bg-brand-600/80 hover:bg-brand-500 text-white rounded-lg text-[10px] font-semibold flex items-center space-x-1" title="Rotaya Ekle">
-        <i data-lucide="plus" class="w-3 h-3"></i>
-        <span>Ekle</span>
-      </button>
+      <div class="flex flex-col space-y-1 shrink-0">
+        <button onclick="addPoiToRoute(${p.lat}, ${p.lon}, '${safeName}')" class="p-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-[10px] font-semibold flex items-center space-x-1 shadow-sm" title="Rotaya Ekle">
+          <i data-lucide="plus" class="w-3 h-3"></i>
+          <span>Ekle</span>
+        </button>
+        <button onclick="openPlaceDetailById(${p.id})" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-[10px] font-medium text-center" title="Detayları İncele">
+          Detay
+        </button>
+      </div>
     `;
     container.appendChild(div);
   });
@@ -1360,7 +1396,16 @@ function generateSmartStopRecommendations(route) {
 
   container.innerHTML = '';
 
-  // Select top-rated places with minimal detour (between 0.5 km and 12 km from route)
+  if (!state.routeData || !state.corridorPois || state.corridorPois.length === 0) {
+    container.innerHTML = `
+      <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 text-center text-[11px] text-slate-400">
+        Rota oluşturulduğunda minimum sapmalı en popüler duraklar burada önerilecektir.
+      </div>
+    `;
+    return;
+  }
+
+  // Select top-rated places with minimal detour (between 0.5 km and 15 km from route)
   const candidates = state.corridorPois
     .filter(p => p.distKm >= 0.5 && p.distKm <= 15.0)
     .sort((a, b) => (b.rating || 4.8) - (a.rating || 4.8));
@@ -1369,7 +1414,7 @@ function generateSmartStopRecommendations(route) {
   state.smartRecommendations = picks;
 
   if (picks.length === 0) {
-    container.innerHTML = '<p class="text-[11px] text-slate-500 py-2">Bu güzergahta ek sapma önerisi bulunmuyor.</p>';
+    container.innerHTML = '<p class="text-[11px] text-slate-500 py-2">Bu güzergahta minimum sapmalı ek öneri bulunmuyor.</p>';
     return;
   }
 
@@ -1394,7 +1439,7 @@ function generateSmartStopRecommendations(route) {
         <span class="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full font-bold whitespace-nowrap">+${detourKm} km / +${detourMin} dk</span>
       </div>
       <p class="text-[11px] text-slate-300 leading-relaxed">${escapeHtml(p.description || '')}</p>
-      <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-800">
+      <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1.5 border-t border-slate-800">
         <span>Önerilen Mola: ${p.recommended_duration || '1-2 saat'}</span>
         <button onclick="addPoiToRoute(${p.lat}, ${p.lon}, '${safeName}')" class="bg-brand-600 hover:bg-brand-500 text-white font-bold px-2.5 py-1 rounded-lg shadow-sm shadow-brand-600/30 flex items-center space-x-1">
           <i data-lucide="plus" class="w-3 h-3"></i>
@@ -1429,6 +1474,27 @@ function addPoiToRoute(lat, lon, name) {
   alert(`"${name}" rotanıza başarıyla eklendi! Rota güncelleniyor.`);
 }
 
+// Reordering stops along the route
+function moveWaypointUp(index) {
+  if (index <= 1 || index >= state.waypoints.length - 1) return;
+  const temp = state.waypoints[index];
+  state.waypoints[index] = state.waypoints[index - 1];
+  state.waypoints[index - 1] = temp;
+  updateWaypointsListUI();
+  updateWaypointMarkers();
+  calculateRouteMain();
+}
+
+function moveWaypointDown(index) {
+  if (index < 1 || index >= state.waypoints.length - 2) return;
+  const temp = state.waypoints[index];
+  state.waypoints[index] = state.waypoints[index + 1];
+  state.waypoints[index + 1] = temp;
+  updateWaypointsListUI();
+  updateWaypointMarkers();
+  calculateRouteMain();
+}
+
 // JOURNEY TIMELINE
 function renderJourneyTimeline() {
   const container = document.getElementById('journey-timeline-container');
@@ -1437,34 +1503,116 @@ function renderJourneyTimeline() {
   container.innerHTML = '';
   const valid = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
 
+  if (!state.routeData || valid.length < 2) {
+    container.innerHTML = `
+      <div class="glass-card p-4 rounded-2xl border border-slate-800 text-center space-y-2.5 my-2">
+        <div class="w-10 h-10 rounded-xl bg-brand-500/10 text-brand-400 mx-auto flex items-center justify-center">
+          <i data-lucide="clock" class="w-5 h-5"></i>
+        </div>
+        <p class="text-xs font-bold text-white">Yolculuk Akışı Hazır Değil</p>
+        <p class="text-[11px] text-slate-400 leading-relaxed">
+          Başlangıç ve varış noktalarınızı belirleyip rotanızı oluşturduğunuzda, sürüş sırasına göre tüm duraklar, mola önerileri ve etap süreleri bu akışta yer alacaktır.
+        </p>
+        <button onclick="showHomepagePlanner()" class="mt-1 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs py-2 px-4 rounded-xl active:scale-95 transition-all">
+          Durakları Belirle
+        </button>
+      </div>
+    `;
+    initIcons();
+    return;
+  }
+
+  // Header Overview Card
+  const totalKm = (state.routeData.distance / 1000).toFixed(1);
+  const totalMinutes = Math.floor(state.routeData.duration / 60);
+  const totalH = Math.floor(totalMinutes / 60);
+  const totalM = totalMinutes % 60;
+  const stopsCount = valid.length - 2;
+
+  const summaryCard = document.createElement('div');
+  summaryCard.className = 'glass-card p-3 rounded-2xl border border-brand-500/20 bg-gradient-to-r from-slate-950 via-slate-900 to-amber-950/20 mb-3 text-xs space-y-1.5';
+  summaryCard.innerHTML = `
+    <div class="flex items-center justify-between">
+      <span class="text-[10px] font-bold text-brand-400 uppercase tracking-wider">Sürüş Özeti</span>
+      <span class="text-[10px] bg-brand-500/20 text-brand-300 px-2 py-0.5 rounded-full font-bold">${valid.length} Nokta</span>
+    </div>
+    <div class="flex items-center justify-between text-white font-bold text-sm">
+      <span>${totalKm} km</span>
+      <span class="text-amber-400">${totalH} sa ${totalM} dk</span>
+    </div>
+    <div class="text-[10px] text-slate-400 flex items-center justify-between pt-1 border-t border-slate-800">
+      <span>Ara Durak: ${stopsCount > 0 ? stopsCount : 'Doğrudan Rota'}</span>
+      <span>Önerilen Dinlenme: ${Math.max(1, Math.floor(totalMinutes / 120))} Mola</span>
+    </div>
+  `;
+  container.appendChild(summaryCard);
+
+  // Chronological Timeline Items
   valid.forEach((wp, idx) => {
     const isStart = idx === 0;
     const isEnd = idx === valid.length - 1;
+    const isWaypoint = !isStart && !isEnd;
 
     const div = document.createElement('div');
     div.className = 'timeline-item flex items-start space-x-3 text-xs relative pb-4';
 
-    let dotColor = isStart ? 'bg-emerald-500' : isEnd ? 'bg-red-500' : 'bg-amber-500';
-    let label = isStart ? 'BAŞLANGIÇ' : isEnd ? 'VARIŞ' : `DURAK ${idx}`;
+    let dotColor = isStart ? 'bg-emerald-500 shadow-emerald-500/50' : isEnd ? 'bg-red-500 shadow-red-500/50' : 'bg-amber-500 shadow-amber-500/50';
+    let label = isStart ? 'BAŞLANGIÇ NOKTASI' : isEnd ? 'VARIŞ NOKTASI' : `ARA DURAK ${idx}`;
+    let icon = isStart ? '🏁' : isEnd ? '🎯' : '📍';
 
     div.innerHTML = `
       <div class="w-6 h-6 rounded-full ${dotColor} flex items-center justify-center text-[10px] font-bold text-white shrink-0 z-10 shadow-lg">
         ${isStart ? 'A' : isEnd ? 'B' : idx}
       </div>
-      <div class="glass-card p-2.5 rounded-xl border border-slate-800 flex-1">
+      <div class="glass-card p-2.5 rounded-xl border border-slate-800 flex-1 hover:border-slate-700 transition-all">
         <div class="flex items-center justify-between">
-          <span class="text-[9px] font-bold uppercase text-slate-400 tracking-wider">${label}</span>
-          ${!isStart && !isEnd ? `
-            <button onclick="removeWaypoint(${idx})" class="text-slate-500 hover:text-red-400" title="Kaldır">
-              <i data-lucide="trash-2" class="w-3 h-3"></i>
-            </button>
+          <span class="text-[9px] font-bold uppercase text-slate-400 tracking-wider flex items-center space-x-1">
+            <span>${icon}</span>
+            <span>${label}</span>
+          </span>
+          ${isWaypoint ? `
+            <div class="flex items-center space-x-1">
+              ${idx > 1 ? `
+                <button onclick="moveWaypointUp(${idx})" class="p-1 text-slate-400 hover:text-white" title="Yukarı Taşı">
+                  <i data-lucide="chevron-up" class="w-3 h-3"></i>
+                </button>
+              ` : ''}
+              ${idx < valid.length - 2 ? `
+                <button onclick="moveWaypointDown(${idx})" class="p-1 text-slate-400 hover:text-white" title="Aşağı Taşı">
+                  <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                </button>
+              ` : ''}
+              <button onclick="removeWaypoint(${idx})" class="p-1 text-slate-500 hover:text-red-400" title="Durağı Kaldır">
+                <i data-lucide="trash-2" class="w-3 h-3"></i>
+              </button>
+            </div>
           ` : ''}
         </div>
         <p class="font-bold text-white text-xs mt-0.5">${escapeHtml(wp.name || 'İsimsiz Nokta')}</p>
+        <p class="text-[10px] text-slate-400 mt-0.5">${isStart ? 'Çıkış Noktası' : isEnd ? 'Hedef Varış' : 'Planlanan Durak'}</p>
       </div>
     `;
 
     container.appendChild(div);
+
+    // Insert Suggested Rest / Coffee Break between segments if long drive
+    if (!isEnd && totalMinutes >= 120 && idx === 0 && valid.length === 2) {
+      const breakDiv = document.createElement('div');
+      breakDiv.className = 'timeline-item flex items-start space-x-3 text-xs relative pb-4 pl-1';
+      breakDiv.innerHTML = `
+        <div class="w-5 h-5 rounded-full bg-sky-500/20 border border-sky-500/40 text-sky-400 flex items-center justify-center text-[10px] shrink-0 z-10">
+          ☕
+        </div>
+        <div class="bg-slate-950/70 p-2 rounded-xl border border-sky-500/20 flex-1 text-[11px]">
+          <div class="flex items-center justify-between text-sky-300 font-semibold">
+            <span>Önerilen Dinlenme Molası</span>
+            <span class="text-[10px] text-slate-400">~2. saat civarı</span>
+          </div>
+          <p class="text-[10px] text-slate-400 mt-0.5">Sürüş güvenliği için 15-20 dk dinlenme tavsiye edilir.</p>
+        </div>
+      `;
+      container.appendChild(breakDiv);
+    }
   });
 
   initIcons();
@@ -2506,6 +2654,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initPlacesDatabase();
   initMap();
   updateWaypointsListUI();
+  renderCorridorPoiList();
+  renderJourneyTimeline();
   initIcons();
 
   // Increment local visits telemetry (#34)
