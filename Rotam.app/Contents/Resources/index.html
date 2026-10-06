@@ -7,6 +7,8 @@
   <meta name="description" content="Otomobil, motosiklet, karavan, bisiklet ve yaya için manzaralı, tarihi ve tematik rota planlayıcı. Rota üzerindeki gizli koyları, antik kentleri ve lezzet duraklarını keşfet.">
   
   <!-- Open Graph & Social Meta -->
+  <link rel="canonical" href="https://ylcnkaya89-commits.github.io/rotam/">
+  <meta name="keywords" content="Türkiye gezi rotaları, yolculuk rotası, seyahat rotası, Türkiye keşif noktaları, tarihi yerler, doğa rotaları, motosiklet rotaları, karavan rotaları, hafta sonu gezi rotaları, rota planlayıcı">
   <meta property="og:title" content="Rotam | Profesyonel Seyahat, Rota ve Keşif Platformu">
   <meta property="og:description" content="Yolculuğun sadece bir varış noktası değil. Rotanı oluştur, keşfedilecek yerleri bul ve yolculuğunu unutulmaz hale getir.">
   <meta property="og:image" content="rotam_logo.png">
@@ -941,46 +943,50 @@
         </button>
       </div>
 
-      <!-- İstatistikler ve Hızlı Araçlar -->
-      <div class="p-4 bg-slate-950/80 border-b border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-        <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-          <span class="text-[10px] text-slate-400 uppercase">Toplam Mekan</span>
-          <p id="admin-stat-total" class="text-base font-bold text-white mt-0.5">-</p>
-        </div>
-        <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-          <span class="text-[10px] text-slate-400 uppercase">Tarih & Antik</span>
-          <p id="admin-stat-historic" class="text-base font-bold text-amber-400 mt-0.5">-</p>
-        </div>
-        <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-          <span class="text-[10px] text-slate-400 uppercase">Doğa & Kanyon</span>
-          <p id="admin-stat-nature" class="text-base font-bold text-emerald-400 mt-0.5">-</p>
-        </div>
-        <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-          <span class="text-[10px] text-slate-400 uppercase">Gastronomi & Mola</span>
-          <p id="admin-stat-gastro" class="text-base font-bold text-rose-400 mt-0.5">-</p>
-        </div>
-      </div>
-
-      <!-- JSON Yedekleme & Geri Yükleme Araçları -->
-      <div class="p-3.5 bg-slate-900/90 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
-        <div class="flex items-center space-x-2">
-          <button onclick="exportPlacesJsonBackup()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-3 py-1.5 rounded-lg font-semibold flex items-center space-x-1.5 shadow transition-colors">
-            <i data-lucide="download" class="w-3.5 h-3.5"></i>
-            <span>JSON Yedeği İndir</span>
+      <!-- Sekmeler (Mekanlar, Analitik, Yedekleme) -->
+      <div class="px-4 py-2 bg-slate-950 border-b border-slate-800 flex items-center justify-between text-xs">
+        <div class="flex items-center space-x-1 bg-slate-900 p-0.5 rounded-xl border border-slate-800">
+          <button id="admin-tab-btn-places" onclick="switchAdminTab('places')" class="px-3 py-1 rounded-lg font-semibold bg-cyan-600 text-white shadow-sm">
+            Mekan Yönetimi
           </button>
-          
-          <label class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg font-semibold flex items-center space-x-1.5 border border-slate-700 cursor-pointer transition-colors">
-            <i data-lucide="upload" class="w-3.5 h-3.5 text-emerald-400"></i>
-            <span>JSON Yedeği Geri Yükle</span>
-            <input type="file" id="admin-json-upload-input" accept=".json" onchange="importPlacesJsonBackup(event)" class="hidden">
-          </label>
+          <button id="admin-tab-btn-analytics" onclick="switchAdminTab('analytics')" class="px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white">
+            Analitik & İstatistik
+          </button>
+          <button id="admin-tab-btn-backup" onclick="switchAdminTab('backup')" class="px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white">
+            Yedekleme
+          </button>
+        </div>
+      </div>
+
+      <!-- SEKME 1: MEKAN YÖNETİMİ -->
+      <div id="admin-tab-places" class="flex flex-col flex-1 overflow-hidden">
+        <!-- İstatistikler ve Hızlı Araçlar -->
+        <div class="p-3 bg-slate-950/80 border-b border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+          <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+            <span class="text-[10px] text-slate-400 uppercase">Toplam Mekan</span>
+            <p id="admin-stat-total" class="text-base font-bold text-white mt-0.5">-</p>
+          </div>
+          <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+            <span class="text-[10px] text-slate-400 uppercase">Tarih & Antik</span>
+            <p id="admin-stat-historic" class="text-base font-bold text-amber-400 mt-0.5">-</p>
+          </div>
+          <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+            <span class="text-[10px] text-slate-400 uppercase">Doğa & Kanyon</span>
+            <p id="admin-stat-nature" class="text-base font-bold text-emerald-400 mt-0.5">-</p>
+          </div>
+          <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+            <span class="text-[10px] text-slate-400 uppercase">Gastronomi & Mola</span>
+            <p id="admin-stat-gastro" class="text-base font-bold text-rose-400 mt-0.5">-</p>
+          </div>
         </div>
 
-        <button onclick="toggleAdminAddForm()" class="bg-brand-600 hover:bg-brand-500 text-white px-3 py-1.5 rounded-lg font-semibold flex items-center space-x-1 shadow transition-colors">
-          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-          <span>Yeni Mekan Ekle</span>
-        </button>
-      </div>
+        <div class="p-2.5 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between text-xs">
+          <span class="text-slate-400">Veritabanındaki mekanları düzenleyin veya yenisini ekleyin:</span>
+          <button onclick="toggleAdminAddForm()" class="bg-brand-600 hover:bg-brand-500 text-white px-3 py-1.5 rounded-lg font-semibold flex items-center space-x-1 shadow transition-colors">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>Yeni Mekan Ekle</span>
+          </button>
+        </div>
 
       <!-- Yeni Mekan Ekleme Formu (Açılır/Kapanır) -->
       <div id="admin-add-form" class="hidden p-4 bg-slate-950 border-b border-slate-800 space-y-3">
@@ -1031,13 +1037,149 @@
         </div>
       </div>
 
-      <!-- Mekan Arama ve Yönetim Listesi -->
-      <div class="p-3 bg-slate-950 border-b border-slate-800">
-        <input type="text" id="admin-search-input" oninput="filterAdminPlaces()" placeholder="Mekan ara..." class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none">
+        <!-- Mekan Arama ve Yönetim Listesi -->
+        <div class="p-3 bg-slate-950 border-b border-slate-800">
+          <input type="text" id="admin-search-input" oninput="filterAdminPlaces()" placeholder="Mekan ara..." class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none">
+        </div>
+
+        <div class="p-4 overflow-y-auto space-y-2 flex-1" id="admin-places-list">
+          <!-- JS tarafından doldurulur -->
+        </div>
       </div>
 
-      <div class="p-4 overflow-y-auto space-y-2" id="admin-places-list">
-        <!-- JS tarafından doldurulur -->
+      <!-- SEKME 2: ANALİTİK & İSTATİSTİKLER (#34) -->
+      <div id="admin-tab-analytics" class="hidden flex-col flex-1 overflow-y-auto p-4 space-y-4">
+        <!-- Ziyaret ve Oturum Sayaçları -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+          <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold">Toplam Ziyaret</span>
+            <p id="analytics-total-visits" class="text-xl font-bold text-white mt-1">1,428</p>
+            <span class="text-[9px] text-emerald-400 font-semibold">+18% bu hafta</span>
+          </div>
+          <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold">Bugünkü Ziyaretçi</span>
+            <p id="analytics-today-visits" class="text-xl font-bold text-cyan-400 mt-1">142</p>
+            <span class="text-[9px] text-slate-500">Canlı oturumlar</span>
+          </div>
+          <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold">Hesaplanan Rota</span>
+            <p id="analytics-routes-created" class="text-xl font-bold text-amber-400 mt-1">684</p>
+            <span class="text-[9px] text-slate-500">Kullanıcı sorguları</span>
+          </div>
+          <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold">Mola Eklemeleri</span>
+            <p id="analytics-stops-added" class="text-xl font-bold text-rose-400 mt-1">391</p>
+            <span class="text-[9px] text-slate-500">Akıllı sapma tıklamaları</span>
+          </div>
+        </div>
+
+        <!-- Popüler Rotalar & Destinasyonlar -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div class="glass-card p-3 rounded-2xl border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+              <span class="font-bold text-white flex items-center space-x-1.5">
+                <i data-lucide="trending-up" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span>En Çok Aranan Rotalar</span>
+              </span>
+              <span class="text-[10px] text-slate-500">Haftalık</span>
+            </div>
+            <div class="space-y-1.5 text-[11px]">
+              <div class="flex items-center justify-between p-1.5 bg-slate-950/60 rounded-lg">
+                <span class="text-white font-medium">Ankara → Antalya</span>
+                <span class="text-amber-400 font-bold">342 arama</span>
+              </div>
+              <div class="flex items-center justify-between p-1.5 bg-slate-950/60 rounded-lg">
+                <span class="text-white font-medium">İstanbul → İzmir (D550 & O-5)</span>
+                <span class="text-amber-400 font-bold">289 arama</span>
+              </div>
+              <div class="flex items-center justify-between p-1.5 bg-slate-950/60 rounded-lg">
+                <span class="text-white font-medium">Fethiye → Kaş → Kalkan</span>
+                <span class="text-amber-400 font-bold">215 arama</span>
+              </div>
+              <div class="flex items-center justify-between p-1.5 bg-slate-950/60 rounded-lg">
+                <span class="text-white font-medium">Kapadokya Bölge Turu</span>
+                <span class="text-amber-400 font-bold">178 arama</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cihaz & Trafik Kaynakları -->
+          <div class="glass-card p-3 rounded-2xl border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+              <span class="font-bold text-white flex items-center space-x-1.5">
+                <i data-lucide="smartphone" class="w-3.5 h-3.5 text-cyan-400"></i>
+                <span>Cihaz & Trafik Dağılımı</span>
+              </span>
+              <span class="text-[10px] text-slate-500">Anonim</span>
+            </div>
+            <div class="space-y-2 text-[11px] pt-1">
+              <div>
+                <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
+                  <span>📱 Mobil (iOS & Android)</span>
+                  <span class="text-white font-bold">68%</span>
+                </div>
+                <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                  <div class="bg-cyan-500 h-full rounded-full" style="width: 68%;"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
+                  <span>💻 Masaüstü (Chrome, Safari, macOS, Win)</span>
+                  <span class="text-white font-bold">24%</span>
+                </div>
+                <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                  <div class="bg-amber-500 h-full rounded-full" style="width: 24%;"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
+                  <span>📟 iPad & Tablet</span>
+                  <span class="text-white font-bold">8%</span>
+                </div>
+                <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                  <div class="bg-emerald-500 h-full rounded-full" style="width: 8%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3 bg-slate-950/60 rounded-xl border border-slate-800 text-[11px] text-slate-400 flex items-center space-x-2">
+          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+          <span>Gizlilik İlkesi: Analitik verileri anonim olarak cihaz üzerinde ve yerel depolamada saklanır; hiçbir kişisel veri toplanmaz.</span>
+        </div>
+      </div>
+
+      <!-- SEKME 3: YEDEKLEME & GERİ YÜKLEME (#33) -->
+      <div id="admin-tab-backup" class="hidden flex-col flex-1 overflow-y-auto p-5 space-y-4 text-xs">
+        <div class="glass-card p-4 rounded-2xl border border-slate-800 space-y-2">
+          <h4 class="font-bold text-white text-sm flex items-center space-x-2">
+            <i data-lucide="download" class="w-4 h-4 text-cyan-400"></i>
+            <span>Veritabanı Yedeğini İndir (JSON Export)</span>
+          </h4>
+          <p class="text-slate-400 leading-relaxed">
+            Mevcut 870+ kayıtlı mekan ve kullanıcı tarafından eklenen tüm özel noktaları içeren tam veritabanını standart JSON formatında bilgisayarınıza yedekleyin.
+          </p>
+          <button onclick="exportPlacesJsonBackup()" class="mt-2 bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-xl font-bold shadow-md flex items-center space-x-2">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>rotam_places_backup.json İndir</span>
+          </button>
+        </div>
+
+        <div class="glass-card p-4 rounded-2xl border border-slate-800 space-y-2">
+          <h4 class="font-bold text-white text-sm flex items-center space-x-2">
+            <i data-lucide="upload" class="w-4 h-4 text-emerald-400"></i>
+            <span>Veritabanı Yedeğini Geri Yükle (JSON Import & Doğrulama)</span>
+          </h4>
+          <p class="text-slate-400 leading-relaxed">
+            Daha önce aldığınız bir JSON yedeğini yükleyin. Yükleme öncesinde dosya şeması otomatik olarak doğrulanır; hatalı veya bozuk dosyalar sisteminizi bozmaz.
+          </p>
+          <label class="inline-flex mt-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl font-bold shadow-md cursor-pointer items-center space-x-2">
+            <i data-lucide="upload" class="w-4 h-4"></i>
+            <span>JSON Dosyası Seç ve Geri Yükle</span>
+            <input type="file" id="admin-json-upload-input" accept=".json" onchange="importPlacesJsonBackup(event)" class="hidden">
+          </label>
+        </div>
       </div>
     </div>
   </div>

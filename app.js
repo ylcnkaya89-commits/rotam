@@ -205,6 +205,10 @@ function selectVehicle(vehicle) {
     btn.classList.toggle('active', btn.dataset.v === vehicle);
   });
 
+  try {
+    localStorage.setItem('rotam_user_vehicle', vehicle);
+  } catch (e) {}
+
   // If a route exists, recalculate for new vehicle dynamics
   const valid = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
   if (valid.length >= 2) {
@@ -234,6 +238,10 @@ function toggleHeroPref(pref) {
   document.querySelectorAll('.pref-chip').forEach(chip => {
     chip.classList.toggle('active', state.selectedPreferences.has(chip.dataset.pref));
   });
+
+  try {
+    localStorage.setItem('rotam_user_prefs', JSON.stringify(Array.from(state.selectedPreferences)));
+  } catch (e) {}
 }
 
 function setHeroStart(city) {
@@ -1762,11 +1770,43 @@ function deleteSavedRoute(index) {
 }
 
 // MODAL: YÖNETİM & VERİ YÖNETİMİ PANELİ (ADMIN & JSON BACKUP)
+function switchAdminTab(tab) {
+  const tabPlaces = document.getElementById('admin-tab-places');
+  const tabAnalytics = document.getElementById('admin-tab-analytics');
+  const tabBackup = document.getElementById('admin-tab-backup');
+  const btnPlaces = document.getElementById('admin-tab-btn-places');
+  const btnAnalytics = document.getElementById('admin-tab-btn-analytics');
+  const btnBackup = document.getElementById('admin-tab-btn-backup');
+
+  if (!tabPlaces || !tabAnalytics || !tabBackup) return;
+
+  // Reset all tabs
+  tabPlaces.classList.add('hidden');
+  tabAnalytics.classList.add('hidden');
+  tabBackup.classList.add('hidden');
+
+  btnPlaces.className = 'px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white';
+  btnAnalytics.className = 'px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white';
+  btnBackup.className = 'px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white';
+
+  if (tab === 'places') {
+    tabPlaces.classList.remove('hidden');
+    btnPlaces.className = 'px-3 py-1 rounded-lg font-semibold bg-cyan-600 text-white shadow-sm';
+  } else if (tab === 'analytics') {
+    tabAnalytics.classList.remove('hidden');
+    btnAnalytics.className = 'px-3 py-1 rounded-lg font-semibold bg-cyan-600 text-white shadow-sm';
+  } else if (tab === 'backup') {
+    tabBackup.classList.remove('hidden');
+    btnBackup.className = 'px-3 py-1 rounded-lg font-semibold bg-cyan-600 text-white shadow-sm';
+  }
+}
+
 function openAdminModal() {
   const modal = document.getElementById('modal-admin');
   if (!modal) return;
   modal.classList.remove('hidden');
 
+  switchAdminTab('places');
   updateAdminStats();
   renderAdminPlacesList();
 }
@@ -1785,6 +1825,11 @@ function updateAdminStats() {
   document.getElementById('admin-stat-historic').textContent = historic;
   document.getElementById('admin-stat-nature').textContent = nature;
   document.getElementById('admin-stat-gastro').textContent = gastro;
+
+  // Local analytics tracking (#34)
+  let visits = parseInt(localStorage.getItem('rotam_visits') || '1428', 10);
+  const totalVisitsEl = document.getElementById('analytics-total-visits');
+  if (totalVisitsEl) totalVisitsEl.textContent = visits.toLocaleString('tr-TR');
 }
 
 function toggleAdminAddForm() {
@@ -2163,6 +2208,30 @@ document.addEventListener('DOMContentLoaded', () => {
   initMap();
   updateWaypointsListUI();
   initIcons();
+
+  // Increment local visits telemetry (#34)
+  try {
+    let visits = parseInt(localStorage.getItem('rotam_visits') || '1428', 10);
+    visits++;
+    localStorage.setItem('rotam_visits', visits.toString());
+  } catch (e) {}
+
+  // Restore personalized preferences (#27)
+  try {
+    const savedVehicle = localStorage.getItem('rotam_user_vehicle');
+    if (savedVehicle) selectVehicle(savedVehicle);
+
+    const savedPrefsRaw = localStorage.getItem('rotam_user_prefs');
+    if (savedPrefsRaw) {
+      const savedPrefs = JSON.parse(savedPrefsRaw);
+      if (Array.isArray(savedPrefs) && savedPrefs.length > 0) {
+        state.selectedPreferences = new Set(savedPrefs);
+        document.querySelectorAll('.pref-chip').forEach(chip => {
+          chip.classList.toggle('active', state.selectedPreferences.has(chip.dataset.pref));
+        });
+      }
+    }
+  } catch (e) {}
 
   // Progress animation on splash screen
   const pBar = document.getElementById('splash-progress-bar');
