@@ -571,7 +571,7 @@
                 </label>
                 <div class="relative">
                   <i data-lucide="map-pin" class="w-4 h-4 text-emerald-400 absolute left-3 top-3"></i>
-                  <input type="text" id="hero-start-input" placeholder="Başlangıç şehri (Örn: Ankara)" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 shadow-inner">
+                  <input type="text" id="hero-start-input" list="turkey-cities-list" oninput="handleHeroStartInput(this.value)" onkeydown="if(event.key==='Enter') submitHeroRoute()" placeholder="Başlangıç şehri (Örn: Ankara)" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 shadow-inner">
                 </div>
                 <!-- Hızlı Şehir Seçimi -->
                 <div class="flex flex-wrap gap-1 mt-1.5">
@@ -589,7 +589,7 @@
                 </label>
                 <div class="relative">
                   <i data-lucide="flag" class="w-4 h-4 text-rose-400 absolute left-3 top-3"></i>
-                  <input type="text" id="hero-end-input" placeholder="Hedef şehir veya mekan (Örn: Antalya)" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 shadow-inner">
+                  <input type="text" id="hero-end-input" list="turkey-cities-list" oninput="handleHeroEndInput(this.value)" onkeydown="if(event.key==='Enter') submitHeroRoute()" placeholder="Hedef şehir veya mekan (Örn: Antalya)" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 shadow-inner">
                 </div>
                 <!-- Popüler Rota Seçimi -->
                 <div class="flex flex-wrap gap-1 mt-1.5">
@@ -1451,6 +1451,9 @@
       <span>Yönetim</span>
     </button>
   </nav>
+
+  <!-- Türkiye Şehirleri ve Popüler Rota Noktaları Datalist -->
+  <datalist id="turkey-cities-list"></datalist>
 
   <!-- Kapsamlı Mekan Veritabanı (870+ Yer) -->
   <script src="places_data.js"></script>

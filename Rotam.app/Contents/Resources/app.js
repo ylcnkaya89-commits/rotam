@@ -139,6 +139,9 @@ function initPlacesDatabase() {
 
   state.allPlaces = Array.from(mapById.values());
   console.log(`Rotam V2 Mekan Veritabanı Hazır: ${state.allPlaces.length} nokta.`);
+  if (typeof populateCityDatalist === 'function') {
+    populateCityDatalist();
+  }
 }
 
 // Map Tile Layers Setup
@@ -500,27 +503,186 @@ function toggleHeroPref(pref) {
   } catch (e) {}
 }
 
+// Turkish String Normalization (case & diacritic-insensitive)
+function normalizeTurkish(str) {
+  if (!str) return '';
+  return str
+    .toString()
+    .trim()
+    .replace(/İ/g, 'i')
+    .replace(/I/g, 'ı')
+    .toLowerCase()
+    .replace(/ç/g, 'c')
+    .replace(/ğ/g, 'g')
+    .replace(/ı/g, 'i')
+    .replace(/ö/g, 'o')
+    .replace(/ş/g, 's')
+    .replace(/ü/g, 'u');
+}
+
+// Instant Offline Local Search Engine for All 81 Provinces, Districts and 870+ Places
+function searchLocalGeo(query) {
+  if (!query || typeof query !== 'string') return null;
+  const rawQ = query.trim();
+  const q = normalizeTurkish(rawQ);
+  if (!q) return null;
+
+  const geoDb = (window.TURKEY_GEO_DATABASE && Array.isArray(window.TURKEY_GEO_DATABASE)) ? window.TURKEY_GEO_DATABASE : [];
+  const placesDb = (state && state.allPlaces && Array.isArray(state.allPlaces)) ? state.allPlaces : (window.DEFAULT_HISTORIC_PLACES || []);
+
+  // 1. Exact match in TURKEY_GEO_DATABASE (81 provinces + top 50 hubs)
+  const exactGeo = geoDb.find(item => normalizeTurkish(item.name) === q);
+  if (exactGeo) {
+    return { lat: exactGeo.lat, lon: exactGeo.lon, displayName: `${exactGeo.name}, Türkiye`, source: 'turkey_db' };
+  }
+
+  // 2. Starts-with match in TURKEY_GEO_DATABASE
+  const startsGeo = geoDb.find(item => normalizeTurkish(item.name).startsWith(q));
+  if (startsGeo) {
+    return { lat: startsGeo.lat, lon: startsGeo.lon, displayName: `${startsGeo.name}, Türkiye`, source: 'turkey_db' };
+  }
+
+  // 3. Substring match in TURKEY_GEO_DATABASE
+  const subGeo = geoDb.find(item => normalizeTurkish(item.name).includes(q) || q.includes(normalizeTurkish(item.name)));
+  if (subGeo) {
+    return { lat: subGeo.lat, lon: subGeo.lon, displayName: `${subGeo.name}, Türkiye`, source: 'turkey_db' };
+  }
+
+  // 4. Exact match in 870+ Places Database
+  const exactPlace = placesDb.find(p => normalizeTurkish(p.name) === q);
+  if (exactPlace) {
+    return { lat: exactPlace.lat, lon: exactPlace.lon, displayName: `${exactPlace.name} (${exactPlace.city || 'Türkiye'})`, source: 'places_db' };
+  }
+
+  // 5. Starts-with match in Places Database
+  const startsPlace = placesDb.find(p => normalizeTurkish(p.name).startsWith(q));
+  if (startsPlace) {
+    return { lat: startsPlace.lat, lon: startsPlace.lon, displayName: `${startsPlace.name} (${startsPlace.city || 'Türkiye'})`, source: 'places_db' };
+  }
+
+  // 6. Substring match in Places Database
+  const subPlace = placesDb.find(p => normalizeTurkish(p.name).includes(q));
+  if (subPlace) {
+    return { lat: subPlace.lat, lon: subPlace.lon, displayName: `${subPlace.name} (${subPlace.city || 'Türkiye'})`, source: 'places_db' };
+  }
+
+  // 7. Token word match: e.g. "Ankara merkez", "Antalya kaş"
+  const tokens = q.split(/[\s,/-]+/).filter(t => t.length >= 3);
+  for (const token of tokens) {
+    const tokenGeo = geoDb.find(item => normalizeTurkish(item.name) === token || normalizeTurkish(item.name).startsWith(token));
+    if (tokenGeo) {
+      return { lat: tokenGeo.lat, lon: tokenGeo.lon, displayName: `${tokenGeo.name}, Türkiye`, source: 'turkey_db' };
+    }
+  }
+
+  return null;
+}
+
+// Reverse Geocoding Lookup for Coordinates (Nearest City or Landmark)
+function findNearestCityOrPlace(lat, lon) {
+  let nearestName = null;
+  let minDistance = Infinity;
+
+  const geoDb = (window.TURKEY_GEO_DATABASE && Array.isArray(window.TURKEY_GEO_DATABASE)) ? window.TURKEY_GEO_DATABASE : [];
+  for (const city of geoDb) {
+    const d = Math.hypot(city.lat - lat, city.lon - lon);
+    if (d < minDistance) {
+      minDistance = d;
+      nearestName = city.name;
+    }
+  }
+
+  const placesDb = (state && state.allPlaces && Array.isArray(state.allPlaces)) ? state.allPlaces : (window.DEFAULT_HISTORIC_PLACES || []);
+  for (const p of placesDb) {
+    const d = Math.hypot(p.lat - lat, p.lon - lon);
+    if (d < minDistance) {
+      minDistance = d;
+      nearestName = p.name;
+    }
+  }
+
+  if (minDistance < 0.12) {
+    return nearestName || `Konum (${lat.toFixed(3)}, ${lon.toFixed(3)})`;
+  } else if (minDistance < 0.35) {
+    return `${nearestName} Çevresi`;
+  }
+  return `Konum (${lat.toFixed(3)}, ${lon.toFixed(3)})`;
+}
+
+// Populate Turkish Cities & Tourist Hubs Datalist for Autocomplete
+function populateCityDatalist() {
+  const datalist = document.getElementById('turkey-cities-list');
+  if (!datalist) return;
+  if (datalist.children && datalist.children.length > 0) return;
+
+  const seen = new Set();
+  const options = [];
+
+  if (window.TURKEY_GEO_DATABASE && Array.isArray(window.TURKEY_GEO_DATABASE)) {
+    window.TURKEY_GEO_DATABASE.forEach(item => {
+      if (!seen.has(item.name)) {
+        seen.add(item.name);
+        options.push(`<option value="${item.name}">${item.name}${item.region ? ' (' + item.region + ')' : ''}</option>`);
+      }
+    });
+  }
+
+  const places = (state && state.allPlaces && Array.isArray(state.allPlaces)) ? state.allPlaces : (window.DEFAULT_HISTORIC_PLACES || []);
+  places.forEach(p => {
+    if (p && p.name && !seen.has(p.name)) {
+      seen.add(p.name);
+      options.push(`<option value="${p.name}">${p.name}${p.city ? ' - ' + p.city : ''}</option>`);
+    }
+  });
+
+  datalist.innerHTML = options.join('');
+}
+
+function checkAndPanToWaypoint(index) {
+  const wp = state.waypoints[index];
+  if (wp && wp.lat !== null && wp.lon !== null && map) {
+    const start = state.waypoints[0];
+    const end = state.waypoints[state.waypoints.length - 1];
+    if (start && end && start.lat !== null && end.lat !== null) {
+      const bounds = L.latLngBounds([[start.lat, start.lon], [end.lat, end.lon]]);
+      map.fitBounds(bounds, { padding: [60, 60], maxZoom: 12 });
+    } else {
+      map.setView([wp.lat, wp.lon], 9);
+    }
+  }
+}
+
 function setSidebarStart(city) {
+  const local = searchLocalGeo(city);
   if (state.waypoints[0]) {
     state.waypoints[0].name = city;
-    state.waypoints[0].lat = null;
-    state.waypoints[0].lon = null;
+    if (local) {
+      state.waypoints[0].lat = local.lat;
+      state.waypoints[0].lon = local.lon;
+    }
   }
   const heroInp = document.getElementById('hero-start-input');
   if (heroInp) heroInp.value = city;
   updateWaypointsListUI();
+  updateWaypointMarkers();
+  checkAndPanToWaypoint(0);
 }
 
 function setSidebarEnd(city) {
   const lastIdx = state.waypoints.length - 1;
+  const local = searchLocalGeo(city);
   if (state.waypoints[lastIdx]) {
     state.waypoints[lastIdx].name = city;
-    state.waypoints[lastIdx].lat = null;
-    state.waypoints[lastIdx].lon = null;
+    if (local) {
+      state.waypoints[lastIdx].lat = local.lat;
+      state.waypoints[lastIdx].lon = local.lon;
+    }
   }
   const heroInp = document.getElementById('hero-end-input');
   if (heroInp) heroInp.value = city;
   updateWaypointsListUI();
+  updateWaypointMarkers();
+  checkAndPanToWaypoint(lastIdx);
 }
 
 function setHeroStart(city) {
@@ -529,6 +691,31 @@ function setHeroStart(city) {
 
 function setHeroEnd(city) {
   setSidebarEnd(city);
+}
+
+function handleHeroStartInput(value) {
+  if (state.waypoints[0]) {
+    state.waypoints[0].name = value;
+    const local = searchLocalGeo(value);
+    if (local) {
+      state.waypoints[0].lat = local.lat;
+      state.waypoints[0].lon = local.lon;
+      updateWaypointMarkers();
+    }
+  }
+}
+
+function handleHeroEndInput(value) {
+  const lastIdx = state.waypoints.length - 1;
+  if (state.waypoints[lastIdx]) {
+    state.waypoints[lastIdx].name = value;
+    const local = searchLocalGeo(value);
+    if (local) {
+      state.waypoints[lastIdx].lat = local.lat;
+      state.waypoints[lastIdx].lon = local.lon;
+      updateWaypointMarkers();
+    }
+  }
 }
 
 // GPS Location for Start Point
@@ -552,6 +739,7 @@ function useCurrentLocationForStart() {
       if (input) input.value = '📍 Mevcut Konumum';
       updateWaypointsListUI();
       updateWaypointMarkers();
+      checkAndPanToWaypoint(0);
       showToast('Mevcut konumunuz başlangıç noktası olarak ayarlandı.', 'success');
     },
     (err) => {
@@ -562,31 +750,66 @@ function useCurrentLocationForStart() {
   );
 }
 
-// Geocoding Helper via OpenStreetMap Nominatim
+// Multi-Tier Geocoding Helper: Instant Offline Database First + Fallbacks
 async function geocodeLocation(query) {
-  if (!query || query.trim() === '') return null;
-  const q = encodeURIComponent(query.trim() + ', Türkiye');
+  if (!query || typeof query !== 'string' || query.trim() === '') return null;
+  const qStr = query.trim();
+
+  // Tier 1: Check instant offline local database first (0ms, 100% offline, guaranteed)
+  const localMatch = searchLocalGeo(qStr);
+  if (localMatch) {
+    return {
+      lat: localMatch.lat,
+      lon: localMatch.lon,
+      displayName: localMatch.displayName
+    };
+  }
+
+  // Tier 2: OpenStreetMap Nominatim with safe timeout
   try {
-    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=1&accept-language=tr`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (data && data.length > 0) {
-      return {
-        lat: parseFloat(data[0].lat),
-        lon: parseFloat(data[0].lon),
-        displayName: data[0].display_name
-      };
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2800);
+    const q = encodeURIComponent(qStr + ', Türkiye');
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=1&accept-language=tr`, {
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.length > 0) {
+        return {
+          lat: parseFloat(data[0].lat),
+          lon: parseFloat(data[0].lon),
+          displayName: data[0].display_name
+        };
+      }
     }
   } catch (err) {
-    console.warn('Geocoding error:', err);
+    // Timeout or network error - fallback silently
   }
+
+  // Tier 3: Fuzzy token match as last resort
+  const tokens = normalizeTurkish(qStr).split(/[\s,/-]+/).filter(t => t.length >= 2);
+  for (const t of tokens) {
+    const subMatch = searchLocalGeo(t);
+    if (subMatch) {
+      return {
+        lat: subMatch.lat,
+        lon: subMatch.lon,
+        displayName: subMatch.displayName
+      };
+    }
+  }
+
   return null;
 }
 
 // Hero Route Submission
 async function submitHeroRoute() {
-  const startVal = document.getElementById('hero-start-input')?.value.trim();
-  const endVal = document.getElementById('hero-end-input')?.value.trim();
+  const startInp = document.getElementById('hero-start-input');
+  const endInp = document.getElementById('hero-end-input');
+  const startVal = startInp ? startInp.value.trim() : '';
+  const endVal = endInp ? endInp.value.trim() : '';
 
   if (!startVal || !endVal) {
     showToast('Lütfen başlangıç ve varış noktalarını girin.', 'warning');
@@ -599,10 +822,20 @@ async function submitHeroRoute() {
   if (startVal.includes('Mevcut Konumum') && state.userLocation) {
     startCoord = state.userLocation;
   } else {
-    startCoord = await geocodeLocation(startVal);
+    if (state.waypoints[0] && state.waypoints[0].lat !== null && state.waypoints[0].name === startVal) {
+      startCoord = { lat: state.waypoints[0].lat, lon: state.waypoints[0].lon };
+    } else {
+      startCoord = await geocodeLocation(startVal);
+    }
   }
 
-  let endCoord = await geocodeLocation(endVal);
+  const lastIdx = state.waypoints.length - 1;
+  let endCoord = null;
+  if (state.waypoints[lastIdx] && state.waypoints[lastIdx].lat !== null && state.waypoints[lastIdx].name === endVal) {
+    endCoord = { lat: state.waypoints[lastIdx].lat, lon: state.waypoints[lastIdx].lon };
+  } else {
+    endCoord = await geocodeLocation(endVal);
+  }
 
   if (!startCoord) {
     showLoadingBanner(false);
@@ -619,9 +852,9 @@ async function submitHeroRoute() {
   state.waypoints[0].lon = startCoord.lon;
   state.waypoints[0].name = startVal;
 
-  state.waypoints[1].lat = endCoord.lat;
-  state.waypoints[1].lon = endCoord.lon;
-  state.waypoints[1].name = endVal;
+  state.waypoints[lastIdx].lat = endCoord.lat;
+  state.waypoints[lastIdx].lon = endCoord.lon;
+  state.waypoints[lastIdx].name = endVal;
 
   updateWaypointsListUI();
   updateWaypointMarkers();
@@ -653,8 +886,12 @@ function updateWaypointsListUI() {
 
     div.innerHTML = `
       <div class="p-1 shrink-0 flex items-center justify-center">${iconHtml}</div>
-      <input type="text" value="${escapeHtml(wp.name || '')}" placeholder="${isStart ? 'Başlangıç Noktası' : isEnd ? 'Varış Noktası' : 'Ara Durak ' + index}" 
-        onchange="handleWaypointNameChange(${index}, this.value)"
+      <input type="text" value="${escapeHtml(wp.name || '')}" 
+        list="turkey-cities-list"
+        placeholder="${isStart ? 'Başlangıç Noktası (Örn: İstanbul)' : isEnd ? 'Varış Noktası (Örn: Antalya)' : 'Ara Durak ' + index}" 
+        oninput="handleWaypointNameChange(${index}, this.value)"
+        onblur="handleWaypointBlur(${index}, this.value)"
+        onkeydown="if(event.key==='Enter') { handleWaypointBlur(${index}, this.value); calculateRouteMain(); }"
         class="bg-transparent flex-1 text-xs text-white placeholder-slate-500 focus:outline-none truncate font-medium">
       <div class="flex items-center space-x-1 shrink-0">
         ${isWaypoint ? `
@@ -672,8 +909,38 @@ function updateWaypointsListUI() {
 }
 
 function handleWaypointNameChange(index, value) {
-  if (state.waypoints[index]) {
-    state.waypoints[index].name = value;
+  if (!state.waypoints[index]) return;
+  state.waypoints[index].name = value;
+
+  // Sync to hero inputs
+  if (index === 0) {
+    const heroStart = document.getElementById('hero-start-input');
+    if (heroStart && heroStart.value !== value) heroStart.value = value;
+  } else if (index === state.waypoints.length - 1) {
+    const heroEnd = document.getElementById('hero-end-input');
+    if (heroEnd && heroEnd.value !== value) heroEnd.value = value;
+  }
+
+  // Quick instant match check
+  const local = searchLocalGeo(value);
+  if (local) {
+    state.waypoints[index].lat = local.lat;
+    state.waypoints[index].lon = local.lon;
+    updateWaypointMarkers();
+    checkAndPanToWaypoint(index);
+  }
+}
+
+async function handleWaypointBlur(index, value) {
+  if (!state.waypoints[index] || !value || value.trim() === '') return;
+  if (state.waypoints[index].lat === null || state.waypoints[index].lon === null) {
+    const coord = await geocodeLocation(value);
+    if (coord) {
+      state.waypoints[index].lat = coord.lat;
+      state.waypoints[index].lon = coord.lon;
+      updateWaypointMarkers();
+      checkAndPanToWaypoint(index);
+    }
   }
 }
 
@@ -776,31 +1043,71 @@ function clearRouteDisplay() {
 
 // Waypoint Map Click & Markers
 async function handleMapClick(lat, lon) {
-  // If start is empty, fill start
+  const friendlyName = findNearestCityOrPlace(lat, lon);
+
+  // 1. If start has no coordinates and no name entered yet
+  if (state.waypoints[0].lat === null && (!state.waypoints[0].name || state.waypoints[0].name.trim() === '')) {
+    state.waypoints[0].lat = lat;
+    state.waypoints[0].lon = lon;
+    state.waypoints[0].name = friendlyName;
+    const heroInp = document.getElementById('hero-start-input');
+    if (heroInp) heroInp.value = friendlyName;
+    updateWaypointsListUI();
+    updateWaypointMarkers();
+    showToast(`Başlangıç: ${friendlyName}`, 'success');
+    return;
+  }
+
+  // 2. If end has no coordinates and no name entered yet
+  const lastIdx = state.waypoints.length - 1;
+  if (state.waypoints[lastIdx].lat === null && (!state.waypoints[lastIdx].name || state.waypoints[lastIdx].name.trim() === '')) {
+    state.waypoints[lastIdx].lat = lat;
+    state.waypoints[lastIdx].lon = lon;
+    state.waypoints[lastIdx].name = friendlyName;
+    const heroInp = document.getElementById('hero-end-input');
+    if (heroInp) heroInp.value = friendlyName;
+    updateWaypointsListUI();
+    updateWaypointMarkers();
+    showToast(`Varış: ${friendlyName}`, 'success');
+    calculateRouteMain();
+    return;
+  }
+
+  // 3. If start was typed but coordinate still missing
   if (state.waypoints[0].lat === null) {
     state.waypoints[0].lat = lat;
     state.waypoints[0].lon = lon;
-    state.waypoints[0].name = `Konum (${lat.toFixed(3)}, ${lon.toFixed(3)})`;
+    if (!state.waypoints[0].name) {
+      state.waypoints[0].name = friendlyName;
+      const heroInp = document.getElementById('hero-start-input');
+      if (heroInp) heroInp.value = friendlyName;
+    }
     updateWaypointsListUI();
     updateWaypointMarkers();
     return;
   }
-  // If end is empty, fill end
-  if (state.waypoints[state.waypoints.length - 1].lat === null) {
-    state.waypoints[state.waypoints.length - 1].lat = lat;
-    state.waypoints[state.waypoints.length - 1].lon = lon;
-    state.waypoints[state.waypoints.length - 1].name = `Konum (${lat.toFixed(3)}, ${lon.toFixed(3)})`;
+
+  // 4. If end was typed but coordinate still missing
+  if (state.waypoints[lastIdx].lat === null) {
+    state.waypoints[lastIdx].lat = lat;
+    state.waypoints[lastIdx].lon = lon;
+    if (!state.waypoints[lastIdx].name) {
+      state.waypoints[lastIdx].name = friendlyName;
+      const heroInp = document.getElementById('hero-end-input');
+      if (heroInp) heroInp.value = friendlyName;
+    }
     updateWaypointsListUI();
     updateWaypointMarkers();
     calculateRouteMain();
     return;
   }
-  // Otherwise, add intermediate waypoint
+
+  // 5. Otherwise, add intermediate waypoint
   const newIndex = state.waypoints.length - 1;
   const newWp = {
     id: 'wp-' + Date.now(),
     type: 'waypoint',
-    name: `Durak (${lat.toFixed(3)}, ${lon.toFixed(3)})`,
+    name: friendlyName,
     lat: lat,
     lon: lon,
     marker: null
@@ -808,6 +1115,7 @@ async function handleMapClick(lat, lon) {
   state.waypoints.splice(newIndex, 0, newWp);
   updateWaypointsListUI();
   updateWaypointMarkers();
+  showToast(`Ara durak: ${friendlyName}`, 'info');
   calculateRouteMain();
 }
 
@@ -2985,6 +3293,7 @@ function initIcons() {
 // DOM CONTENT LOADED EVENT
 document.addEventListener('DOMContentLoaded', () => {
   initPlacesDatabase();
+  populateCityDatalist();
   initMap();
   updateWaypointsListUI();
   renderCorridorPoiList();
