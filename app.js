@@ -961,6 +961,20 @@ function displayRouteStats(route) {
     badge.textContent = 'HIZLI OTOYOL';
     badge.className = 'px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30';
   }
+
+  // Update Mobile Mini Cockpit
+  const miniCockpit = document.getElementById('mobile-mini-cockpit');
+  const miniOpenBtn = document.getElementById('btn-mobile-open-planner');
+  const miniDist = document.getElementById('mobile-mini-dist');
+  const miniDur = document.getElementById('mobile-mini-dur');
+  const miniTwist = document.getElementById('mobile-mini-twist');
+  if (miniCockpit) {
+    miniCockpit.classList.remove('hidden');
+    if (miniOpenBtn) miniOpenBtn.classList.add('hidden');
+    if (miniDist) miniDist.textContent = `${distanceKm} km`;
+    if (miniDur) miniDur.textContent = durationStr;
+    if (miniTwist) miniTwist.textContent = `Viraj: ${curviness}`;
+  }
 }
 
 // Curviness algorithm
@@ -1342,6 +1356,10 @@ function clearRouteDisplay() {
   document.getElementById('btn-export-gpx').setAttribute('disabled', 'true');
   document.getElementById('btn-open-gmaps').setAttribute('disabled', 'true');
   document.getElementById('btn-save-route-modal').setAttribute('disabled', 'true');
+  const miniCockpit = document.getElementById('mobile-mini-cockpit');
+  const miniOpenBtn = document.getElementById('btn-mobile-open-planner');
+  if (miniCockpit) miniCockpit.classList.add('hidden');
+  if (miniOpenBtn) miniOpenBtn.classList.remove('hidden');
 }
 
 // Reverse Route (Ters Çevir)
@@ -1819,23 +1837,79 @@ function initEventListeners() {
     if (e.target === modal) modal.classList.add('hidden');
   });
 
-  // Mobile Sidebar Toggle
-  const sidebar = document.getElementById('sidebar');
-  const toggleBtn = document.getElementById('btn-toggle-sidebar');
-  const toggleIcon = document.getElementById('sidebar-toggle-icon');
-
-  toggleBtn.addEventListener('click', () => {
-    sidebar.classList.toggle('hidden');
-    sidebar.classList.toggle('flex');
-    const isHidden = sidebar.classList.contains('hidden');
-    toggleIcon.setAttribute('data-lucide', isHidden ? 'panel-left-open' : 'panel-left-close');
+  // Mobile Sidebar & Responsive Helpers
+  window.openMobileSidebar = function() {
+    const sb = document.getElementById('sidebar');
+    if (!sb) return;
+    sb.classList.remove('hidden');
+    sb.classList.add('flex');
+    const icon = document.getElementById('sidebar-toggle-icon');
+    if (icon) icon.setAttribute('data-lucide', 'x');
     initIcons();
+  };
+
+  window.closeMobileSidebar = function() {
+    const sb = document.getElementById('sidebar');
+    if (!sb) return;
+    sb.classList.add('hidden');
+    sb.classList.remove('flex');
+    const icon = document.getElementById('sidebar-toggle-icon');
+    if (icon) icon.setAttribute('data-lucide', 'list');
+    initIcons();
+    if (map) setTimeout(() => map.invalidateSize(), 150);
+  };
+
+  window.toggleMobileSidebar = function() {
+    const sb = document.getElementById('sidebar');
+    if (!sb) return;
+    if (sb.classList.contains('hidden')) {
+      window.openMobileSidebar();
+    } else {
+      window.closeMobileSidebar();
+    }
+  };
+
+  window.toggleMobileMoreMenu = function(e) {
+    if (e) e.stopPropagation();
+    const dropdown = document.getElementById('mobile-more-dropdown');
+    if (dropdown) dropdown.classList.toggle('hidden');
+  };
+
+  window.closeMobileMoreMenu = function() {
+    const dropdown = document.getElementById('mobile-more-dropdown');
+    if (dropdown) dropdown.classList.add('hidden');
+  };
+
+  window.openMobileModal = function(type) {
+    window.closeMobileMoreMenu();
+    if (type === 'historic') {
+      document.getElementById('btn-historic-places')?.click();
+    } else if (type === 'presets') {
+      document.getElementById('btn-presets')?.click();
+    } else if (type === 'save') {
+      document.getElementById('btn-save-route-modal')?.click();
+    }
+  };
+
+  document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('mobile-more-dropdown');
+    const btn = document.getElementById('btn-mobile-more-menu');
+    if (dropdown && !dropdown.classList.contains('hidden')) {
+      if (!dropdown.contains(e.target) && (!btn || !btn.contains(e.target))) {
+        dropdown.classList.add('hidden');
+      }
+    }
   });
+
+  const toggleBtn = document.getElementById('btn-toggle-sidebar');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', window.toggleMobileSidebar);
+  }
 
   // Toggle Elevation Panel Minimize
   document.getElementById('btn-toggle-elevation').addEventListener('click', () => {
-    const canvasWrap = document.querySelector('#elevation-panel .h-28');
-    canvasWrap.classList.toggle('hidden');
+    const canvasWrap = document.querySelector('#elevation-panel canvas')?.parentElement;
+    if (canvasWrap) canvasWrap.classList.toggle('hidden');
   });
 
   // DATABASE: Saved Routes Modal
