@@ -99,6 +99,12 @@ main {
   background-color: #090d16;
 }
 
+/* ROTAM High-Contrast Dark Mode Map (Adblocker-Safe, Fast & 100% Reliable) */
+#map.dark-map .leaflet-tile-pane {
+  filter: invert(100%) hue-rotate(180deg) brightness(88%) contrast(108%);
+  -webkit-filter: invert(100%) hue-rotate(180deg) brightness(88%) contrast(108%);
+}
+
 .leaflet-container {
   width: 100% !important;
   height: 100% !important;

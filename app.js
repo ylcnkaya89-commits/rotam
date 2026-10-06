@@ -75,12 +75,12 @@ function initPlacesDatabase() {
 function createTileLayers() {
   if (typeof L === 'undefined') return {};
   const layers = {
-    dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      subdomains: 'abcd',
+    // Ultra-reliable, adblocker-safe Dark Mode tile using OpenStreetMap + high-contrast CSS filter
+    dark: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      attribution: '&copy; CARTO, &copy; OpenStreetMap'
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }),
-    voyager: L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    voyager: L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
       subdomains: 'abcd',
       maxZoom: 19,
       attribution: '&copy; CARTO, &copy; OpenStreetMap'
@@ -129,6 +129,9 @@ function initMap() {
     setTimeout(initMap, 150);
     return;
   }
+
+  // Ensure dark-map filter is active for dark mode
+  mapEl.classList.add('dark-map');
 
   tileLayers = createTileLayers();
   const defaultTile = tileLayers.dark || tileLayers.osm;
@@ -230,11 +233,22 @@ function clearHighlightMarkers() {
 }
 
 function switchTile(tileKey) {
-  if (!map || !tileLayers[tileKey]) return;
+  if (!map) return;
+
+  const mapEl = document.getElementById('map');
+  if (tileKey === 'dark') {
+    if (mapEl) mapEl.classList.add('dark-map');
+  } else {
+    if (mapEl) mapEl.classList.remove('dark-map');
+  }
+
+  const targetLayer = tileLayers[tileKey] || tileLayers.dark || tileLayers.osm;
+  if (!targetLayer) return;
+
   Object.values(tileLayers).forEach(l => {
     if (map.hasLayer(l)) map.removeLayer(l);
   });
-  map.addLayer(tileLayers[tileKey]);
+  map.addLayer(targetLayer);
   state.activeTileLayer = tileKey;
 
   document.querySelectorAll('.tile-btn').forEach(b => {
