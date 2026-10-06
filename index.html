@@ -132,8 +132,13 @@
         <i data-lucide="map" class="w-3.5 h-3.5 shrink-0"></i>
         <span><span class="hidden lg:inline">Rota </span>Planla</span>
       </button>
-      <button id="nav-btn-discover" onclick="openDiscoverModal()" class="flex items-center space-x-1.5 px-2.5 lg:px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all">
+      <button id="nav-btn-stream" onclick="toggleRightPanel()" class="flex items-center space-x-1.5 px-2.5 lg:px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all cursor-pointer" title="Rotadaki Keşifler ve Yolculuk Akışı">
         <i data-lucide="compass" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
+        <span>Keşif & Akış</span>
+        <span id="badge-header-poi-count" class="hidden px-1.5 py-0.2 bg-amber-500/20 text-amber-300 rounded-full text-[10px] font-bold border border-amber-500/30">0</span>
+      </button>
+      <button id="nav-btn-discover" onclick="openDiscoverModal()" class="flex items-center space-x-1.5 px-2.5 lg:px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all">
+        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-orange-400 shrink-0"></i>
         <span><span class="hidden lg:inline">Türkiye'yi </span>Keşfet</span>
       </button>
       <button id="nav-btn-nearby" onclick="openNearbyModal()" class="flex items-center space-x-1.5 px-2.5 lg:px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all">
@@ -167,9 +172,10 @@
         <span class="hidden xl:inline">Yükle</span>
       </button>
 
-      <button id="btn-open-gmaps" disabled onclick="openInGoogleMaps()" class="hidden sm:flex disabled:opacity-40 disabled:cursor-not-allowed items-center space-x-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1.5 lg:px-2.5 rounded-lg text-xs font-medium border border-slate-700 transition-colors" title="Google Maps'te Aç">
-        <i data-lucide="external-link" class="w-3.5 h-3.5 text-green-400 shrink-0"></i>
-        <span class="hidden xl:inline">Google Maps</span>
+      <!-- Google Maps Dışa Aktarma / Açma Butonu (Masaüstü & Mobil) -->
+      <button id="btn-open-gmaps" onclick="openInGoogleMaps()" class="flex items-center space-x-1 sm:space-x-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-md border border-emerald-500/40 active:scale-95 transition-all" title="Google Maps'te Aç ve Navigasyonu Başlat">
+        <i data-lucide="navigation" class="w-3.5 h-3.5 text-white shrink-0"></i>
+        <span><span class="hidden sm:inline">Google </span>Maps</span>
       </button>
 
       <!-- Mobil Menü Toggle Butonu -->
@@ -462,6 +468,22 @@
               <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
             </div>
           </button>
+
+          <!-- Rota Eylemleri: Google Maps Navigasyon, GPX ve Kaydet -->
+          <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-slate-800">
+            <button type="button" onclick="openInGoogleMaps()" class="col-span-2 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-emerald-600/25 flex items-center justify-center space-x-2 active:scale-[0.99] transition-all" title="Rotayı Google Maps'te Aç ve Navigasyonu Başlat">
+              <i data-lucide="navigation" class="w-4 h-4 text-white"></i>
+              <span>Google Maps Navigasyonunu Başlat</span>
+            </button>
+            <button type="button" onclick="exportGPX()" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl text-xs border border-slate-700 flex items-center justify-center space-x-1.5 transition-all">
+              <i data-lucide="download" class="w-3.5 h-3.5 text-accent-400"></i>
+              <span>GPX İndir</span>
+            </button>
+            <button type="button" onclick="openSaveRouteModal()" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl text-xs border border-slate-700 flex items-center justify-center space-x-1.5 transition-all">
+              <i data-lucide="bookmark-plus" class="w-3.5 h-3.5 text-brand-400"></i>
+              <span>Rotayı Kaydet</span>
+            </button>
+          </div>
         </div>
 
         <!-- 5. HAVA DURUMU KARTI -->
@@ -715,14 +737,14 @@
       </div>
 
       <!-- SAĞ ÇEKMECE / PANEL TOGGLE (KEŞİF & ZAMAN ÇİZELGESİ) -->
-      <button id="btn-toggle-right-panel" onclick="toggleRightPanel()" class="hidden md:flex absolute top-14 right-3 sm:top-16 sm:right-4 z-20 glass-panel p-2.5 rounded-xl border border-slate-800 text-slate-300 hover:text-white shadow-xl items-center space-x-1.5 text-xs transition-all">
+      <button id="btn-toggle-right-panel" onclick="toggleRightPanel()" class="hidden md:flex absolute top-14 right-3 sm:top-16 sm:right-4 z-[1030] glass-panel p-2.5 rounded-xl border border-slate-800 text-slate-300 hover:text-white hover:border-amber-500/40 shadow-xl items-center space-x-1.5 text-xs transition-all cursor-pointer">
         <i data-lucide="compass" class="w-4 h-4 text-amber-400"></i>
         <span>Keşif & Akış</span>
         <span id="badge-right-panel-poi-count" class="hidden px-1.5 py-0.5 bg-amber-500/20 text-amber-300 rounded-full text-[10px] font-bold border border-amber-500/30">0</span>
       </button>
 
       <!-- SAĞ PANEL: ROTA ÜZERİNDE KEŞFET & ZAMAN ÇİZELGESİ -->
-      <div id="right-panel" class="hidden w-full sm:w-[380px] bg-slate-900/95 border-l border-slate-800/90 flex-col z-35 absolute inset-y-0 right-0 shadow-2xl backdrop-blur-xl transition-all duration-300 ease-in-out">
+      <div id="right-panel" class="hidden w-full sm:w-[380px] bg-slate-900/95 border-l border-slate-800/90 flex-col z-[1050] absolute inset-y-0 right-0 shadow-2xl backdrop-blur-xl transition-all duration-300 ease-in-out">
         <!-- Panel Başlığı & Sekmeler -->
         <div class="p-3 border-b border-slate-800 bg-slate-950 flex items-center justify-between shrink-0">
           <div class="flex items-center space-x-1 bg-slate-900 p-0.5 rounded-xl border border-slate-800 text-xs">
@@ -833,7 +855,11 @@
             <span class="text-slate-500">•</span>
             <span id="mobile-mini-pois" class="text-emerald-400 font-bold text-xs">- Keşif</span>
           </div>
-          <div class="flex items-center space-x-1.5">
+          <div class="flex items-center space-x-1 sm:space-x-1.5">
+            <button onclick="openInGoogleMaps()" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/30 flex items-center space-x-1 active:scale-95 transition-all" title="Google Maps Navigasyonunu Başlat">
+              <i data-lucide="navigation" class="w-3.5 h-3.5 text-white"></i>
+              <span>Maps</span>
+            </button>
             <button onclick="openRightPanel()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-xl text-xs font-bold border border-slate-700 flex items-center space-x-1 active:scale-95 transition-all" title="Rotadaki Keşif Noktaları">
               <i data-lucide="compass" class="w-3.5 h-3.5"></i>
               <span>Keşfet</span>

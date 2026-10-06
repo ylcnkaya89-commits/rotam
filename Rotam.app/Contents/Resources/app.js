@@ -766,6 +766,8 @@ function clearRouteDisplay() {
   document.getElementById('btn-export-gpx')?.setAttribute('disabled', 'true');
   document.getElementById('btn-open-gmaps')?.setAttribute('disabled', 'true');
   document.getElementById('btn-save-route-modal')?.setAttribute('disabled', 'true');
+  document.getElementById('badge-right-panel-poi-count')?.classList.add('hidden');
+  document.getElementById('badge-header-poi-count')?.classList.add('hidden');
 
   renderCorridorPoiList();
   generateSmartStopRecommendations(null);
@@ -1311,13 +1313,19 @@ function analyzeRouteCorridor(route, radiusMeters = 50000) {
   if (totalEl) totalEl.textContent = `${found.length} Nokta`;
 
   const rightPanelBadge = document.getElementById('badge-right-panel-poi-count');
-  if (rightPanelBadge) {
-    if (found.length > 0) {
+  const headerBadge = document.getElementById('badge-header-poi-count');
+  if (found.length > 0) {
+    if (rightPanelBadge) {
       rightPanelBadge.textContent = found.length;
       rightPanelBadge.classList.remove('hidden');
-    } else {
-      rightPanelBadge.classList.add('hidden');
     }
+    if (headerBadge) {
+      headerBadge.textContent = found.length;
+      headerBadge.classList.remove('hidden');
+    }
+  } else {
+    if (rightPanelBadge) rightPanelBadge.classList.add('hidden');
+    if (headerBadge) headerBadge.classList.add('hidden');
   }
 
   const mobileMiniPois = document.getElementById('mobile-mini-pois');
@@ -1687,6 +1695,10 @@ function renderJourneyTimeline() {
       <span>Ara Durak: ${stopsCount > 0 ? stopsCount : 'Doğrudan Rota'}</span>
       <span>Önerilen Dinlenme: ${Math.max(1, Math.floor(totalMinutes / 120))} Mola</span>
     </div>
+    <button onclick="openInGoogleMaps()" class="w-full mt-2 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-md shadow-emerald-600/20 active:scale-95 transition-all" title="Google Maps Navigasyonu Başlat">
+      <i data-lucide="navigation" class="w-3.5 h-3.5 text-white"></i>
+      <span>Google Maps ile Sürüşü Başlat</span>
+    </button>
   `;
   container.appendChild(summaryCard);
 
@@ -1776,6 +1788,7 @@ function toggleRightPanel() {
 function openRightPanel() {
   const panel = document.getElementById('right-panel');
   const toggleBtn = document.getElementById('btn-toggle-right-panel');
+  const navBtn = document.getElementById('nav-btn-stream');
   const mapControls = document.getElementById('floating-map-controls');
   const elevPanel = document.getElementById('elevation-panel');
   if (!panel) return;
@@ -1788,12 +1801,21 @@ function openRightPanel() {
   panel.classList.remove('hidden');
   panel.classList.add('flex');
   if (toggleBtn) toggleBtn.classList.add('hidden');
+  if (navBtn) {
+    navBtn.classList.add('bg-slate-800', 'text-white', 'border', 'border-amber-500/40');
+    navBtn.classList.remove('text-slate-300');
+  }
   if (mapControls && window.innerWidth >= 768) {
     mapControls.classList.add('shifted');
   }
   if (elevPanel && window.innerWidth >= 768) {
     elevPanel.classList.add('with-right-panel');
   }
+
+  // Ensure content is fresh
+  renderCorridorPoiList();
+  renderJourneyTimeline();
+
   initIcons();
   if (map) {
     setTimeout(() => map.invalidateSize(), 100);
@@ -1804,6 +1826,7 @@ function openRightPanel() {
 function closeRightPanel() {
   const panel = document.getElementById('right-panel');
   const toggleBtn = document.getElementById('btn-toggle-right-panel');
+  const navBtn = document.getElementById('nav-btn-stream');
   const mapControls = document.getElementById('floating-map-controls');
   const elevPanel = document.getElementById('elevation-panel');
   if (!panel) return;
@@ -1811,6 +1834,10 @@ function closeRightPanel() {
   panel.classList.add('hidden');
   panel.classList.remove('flex');
   if (toggleBtn) toggleBtn.classList.remove('hidden');
+  if (navBtn) {
+    navBtn.classList.remove('bg-slate-800', 'text-white', 'border', 'border-amber-500/40');
+    navBtn.classList.add('text-slate-300');
+  }
   if (mapControls) {
     mapControls.classList.remove('shifted');
   }
@@ -2903,7 +2930,13 @@ function exportGPX() {
 // OPEN IN GOOGLE MAPS
 function openInGoogleMaps() {
   const valid = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
-  if (valid.length < 2) return;
+  if (valid.length < 2) {
+    showToast('Google Maps navigasyonunu başlatmak için önce başlangıç ve varış noktalarınızı belirleyip rota oluşturun.', 'info');
+    if (window.innerWidth < 768) {
+      openMobileSidebar();
+    }
+    return;
+  }
 
   const origin = `${valid[0].lat},${valid[0].lon}`;
   const dest = `${valid[valid.length - 1].lat},${valid[valid.length - 1].lon}`;
@@ -2924,7 +2957,11 @@ function openInGoogleMaps() {
   };
   url += `&travelmode=${travelModes[state.currentVehicle] || 'driving'}`;
 
-  window.open(url, '_blank');
+  showToast('Google Maps navigasyonu açılıyor...', 'info');
+  const win = window.open(url, '_blank');
+  if (!win || win.closed || typeof win.closed === 'undefined') {
+    window.location.href = url;
+  }
 }
 
 // HTML Escape Helper
