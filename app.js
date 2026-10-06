@@ -19,6 +19,7 @@ const state = {
   elevationHoverMarker: null,
   activeTileLayer: null,
   poiMarkers: [],
+  highlightMarkers: [],
   activePoiCategories: new Set(['historic', 'nature', 'photography', 'beach', 'gastronomy', 'cafe', 'fuel', 'ev_charge', 'camping']),
   allPlaces: [],
   corridorPois: [],
@@ -73,15 +74,20 @@ function initPlacesDatabase() {
 // Map Tile Layers Setup
 function createTileLayers() {
   if (typeof L === 'undefined') return {};
-  return {
-    osm: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }),
+  const layers = {
     dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       subdomains: 'abcd',
       maxZoom: 19,
       attribution: '&copy; CARTO, &copy; OpenStreetMap'
+    }),
+    voyager: L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      subdomains: 'abcd',
+      maxZoom: 19,
+      attribution: '&copy; CARTO, &copy; OpenStreetMap'
+    }),
+    osm: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }),
     topo: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
       maxZoom: 17,
@@ -92,13 +98,37 @@ function createTileLayers() {
       attribution: '&copy; Esri'
     })
   };
+
+  // Add error resilience
+  Object.entries(layers).forEach(([name, l]) => {
+    l.on('tileerror', (e) => {
+      console.warn(`Harita katmanı (${name}) karosu yüklenirken uyarı:`, e);
+    });
+  });
+
+  return layers;
 }
 
-// Leaflet Map Initialization
+// Leaflet Map Initialization with automatic retry & size stabilization
+let mapInitRetries = 0;
 function initMap() {
-  if (mapInitialized || typeof L === 'undefined') return;
+  if (mapInitialized) return;
+
+  if (typeof L === 'undefined') {
+    mapInitRetries++;
+    if (mapInitRetries < 40) {
+      setTimeout(initMap, 150);
+    } else {
+      console.error('Leaflet kütüphanesi yüklenemedi.');
+    }
+    return;
+  }
+
   const mapEl = document.getElementById('map');
-  if (!mapEl) return;
+  if (!mapEl) {
+    setTimeout(initMap, 150);
+    return;
+  }
 
   tileLayers = createTileLayers();
   const defaultTile = tileLayers.dark || tileLayers.osm;
@@ -109,7 +139,8 @@ function initMap() {
     zoom: 6,
     layers: [defaultTile],
     zoomControl: false,
-    tap: true
+    tap: true,
+    preferCanvas: true
   });
 
   // Custom Zoom Control placed bottom right
@@ -124,6 +155,78 @@ function initMap() {
   });
 
   setupElevationCanvas();
+
+  // Force Leaflet container recalculation at crucial render intervals
+  setTimeout(() => { if (map) map.invalidateSize(); }, 60);
+  setTimeout(() => { if (map) map.invalidateSize(); }, 250);
+  setTimeout(() => { if (map) map.invalidateSize(); }, 700);
+  setTimeout(() => { if (map) map.invalidateSize(); }, 1500);
+
+  // Render initial famous discovery spots across Turkey
+  renderInitialHighlights();
+}
+
+// Initial Highlight Discovery Pins (Rendered when no route is active)
+function renderInitialHighlights() {
+  clearHighlightMarkers();
+  if (!map || !state.allPlaces || state.allPlaces.length === 0) return;
+  if (state.routeData) return; // Do not clutter when route is displayed
+
+  // Pick top 35 iconic places across Turkey
+  const curatedIds = [1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36];
+  const highlightPlaces = state.allPlaces.filter(p => curatedIds.includes(p.id) || p.rating === 5).slice(0, 35);
+
+  highlightPlaces.forEach(p => {
+    const cat = p.category || 'historic';
+    const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG.historic;
+    const pinClass = cfg.pinClass || 'pin-historic';
+
+    const icon = L.divIcon({
+      className: 'custom-poi-marker',
+      html: `
+        <div class="custom-pin ${pinClass} w-7 h-7 text-xs flex items-center justify-center shadow-lg transition-transform hover:scale-125" title="${escapeHtml(p.name)}">
+          <span>${cfg.emoji}</span>
+        </div>
+      `,
+      iconSize: [28, 28],
+      iconAnchor: [14, 14]
+    });
+
+    const marker = L.marker([p.lat, p.lon], { icon }).addTo(map);
+    const safeName = escapeHtml(p.name).replace(/'/g, "\\'");
+
+    marker.bindPopup(`
+      <div class="text-xs p-1">
+        <div class="flex items-center justify-between mb-1.5 gap-2">
+          <strong style="color:${cfg.color}" class="font-bold flex items-center gap-1">
+            <span>${cfg.emoji}</span>
+            <span>${cfg.title}</span>
+          </strong>
+          <span class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">★ ${p.rating || 5}.0</span>
+        </div>
+        <p class="font-bold text-white text-sm mt-0.5">${escapeHtml(p.name)}</p>
+        ${p.description ? `<p class="text-[11px] text-slate-300 mt-1 leading-relaxed">${escapeHtml(p.description)}</p>` : ''}
+        <div class="flex items-center space-x-1.5 mt-3 pt-2 border-t border-slate-800">
+          <button onclick="addPoiToRoute(${p.lat}, ${p.lon}, '${safeName}')" class="text-[10px] bg-brand-600 hover:bg-brand-500 text-white px-2.5 py-1.5 rounded-lg font-semibold shadow-md shadow-brand-600/30">
+            Rotaya Ekle
+          </button>
+          <button onclick="openPlaceDetailById(${p.id})" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1.5 rounded-lg">
+            Detaylar
+          </button>
+        </div>
+      </div>
+    `);
+
+    state.highlightMarkers.push(marker);
+  });
+}
+
+function clearHighlightMarkers() {
+  if (!state.highlightMarkers) state.highlightMarkers = [];
+  state.highlightMarkers.forEach(m => {
+    if (map) map.removeLayer(m);
+  });
+  state.highlightMarkers = [];
 }
 
 function switchTile(tileKey) {
@@ -143,27 +246,44 @@ function switchTile(tileKey) {
     activeBtn.classList.add('bg-slate-800', 'text-white');
     activeBtn.classList.remove('text-slate-400');
   }
+  setTimeout(() => { if (map) map.invalidateSize(); }, 50);
 }
 
 // Splash Screen Dismissal
 function dismissSplashScreen() {
   const splash = document.getElementById('splash-screen');
-  if (!splash) return;
-  splash.style.opacity = '0';
-  splash.style.pointerEvents = 'none';
-  setTimeout(() => {
-    splash.remove();
-    initIcons();
-  }, 600);
+  if (splash) {
+    splash.style.opacity = '0';
+    splash.style.pointerEvents = 'none';
+    setTimeout(() => {
+      splash.remove();
+      initIcons();
+      if (map) map.invalidateSize();
+    }, 600);
+  }
+  if (map) {
+    setTimeout(() => map.invalidateSize(), 50);
+    setTimeout(() => map.invalidateSize(), 250);
+    setTimeout(() => map.invalidateSize(), 700);
+  }
 }
 
 // Homepage Hero Planner Toggle
 function showHomepagePlanner() {
-  const hero = document.getElementById('homepage-hero-overlay');
-  if (hero) {
-    hero.classList.remove('hidden');
-    hero.classList.add('flex');
+  const sidebar = document.getElementById('sidebar');
+  if (window.innerWidth >= 768 && sidebar) {
+    sidebar.classList.remove('hidden');
+    sidebar.classList.add('flex');
+    sidebar.scrollTo({ top: 0, behavior: 'smooth' });
+    const startInp = document.querySelector('#waypoints-container input');
+    if (startInp) startInp.focus();
+    return;
+  }
+  if (sidebar) {
+    sidebar.classList.toggle('hidden');
+    sidebar.classList.toggle('flex');
     initIcons();
+    if (map) setTimeout(() => map.invalidateSize(), 200);
   }
 }
 
@@ -172,6 +292,43 @@ function dismissHomepagePlanner() {
   if (hero) {
     hero.classList.add('hidden');
     hero.classList.remove('flex');
+  }
+  if (map) {
+    setTimeout(() => map.invalidateSize(), 50);
+    setTimeout(() => map.invalidateSize(), 250);
+  }
+}
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  if (!sidebar) return;
+  sidebar.classList.toggle('hidden');
+  initIcons();
+  if (map) {
+    setTimeout(() => map.invalidateSize(), 100);
+    setTimeout(() => map.invalidateSize(), 300);
+  }
+}
+
+function openMobileSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar) {
+    sidebar.classList.remove('hidden');
+    sidebar.classList.add('flex');
+    initIcons();
+    if (map) setTimeout(() => map.invalidateSize(), 150);
+  }
+}
+
+function closeMobileSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar) {
+    sidebar.classList.add('hidden');
+    sidebar.classList.remove('flex');
+    if (map) {
+      setTimeout(() => map.invalidateSize(), 100);
+      setTimeout(() => map.invalidateSize(), 300);
+    }
   }
 }
 
@@ -244,14 +401,35 @@ function toggleHeroPref(pref) {
   } catch (e) {}
 }
 
+function setSidebarStart(city) {
+  if (state.waypoints[0]) {
+    state.waypoints[0].name = city;
+    state.waypoints[0].lat = null;
+    state.waypoints[0].lon = null;
+  }
+  const heroInp = document.getElementById('hero-start-input');
+  if (heroInp) heroInp.value = city;
+  updateWaypointsListUI();
+}
+
+function setSidebarEnd(city) {
+  const lastIdx = state.waypoints.length - 1;
+  if (state.waypoints[lastIdx]) {
+    state.waypoints[lastIdx].name = city;
+    state.waypoints[lastIdx].lat = null;
+    state.waypoints[lastIdx].lon = null;
+  }
+  const heroInp = document.getElementById('hero-end-input');
+  if (heroInp) heroInp.value = city;
+  updateWaypointsListUI();
+}
+
 function setHeroStart(city) {
-  const input = document.getElementById('hero-start-input');
-  if (input) input.value = city;
+  setSidebarStart(city);
 }
 
 function setHeroEnd(city) {
-  const input = document.getElementById('hero-end-input');
-  if (input) input.value = city;
+  setSidebarEnd(city);
 }
 
 // GPS Location for Start Point
@@ -453,6 +631,15 @@ function clearRouteDisplay() {
   ghostPolylines = [];
 
   clearPoiMarkers();
+  state.routeData = null;
+  state.routeAlternatives = [];
+  renderInitialHighlights();
+
+  if (map) {
+    map.setView([39.0, 35.2], 6);
+    setTimeout(() => map.invalidateSize(), 100);
+  }
+
   document.getElementById('route-summary-panel')?.classList.add('hidden');
   document.getElementById('weather-panel')?.classList.add('hidden');
   document.getElementById('elevation-panel')?.classList.add('hidden');
@@ -549,14 +736,31 @@ function showLoadingBanner(show, text) {
 }
 
 async function calculateRouteMain() {
+  showLoadingBanner(true, '1. Rota durakları kontrol ediliyor...');
+
+  // Auto geocode any waypoint with a name but missing coordinates
+  for (let i = 0; i < state.waypoints.length; i++) {
+    const wp = state.waypoints[i];
+    if ((wp.lat === null || wp.lon === null) && wp.name && wp.name.trim() !== '') {
+      showLoadingBanner(true, `Konum aranıyor: ${wp.name}...`);
+      const coord = await geocodeLocation(wp.name);
+      if (coord) {
+        wp.lat = coord.lat;
+        wp.lon = coord.lon;
+      }
+    }
+  }
+  updateWaypointMarkers();
+
   const validPoints = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
   if (validPoints.length < 2) {
-    clearRouteDisplay();
+    showLoadingBanner(false);
+    alert('Lütfen en az başlangıç ve varış noktası girin veya haritadan 2 nokta seçin.');
     return;
   }
 
   const requestId = ++state.routeRequestId;
-  showLoadingBanner(true, '1. Rota hesaplanıyor...');
+  showLoadingBanner(true, '1. Güzergah hesaplanıyor...');
 
   try {
     // Stage 1: Generate multiple route alternatives
@@ -575,8 +779,15 @@ async function calculateRouteMain() {
     const activeRoute = alternatives[0];
     state.routeData = activeRoute;
 
+    // Clear initial highlight pins when active route takes over
+    clearHighlightMarkers();
+
     // Draw Active Route & Ghost Alternatives on Map
     drawRoutesOnMap(alternatives, 0);
+
+    if (map) {
+      setTimeout(() => map.invalidateSize(), 80);
+    }
 
     // Display Cockpit Stats
     displayRouteStats(activeRoute);
@@ -2250,4 +2461,20 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     dismissSplashScreen();
   }, 1400);
+});
+
+// Window-level size invalidation listeners for flawless responsive rendering
+window.addEventListener('resize', () => {
+  if (map) map.invalidateSize();
+});
+
+window.addEventListener('orientationchange', () => {
+  setTimeout(() => { if (map) map.invalidateSize(); }, 200);
+});
+
+window.addEventListener('load', () => {
+  if (map) {
+    map.invalidateSize();
+    setTimeout(() => map.invalidateSize(), 300);
+  }
 });
