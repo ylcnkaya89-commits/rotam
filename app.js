@@ -316,11 +316,10 @@ function dismissHomepagePlanner() {
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   if (!sidebar) return;
-  sidebar.classList.toggle('hidden');
-  initIcons();
-  if (map) {
-    setTimeout(() => map.invalidateSize(), 100);
-    setTimeout(() => map.invalidateSize(), 300);
+  if (!sidebar.classList.contains('hidden')) {
+    closeMobileSidebar();
+  } else {
+    openMobileSidebar();
   }
 }
 
@@ -331,6 +330,10 @@ function openMobileSidebar() {
     sidebar.classList.add('flex');
     initIcons();
     if (map) setTimeout(() => map.invalidateSize(), 150);
+  }
+  // On mobile, close right-panel to prevent overlay collision
+  if (window.innerWidth < 768) {
+    closeRightPanel();
   }
 }
 
@@ -343,6 +346,15 @@ function closeMobileSidebar() {
       setTimeout(() => map.invalidateSize(), 100);
       setTimeout(() => map.invalidateSize(), 300);
     }
+  }
+}
+
+function handleMobileNavPlan() {
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar && !sidebar.classList.contains('hidden')) {
+    closeMobileSidebar();
+  } else {
+    openMobileSidebar();
   }
 }
 
@@ -659,6 +671,8 @@ function clearRouteDisplay() {
   document.getElementById('elevation-panel')?.classList.add('hidden');
   document.getElementById('route-alternatives-container')?.classList.add('hidden');
   document.getElementById('mobile-mini-cockpit')?.classList.add('hidden');
+  document.getElementById('btn-mobile-open-planner')?.classList.remove('hidden');
+  document.getElementById('badge-right-panel-poi-count')?.classList.add('hidden');
   document.getElementById('btn-export-gpx')?.setAttribute('disabled', 'true');
   document.getElementById('btn-open-gmaps')?.setAttribute('disabled', 'true');
   document.getElementById('btn-save-route-modal')?.setAttribute('disabled', 'true');
@@ -830,8 +844,10 @@ async function calculateRouteMain() {
 
     // Mobile mini cockpit
     const mini = document.getElementById('mobile-mini-cockpit');
+    const plannerBtn = document.getElementById('btn-mobile-open-planner');
     if (mini) {
       mini.classList.remove('hidden');
+      if (plannerBtn) plannerBtn.classList.add('hidden');
       document.getElementById('mobile-mini-dist').textContent = (activeRoute.distance / 1000).toFixed(1) + ' km';
       const m = Math.floor(activeRoute.duration / 60);
       document.getElementById('mobile-mini-dur').textContent = `${Math.floor(m / 60)} sa ${m % 60} dk`;
@@ -1191,6 +1207,21 @@ function analyzeRouteCorridor(route, radiusMeters = 50000) {
   const totalEl = document.getElementById('corridor-total-count');
   if (totalEl) totalEl.textContent = `${found.length} Nokta`;
 
+  const rightPanelBadge = document.getElementById('badge-right-panel-poi-count');
+  if (rightPanelBadge) {
+    if (found.length > 0) {
+      rightPanelBadge.textContent = found.length;
+      rightPanelBadge.classList.remove('hidden');
+    } else {
+      rightPanelBadge.classList.add('hidden');
+    }
+  }
+
+  const mobileMiniPois = document.getElementById('mobile-mini-pois');
+  if (mobileMiniPois) {
+    mobileMiniPois.textContent = `${found.length} Keşif`;
+  }
+
   const countPills = {
     historic: document.getElementById('count-pill-historic'),
     nature: document.getElementById('count-pill-nature'),
@@ -1443,7 +1474,61 @@ function renderJourneyTimeline() {
 function toggleRightPanel() {
   const panel = document.getElementById('right-panel');
   if (!panel) return;
-  panel.classList.toggle('hidden');
+  if (!panel.classList.contains('hidden')) {
+    closeRightPanel();
+  } else {
+    openRightPanel();
+  }
+}
+
+function openRightPanel() {
+  const panel = document.getElementById('right-panel');
+  const toggleBtn = document.getElementById('btn-toggle-right-panel');
+  const mapControls = document.getElementById('floating-map-controls');
+  const elevPanel = document.getElementById('elevation-panel');
+  if (!panel) return;
+
+  // On mobile, close left sidebar to prevent overlay collision
+  if (window.innerWidth < 768) {
+    closeMobileSidebar();
+  }
+
+  panel.classList.remove('hidden');
+  panel.classList.add('flex');
+  if (toggleBtn) toggleBtn.classList.add('hidden');
+  if (mapControls && window.innerWidth >= 768) {
+    mapControls.classList.add('shifted');
+  }
+  if (elevPanel && window.innerWidth >= 768) {
+    elevPanel.classList.add('with-right-panel');
+  }
+  initIcons();
+  if (map) {
+    setTimeout(() => map.invalidateSize(), 100);
+    setTimeout(() => map.invalidateSize(), 350);
+  }
+}
+
+function closeRightPanel() {
+  const panel = document.getElementById('right-panel');
+  const toggleBtn = document.getElementById('btn-toggle-right-panel');
+  const mapControls = document.getElementById('floating-map-controls');
+  const elevPanel = document.getElementById('elevation-panel');
+  if (!panel) return;
+
+  panel.classList.add('hidden');
+  panel.classList.remove('flex');
+  if (toggleBtn) toggleBtn.classList.remove('hidden');
+  if (mapControls) {
+    mapControls.classList.remove('shifted');
+  }
+  if (elevPanel) {
+    elevPanel.classList.remove('with-right-panel');
+  }
+  if (map) {
+    setTimeout(() => map.invalidateSize(), 100);
+    setTimeout(() => map.invalidateSize(), 350);
+  }
 }
 
 function switchRightTab(tab) {
@@ -1453,27 +1538,16 @@ function switchRightTab(tab) {
   const contentTimeline = document.getElementById('tab-content-timeline');
 
   if (tab === 'discover') {
-    btnDiscover.className = 'px-3 py-1 rounded-lg font-semibold bg-brand-600 text-white shadow-sm';
-    btnTimeline.className = 'px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white';
-    contentDiscover.classList.remove('hidden');
-    contentTimeline.classList.add('hidden');
+    if (btnDiscover) btnDiscover.className = 'px-3 py-1 rounded-lg font-semibold bg-brand-600 text-white shadow-sm';
+    if (btnTimeline) btnTimeline.className = 'px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white';
+    if (contentDiscover) contentDiscover.classList.remove('hidden');
+    if (contentTimeline) contentTimeline.classList.add('hidden');
   } else {
-    btnTimeline.className = 'px-3 py-1 rounded-lg font-semibold bg-brand-600 text-white shadow-sm';
-    btnDiscover.className = 'px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white';
-    contentTimeline.classList.remove('hidden');
-    contentDiscover.classList.add('hidden');
+    if (btnTimeline) btnTimeline.className = 'px-3 py-1 rounded-lg font-semibold bg-brand-600 text-white shadow-sm';
+    if (btnDiscover) btnDiscover.className = 'px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white';
+    if (contentTimeline) contentTimeline.classList.remove('hidden');
+    if (contentDiscover) contentDiscover.classList.add('hidden');
   }
-}
-
-// Mobile Sidebar Controls
-function openMobileSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  if (sidebar) sidebar.classList.remove('hidden');
-}
-
-function closeMobileSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  if (sidebar) sidebar.classList.add('hidden');
 }
 
 // Elevation Canvas & API Setup

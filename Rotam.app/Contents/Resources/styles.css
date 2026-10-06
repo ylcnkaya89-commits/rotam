@@ -455,3 +455,41 @@ main {
     border-radius: 1.25rem !important;
   }
 }
+
+/* Panel & Controls Positioning & Anti-Overlap Architecture */
+#floating-map-controls {
+  transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (min-width: 768px) {
+  #floating-map-controls.shifted {
+    right: 396px !important;
+  }
+
+  #elevation-panel.with-right-panel {
+    right: 400px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  #sidebar {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    z-index: 35 !important;
+  }
+
+  #right-panel {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    z-index: 35 !important;
+  }
+
+  #elevation-panel {
+    max-width: calc(100vw - 1rem) !important;
+  }
+}
+

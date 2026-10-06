@@ -113,63 +113,63 @@
   <!-- TOP NAVIGATION BAR -->
   <header class="h-16 bg-slate-900/95 border-b border-slate-800/80 px-3 sm:px-5 flex items-center justify-between z-30 shrink-0 backdrop-blur-xl max-w-full">
     <!-- Brand Logo & Title -->
-    <div class="flex items-center space-x-3 cursor-pointer" onclick="showHomepagePlanner()">
+    <div class="flex items-center space-x-2.5 sm:space-x-3 cursor-pointer shrink-0" onclick="showHomepagePlanner()">
       <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden border border-amber-500/40 shadow-lg shadow-brand-500/20 shrink-0 bg-slate-950 flex items-center justify-center">
         <img src="rotam_logo.png" alt="Rotam Logo" class="w-full h-full object-cover">
       </div>
       <div class="min-w-0">
         <div class="flex items-center space-x-1.5">
-          <span class="text-lg sm:text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-100 to-brand-400 bg-clip-text text-transparent">Rotam</span>
+          <span class="text-base sm:text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-100 to-brand-400 bg-clip-text text-transparent">Rotam</span>
           <span class="px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase bg-brand-500/20 text-brand-400 border border-brand-500/30 rounded-full shrink-0">V2</span>
         </div>
-        <p class="text-[10px] text-slate-400 hidden sm:block truncate">Seyahat, Rota & Keşif Platformu</p>
+        <p class="text-[10px] text-slate-400 hidden xl:block truncate">Seyahat, Rota & Keşif Platformu</p>
       </div>
     </div>
 
-    <!-- Center Navigation Tabs (Desktop) -->
-    <nav class="hidden md:flex items-center bg-slate-950/80 p-1 rounded-xl border border-slate-800/80 space-x-1 text-xs">
-      <button id="nav-btn-planner" onclick="showHomepagePlanner()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg font-medium transition-all bg-brand-600 text-white shadow-sm shadow-brand-600/30">
-        <i data-lucide="map" class="w-3.5 h-3.5"></i>
-        <span>Rota Planla</span>
+    <!-- Center Navigation Tabs (Desktop & Tablet) -->
+    <nav class="hidden md:flex items-center bg-slate-950/80 p-1 rounded-xl border border-slate-800/80 space-x-0.5 lg:space-x-1 text-xs shrink-0">
+      <button id="nav-btn-planner" onclick="showHomepagePlanner()" class="flex items-center space-x-1.5 px-2.5 lg:px-3 py-1.5 rounded-lg font-medium transition-all bg-brand-600 text-white shadow-sm shadow-brand-600/30">
+        <i data-lucide="map" class="w-3.5 h-3.5 shrink-0"></i>
+        <span><span class="hidden lg:inline">Rota </span>Planla</span>
       </button>
-      <button id="nav-btn-discover" onclick="openDiscoverModal()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all">
-        <i data-lucide="compass" class="w-3.5 h-3.5 text-amber-400"></i>
-        <span>Türkiye'yi Keşfet</span>
+      <button id="nav-btn-discover" onclick="openDiscoverModal()" class="flex items-center space-x-1.5 px-2.5 lg:px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all">
+        <i data-lucide="compass" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
+        <span><span class="hidden lg:inline">Türkiye'yi </span>Keşfet</span>
       </button>
-      <button id="nav-btn-nearby" onclick="openNearbyModal()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all">
-        <i data-lucide="navigation" class="w-3.5 h-3.5 text-emerald-400"></i>
+      <button id="nav-btn-nearby" onclick="openNearbyModal()" class="flex items-center space-x-1.5 px-2.5 lg:px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all">
+        <i data-lucide="navigation" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>
         <span>Yakınımda</span>
       </button>
-      <button id="nav-btn-saved" onclick="openSavedRoutesModal()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all">
-        <i data-lucide="folder-heart" class="w-3.5 h-3.5 text-rose-400"></i>
+      <button id="nav-btn-saved" onclick="openSavedRoutesModal()" class="flex items-center space-x-1.5 px-2.5 lg:px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all">
+        <i data-lucide="folder-heart" class="w-3.5 h-3.5 text-rose-400 shrink-0"></i>
         <span>Rotalarım</span>
       </button>
-      <button id="nav-btn-admin" onclick="openAdminModal()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all" title="Veri & Yönetim Paneli">
-        <i data-lucide="settings-2" class="w-3.5 h-3.5 text-cyan-400"></i>
+      <button id="nav-btn-admin" onclick="openAdminModal()" class="flex items-center space-x-1.5 px-2.5 lg:px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all" title="Veri & Yönetim Paneli">
+        <i data-lucide="settings-2" class="w-3.5 h-3.5 text-cyan-400 shrink-0"></i>
         <span>Yönetim</span>
       </button>
     </nav>
 
     <!-- Top Right Quick Actions -->
-    <div class="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
-      <button id="btn-save-route-modal" disabled onclick="openSaveRouteModal()" class="hidden sm:flex disabled:opacity-40 disabled:cursor-not-allowed items-center space-x-1.5 bg-brand-600 hover:bg-brand-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-md shadow-brand-600/30 transition-all">
-        <i data-lucide="bookmark-plus" class="w-3.5 h-3.5"></i>
-        <span class="hidden md:inline">Rotayı Kaydet</span>
+    <div class="flex items-center space-x-1 sm:space-x-1.5 shrink-0">
+      <button id="btn-save-route-modal" disabled onclick="openSaveRouteModal()" class="hidden sm:flex disabled:opacity-40 disabled:cursor-not-allowed items-center space-x-1.5 bg-brand-600 hover:bg-brand-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-md shadow-brand-600/30 transition-all" title="Rotayı Kaydet">
+        <i data-lucide="bookmark-plus" class="w-3.5 h-3.5 shrink-0"></i>
+        <span class="hidden xl:inline">Rotayı </span><span class="hidden lg:inline">Kaydet</span>
       </button>
 
-      <button id="btn-export-gpx" disabled onclick="exportGPX()" class="hidden sm:flex disabled:opacity-40 disabled:cursor-not-allowed items-center space-x-1 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-slate-700 transition-colors" title="GPX Olarak İndir">
-        <i data-lucide="download" class="w-3.5 h-3.5 text-accent-400"></i>
-        <span>GPX</span>
+      <button id="btn-export-gpx" disabled onclick="exportGPX()" class="hidden sm:flex disabled:opacity-40 disabled:cursor-not-allowed items-center space-x-1 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1.5 lg:px-2.5 rounded-lg text-xs font-medium border border-slate-700 transition-colors" title="GPX Olarak İndir">
+        <i data-lucide="download" class="w-3.5 h-3.5 text-accent-400 shrink-0"></i>
+        <span class="hidden lg:inline">GPX</span>
       </button>
 
-      <button id="btn-import-gpx-trigger" onclick="openGpxImportModal()" class="hidden sm:flex items-center space-x-1 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-slate-700 transition-colors" title="GPX Dosyası Yükle">
-        <i data-lucide="upload" class="w-3.5 h-3.5 text-emerald-400"></i>
-        <span class="hidden lg:inline">Yükle</span>
+      <button id="btn-import-gpx-trigger" onclick="openGpxImportModal()" class="hidden sm:flex items-center space-x-1 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1.5 lg:px-2.5 rounded-lg text-xs font-medium border border-slate-700 transition-colors" title="GPX Dosyası Yükle">
+        <i data-lucide="upload" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>
+        <span class="hidden xl:inline">Yükle</span>
       </button>
 
-      <button id="btn-open-gmaps" disabled onclick="openInGoogleMaps()" class="hidden sm:flex disabled:opacity-40 disabled:cursor-not-allowed items-center space-x-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-slate-700 transition-colors" title="Google Maps'te Aç">
-        <i data-lucide="external-link" class="w-3.5 h-3.5 text-green-400"></i>
-        <span class="hidden lg:inline">Google Maps</span>
+      <button id="btn-open-gmaps" disabled onclick="openInGoogleMaps()" class="hidden sm:flex disabled:opacity-40 disabled:cursor-not-allowed items-center space-x-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1.5 lg:px-2.5 rounded-lg text-xs font-medium border border-slate-700 transition-colors" title="Google Maps'te Aç">
+        <i data-lucide="external-link" class="w-3.5 h-3.5 text-green-400 shrink-0"></i>
+        <span class="hidden xl:inline">Google Maps</span>
       </button>
 
       <!-- Mobil Menü Toggle Butonu -->
@@ -183,7 +183,7 @@
   <div class="flex-1 flex overflow-hidden relative">
 
     <!-- LEFT SIDEBAR: ROTA PLANLAMA, DURAKLAR & KOKPİT -->
-    <aside id="sidebar" class="hidden md:flex w-full md:w-[420px] bg-slate-900/95 border-r border-slate-800/90 flex-col z-20 transition-all duration-300 ease-in-out absolute md:relative inset-y-0 left-0 shadow-2xl backdrop-blur-xl">
+    <aside id="sidebar" class="hidden md:flex w-full md:w-[420px] bg-slate-900/95 border-r border-slate-800/90 flex-col z-35 transition-all duration-300 ease-in-out absolute md:relative inset-y-0 left-0 shadow-2xl backdrop-blur-xl">
 
       <!-- Mobil Üst Bar -->
       <div class="flex md:hidden p-3 border-b border-slate-800 bg-slate-950 flex-col space-y-2 shrink-0">
@@ -192,15 +192,15 @@
             <i data-lucide="map-pin" class="w-4 h-4 text-brand-400"></i>
             <span class="text-xs font-bold text-white uppercase tracking-wider">Rota ve Duraklar</span>
           </div>
-          <button onclick="closeMobileSidebar()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center space-x-1.5 border border-slate-700">
-            <span>Harita</span>
+          <button onclick="closeMobileSidebar()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center space-x-1.5 border border-slate-700 active:scale-95 transition-all">
+            <span>Haritayı Gör</span>
             <i data-lucide="map" class="w-3.5 h-3.5 text-brand-400"></i>
           </button>
         </div>
       </div>
 
       <!-- Scrollable Sidebar İçeriği -->
-      <div class="flex-1 overflow-y-auto p-4 space-y-4">
+      <div class="flex-1 overflow-y-auto p-4 space-y-4 pb-28 md:pb-6">
 
         <!-- 0. HERO VİZYON KARTI (SIDEBAR ÜSTÜ) -->
         <div class="glass-card rounded-2xl p-4 border border-amber-500/20 bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/30">
@@ -670,7 +670,7 @@
 
       <!-- HARİTA ÜSTÜ FLOATING KONTROLLER -->
       <!-- Katman Seçici (Harita Tipi) -->
-      <div class="absolute top-3 right-3 sm:top-4 sm:right-4 z-[400] flex flex-col space-y-2">
+      <div id="floating-map-controls" class="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 flex flex-col space-y-2">
         <div class="glass-panel p-1 rounded-xl shadow-2xl flex space-x-1 border border-slate-800">
           <button id="tile-dark" onclick="switchTile('dark')" class="tile-btn px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-white" title="Karanlık Mod">
             🌙<span class="hidden sm:inline ml-1">Dark</span>
@@ -688,34 +688,29 @@
       </div>
 
       <!-- Rota Sırasında Gerçek Yükleme Aşamaları (Animated Loading Banner) -->
-      <div id="route-loading-banner" class="hidden absolute top-4 left-1/2 -translate-x-1/2 z-[450] glass-panel px-4 py-2.5 rounded-2xl border border-amber-500/40 shadow-2xl flex items-center space-x-3 text-xs text-white animate-slide-in">
+      <div id="route-loading-banner" class="hidden absolute top-4 left-1/2 -translate-x-1/2 z-50 glass-panel px-4 py-2.5 rounded-2xl border border-amber-500/40 shadow-2xl flex items-center space-x-3 text-xs text-white animate-slide-in">
         <div class="w-4 h-4 border-2 border-brand-400 border-t-transparent rounded-full animate-spin"></div>
         <span id="route-loading-stage-text" class="font-medium">Rota hesaplanıyor...</span>
       </div>
 
-      <!-- Harita İpucu Bildirimi -->
-      <div id="map-hint" class="hidden sm:flex absolute top-4 left-4 z-[400] glass-panel px-3 py-2 rounded-xl text-xs text-slate-300 items-center space-x-2 shadow-lg border border-slate-800/80">
-        <i data-lucide="mouse-pointer-click" class="w-4 h-4 text-brand-400"></i>
-        <span>Haritaya tıklayarak durak ekleyebilirsiniz.</span>
+      <!-- Harita İpucu Bildirimi (Zoom butonlarının yanına konumlandırıldı) -->
+      <div id="map-hint" class="hidden sm:flex absolute top-3 left-14 sm:top-4 sm:left-14 z-20 glass-panel px-3 py-1.5 rounded-xl text-xs text-slate-300 items-center space-x-2 shadow-lg border border-slate-800/80">
+        <i data-lucide="mouse-pointer-click" class="w-4 h-4 text-brand-400 shrink-0"></i>
+        <span class="text-[11px]">Haritaya tıklayarak durak ekleyebilirsiniz.</span>
         <button onclick="document.getElementById('map-hint').remove()" class="text-slate-500 hover:text-slate-300 ml-1">
           <i data-lucide="x" class="w-3.5 h-3.5"></i>
         </button>
       </div>
 
-      <!-- Mobil Yüzen Rota Butonu (Mobile Floating Plan Button) -->
-      <button id="mobile-floating-plan-btn" onclick="toggleSidebar()" class="md:hidden absolute bottom-4 left-1/2 -translate-x-1/2 z-[400] glass-panel px-4 py-2.5 rounded-2xl border border-brand-500/40 shadow-2xl flex items-center space-x-2 text-xs font-bold text-white bg-slate-900/90 active:scale-95 transition-all">
-        <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
-        <span>Rotanı Planla</span>
-      </button>
-
       <!-- SAĞ ÇEKMECE / PANEL TOGGLE (KEŞİF & ZAMAN ÇİZELGESİ) -->
-      <button id="btn-toggle-right-panel" onclick="toggleRightPanel()" class="hidden md:flex absolute top-16 right-4 z-[400] glass-panel p-2.5 rounded-xl border border-slate-800 text-slate-300 hover:text-white shadow-xl items-center space-x-1.5 text-xs transition-all">
+      <button id="btn-toggle-right-panel" onclick="toggleRightPanel()" class="hidden md:flex absolute top-14 right-3 sm:top-16 sm:right-4 z-20 glass-panel p-2.5 rounded-xl border border-slate-800 text-slate-300 hover:text-white shadow-xl items-center space-x-1.5 text-xs transition-all">
         <i data-lucide="compass" class="w-4 h-4 text-amber-400"></i>
         <span>Keşif & Akış</span>
+        <span id="badge-right-panel-poi-count" class="hidden px-1.5 py-0.5 bg-amber-500/20 text-amber-300 rounded-full text-[10px] font-bold border border-amber-500/30">0</span>
       </button>
 
       <!-- SAĞ PANEL: ROTA ÜZERİNDE KEŞFET & ZAMAN ÇİZELGESİ -->
-      <div id="right-panel" class="hidden md:flex w-[380px] bg-slate-900/95 border-l border-slate-800/90 flex-col z-20 absolute inset-y-0 right-0 shadow-2xl backdrop-blur-xl transition-all duration-300 ease-in-out">
+      <div id="right-panel" class="hidden w-full sm:w-[380px] bg-slate-900/95 border-l border-slate-800/90 flex-col z-35 absolute inset-y-0 right-0 shadow-2xl backdrop-blur-xl transition-all duration-300 ease-in-out">
         <!-- Panel Başlığı & Sekmeler -->
         <div class="p-3 border-b border-slate-800 bg-slate-950 flex items-center justify-between shrink-0">
           <div class="flex items-center space-x-1 bg-slate-900 p-0.5 rounded-xl border border-slate-800 text-xs">
@@ -726,13 +721,13 @@
               Yolculuk Akışı
             </button>
           </div>
-          <button onclick="toggleRightPanel()" class="p-1 rounded-lg text-slate-400 hover:text-white">
+          <button onclick="closeRightPanel()" class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors" title="Paneli Kapat">
             <i data-lucide="x" class="w-4 h-4"></i>
           </button>
         </div>
 
         <!-- Sekme 1: Rotada Keşfet (50 km Koridoru & Akıllı Öneriler) -->
-        <div id="tab-content-discover" class="flex-1 overflow-y-auto p-4 space-y-4">
+        <div id="tab-content-discover" class="flex-1 overflow-y-auto p-4 space-y-4 pb-28 sm:pb-6">
           <!-- 50 km Koridor Özeti -->
           <div class="glass-card rounded-2xl p-3.5 border border-slate-800">
             <div class="flex items-center justify-between mb-1.5">
@@ -800,7 +795,7 @@
         </div>
 
         <!-- Sekme 2: Yolculuk Zaman Çizelgesi (Journey Timeline) -->
-        <div id="tab-content-timeline" class="hidden flex-1 overflow-y-auto p-4 space-y-3">
+        <div id="tab-content-timeline" class="hidden flex-1 overflow-y-auto p-4 space-y-3 pb-28 sm:pb-6">
           <div class="glass-card rounded-2xl p-3 border border-slate-800 mb-2">
             <span class="text-xs font-bold text-white flex items-center space-x-1.5">
               <i data-lucide="clock" class="w-3.5 h-3.5 text-brand-400"></i>
@@ -816,31 +811,37 @@
       </div>
 
       <!-- MOBİL YÜZEN ALT ÇUBUK (HARİTA ÜZERİNDE) -->
-      <div id="mobile-bottom-bar" class="md:hidden absolute bottom-4 left-3 right-3 z-[450] flex flex-col items-center pointer-events-none">
+      <div id="mobile-bottom-bar" class="md:hidden absolute bottom-3 left-3 right-3 z-25 flex flex-col items-center pointer-events-none transition-all duration-300">
         <!-- Rota hesaplandığında mini kokpit kartı -->
-        <div id="mobile-mini-cockpit" class="hidden pointer-events-auto w-full mb-2 glass-card p-2.5 rounded-2xl flex items-center justify-between border border-slate-800/90 shadow-2xl backdrop-blur-xl animate-slide-in">
+        <div id="mobile-mini-cockpit" class="hidden pointer-events-auto w-full glass-card p-2.5 rounded-2xl flex items-center justify-between border border-slate-800/90 shadow-2xl backdrop-blur-xl animate-slide-in">
           <div class="flex items-center space-x-2 text-xs">
             <span id="mobile-mini-dist" class="font-bold text-white text-sm">-</span>
             <span class="text-slate-500">•</span>
             <span id="mobile-mini-dur" class="text-amber-400 font-semibold text-xs">-</span>
             <span class="text-slate-500">•</span>
-            <span id="mobile-mini-pois" class="text-brand-400 font-bold text-xs">- POI</span>
+            <span id="mobile-mini-pois" class="text-emerald-400 font-bold text-xs">- Keşif</span>
           </div>
-          <button onclick="openMobileSidebar()" class="px-2.5 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-600/30 flex items-center space-x-1 active:scale-95 transition-all">
-            <span>Detaylar</span>
-            <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
-          </button>
+          <div class="flex items-center space-x-1.5">
+            <button onclick="openRightPanel()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-xl text-xs font-bold border border-slate-700 flex items-center space-x-1 active:scale-95 transition-all" title="Rotadaki Keşif Noktaları">
+              <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+              <span>Keşfet</span>
+            </button>
+            <button onclick="openMobileSidebar()" class="px-2.5 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-600/30 flex items-center space-x-1 active:scale-95 transition-all" title="Rota Detayları ve Duraklar">
+              <span>Detay</span>
+              <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
         </div>
 
         <!-- Rota hesaplanmamışken açma butonu -->
-        <button id="btn-mobile-open-planner" onclick="showHomepagePlanner()" class="pointer-events-auto bg-gradient-to-r from-brand-600 to-amber-600 text-white font-bold px-4 py-2.5 rounded-full shadow-2xl shadow-brand-600/40 border border-brand-400/30 text-xs flex items-center space-x-2 active:scale-95 transition-all">
-          <i data-lucide="map-pin" class="w-4 h-4"></i>
-          <span>Rota & Durakları Belirle</span>
+        <button id="btn-mobile-open-planner" onclick="openMobileSidebar()" class="pointer-events-auto bg-gradient-to-r from-brand-600 via-amber-500 to-orange-600 text-white font-bold px-4 py-2 rounded-full shadow-xl shadow-brand-600/30 border border-amber-400/30 text-xs flex items-center space-x-2 active:scale-95 transition-all">
+          <i data-lucide="compass" class="w-4 h-4 text-amber-200"></i>
+          <span>Rotanı Planla</span>
         </button>
       </div>
 
       <!-- ALT PANEL: ETKİLEŞİMLİ YÜKSEKLİK & EĞİM PROFİLİ -->
-      <div id="elevation-panel" class="hidden absolute bottom-4 md:bottom-4 left-3 right-3 sm:left-4 sm:right-[400px] z-[400] glass-panel rounded-2xl p-2.5 sm:p-3 border border-slate-800 shadow-2xl backdrop-blur-xl animate-slide-in">
+      <div id="elevation-panel" class="hidden absolute bottom-20 md:bottom-4 left-3 right-3 sm:left-4 sm:right-4 z-25 glass-panel rounded-2xl p-2.5 sm:p-3 border border-slate-800 shadow-2xl backdrop-blur-xl transition-all duration-300 animate-slide-in">
         <div class="flex items-center justify-between mb-2">
           <div class="flex items-center space-x-2">
             <i data-lucide="mountain-snow" class="w-4 h-4 text-brand-400"></i>
@@ -850,8 +851,8 @@
           <div class="flex items-center space-x-2 sm:space-x-3 text-[11px] text-slate-400">
             <span>Zirve: <strong id="elevation-max" class="text-white">-</strong></span>
             <span>Taban: <strong id="elevation-min" class="text-white">-</strong></span>
-            <button id="btn-toggle-elevation" onclick="toggleElevationPanelVisibility()" class="text-slate-400 hover:text-white ml-2 p-1">
-              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            <button id="btn-toggle-elevation" onclick="toggleElevationPanelVisibility()" class="text-slate-400 hover:text-white ml-2 p-1" title="Kapat / Küçült">
+              <i data-lucide="x" class="w-4 h-4"></i>
             </button>
           </div>
         </div>
@@ -1341,7 +1342,7 @@
 
   <!-- MOBİL ALT SABİT MENÜ (MOBILE BOTTOM NAV) -->
   <nav id="mobile-bottom-nav" class="md:hidden h-14 bg-slate-900/95 border-t border-slate-800/80 px-2 flex items-center justify-around z-30 shrink-0 backdrop-blur-xl">
-    <button onclick="toggleSidebar()" class="flex flex-col items-center justify-center p-1 text-brand-400 font-semibold text-[10px]">
+    <button id="mobile-nav-btn-plan" onclick="handleMobileNavPlan()" class="flex flex-col items-center justify-center p-1 text-brand-400 font-semibold text-[10px]">
       <i data-lucide="map" class="w-4 h-4 mb-0.5"></i>
       <span>Planla</span>
     </button>
