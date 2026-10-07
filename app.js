@@ -239,6 +239,16 @@ function initMap() {
 
   setupElevationCanvas();
 
+  // Setup ResizeObserver for map container to automatically adjust to drawer & flex resize
+  if (typeof ResizeObserver !== 'undefined' && mapEl) {
+    const mapResizeObserver = new ResizeObserver(() => {
+      if (map) {
+        map.invalidateSize();
+      }
+    });
+    mapResizeObserver.observe(mapEl);
+  }
+
   // Force Leaflet container recalculation at crucial render intervals
   setTimeout(() => { if (map) map.invalidateSize(); }, 60);
   setTimeout(() => { if (map) map.invalidateSize(); }, 250);
