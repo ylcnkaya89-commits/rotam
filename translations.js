@@ -28,11 +28,14 @@ window.TRANSLATIONS = {
     btn_lang_toggle: "Dili Değiştir / Change Language",
 
     // Mobile Bottom Nav
-    mobile_nav_plan: "Planla",
+    mobile_nav_plan: "Rota",
     mobile_nav_discover: "Keşfet",
     mobile_nav_nearby: "Yakınımda",
     mobile_nav_saved: "Rotalarım",
     mobile_nav_admin: "Yönetim",
+    mobile_gmaps_start: "Google Maps ile Başlat",
+    quick_label: "Hızlı:",
+    mobile_pois_label: "Keşif",
 
     // Vehicles
     vehicle_title: "Yolculuk Türü",
@@ -252,11 +255,14 @@ window.TRANSLATIONS = {
     btn_lang_toggle: "Change Language / Dili Değiştir",
 
     // Mobile Bottom Nav
-    mobile_nav_plan: "Plan",
+    mobile_nav_plan: "Route",
     mobile_nav_discover: "Discover",
     mobile_nav_nearby: "Near Me",
     mobile_nav_saved: "Saved",
     mobile_nav_admin: "Settings",
+    mobile_gmaps_start: "Start Google Maps",
+    quick_label: "Quick:",
+    mobile_pois_label: "Spots",
 
     // Vehicles
     vehicle_title: "Travel Mode",

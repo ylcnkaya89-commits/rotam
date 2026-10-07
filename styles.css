@@ -574,5 +574,27 @@ main {
   #mobile-bottom-bar {
     bottom: max(0.75rem, env(safe-area-inset-bottom)) !important;
   }
+
+  /* On mobile, elevate cockpit card & ensure elevation doesn't collide */
+  #elevation-panel {
+    bottom: 84px !important;
+    max-width: calc(100vw - 1.5rem) !important;
+    z-index: 1015 !important;
+  }
+}
+
+/* Utility: Smooth scrollbar hiding for horizontal pill bars */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile Route Bottom Card Styling */
+#mobile-mini-cockpit {
+  box-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 

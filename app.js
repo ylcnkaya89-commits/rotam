@@ -1261,7 +1261,20 @@ async function calculateRouteMain() {
       if (plannerBtn) plannerBtn.classList.add('hidden');
       document.getElementById('mobile-mini-dist').textContent = (activeRoute.distance / 1000).toFixed(1) + ' km';
       const m = Math.floor(activeRoute.duration / 60);
-      document.getElementById('mobile-mini-dur').textContent = `${Math.floor(m / 60)} sa ${m % 60} dk`;
+      const isEn = (window.state && window.state.lang === 'en');
+      const h = Math.floor(m / 60);
+      const minRem = m % 60;
+      document.getElementById('mobile-mini-dur').textContent = isEn ? `${h > 0 ? h + ' h ' : ''}${minRem} m` : `${h > 0 ? h + ' sa ' : ''}${minRem} dk`;
+    }
+
+    // On mobile, auto-close sidebar so user immediately views their route on the map
+    if (window.innerWidth < 768) {
+      closeMobileSidebar();
+      if (routePolyline && map) {
+        setTimeout(() => {
+          map.fitBounds(routePolyline.getBounds(), { padding: [36, 36] });
+        }, 120);
+      }
     }
 
   } catch (error) {
@@ -1664,7 +1677,8 @@ function analyzeRouteCorridor(route, radiusMeters = 50000) {
 
   const mobileMiniPois = document.getElementById('mobile-mini-pois');
   if (mobileMiniPois) {
-    mobileMiniPois.textContent = `${found.length} Keşif`;
+    const isEn = (window.state && window.state.lang === 'en');
+    mobileMiniPois.textContent = isEn ? `${found.length} Spots` : `${found.length} Keşif`;
   }
 
   const sidebarShortcutCount = document.getElementById('sidebar-shortcut-corridor-count');
@@ -2244,7 +2258,10 @@ async function fetchAndDisplayElevation(coords) {
       elev: elevations[idx] || 0
     }));
 
-    panel.classList.remove('hidden');
+    // Only unhide elevation automatically on desktop (>= 768px)
+    if (window.innerWidth >= 768) {
+      panel.classList.remove('hidden');
+    }
     drawElevationChart(state.elevationData);
 
   } catch (e) {

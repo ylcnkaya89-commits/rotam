@@ -204,24 +204,18 @@
             <i data-lucide="map-pin" class="w-4 h-4 text-brand-400"></i>
             <span class="text-xs font-bold text-white uppercase tracking-wider" data-i18n="sidebar_mobile_title">Rota ve Duraklar</span>
           </div>
-          <div class="flex items-center space-x-2">
-            <button onclick="toggleLanguage()" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold border border-slate-700 flex items-center space-x-1 active:scale-95 transition-all" title="Dili Değiştir / Change Language">
-              <span id="sidebar-lang-flag">🇹🇷</span>
-              <span id="sidebar-lang-code" class="text-[10px] font-bold">TR</span>
-            </button>
-            <button onclick="closeMobileSidebar()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center space-x-1.5 border border-slate-700 active:scale-95 transition-all">
-              <span data-i18n="sidebar_see_map">Haritayı Gör</span>
-              <i data-lucide="map" class="w-3.5 h-3.5 text-brand-400"></i>
-            </button>
-          </div>
+          <button onclick="closeMobileSidebar()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center space-x-1.5 border border-slate-700 active:scale-95 transition-all">
+            <span data-i18n="sidebar_see_map">Haritayı Gör</span>
+            <i data-lucide="map" class="w-3.5 h-3.5 text-brand-400"></i>
+          </button>
         </div>
       </div>
 
       <!-- Scrollable Sidebar İçeriği -->
       <div class="flex-1 overflow-y-auto p-4 space-y-4 pb-28 md:pb-6">
 
-        <!-- 0. HERO VİZYON KARTI (SIDEBAR ÜSTÜ) -->
-        <div class="glass-card rounded-2xl p-4 border border-amber-500/20 bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/30">
+        <!-- 0. HERO VİZYON KARTI (SIDEBAR ÜSTÜ - Sadece Masaüstünde) -->
+        <div class="hidden md:block glass-card rounded-2xl p-4 border border-amber-500/20 bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/30">
           <div class="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold mb-2">
             <i data-lucide="compass" class="w-3 h-3"></i>
             <span>ROTAM V2 PLATFORM</span>
@@ -286,81 +280,73 @@
             </div>
           </div>
 
-          <!-- Hızlı Şehir & Popüler Hedef Kısayolları -->
-          <div class="mb-3 p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-2">
-            <div>
-              <span class="text-[10px] text-slate-400 font-semibold block mb-1" data-i18n="quick_start">Hızlı Başlangıç:</span>
-              <div class="flex flex-wrap gap-1">
-                <button type="button" onclick="setSidebarStart('İstanbul')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300">İstanbul</button>
-                <button type="button" onclick="setSidebarStart('Ankara')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300">Ankara</button>
-                <button type="button" onclick="setSidebarStart('İzmir')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300">İzmir</button>
-                <button type="button" onclick="setSidebarStart('Bursa')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300">Bursa</button>
-                <button type="button" onclick="useCurrentLocationForStart()" class="text-[10px] px-2 py-0.5 rounded-md bg-brand-500/20 text-brand-400 hover:bg-brand-500/30 flex items-center space-x-1 font-semibold">
-                  <i data-lucide="crosshair" class="w-2.5 h-2.5"></i>
-                  <span data-i18n="use_my_location">Konumum</span>
-                </button>
-              </div>
-            </div>
-            <div>
-              <span class="text-[10px] text-slate-400 font-semibold block mb-1" data-i18n="popular_dest">Popüler Hedefler:</span>
-              <div class="flex flex-wrap gap-1">
-                <button type="button" onclick="setSidebarEnd('Antalya')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300">Antalya</button>
-                <button type="button" onclick="setSidebarEnd('Muğla')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300">Muğla</button>
-                <button type="button" onclick="setSidebarEnd('Kapadokya')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300">Kapadokya</button>
-                <button type="button" onclick="setSidebarEnd('Kaş')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300">Kaş</button>
-                <button type="button" onclick="setSidebarEnd('Trabzon')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300">Trabzon</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Waypoints List Container -->
+          <!-- Waypoints List Container (Doğrudan Başlangıç ve Varış Girişleri) -->
           <div id="waypoints-container" class="space-y-2.5 relative">
             <!-- JS tarafından render edilir -->
           </div>
 
-          <!-- Nasıl Bir Yolculuk İstiyorsun? (10 Tercih Kartı) -->
+          <!-- Hızlı Şehir & Popüler Hedef Kısayolları (Kompakt Kaydırılabilir Çubuk) -->
+          <div class="mt-2.5 flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1 text-xs">
+            <button type="button" onclick="useCurrentLocationForStart()" class="shrink-0 text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/30 flex items-center space-x-1 font-semibold active:scale-95 transition-all">
+              <i data-lucide="crosshair" class="w-3 h-3"></i>
+              <span data-i18n="use_my_location">Konumum</span>
+            </button>
+            <button type="button" onclick="setSidebarStart('İstanbul')" class="shrink-0 text-[10px] px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60 active:scale-95 transition-all">İstanbul</button>
+            <button type="button" onclick="setSidebarStart('Ankara')" class="shrink-0 text-[10px] px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60 active:scale-95 transition-all">Ankara</button>
+            <button type="button" onclick="setSidebarEnd('Antalya')" class="shrink-0 text-[10px] px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700/60 active:scale-95 transition-all">Antalya</button>
+            <button type="button" onclick="setSidebarEnd('Muğla')" class="shrink-0 text-[10px] px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700/60 active:scale-95 transition-all">Muğla</button>
+            <button type="button" onclick="setSidebarEnd('Kapadokya')" class="shrink-0 text-[10px] px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700/60 active:scale-95 transition-all">Kapadokya</button>
+            <button type="button" onclick="setSidebarEnd('Kaş')" class="shrink-0 text-[10px] px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700/60 active:scale-95 transition-all">Kaş</button>
+            <button type="button" onclick="setSidebarEnd('İzmir')" class="shrink-0 text-[10px] px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60 active:scale-95 transition-all">İzmir</button>
+            <button type="button" onclick="setSidebarEnd('Trabzon')" class="shrink-0 text-[10px] px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700/60 active:scale-95 transition-all">Trabzon</button>
+          </div>
+
+          <!-- Nasıl Bir Yolculuk İstiyorsun? (Kompakt Kaydırılabilir Tercih Çubuğu) -->
           <div class="mt-3 pt-3 border-t border-slate-800/80">
-            <label class="block text-xs font-bold text-slate-300 mb-2" data-i18n="pref_question">Nasıl bir yolculuk istiyorsun?</label>
-            <div class="grid grid-cols-2 sm:grid-cols-5 gap-1.5 text-xs">
-              <button type="button" onclick="toggleHeroPref('fastest')" class="pref-chip active p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-left flex items-center space-x-1 hover:border-brand-500/50" data-pref="fastest">
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="block text-xs font-bold text-slate-300" data-i18n="pref_question">Nasıl bir yolculuk istiyorsun?</label>
+              <span class="text-[10px] text-slate-500 md:hidden">Kaydırarak seç</span>
+            </div>
+            <div class="flex md:grid md:grid-cols-5 gap-1.5 overflow-x-auto no-scrollbar pb-1 text-xs">
+              <button type="button" onclick="toggleHeroPref('fastest')" class="pref-chip active shrink-0 px-3 py-1.5 md:p-1.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center space-x-1.5 hover:border-brand-500/50" data-pref="fastest">
                 <span>⚡</span>
-                <span class="text-[10px] font-medium" data-i18n="pref_fastest">Hızlı</span>
+                <span class="text-[11px] md:text-[10px] font-medium" data-i18n="pref_fastest">Hızlı</span>
               </button>
-              <button type="button" onclick="toggleHeroPref('scenic')" class="pref-chip p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-left flex items-center space-x-1 hover:border-brand-500/50" data-pref="scenic">
+              <button type="button" onclick="toggleHeroPref('scenic')" class="pref-chip shrink-0 px-3 py-1.5 md:p-1.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center space-x-1.5 hover:border-brand-500/50" data-pref="scenic">
                 <span>🌄</span>
-                <span class="text-[10px] font-medium" data-i18n="pref_scenic">Manzaralı</span>
+                <span class="text-[11px] md:text-[10px] font-medium" data-i18n="pref_scenic">Manzaralı</span>
               </button>
-              <button type="button" onclick="toggleHeroPref('historic')" class="pref-chip p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-left flex items-center space-x-1 hover:border-brand-500/50" data-pref="historic">
+              <button type="button" onclick="toggleHeroPref('historic')" class="pref-chip shrink-0 px-3 py-1.5 md:p-1.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center space-x-1.5 hover:border-brand-500/50" data-pref="historic">
                 <span>🏛️</span>
-                <span class="text-[10px] font-medium" data-i18n="pref_historic">Tarihi</span>
+                <span class="text-[11px] md:text-[10px] font-medium" data-i18n="pref_historic">Tarihi</span>
               </button>
-              <button type="button" onclick="toggleHeroPref('nature')" class="pref-chip p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-left flex items-center space-x-1 hover:border-brand-500/50" data-pref="nature">
+              <button type="button" onclick="toggleHeroPref('nature')" class="pref-chip shrink-0 px-3 py-1.5 md:p-1.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center space-x-1.5 hover:border-brand-500/50" data-pref="nature">
                 <span>🌲</span>
-                <span class="text-[10px] font-medium" data-i18n="pref_nature">Doğa</span>
+                <span class="text-[11px] md:text-[10px] font-medium" data-i18n="pref_nature">Doğa</span>
               </button>
-              <button type="button" onclick="toggleHeroPref('photo')" class="pref-chip p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-left flex items-center space-x-1 hover:border-brand-500/50" data-pref="photo">
+              <button type="button" onclick="toggleHeroPref('photo')" class="pref-chip shrink-0 px-3 py-1.5 md:p-1.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center space-x-1.5 hover:border-brand-500/50" data-pref="photo">
                 <span>📸</span>
-                <span class="text-[10px] font-medium" data-i18n="pref_photo">Fotoğraf</span>
+                <span class="text-[11px] md:text-[10px] font-medium" data-i18n="pref_photo">Fotoğraf</span>
               </button>
-              <button type="button" onclick="toggleHeroPref('beach')" class="pref-chip p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-left flex items-center space-x-1 hover:border-brand-500/50" data-pref="beach">
+              <button type="button" onclick="toggleHeroPref('beach')" class="pref-chip shrink-0 px-3 py-1.5 md:p-1.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center space-x-1.5 hover:border-brand-500/50" data-pref="beach">
                 <span>🌊</span>
-                <span class="text-[10px] font-medium" data-i18n="pref_beach">Sahil</span>
+                <span class="text-[11px] md:text-[10px] font-medium" data-i18n="pref_beach">Sahil</span>
               </button>
-              <button type="button" onclick="toggleHeroPref('gastro')" class="pref-chip p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-left flex items-center space-x-1 hover:border-brand-500/50" data-pref="gastro">
+              <button type="button" onclick="toggleHeroPref('gastro')" class="pref-chip shrink-0 px-3 py-1.5 md:p-1.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center space-x-1.5 hover:border-brand-500/50" data-pref="gastro">
                 <span>🍴</span>
-                <span class="text-[10px] font-medium" data-i18n="pref_gastro">Gastro</span>
+                <span class="text-[11px] md:text-[10px] font-medium" data-i18n="pref_gastro">Gastro</span>
               </button>
-              <button type="button" onclick="toggleHeroPref('twisty')" class="pref-chip p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-left flex items-center space-x-1 hover:border-brand-500/50" data-pref="twisty">
+              <button type="button" onclick="toggleHeroPref('twisty')" class="pref-chip shrink-0 px-3 py-1.5 md:p-1.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center space-x-1.5 hover:border-brand-500/50" data-pref="twisty">
                 <span>🏍️</span>
-                <span class="text-[10px] font-medium" data-i18n="pref_twisty">Virajlı</span>
+                <span class="text-[11px] md:text-[10px] font-medium" data-i18n="pref_twisty">Virajlı</span>
               </button>
-              <button type="button" onclick="toggleHeroPref('discovery')" class="pref-chip p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-left flex items-center space-x-1 hover:border-brand-500/50" data-pref="discovery">
+              <button type="button" onclick="toggleHeroPref('discovery')" class="pref-chip shrink-0 px-3 py-1.5 md:p-1.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center space-x-1.5 hover:border-brand-500/50" data-pref="discovery">
                 <span>🗺️</span>
-                <span class="text-[10px] font-medium" data-i18n="pref_discovery">Keşif</span>
+                <span class="text-[11px] md:text-[10px] font-medium" data-i18n="pref_discovery">Keşif</span>
               </button>
-              <button type="button" onclick="toggleHeroPref('best')" class="pref-chip p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-left flex items-center space-x-1 hover:border-brand-500/50" data-pref="best">
+              <button type="button" onclick="toggleHeroPref('best')" class="pref-chip shrink-0 px-3 py-1.5 md:p-1.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center space-x-1.5 hover:border-brand-500/50" data-pref="best">
                 <span>⭐</span>
-                <span class="text-[10px] font-medium" data-i18n="pref_best">En İyi</span>
+                <span class="text-[11px] md:text-[10px] font-medium" data-i18n="pref_best">En İyi</span>
               </button>
             </div>
           </div>
@@ -858,33 +844,37 @@
 
       <!-- MOBİL YÜZEN ALT ÇUBUK (HARİTA ÜZERİNDE) -->
       <div id="mobile-bottom-bar" class="md:hidden absolute bottom-3 left-3 right-3 z-25 flex flex-col items-center pointer-events-none transition-all duration-300">
-        <!-- Rota hesaplandığında mini kokpit kartı -->
-        <div id="mobile-mini-cockpit" class="hidden pointer-events-auto w-full glass-card p-2.5 rounded-2xl flex items-center justify-between border border-slate-800/90 shadow-2xl backdrop-blur-xl animate-slide-in">
-          <div class="flex items-center space-x-2 text-xs">
-            <span id="mobile-mini-dist" class="font-bold text-white text-sm">-</span>
-            <span class="text-slate-500">•</span>
-            <span id="mobile-mini-dur" class="text-amber-400 font-semibold text-xs">-</span>
-            <span class="text-slate-500">•</span>
-            <span id="mobile-mini-pois" class="text-emerald-400 font-bold text-xs">- Keşif</span>
+        <!-- Rota hesaplandığında modern mobil rota kartı -->
+        <div id="mobile-mini-cockpit" class="hidden pointer-events-auto w-full glass-card p-3 rounded-2xl flex flex-col space-y-2.5 border border-slate-800/90 shadow-2xl backdrop-blur-xl animate-slide-in">
+          <!-- Üst Bilgi Satırı: Süre, Mesafe ve Keşif Noktası -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span id="mobile-mini-dur" class="text-white font-extrabold text-sm sm:text-base tracking-tight">-</span>
+              <span class="text-slate-500">•</span>
+              <span id="mobile-mini-dist" class="text-brand-400 font-bold text-xs sm:text-sm">-</span>
+            </div>
+            <span id="mobile-mini-pois" class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">- Keşif</span>
           </div>
-          <div class="flex items-center space-x-1 sm:space-x-1.5">
-            <button onclick="openInGoogleMaps()" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/30 flex items-center space-x-1 active:scale-95 transition-all" title="Google Maps Navigasyonunu Başlat">
-              <i data-lucide="navigation" class="w-3.5 h-3.5 text-white"></i>
-              <span>Maps</span>
+
+          <!-- Alt Buton Satırı: 1-Dokunuş Google Maps + Keşfet & Detay -->
+          <div class="flex items-center space-x-2">
+            <button onclick="openInGoogleMaps()" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs shadow-lg shadow-emerald-600/30 flex items-center justify-center space-x-1.5 active:scale-95 transition-all" title="Google Maps ile Navigasyonu Başlat">
+              <i data-lucide="navigation" class="w-4 h-4 text-white shrink-0"></i>
+              <span class="tracking-wide" data-i18n="mobile_gmaps_start">Google Maps ile Başlat</span>
             </button>
-            <button onclick="openRightPanel()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-xl text-xs font-bold border border-slate-700 flex items-center space-x-1 active:scale-95 transition-all" title="Rotadaki Keşif Noktaları">
-              <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+            <button onclick="openRightPanel()" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-xl text-xs font-semibold border border-slate-700 flex items-center space-x-1 active:scale-95 transition-all" title="Rotadaki Keşif Noktaları">
+              <i data-lucide="compass" class="w-3.5 h-3.5 shrink-0"></i>
               <span data-i18n="mobile_nav_discover">Keşfet</span>
             </button>
-            <button onclick="openMobileSidebar()" class="px-2.5 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-600/30 flex items-center space-x-1 active:scale-95 transition-all" title="Rota Detayları ve Duraklar">
+            <button onclick="openMobileSidebar()" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold border border-slate-700 flex items-center space-x-1 active:scale-95 transition-all" title="Rota Detayları ve Duraklar">
               <span data-i18n="btn_details">Detay</span>
-              <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
+              <i data-lucide="chevron-up" class="w-3.5 h-3.5 shrink-0"></i>
             </button>
           </div>
         </div>
 
         <!-- Rota hesaplanmamışken açma butonu -->
-        <button id="btn-mobile-open-planner" onclick="openMobileSidebar()" class="pointer-events-auto bg-gradient-to-r from-brand-600 via-amber-500 to-orange-600 text-white font-bold px-4 py-2 rounded-full shadow-xl shadow-brand-600/30 border border-amber-400/30 text-xs flex items-center space-x-2 active:scale-95 transition-all">
+        <button id="btn-mobile-open-planner" onclick="openMobileSidebar()" class="pointer-events-auto bg-gradient-to-r from-brand-600 via-amber-500 to-orange-600 text-white font-bold px-5 py-2.5 rounded-full shadow-xl shadow-brand-600/30 border border-amber-400/30 text-xs flex items-center space-x-2 active:scale-95 transition-all">
           <i data-lucide="compass" class="w-4 h-4 text-amber-200"></i>
           <span data-i18n="btn_mobile_plan_route">Rotanı Planla</span>
         </button>
@@ -1014,9 +1004,14 @@
           <h3 class="text-base font-bold text-white" data-i18n="modal_saved_title">Kayıtlı Rotalarım</h3>
           <span class="px-2 py-0.5 text-[10px] rounded bg-slate-800 text-slate-400 font-mono">SQLite / Depolama</span>
         </div>
-        <button onclick="closeSavedRoutesModal()" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
+        <div class="flex items-center space-x-1.5">
+          <button onclick="openAdminModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" title="Veri & Yönetim Paneli" data-i18n-title="nav_admin">
+            <i data-lucide="settings-2" class="w-4 h-4"></i>
+          </button>
+          <button onclick="closeSavedRoutesModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
       </div>
 
       <div class="p-4 overflow-y-auto space-y-3" id="saved-routes-list">
@@ -1470,27 +1465,23 @@
     </div>
   </div>
 
-  <!-- MOBİL ALT SABİT MENÜ (MOBILE BOTTOM NAV) -->
+  <!-- MOBİL ALT SABİT MENÜ (MOBILE BOTTOM NAV - 4 TEMEL SEYAHAT SEKMESİ) -->
   <nav id="mobile-bottom-nav" class="md:hidden h-14 bg-slate-900/95 border-t border-slate-800/80 px-2 flex items-center justify-around z-30 shrink-0 backdrop-blur-xl">
-    <button id="mobile-nav-btn-plan" onclick="handleMobileNavPlan()" class="flex flex-col items-center justify-center p-1 text-brand-400 font-semibold text-[10px]">
-      <i data-lucide="map" class="w-4 h-4 mb-0.5"></i>
-      <span data-i18n="mobile_nav_plan">Planla</span>
+    <button id="mobile-nav-btn-plan" onclick="handleMobileNavPlan()" class="flex-1 flex flex-col items-center justify-center p-1 text-brand-400 font-semibold text-[10px] active:scale-95 transition-all">
+      <i data-lucide="map" class="w-5 h-5 mb-0.5"></i>
+      <span data-i18n="mobile_nav_plan">Rota</span>
     </button>
-    <button onclick="openDiscoverModal()" class="flex flex-col items-center justify-center p-1 text-slate-400 hover:text-white text-[10px]">
-      <i data-lucide="compass" class="w-4 h-4 mb-0.5"></i>
+    <button onclick="openDiscoverModal()" class="flex-1 flex flex-col items-center justify-center p-1 text-slate-400 hover:text-white text-[10px] active:scale-95 transition-all">
+      <i data-lucide="compass" class="w-5 h-5 mb-0.5"></i>
       <span data-i18n="mobile_nav_discover">Keşfet</span>
     </button>
-    <button onclick="openNearbyModal()" class="flex flex-col items-center justify-center p-1 text-slate-400 hover:text-white text-[10px]">
-      <i data-lucide="navigation" class="w-4 h-4 mb-0.5"></i>
+    <button onclick="openNearbyModal()" class="flex-1 flex flex-col items-center justify-center p-1 text-slate-400 hover:text-white text-[10px] active:scale-95 transition-all">
+      <i data-lucide="navigation" class="w-5 h-5 mb-0.5"></i>
       <span data-i18n="mobile_nav_nearby">Yakınımda</span>
     </button>
-    <button onclick="openSavedRoutesModal()" class="flex flex-col items-center justify-center p-1 text-slate-400 hover:text-white text-[10px]">
-      <i data-lucide="folder-heart" class="w-4 h-4 mb-0.5"></i>
+    <button onclick="openSavedRoutesModal()" class="flex-1 flex flex-col items-center justify-center p-1 text-slate-400 hover:text-white text-[10px] active:scale-95 transition-all">
+      <i data-lucide="folder-heart" class="w-5 h-5 mb-0.5"></i>
       <span data-i18n="mobile_nav_saved">Rotalarım</span>
-    </button>
-    <button onclick="openAdminModal()" class="flex flex-col items-center justify-center p-1 text-slate-400 hover:text-white text-[10px]">
-      <i data-lucide="settings-2" class="w-4 h-4 mb-0.5"></i>
-      <span data-i18n="mobile_nav_admin">Yönetim</span>
     </button>
   </nav>
 
