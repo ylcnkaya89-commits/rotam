@@ -45,7 +45,7 @@ cat << 'PLIST' > "$APP_DIR/Contents/Info.plist"
 PLIST
 
 # Copy Web Assets and Python Server to the bundle
-cp index.html app.js styles.css places_data.js server.py database.py rotam.db rotam_logo.png manifest.json sw.js "$APP_DIR/Contents/Resources/"
+cp index.html app.js styles.css places_data.js translations.js server.py database.py rotam.db rotam_logo.png manifest.json sw.js "$APP_DIR/Contents/Resources/"
 [ -f "Rotam.icns" ] && cp Rotam.icns "$APP_DIR/Contents/Resources/AppIcon.icns"
 
 echo "🔐 Uygulama Mac Güvenlik Sistemleri İçin İmzalanıyor..."

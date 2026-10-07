@@ -122,7 +122,7 @@
           <span class="text-base sm:text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-100 to-brand-400 bg-clip-text text-transparent">Rotam</span>
           <span class="px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase bg-brand-500/20 text-brand-400 border border-brand-500/30 rounded-full shrink-0">V2</span>
         </div>
-        <p class="text-[10px] text-slate-400 hidden xl:block truncate">Seyahat, Rota & Keşif Platformu</p>
+        <p class="text-[10px] text-slate-400 hidden xl:block truncate" data-i18n="app_subtitle">Seyahat, Rota & Keşif Platformu</p>
       </div>
     </div>
 
@@ -130,52 +130,58 @@
     <nav class="hidden md:flex items-center bg-slate-950/80 p-1 rounded-xl border border-slate-800/80 space-x-0.5 lg:space-x-1 text-xs shrink-0">
       <button id="nav-btn-planner" onclick="showHomepagePlanner()" class="flex items-center space-x-1.5 px-2.5 lg:px-3 py-1.5 rounded-lg font-medium transition-all bg-brand-600 text-white shadow-sm shadow-brand-600/30">
         <i data-lucide="map" class="w-3.5 h-3.5 shrink-0"></i>
-        <span><span class="hidden lg:inline">Rota </span>Planla</span>
+        <span data-i18n="nav_plan">Rota Planla</span>
       </button>
       <button id="nav-btn-stream" onclick="toggleRightPanel()" class="flex items-center space-x-1.5 px-2.5 lg:px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all cursor-pointer" title="Rotadaki Keşifler ve Yolculuk Akışı">
         <i data-lucide="compass" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
-        <span>Keşif & Akış</span>
+        <span data-i18n="nav_stream">Keşif & Akış</span>
         <span id="badge-header-poi-count" class="hidden px-1.5 py-0.2 bg-amber-500/20 text-amber-300 rounded-full text-[10px] font-bold border border-amber-500/30">0</span>
       </button>
       <button id="nav-btn-discover" onclick="openDiscoverModal()" class="flex items-center space-x-1.5 px-2.5 lg:px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all">
         <i data-lucide="map-pin" class="w-3.5 h-3.5 text-orange-400 shrink-0"></i>
-        <span><span class="hidden lg:inline">Türkiye'yi </span>Keşfet</span>
+        <span data-i18n="nav_discover">Türkiye'yi Keşfet</span>
       </button>
       <button id="nav-btn-nearby" onclick="openNearbyModal()" class="flex items-center space-x-1.5 px-2.5 lg:px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all">
         <i data-lucide="navigation" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>
-        <span>Yakınımda</span>
+        <span data-i18n="nav_nearby">Yakınımda</span>
       </button>
       <button id="nav-btn-saved" onclick="openSavedRoutesModal()" class="flex items-center space-x-1.5 px-2.5 lg:px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all">
         <i data-lucide="folder-heart" class="w-3.5 h-3.5 text-rose-400 shrink-0"></i>
-        <span>Rotalarım</span>
+        <span data-i18n="nav_saved">Rotalarım</span>
       </button>
       <button id="nav-btn-admin" onclick="openAdminModal()" class="flex items-center space-x-1.5 px-2.5 lg:px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all" title="Veri & Yönetim Paneli">
         <i data-lucide="settings-2" class="w-3.5 h-3.5 text-cyan-400 shrink-0"></i>
-        <span>Yönetim</span>
+        <span data-i18n="nav_admin">Yönetim</span>
       </button>
     </nav>
 
     <!-- Top Right Quick Actions -->
     <div class="flex items-center space-x-1 sm:space-x-1.5 shrink-0">
+      <!-- Dil Değiştirici Buton (TR / EN) -->
+      <button id="btn-toggle-lang" onclick="toggleLanguage()" class="flex items-center space-x-1 bg-slate-800/90 hover:bg-slate-750 text-slate-200 px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-700/80 active:scale-95 transition-all shadow-sm" title="Dili Değiştir / Change Language">
+        <span id="lang-flag" class="text-sm">🇹🇷</span>
+        <span id="lang-code" class="text-[10px] sm:text-[11px] font-bold tracking-wider">TR</span>
+      </button>
+
       <button id="btn-save-route-modal" disabled onclick="openSaveRouteModal()" class="hidden sm:flex disabled:opacity-40 disabled:cursor-not-allowed items-center space-x-1.5 bg-brand-600 hover:bg-brand-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-md shadow-brand-600/30 transition-all" title="Rotayı Kaydet">
         <i data-lucide="bookmark-plus" class="w-3.5 h-3.5 shrink-0"></i>
-        <span class="hidden xl:inline">Rotayı </span><span class="hidden lg:inline">Kaydet</span>
+        <span data-i18n="btn_save_route">Rotayı Kaydet</span>
       </button>
 
       <button id="btn-export-gpx" disabled onclick="exportGPX()" class="hidden sm:flex disabled:opacity-40 disabled:cursor-not-allowed items-center space-x-1 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1.5 lg:px-2.5 rounded-lg text-xs font-medium border border-slate-700 transition-colors" title="GPX Olarak İndir">
         <i data-lucide="download" class="w-3.5 h-3.5 text-accent-400 shrink-0"></i>
-        <span class="hidden lg:inline">GPX</span>
+        <span data-i18n="btn_export_gpx">GPX</span>
       </button>
 
       <button id="btn-import-gpx-trigger" onclick="openGpxImportModal()" class="hidden sm:flex items-center space-x-1 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1.5 lg:px-2.5 rounded-lg text-xs font-medium border border-slate-700 transition-colors" title="GPX Dosyası Yükle">
         <i data-lucide="upload" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>
-        <span class="hidden xl:inline">Yükle</span>
+        <span class="hidden xl:inline" data-i18n="btn_import_gpx">Yükle</span>
       </button>
 
       <!-- Google Maps Dışa Aktarma / Açma Butonu (Masaüstü & Mobil) -->
       <button id="btn-open-gmaps" onclick="openInGoogleMaps()" class="flex items-center space-x-1 sm:space-x-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-md border border-emerald-500/40 active:scale-95 transition-all" title="Google Maps'te Aç ve Navigasyonu Başlat">
         <i data-lucide="navigation" class="w-3.5 h-3.5 text-white shrink-0"></i>
-        <span><span class="hidden sm:inline">Google </span>Maps</span>
+        <span>Maps</span>
       </button>
 
       <!-- Mobil Menü Toggle Butonu -->
@@ -196,12 +202,18 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-2">
             <i data-lucide="map-pin" class="w-4 h-4 text-brand-400"></i>
-            <span class="text-xs font-bold text-white uppercase tracking-wider">Rota ve Duraklar</span>
+            <span class="text-xs font-bold text-white uppercase tracking-wider" data-i18n="sidebar_mobile_title">Rota ve Duraklar</span>
           </div>
-          <button onclick="closeMobileSidebar()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center space-x-1.5 border border-slate-700 active:scale-95 transition-all">
-            <span>Haritayı Gör</span>
-            <i data-lucide="map" class="w-3.5 h-3.5 text-brand-400"></i>
-          </button>
+          <div class="flex items-center space-x-2">
+            <button onclick="toggleLanguage()" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold border border-slate-700 flex items-center space-x-1 active:scale-95 transition-all" title="Dili Değiştir / Change Language">
+              <span id="sidebar-lang-flag">🇹🇷</span>
+              <span id="sidebar-lang-code" class="text-[10px] font-bold">TR</span>
+            </button>
+            <button onclick="closeMobileSidebar()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center space-x-1.5 border border-slate-700 active:scale-95 transition-all">
+              <span data-i18n="sidebar_see_map">Haritayı Gör</span>
+              <i data-lucide="map" class="w-3.5 h-3.5 text-brand-400"></i>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -214,10 +226,10 @@
             <i data-lucide="compass" class="w-3 h-3"></i>
             <span>ROTAM V2 PLATFORM</span>
           </div>
-          <h1 class="text-sm font-extrabold tracking-tight text-white leading-snug">
+          <h1 class="text-sm font-extrabold tracking-tight text-white leading-snug" data-i18n="slogan_title">
             Yolculuğun sadece bir varış noktası değil.
           </h1>
-          <p class="text-[11px] text-slate-300 mt-1 leading-relaxed">
+          <p class="text-[11px] text-slate-300 mt-1 leading-relaxed" data-i18n="slogan_desc">
             Rotanı oluştur, keşfedilecek yerleri bul ve yolculuğunu unutulmaz hale getir.
           </p>
         </div>
@@ -227,7 +239,7 @@
           <div class="flex items-center justify-between mb-2.5">
             <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
               <i data-lucide="navigation-2" class="w-3.5 h-3.5 text-brand-400"></i>
-              <span>Yolculuk Türü</span>
+              <span data-i18n="vehicle_title">Yolculuk Türü</span>
             </span>
             <span id="vehicle-label-badge" class="text-[10px] font-bold text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded-full border border-brand-500/20">
               Otomobil
@@ -236,23 +248,23 @@
           <div class="grid grid-cols-5 gap-1 text-[11px]">
             <button class="vehicle-btn active flex flex-col items-center justify-center p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white" data-vehicle="car" onclick="selectVehicle('car')" title="Otomobil">
               <span class="text-base mb-0.5">🚗</span>
-              <span class="text-[10px] font-semibold">Oto</span>
+              <span class="text-[10px] font-semibold" data-i18n="veh_car_short">Oto</span>
             </button>
             <button class="vehicle-btn flex flex-col items-center justify-center p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white" data-vehicle="motorcycle" onclick="selectVehicle('motorcycle')" title="Motosiklet">
               <span class="text-base mb-0.5">🏍️</span>
-              <span class="text-[10px] font-semibold">Moto</span>
+              <span class="text-[10px] font-semibold" data-i18n="veh_moto_short">Moto</span>
             </button>
             <button class="vehicle-btn flex flex-col items-center justify-center p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white" data-vehicle="camper" onclick="selectVehicle('camper')" title="Karavan / Karavan Kamp">
               <span class="text-base mb-0.5">🚐</span>
-              <span class="text-[10px] font-semibold">Karavan</span>
+              <span class="text-[10px] font-semibold" data-i18n="veh_camper">Karavan</span>
             </button>
             <button class="vehicle-btn flex flex-col items-center justify-center p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white" data-vehicle="bicycle" onclick="selectVehicle('bicycle')" title="Bisiklet">
               <span class="text-base mb-0.5">🚲</span>
-              <span class="text-[10px] font-semibold">Bisiklet</span>
+              <span class="text-[10px] font-semibold" data-i18n="veh_bicycle">Bisiklet</span>
             </button>
             <button class="vehicle-btn flex flex-col items-center justify-center p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white" data-vehicle="walk" onclick="selectVehicle('walk')" title="Yaya / Yürüyüş">
               <span class="text-base mb-0.5">🚶</span>
-              <span class="text-[10px] font-semibold">Yaya</span>
+              <span class="text-[10px] font-semibold" data-i18n="veh_walk">Yaya</span>
             </button>
           </div>
         </div>
@@ -262,13 +274,13 @@
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center space-x-2">
               <i data-lucide="map-pin" class="w-4 h-4 text-brand-400"></i>
-              <h2 class="text-sm font-semibold tracking-wide text-slate-200">Rota Durakları</h2>
+              <h2 class="text-sm font-semibold tracking-wide text-slate-200" data-i18n="waypoints_title">Rota Durakları</h2>
             </div>
             <div class="flex items-center space-x-1">
-              <button id="btn-reverse-route" onclick="reverseRoute()" title="Rotayı Ters Çevir" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-colors">
+              <button id="btn-reverse-route" onclick="reverseRoute()" title="Rotayı Ters Çevir" data-i18n-title="btn_reverse_title" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-colors">
                 <i data-lucide="arrow-up-down" class="w-4 h-4"></i>
               </button>
-              <button id="btn-clear-all" onclick="clearAllRoute()" title="Tümünü Temizle" class="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-slate-800 transition-colors">
+              <button id="btn-clear-all" onclick="clearAllRoute()" title="Tümünü Temizle" data-i18n-title="btn_clear_title" class="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-slate-800 transition-colors">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
               </button>
             </div>
@@ -277,7 +289,7 @@
           <!-- Hızlı Şehir & Popüler Hedef Kısayolları -->
           <div class="mb-3 p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-2">
             <div>
-              <span class="text-[10px] text-slate-400 font-semibold block mb-1">Hızlı Başlangıç:</span>
+              <span class="text-[10px] text-slate-400 font-semibold block mb-1" data-i18n="quick_start">Hızlı Başlangıç:</span>
               <div class="flex flex-wrap gap-1">
                 <button type="button" onclick="setSidebarStart('İstanbul')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300">İstanbul</button>
                 <button type="button" onclick="setSidebarStart('Ankara')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300">Ankara</button>
@@ -285,12 +297,12 @@
                 <button type="button" onclick="setSidebarStart('Bursa')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300">Bursa</button>
                 <button type="button" onclick="useCurrentLocationForStart()" class="text-[10px] px-2 py-0.5 rounded-md bg-brand-500/20 text-brand-400 hover:bg-brand-500/30 flex items-center space-x-1 font-semibold">
                   <i data-lucide="crosshair" class="w-2.5 h-2.5"></i>
-                  <span>Konumum</span>
+                  <span data-i18n="use_my_location">Konumum</span>
                 </button>
               </div>
             </div>
             <div>
-              <span class="text-[10px] text-slate-400 font-semibold block mb-1">Popüler Hedefler:</span>
+              <span class="text-[10px] text-slate-400 font-semibold block mb-1" data-i18n="popular_dest">Popüler Hedefler:</span>
               <div class="flex flex-wrap gap-1">
                 <button type="button" onclick="setSidebarEnd('Antalya')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300">Antalya</button>
                 <button type="button" onclick="setSidebarEnd('Muğla')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300">Muğla</button>
@@ -308,47 +320,47 @@
 
           <!-- Nasıl Bir Yolculuk İstiyorsun? (10 Tercih Kartı) -->
           <div class="mt-3 pt-3 border-t border-slate-800/80">
-            <label class="block text-xs font-bold text-slate-300 mb-2">Nasıl bir yolculuk istiyorsun?</label>
+            <label class="block text-xs font-bold text-slate-300 mb-2" data-i18n="pref_question">Nasıl bir yolculuk istiyorsun?</label>
             <div class="grid grid-cols-2 sm:grid-cols-5 gap-1.5 text-xs">
               <button type="button" onclick="toggleHeroPref('fastest')" class="pref-chip active p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-left flex items-center space-x-1 hover:border-brand-500/50" data-pref="fastest">
                 <span>⚡</span>
-                <span class="text-[10px] font-medium">Hızlı</span>
+                <span class="text-[10px] font-medium" data-i18n="pref_fastest">Hızlı</span>
               </button>
               <button type="button" onclick="toggleHeroPref('scenic')" class="pref-chip p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-left flex items-center space-x-1 hover:border-brand-500/50" data-pref="scenic">
                 <span>🌄</span>
-                <span class="text-[10px] font-medium">Manzaralı</span>
+                <span class="text-[10px] font-medium" data-i18n="pref_scenic">Manzaralı</span>
               </button>
               <button type="button" onclick="toggleHeroPref('historic')" class="pref-chip p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-left flex items-center space-x-1 hover:border-brand-500/50" data-pref="historic">
                 <span>🏛️</span>
-                <span class="text-[10px] font-medium">Tarihi</span>
+                <span class="text-[10px] font-medium" data-i18n="pref_historic">Tarihi</span>
               </button>
               <button type="button" onclick="toggleHeroPref('nature')" class="pref-chip p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-left flex items-center space-x-1 hover:border-brand-500/50" data-pref="nature">
                 <span>🌲</span>
-                <span class="text-[10px] font-medium">Doğa</span>
+                <span class="text-[10px] font-medium" data-i18n="pref_nature">Doğa</span>
               </button>
               <button type="button" onclick="toggleHeroPref('photo')" class="pref-chip p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-left flex items-center space-x-1 hover:border-brand-500/50" data-pref="photo">
                 <span>📸</span>
-                <span class="text-[10px] font-medium">Fotoğraf</span>
+                <span class="text-[10px] font-medium" data-i18n="pref_photo">Fotoğraf</span>
               </button>
               <button type="button" onclick="toggleHeroPref('beach')" class="pref-chip p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-left flex items-center space-x-1 hover:border-brand-500/50" data-pref="beach">
                 <span>🌊</span>
-                <span class="text-[10px] font-medium">Sahil</span>
+                <span class="text-[10px] font-medium" data-i18n="pref_beach">Sahil</span>
               </button>
               <button type="button" onclick="toggleHeroPref('gastro')" class="pref-chip p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-left flex items-center space-x-1 hover:border-brand-500/50" data-pref="gastro">
                 <span>🍴</span>
-                <span class="text-[10px] font-medium">Gastro</span>
+                <span class="text-[10px] font-medium" data-i18n="pref_gastro">Gastro</span>
               </button>
               <button type="button" onclick="toggleHeroPref('twisty')" class="pref-chip p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-left flex items-center space-x-1 hover:border-brand-500/50" data-pref="twisty">
                 <span>🏍️</span>
-                <span class="text-[10px] font-medium">Virajlı</span>
+                <span class="text-[10px] font-medium" data-i18n="pref_twisty">Virajlı</span>
               </button>
               <button type="button" onclick="toggleHeroPref('discovery')" class="pref-chip p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-left flex items-center space-x-1 hover:border-brand-500/50" data-pref="discovery">
                 <span>🗺️</span>
-                <span class="text-[10px] font-medium">Keşif</span>
+                <span class="text-[10px] font-medium" data-i18n="pref_discovery">Keşif</span>
               </button>
               <button type="button" onclick="toggleHeroPref('best')" class="pref-chip p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-left flex items-center space-x-1 hover:border-brand-500/50" data-pref="best">
                 <span>⭐</span>
-                <span class="text-[10px] font-medium">En İyi</span>
+                <span class="text-[10px] font-medium" data-i18n="pref_best">En İyi</span>
               </button>
             </div>
           </div>
@@ -358,15 +370,15 @@
             <div class="flex items-center justify-between">
               <button id="btn-add-waypoint" onclick="addWaypointField()" class="flex items-center space-x-1.5 text-xs text-brand-400 hover:text-brand-300 font-medium py-1 px-2 rounded-lg hover:bg-brand-500/10 transition-colors">
                 <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                <span>Ara Durak Ekle</span>
+                <span data-i18n="btn_add_waypoint">Ara Durak Ekle</span>
               </button>
-              <span class="text-[10px] text-slate-500">veya haritaya tıkla</span>
+              <span class="text-[10px] text-slate-500" data-i18n="or_click_map">veya haritaya tıkla</span>
             </div>
 
             <!-- Ana Hesapla Butonu -->
             <button id="btn-calculate-route-main" onclick="calculateRouteMain()" class="w-full bg-gradient-to-r from-brand-600 via-amber-500 to-orange-600 hover:from-brand-500 hover:to-orange-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center space-x-2 shadow-lg shadow-brand-600/30 active:scale-[0.98] transition-all">
               <i data-lucide="sparkles" class="w-4 h-4"></i>
-              <span>ROTAMI OLUŞTUR</span>
+              <span data-i18n="btn_create_route">ROTAMI OLUŞTUR</span>
             </button>
           </div>
         </div>
@@ -376,7 +388,7 @@
           <div class="flex items-center justify-between mb-2">
             <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
               <i data-lucide="git-branch" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span>Rota Alternatifleri</span>
+              <span data-i18n="alternatives_title">Rota Alternatifleri</span>
             </span>
             <span class="text-[10px] text-slate-500">Seçmek için tıkla</span>
           </div>
@@ -391,7 +403,7 @@
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center space-x-2">
               <i data-lucide="gauge" class="w-4 h-4 text-brand-400"></i>
-              <h3 class="text-sm font-semibold text-slate-200">Sürüş Göstergeleri</h3>
+              <h3 class="text-sm font-semibold text-slate-200" data-i18n="route_summary">Sürüş Göstergeleri</h3>
             </div>
             <span id="route-badge-mode" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-500/20 text-brand-400 border border-brand-500/30">
               STANDART
@@ -406,7 +418,7 @@
                 <i data-lucide="route" class="w-5 h-5"></i>
               </div>
               <div class="min-w-0">
-                <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Mesafe</p>
+                <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold" data-i18n="metric_distance">Mesafe</p>
                 <p id="stat-distance" class="text-base font-bold text-white truncate">-</p>
               </div>
             </div>
@@ -417,7 +429,7 @@
                 <i data-lucide="clock" class="w-5 h-5"></i>
               </div>
               <div class="min-w-0">
-                <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Süre</p>
+                <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold" data-i18n="metric_duration">Süre</p>
                 <p id="stat-duration" class="text-base font-bold text-white truncate">-</p>
               </div>
             </div>
@@ -428,7 +440,7 @@
                 <i data-lucide="git-commit" class="w-5 h-5"></i>
               </div>
               <div class="min-w-0">
-                <p id="label-stat-score" class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Viraj Puanı</p>
+                <p id="label-stat-score" class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold" data-i18n="score_curviness">Viraj Puanı</p>
                 <p id="stat-score" class="text-base font-bold text-brand-400 truncate">-</p>
               </div>
             </div>
@@ -461,7 +473,7 @@
           <button type="button" onclick="openRightPanel()" class="w-full mt-3 p-2.5 rounded-xl bg-gradient-to-r from-amber-500/10 via-brand-500/10 to-orange-500/10 hover:from-amber-500/20 hover:to-orange-500/20 border border-amber-500/30 text-amber-300 flex items-center justify-between text-xs font-semibold active:scale-[0.99] transition-all">
             <div class="flex items-center space-x-2">
               <i data-lucide="compass" class="w-4 h-4 text-amber-400"></i>
-              <span>Keşif & Yolculuk Akışı</span>
+              <span data-i18n="nav_stream">Keşif & Yolculuk Akışı</span>
             </div>
             <div class="flex items-center space-x-1.5 text-[11px] text-white">
               <span id="sidebar-shortcut-corridor-count" class="font-bold text-amber-400">Detaylar</span>
@@ -473,15 +485,15 @@
           <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-slate-800">
             <button type="button" onclick="openInGoogleMaps()" class="col-span-2 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-emerald-600/25 flex items-center justify-center space-x-2 active:scale-[0.99] transition-all" title="Rotayı Google Maps'te Aç ve Navigasyonu Başlat">
               <i data-lucide="navigation" class="w-4 h-4 text-white"></i>
-              <span>Google Maps Navigasyonunu Başlat</span>
+              <span data-i18n="timeline_gmaps_btn">Google Maps Navigasyonunu Başlat</span>
             </button>
             <button type="button" onclick="exportGPX()" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl text-xs border border-slate-700 flex items-center justify-center space-x-1.5 transition-all">
               <i data-lucide="download" class="w-3.5 h-3.5 text-accent-400"></i>
-              <span>GPX İndir</span>
+              <span data-i18n="btn_export_gpx">GPX İndir</span>
             </button>
             <button type="button" onclick="openSaveRouteModal()" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl text-xs border border-slate-700 flex items-center justify-center space-x-1.5 transition-all">
               <i data-lucide="bookmark-plus" class="w-3.5 h-3.5 text-brand-400"></i>
-              <span>Rotayı Kaydet</span>
+              <span data-i18n="btn_save_route">Rotayı Kaydet</span>
             </button>
           </div>
         </div>
@@ -739,7 +751,7 @@
       <!-- SAĞ ÇEKMECE / PANEL TOGGLE (KEŞİF & ZAMAN ÇİZELGESİ) -->
       <button id="btn-toggle-right-panel" onclick="toggleRightPanel()" class="hidden md:flex absolute top-14 right-3 sm:top-16 sm:right-4 z-[1030] glass-panel p-2.5 rounded-xl border border-slate-800 text-slate-300 hover:text-white hover:border-amber-500/40 shadow-xl items-center space-x-1.5 text-xs transition-all cursor-pointer">
         <i data-lucide="compass" class="w-4 h-4 text-amber-400"></i>
-        <span>Keşif & Akış</span>
+        <span data-i18n="nav_stream">Keşif & Akış</span>
         <span id="badge-right-panel-poi-count" class="hidden px-1.5 py-0.5 bg-amber-500/20 text-amber-300 rounded-full text-[10px] font-bold border border-amber-500/30">0</span>
       </button>
 
@@ -748,10 +760,10 @@
         <!-- Panel Başlığı & Sekmeler -->
         <div class="p-3 border-b border-slate-800 bg-slate-950 flex items-center justify-between shrink-0">
           <div class="flex items-center space-x-1 bg-slate-900 p-0.5 rounded-xl border border-slate-800 text-xs">
-            <button id="tab-btn-discover" onclick="switchRightTab('discover')" class="px-3 py-1 rounded-lg font-semibold bg-brand-600 text-white shadow-sm">
+            <button id="tab-btn-discover" onclick="switchRightTab('discover')" class="px-3 py-1 rounded-lg font-semibold bg-brand-600 text-white shadow-sm" data-i18n="tab_discover">
               Rotada Keşfet
             </button>
-            <button id="tab-btn-timeline" onclick="switchRightTab('timeline')" class="px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white">
+            <button id="tab-btn-timeline" onclick="switchRightTab('timeline')" class="px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white" data-i18n="tab_timeline">
               Yolculuk Akışı
             </button>
           </div>
@@ -767,11 +779,11 @@
             <div class="flex items-center justify-between mb-1.5">
               <span class="text-xs font-bold text-amber-400 flex items-center space-x-1.5">
                 <i data-lucide="radar" class="w-3.5 h-3.5 text-amber-400"></i>
-                <span>50 km Koridoru Analizi</span>
+                <span data-i18n="corridor_title">50 km Koridoru Analizi</span>
               </span>
               <span id="corridor-total-count" class="font-bold text-white bg-amber-500/20 px-2 py-0.5 rounded-md text-[10px] border border-amber-500/30">0 Nokta</span>
             </div>
-            <p class="text-[11px] text-slate-400">Seçili güzergah boyunca keşfedilecek tarihi, doğal ve gastronomik noktalar.</p>
+            <p class="text-[11px] text-slate-400" data-i18n="corridor_desc">Seçili güzergah boyunca keşfedilecek tarihi, doğal ve gastronomik noktalar.</p>
 
             <!-- Kategori Filtre Butonları -->
             <div class="grid grid-cols-2 gap-1.5 mt-3 pt-2 border-t border-slate-800 text-[11px]">
@@ -807,7 +819,7 @@
             <div class="flex items-center justify-between mb-2">
               <span class="text-xs font-bold text-white flex items-center space-x-1.5">
                 <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
-                <span>Akıllı Durak Önerileri</span>
+                <span data-i18n="smart_stops_title">Akıllı Durak Önerileri</span>
               </span>
               <span class="text-[10px] text-slate-500">Minimal Sapma</span>
             </div>
@@ -862,10 +874,10 @@
             </button>
             <button onclick="openRightPanel()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-xl text-xs font-bold border border-slate-700 flex items-center space-x-1 active:scale-95 transition-all" title="Rotadaki Keşif Noktaları">
               <i data-lucide="compass" class="w-3.5 h-3.5"></i>
-              <span>Keşfet</span>
+              <span data-i18n="mobile_nav_discover">Keşfet</span>
             </button>
             <button onclick="openMobileSidebar()" class="px-2.5 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-600/30 flex items-center space-x-1 active:scale-95 transition-all" title="Rota Detayları ve Duraklar">
-              <span>Detay</span>
+              <span data-i18n="btn_details">Detay</span>
               <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
             </button>
           </div>
@@ -874,7 +886,7 @@
         <!-- Rota hesaplanmamışken açma butonu -->
         <button id="btn-mobile-open-planner" onclick="openMobileSidebar()" class="pointer-events-auto bg-gradient-to-r from-brand-600 via-amber-500 to-orange-600 text-white font-bold px-4 py-2 rounded-full shadow-xl shadow-brand-600/30 border border-amber-400/30 text-xs flex items-center space-x-2 active:scale-95 transition-all">
           <i data-lucide="compass" class="w-4 h-4 text-amber-200"></i>
-          <span>Rotanı Planla</span>
+          <span data-i18n="btn_mobile_plan_route">Rotanı Planla</span>
         </button>
       </div>
 
@@ -883,7 +895,7 @@
         <div class="flex items-center justify-between mb-2">
           <div class="flex items-center space-x-2">
             <i data-lucide="mountain-snow" class="w-4 h-4 text-brand-400"></i>
-            <span class="text-xs font-semibold text-slate-200">Yükselti Profili</span>
+            <span class="text-xs font-semibold text-slate-200" data-i18n="elevation_title">Yükselti Profili</span>
             <span id="elevation-hover-info" class="text-xs text-brand-400 font-mono font-medium ml-2"></span>
           </div>
           <div class="flex items-center space-x-2 sm:space-x-3 text-[11px] text-slate-400">
@@ -914,8 +926,8 @@
             <i data-lucide="compass" class="w-5 h-5"></i>
           </div>
           <div>
-            <h3 class="text-base font-bold text-white">Türkiye'yi Keşfet</h3>
-            <p class="text-xs text-slate-400">Antik kentler, doğa harikaları, kanyonlar, sahiller ve gastronomi durakları</p>
+            <h3 class="text-base font-bold text-white" data-i18n="modal_discover_title">Türkiye'yi Keşfet</h3>
+            <p class="text-xs text-slate-400" data-i18n="modal_discover_sub">Antik kentler, doğa harikaları, kanyonlar, sahiller ve gastronomi durakları</p>
           </div>
         </div>
         <button onclick="closeDiscoverModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
@@ -927,30 +939,30 @@
       <div class="p-3.5 bg-slate-950/80 border-b border-slate-800 space-y-2.5">
         <div class="relative">
           <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
-          <input type="text" id="discover-search-input" oninput="filterDiscoverPlaces()" placeholder="Yerin adı, şehir veya özellik ara (Örn: Sagalassos, Yedigöller, Kaputaş, Efes, Urfa...)" class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+          <input type="text" id="discover-search-input" oninput="filterDiscoverPlaces()" placeholder="Yerin adı, şehir veya özellik ara (Örn: Sagalassos, Yedigöller, Kaputaş, Efes, Urfa...)" data-i18n-placeholder="search_discover_placeholder" class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
         </div>
 
         <!-- Kategori Çipleri -->
         <div class="flex flex-wrap gap-1 text-[11px]" id="discover-category-filters">
-          <button onclick="selectDiscoverCategory('all')" class="discover-cat-btn active px-3 py-1 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/40 font-medium" data-cat="all">Tümü</button>
-          <button onclick="selectDiscoverCategory('historic')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="historic">🏛️ Tarih</button>
-          <button onclick="selectDiscoverCategory('nature')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="nature">🌲 Doğa</button>
-          <button onclick="selectDiscoverCategory('photography')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="photography">📸 Fotoğraf</button>
-          <button onclick="selectDiscoverCategory('beach')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="beach">🌊 Sahil</button>
-          <button onclick="selectDiscoverCategory('gastronomy')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="gastronomy">🍴 Lezzet</button>
-          <button onclick="selectDiscoverCategory('camping')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="camping">🚐 Karavan & Kamp</button>
-          <button onclick="selectDiscoverCategory('ev_charge')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="ev_charge">⚡ EV Şarj</button>
+          <button onclick="selectDiscoverCategory('all')" class="discover-cat-btn active px-3 py-1 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/40 font-medium" data-cat="all" data-i18n="cat_all">Tümü</button>
+          <button onclick="selectDiscoverCategory('historic')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="historic" data-i18n="cat_historic">🏛️ Tarih</button>
+          <button onclick="selectDiscoverCategory('nature')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="nature" data-i18n="cat_nature">🌲 Doğa</button>
+          <button onclick="selectDiscoverCategory('photography')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="photography" data-i18n="cat_photography">📸 Fotoğraf</button>
+          <button onclick="selectDiscoverCategory('beach')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="beach" data-i18n="cat_beach">🌊 Sahil</button>
+          <button onclick="selectDiscoverCategory('gastronomy')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="gastronomy" data-i18n="cat_gastronomy">🍴 Lezzet</button>
+          <button onclick="selectDiscoverCategory('camping')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="camping" data-i18n="cat_camping">🚐 Karavan & Kamp</button>
+          <button onclick="selectDiscoverCategory('ev_charge')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="ev_charge" data-i18n="cat_ev_charge">⚡ EV Şarj</button>
         </div>
 
         <!-- Bölge Filtreleri -->
         <div class="flex flex-wrap gap-1 text-[10px] text-slate-400 pt-1 border-t border-slate-900" id="discover-region-filters">
-          <button onclick="selectDiscoverRegion('all')" class="discover-reg-btn active px-2 py-0.5 rounded bg-slate-800 text-amber-400 font-semibold" data-reg="all">Tüm Bölgeler</button>
-          <button onclick="selectDiscoverRegion('Ege')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Ege">Ege</button>
-          <button onclick="selectDiscoverRegion('Akdeniz')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Akdeniz">Akdeniz</button>
-          <button onclick="selectDiscoverRegion('İç Anadolu')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="İç Anadolu">İç Anadolu</button>
-          <button onclick="selectDiscoverRegion('Marmara')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Marmara">Marmara</button>
-          <button onclick="selectDiscoverRegion('Karadeniz')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Karadeniz">Karadeniz</button>
-          <button onclick="selectDiscoverRegion('Doğu & Güneydoğu')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Doğu & Güneydoğu">Doğu & GD</button>
+          <button onclick="selectDiscoverRegion('all')" class="discover-reg-btn active px-2 py-0.5 rounded bg-slate-800 text-amber-400 font-semibold" data-reg="all" data-i18n="region_all">Tüm Bölgeler</button>
+          <button onclick="selectDiscoverRegion('Ege')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Ege" data-i18n="region_aegean">Ege</button>
+          <button onclick="selectDiscoverRegion('Akdeniz')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Akdeniz" data-i18n="region_mediterranean">Akdeniz</button>
+          <button onclick="selectDiscoverRegion('İç Anadolu')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="İç Anadolu" data-i18n="region_central">İç Anadolu</button>
+          <button onclick="selectDiscoverRegion('Marmara')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Marmara" data-i18n="region_marmara">Marmara</button>
+          <button onclick="selectDiscoverRegion('Karadeniz')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Karadeniz" data-i18n="region_blacksea">Karadeniz</button>
+          <button onclick="selectDiscoverRegion('Doğu & Güneydoğu')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Doğu & Güneydoğu" data-i18n="region_east">Doğu & GD</button>
         </div>
       </div>
 
@@ -967,7 +979,7 @@
       <div class="p-4 border-b border-slate-800 flex items-center justify-between">
         <div class="flex items-center space-x-2">
           <i data-lucide="navigation" class="w-5 h-5 text-emerald-400"></i>
-          <h3 class="text-base font-bold text-white">Yakınımda Ne Var?</h3>
+          <h3 class="text-base font-bold text-white" data-i18n="modal_nearby_title">Yakınımda Ne Var?</h3>
         </div>
         <button onclick="closeNearbyModal()" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -976,19 +988,19 @@
 
       <div class="p-3 bg-slate-950 border-b border-slate-800 flex items-center justify-between text-xs">
         <div class="flex items-center space-x-1">
-          <span class="text-slate-400">Mesafe Yarıçapı:</span>
+          <span class="text-slate-400" data-i18n="nearby_radius_label">Mesafe Yarıçapı:</span>
           <button onclick="fetchNearby(10)" class="nearby-radius-btn px-2 py-1 rounded bg-slate-800 text-slate-300" data-radius="10">10 km</button>
           <button onclick="fetchNearby(25)" class="nearby-radius-btn px-2 py-1 rounded bg-slate-800 text-slate-300" data-radius="25">25 km</button>
           <button onclick="fetchNearby(50)" class="nearby-radius-btn active px-2 py-1 rounded bg-emerald-600 text-white font-bold" data-radius="50">50 km</button>
         </div>
         <button onclick="refreshNearbyGPS()" class="text-emerald-400 hover:text-emerald-300 flex items-center space-x-1">
           <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
-          <span>Yenile</span>
+          <span data-i18n="btn_refresh">Yenile</span>
         </button>
       </div>
 
       <div class="p-4 overflow-y-auto space-y-2.5" id="nearby-places-list">
-        <p class="text-xs text-slate-400 text-center py-6">Konumunuz alınıyor ve yakındaki noktalar taranıyor...</p>
+        <p class="text-xs text-slate-400 text-center py-6" data-i18n="nearby_scanning">Konumunuz alınıyor ve yakındaki noktalar taranıyor...</p>
       </div>
     </div>
   </div>
@@ -999,7 +1011,7 @@
       <div class="p-4 border-b border-slate-800 flex items-center justify-between">
         <div class="flex items-center space-x-2">
           <i data-lucide="folder-heart" class="w-5 h-5 text-rose-400"></i>
-          <h3 class="text-base font-bold text-white">Kayıtlı Rotalarım</h3>
+          <h3 class="text-base font-bold text-white" data-i18n="modal_saved_title">Kayıtlı Rotalarım</h3>
           <span class="px-2 py-0.5 text-[10px] rounded bg-slate-800 text-slate-400 font-mono">SQLite / Depolama</span>
         </div>
         <button onclick="closeSavedRoutesModal()" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
@@ -1019,7 +1031,7 @@
       <div class="p-4 border-b border-slate-800 flex items-center justify-between">
         <div class="flex items-center space-x-2">
           <i data-lucide="bookmark-plus" class="w-5 h-5 text-brand-400"></i>
-          <h3 class="text-base font-bold text-white">Rotayı Kaydet</h3>
+          <h3 class="text-base font-bold text-white" data-i18n="modal_save_title">Rotayı Kaydet</h3>
         </div>
         <button onclick="closeSaveRouteModal()" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -1028,19 +1040,19 @@
 
       <form id="form-save-route" onsubmit="handleSaveRouteSubmit(event)" class="p-4 space-y-3">
         <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Rota Başlığı</label>
-          <input type="text" id="save-route-title" required placeholder="Örn: 2026 Yaz Akdeniz & Likya Turu" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+          <label class="block text-xs font-semibold text-slate-300 mb-1" data-i18n="save_route_title_label">Rota Başlığı</label>
+          <input type="text" id="save-route-title" required placeholder="Örn: 2026 Yaz Akdeniz & Likya Turu" data-i18n-placeholder="save_route_title_placeholder" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Gezi Notları & Açıklama (İsteğe Bağlı)</label>
-          <textarea id="save-route-desc" rows="3" placeholder="Örn: Gün batımı molaları, Kaputaş ve Sagalassos antik kenti ziyaretleri..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500"></textarea>
+          <label class="block text-xs font-semibold text-slate-300 mb-1" data-i18n="save_route_desc_label">Gezi Notları & Açıklama (İsteğe Bağlı)</label>
+          <textarea id="save-route-desc" rows="3" placeholder="Örn: Gün batımı molaları, Kaputaş ve Sagalassos antik kenti ziyaretleri..." data-i18n-placeholder="save_route_desc_placeholder" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500"></textarea>
         </div>
         <div class="flex items-center space-x-2 pt-2">
           <button type="submit" class="flex-1 bg-brand-600 hover:bg-brand-500 text-white font-semibold py-2 rounded-xl text-xs shadow-lg shadow-brand-600/30 transition-all">
-            Kaydet
+            <span data-i18n="btn_save">Kaydet</span>
           </button>
           <button type="button" onclick="closeSaveRouteModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs">
-            İptal
+            <span data-i18n="btn_cancel">İptal</span>
           </button>
         </div>
       </form>
@@ -1056,8 +1068,8 @@
             <i data-lucide="settings-2" class="w-4 h-4"></i>
           </div>
           <div>
-            <h3 class="text-base font-bold text-white">Yönetim & Veri Paneli (Admin)</h3>
-            <p class="text-xs text-slate-400">Keşif noktaları yönetimi, yeni mekan ekleme ve JSON veritabanı yedekleme</p>
+            <h3 class="text-base font-bold text-white" data-i18n="modal_admin_title">Yönetim & Veri Paneli (Admin)</h3>
+            <p class="text-xs text-slate-400" data-i18n="modal_admin_sub">Keşif noktaları yönetimi, yeni mekan ekleme ve JSON veritabanı yedekleme</p>
           </div>
         </div>
         <button onclick="closeAdminModal()" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
@@ -1068,13 +1080,13 @@
       <!-- Sekmeler (Mekanlar, Analitik, Yedekleme) -->
       <div class="px-4 py-2 bg-slate-950 border-b border-slate-800 flex items-center justify-between text-xs">
         <div class="flex items-center space-x-1 bg-slate-900 p-0.5 rounded-xl border border-slate-800">
-          <button id="admin-tab-btn-places" onclick="switchAdminTab('places')" class="px-3 py-1 rounded-lg font-semibold bg-cyan-600 text-white shadow-sm">
+          <button id="admin-tab-btn-places" onclick="switchAdminTab('places')" class="px-3 py-1 rounded-lg font-semibold bg-cyan-600 text-white shadow-sm" data-i18n="admin_tab_places">
             Mekan Yönetimi
           </button>
-          <button id="admin-tab-btn-analytics" onclick="switchAdminTab('analytics')" class="px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white">
+          <button id="admin-tab-btn-analytics" onclick="switchAdminTab('analytics')" class="px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white" data-i18n="admin_tab_analytics">
             Analitik & İstatistik
           </button>
-          <button id="admin-tab-btn-backup" onclick="switchAdminTab('backup')" class="px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white">
+          <button id="admin-tab-btn-backup" onclick="switchAdminTab('backup')" class="px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white" data-i18n="admin_tab_settings">
             Yedekleme
           </button>
         </div>
@@ -1085,28 +1097,28 @@
         <!-- İstatistikler ve Hızlı Araçlar -->
         <div class="p-3 bg-slate-950/80 border-b border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
           <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-            <span class="text-[10px] text-slate-400 uppercase">Toplam Mekan</span>
+            <span class="text-[10px] text-slate-400 uppercase" data-i18n="admin_stat_total">Toplam Mekan</span>
             <p id="admin-stat-total" class="text-base font-bold text-white mt-0.5">-</p>
           </div>
           <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-            <span class="text-[10px] text-slate-400 uppercase">Tarih & Antik</span>
+            <span class="text-[10px] text-slate-400 uppercase" data-i18n="admin_stat_historic">Tarih & Antik</span>
             <p id="admin-stat-historic" class="text-base font-bold text-amber-400 mt-0.5">-</p>
           </div>
           <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-            <span class="text-[10px] text-slate-400 uppercase">Doğa & Kanyon</span>
+            <span class="text-[10px] text-slate-400 uppercase" data-i18n="admin_stat_nature">Doğa & Kanyon</span>
             <p id="admin-stat-nature" class="text-base font-bold text-emerald-400 mt-0.5">-</p>
           </div>
           <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-            <span class="text-[10px] text-slate-400 uppercase">Gastronomi & Mola</span>
+            <span class="text-[10px] text-slate-400 uppercase" data-i18n="admin_stat_gastro">Gastronomi & Mola</span>
             <p id="admin-stat-gastro" class="text-base font-bold text-rose-400 mt-0.5">-</p>
           </div>
         </div>
 
         <div class="p-2.5 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between text-xs">
-          <span class="text-slate-400">Veritabanındaki mekanları düzenleyin veya yenisini ekleyin:</span>
+          <span class="text-slate-400" data-i18n="admin_places_sub">Veritabanındaki mekanları düzenleyin veya yenisini ekleyin:</span>
           <button onclick="toggleAdminAddForm()" class="bg-brand-600 hover:bg-brand-500 text-white px-3 py-1.5 rounded-lg font-semibold flex items-center space-x-1 shadow transition-colors">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-            <span>Yeni Mekan Ekle</span>
+            <span data-i18n="admin_new_place_btn">Yeni Mekan Ekle</span>
           </button>
         </div>
 
@@ -1272,33 +1284,63 @@
         </div>
       </div>
 
-      <!-- SEKME 3: YEDEKLEME & GERİ YÜKLEME (#33) -->
+      <!-- SEKME 3: DİL, YEDEKLEME & AYARLAR -->
       <div id="admin-tab-backup" class="hidden flex-col flex-1 overflow-y-auto p-5 space-y-4 text-xs">
+        <!-- Dil Tercihi Kartı -->
+        <div class="glass-card p-4 rounded-2xl border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="languages" class="w-4 h-4 text-brand-400"></i>
+              <h4 class="font-bold text-white text-sm" data-i18n="admin_lang_title">Uygulama Dili / Application Language</h4>
+            </div>
+            <span class="text-[10px] bg-brand-500/20 text-brand-400 px-2 py-0.5 rounded-full font-bold">i18n</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed" data-i18n="admin_lang_desc">
+            Kullanıcı arayüzü ve içerik dili tercihini belirleyin.
+          </p>
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <button type="button" onclick="setLanguage('tr')" id="btn-lang-choice-tr" class="flex items-center space-x-3 p-3 rounded-xl border border-slate-800 hover:border-brand-500/50 bg-slate-950/70 text-left transition-all">
+              <span class="text-2xl">🇹🇷</span>
+              <div>
+                <p class="text-xs font-bold text-white">Türkçe</p>
+                <p class="text-[10px] text-slate-400">Varsayılan arayüz</p>
+              </div>
+            </button>
+            <button type="button" onclick="setLanguage('en')" id="btn-lang-choice-en" class="flex items-center space-x-3 p-3 rounded-xl border border-slate-800 hover:border-brand-500/50 bg-slate-950/70 text-left transition-all">
+              <span class="text-2xl">🇬🇧</span>
+              <div>
+                <p class="text-xs font-bold text-white">English</p>
+                <p class="text-[10px] text-slate-400">International UI</p>
+              </div>
+            </button>
+          </div>
+        </div>
+
         <div class="glass-card p-4 rounded-2xl border border-slate-800 space-y-2">
           <h4 class="font-bold text-white text-sm flex items-center space-x-2">
             <i data-lucide="download" class="w-4 h-4 text-cyan-400"></i>
-            <span>Veritabanı Yedeğini İndir (JSON Export)</span>
+            <span data-i18n="admin_backup_download_title">Veritabanı Yedeğini İndir (JSON Export)</span>
           </h4>
-          <p class="text-slate-400 leading-relaxed">
+          <p class="text-slate-400 leading-relaxed" data-i18n="admin_backup_download_desc">
             Mevcut 870+ kayıtlı mekan ve kullanıcı tarafından eklenen tüm özel noktaları içeren tam veritabanını standart JSON formatında bilgisayarınıza yedekleyin.
           </p>
           <button onclick="exportPlacesJsonBackup()" class="mt-2 bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-xl font-bold shadow-md flex items-center space-x-2">
             <i data-lucide="download" class="w-4 h-4"></i>
-            <span>rotam_places_backup.json İndir</span>
+            <span data-i18n="admin_backup_download_btn">rotam_places_backup.json İndir</span>
           </button>
         </div>
 
         <div class="glass-card p-4 rounded-2xl border border-slate-800 space-y-2">
           <h4 class="font-bold text-white text-sm flex items-center space-x-2">
             <i data-lucide="upload" class="w-4 h-4 text-emerald-400"></i>
-            <span>Veritabanı Yedeğini Geri Yükle (JSON Import & Doğrulama)</span>
+            <span data-i18n="admin_backup_restore_title">Veritabanı Yedeğini Geri Yükle (JSON Import & Doğrulama)</span>
           </h4>
-          <p class="text-slate-400 leading-relaxed">
+          <p class="text-slate-400 leading-relaxed" data-i18n="admin_backup_restore_desc">
             Daha önce aldığınız bir JSON yedeğini yükleyin. Yükleme öncesinde dosya şeması otomatik olarak doğrulanır; hatalı veya bozuk dosyalar sisteminizi bozmaz.
           </p>
           <label class="inline-flex mt-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl font-bold shadow-md cursor-pointer items-center space-x-2">
             <i data-lucide="upload" class="w-4 h-4"></i>
-            <span>JSON Dosyası Seç ve Geri Yükle</span>
+            <span data-i18n="admin_backup_restore_btn">JSON Dosyası Seç ve Geri Yükle</span>
             <input type="file" id="admin-json-upload-input" accept=".json" onchange="importPlacesJsonBackup(event)" class="hidden">
           </label>
         </div>
@@ -1365,8 +1407,8 @@
               <i data-lucide="camera" class="w-4 h-4"></i>
             </div>
             <div>
-              <p class="font-bold text-white group-hover:text-amber-400 transition-colors">Google Maps'te Tüm Fotoğrafları & Yorumları Gör</p>
-              <p class="text-[10px] text-slate-400">360° sokak görünümleri, drone ve gezgin çekimleri</p>
+              <p class="font-bold text-white group-hover:text-amber-400 transition-colors" data-i18n="place_gmaps_photos_btn">Google Maps'te Tüm Fotoğrafları & Yorumları Gör</p>
+              <p class="text-[10px] text-slate-400" data-i18n="place_gmaps_photos_sub">360° sokak görünümleri, drone ve gezgin çekimleri</p>
             </div>
           </div>
           <i data-lucide="external-link" class="w-4 h-4 text-slate-400 group-hover:text-amber-400 shrink-0 ml-2"></i>
@@ -1375,11 +1417,11 @@
         <!-- Hızlı Bilgiler -->
         <div class="grid grid-cols-2 gap-2 bg-slate-950/80 p-3 rounded-xl border border-slate-800/80">
           <div>
-            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">En Uygun Zaman</span>
+            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider" data-i18n="place_best_time">En Uygun Zaman</span>
             <p id="place-detail-time" class="text-white font-medium mt-0.5">-</p>
           </div>
           <div>
-            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Önerilen Mola</span>
+            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider" data-i18n="place_suggested_stay">Önerilen Mola</span>
             <p id="place-detail-duration" class="text-white font-medium mt-0.5">-</p>
           </div>
         </div>
@@ -1391,11 +1433,11 @@
         <div class="pt-2 flex items-center space-x-2">
           <button id="btn-place-add-to-route" class="flex-1 bg-brand-600 hover:bg-brand-500 text-white font-bold py-2.5 rounded-xl text-xs shadow-lg shadow-brand-600/30 flex items-center justify-center space-x-1.5 active:scale-95 transition-all">
             <i data-lucide="plus-circle" class="w-4 h-4"></i>
-            <span>ROTAMA EKLE</span>
+            <span data-i18n="btn_add_to_route_full">ROTAMA EKLE</span>
           </button>
           <button id="btn-place-set-destination" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2.5 rounded-xl text-xs border border-slate-700 flex items-center justify-center space-x-1.5 active:scale-95 transition-all">
             <i data-lucide="flag" class="w-4 h-4 text-rose-400"></i>
-            <span>HEDEF YAP</span>
+            <span data-i18n="btn_set_dest_full">HEDEF YAP</span>
           </button>
         </div>
       </div>
@@ -1408,7 +1450,7 @@
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <div class="flex items-center space-x-2">
           <i data-lucide="upload-cloud" class="w-5 h-5 text-emerald-400"></i>
-          <h3 class="text-base font-bold text-white">GPX Rotası Yükle</h3>
+          <h3 class="text-base font-bold text-white" data-i18n="modal_gpx_title">GPX Rotası Yükle</h3>
         </div>
         <button onclick="closeGpxImportModal()" class="p-1 rounded-lg text-slate-400 hover:text-white">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -1417,12 +1459,12 @@
 
       <div id="gpx-dropzone" ondragover="handleGpxDragOver(event)" ondragleave="handleGpxDragLeave(event)" ondrop="handleGpxDrop(event)" class="border-2 border-dashed border-slate-700 hover:border-emerald-500 rounded-2xl p-6 text-center cursor-pointer transition-colors bg-slate-950/50">
         <i data-lucide="file-code" class="w-10 h-10 text-emerald-400 mx-auto mb-2"></i>
-        <p class="text-xs font-semibold text-white">GPX dosyasını buraya sürükleyin</p>
-        <p class="text-[11px] text-slate-400 mt-1">veya bilgisayarınızdan seçin (.gpx)</p>
+        <p class="text-xs font-semibold text-white" data-i18n="gpx_drop_title">GPX dosyasını buraya sürükleyin</p>
+        <p class="text-[11px] text-slate-400 mt-1" data-i18n="gpx_drop_sub">veya bilgisayarınızdan seçin (.gpx)</p>
         <input type="file" id="gpx-file-input" accept=".gpx" onchange="handleGpxFileSelect(event)" class="hidden">
       </div>
 
-      <p class="text-[11px] text-slate-400 leading-relaxed">
+      <p class="text-[11px] text-slate-400 leading-relaxed" data-i18n="gpx_desc">
         Yüklediğiniz GPX dosyasındaki koordinatlar ve duraklar otomatik olarak haritada çizilecek, mesafe ve yükseklik analizi yapılacaktır.
       </p>
     </div>
@@ -1432,23 +1474,23 @@
   <nav id="mobile-bottom-nav" class="md:hidden h-14 bg-slate-900/95 border-t border-slate-800/80 px-2 flex items-center justify-around z-30 shrink-0 backdrop-blur-xl">
     <button id="mobile-nav-btn-plan" onclick="handleMobileNavPlan()" class="flex flex-col items-center justify-center p-1 text-brand-400 font-semibold text-[10px]">
       <i data-lucide="map" class="w-4 h-4 mb-0.5"></i>
-      <span>Planla</span>
+      <span data-i18n="mobile_nav_plan">Planla</span>
     </button>
     <button onclick="openDiscoverModal()" class="flex flex-col items-center justify-center p-1 text-slate-400 hover:text-white text-[10px]">
       <i data-lucide="compass" class="w-4 h-4 mb-0.5"></i>
-      <span>Keşfet</span>
+      <span data-i18n="mobile_nav_discover">Keşfet</span>
     </button>
     <button onclick="openNearbyModal()" class="flex flex-col items-center justify-center p-1 text-slate-400 hover:text-white text-[10px]">
       <i data-lucide="navigation" class="w-4 h-4 mb-0.5"></i>
-      <span>Yakınımda</span>
+      <span data-i18n="mobile_nav_nearby">Yakınımda</span>
     </button>
     <button onclick="openSavedRoutesModal()" class="flex flex-col items-center justify-center p-1 text-slate-400 hover:text-white text-[10px]">
       <i data-lucide="folder-heart" class="w-4 h-4 mb-0.5"></i>
-      <span>Rotalarım</span>
+      <span data-i18n="mobile_nav_saved">Rotalarım</span>
     </button>
     <button onclick="openAdminModal()" class="flex flex-col items-center justify-center p-1 text-slate-400 hover:text-white text-[10px]">
       <i data-lucide="settings-2" class="w-4 h-4 mb-0.5"></i>
-      <span>Yönetim</span>
+      <span data-i18n="mobile_nav_admin">Yönetim</span>
     </button>
   </nav>
 
@@ -1457,6 +1499,8 @@
 
   <!-- Kapsamlı Mekan Veritabanı (870+ Yer) -->
   <script src="places_data.js"></script>
+  <!-- Çoklu Dil ve Çeviri Motoru (TR / EN) -->
+  <script src="translations.js"></script>
   <!-- V2 JavaScript Uygulama Mantığı -->
   <script src="app.js"></script>
 </body>

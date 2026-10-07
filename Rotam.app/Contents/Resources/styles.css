@@ -447,12 +447,65 @@ main {
 }
 
 /* Responsive Modals on Mobile */
+/* Responsive Native-Grade Mobile Pages Optimization */
 @media (max-width: 640px) {
+  /* Modals as Fullscreen App Views on Phones */
+  [id^="modal-"] {
+    padding: 0 !important;
+  }
+
   .responsive-modal-card {
-    max-height: 88dvh !important;
-    width: 95vw !important;
-    margin: auto !important;
-    border-radius: 1.25rem !important;
+    height: 100% !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    border: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .responsive-modal-card > div:first-child:not(#place-detail-hero) {
+    padding-top: max(0.85rem, env(safe-area-inset-top)) !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    padding-bottom: 0.85rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  #modal-place-detail #place-detail-hero {
+    border-radius: 0 !important;
+    height: 220px !important;
+  }
+
+  #modal-place-detail #place-detail-hero .absolute.top-3 {
+    top: max(0.75rem, env(safe-area-inset-top)) !important;
+  }
+
+  .responsive-modal-card > div:last-child,
+  .responsive-modal-card > form:last-child {
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom)) !important;
+  }
+
+  /* Touch Friendly Inputs & Action Targets */
+  input[type="text"], input[type="search"], textarea, select {
+    font-size: 14px !important; /* Prevents auto-zoom on iOS */
+    min-height: 42px !important;
+  }
+
+  button, .vehicle-btn, .pref-chip {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Compact padding in Discover cards on mobile */
+  #discover-places-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+    padding: 0.75rem !important;
+    padding-bottom: 5rem !important;
   }
 }
 
@@ -504,6 +557,22 @@ main {
 
   #elevation-panel {
     max-width: calc(100vw - 1rem) !important;
+  }
+
+  /* Mobile Bottom Navigation Enhancements */
+  #mobile-bottom-nav button {
+    min-height: 44px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #mobile-bottom-nav button:active {
+    transform: scale(0.92);
+  }
+
+  /* Safe Area Padding for Mobile Bottom Bar */
+  #mobile-bottom-bar {
+    bottom: max(0.75rem, env(safe-area-inset-bottom)) !important;
   }
 }
 

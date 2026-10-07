@@ -6,6 +6,7 @@
 
 // Global Application State
 const state = {
+  lang: localStorage.getItem('rotam_lang') || 'tr',
   currentVehicle: 'car', // 'car' | 'motorcycle' | 'camper' | 'bicycle' | 'walk'
   selectedPreferences: new Set(['fastest']), // 'fastest', 'scenic', 'historic', 'nature', 'photo', 'beach', 'gastro', 'twisty', 'discovery', 'best'
   waypoints: [
@@ -30,6 +31,7 @@ const state = {
   userLocation: null,
   routeRequestId: 0
 };
+window.state = state;
 
 // Map & Layer State
 let map = null;
@@ -41,18 +43,23 @@ let mapInitialized = false;
 
 // Category Configs: Colors, Icons & Titles
 const CATEGORY_CONFIG = {
-  historic: { title: 'Tarihi Yer & Antik Kent', icon: 'landmark', emoji: '🏛️', color: '#d97706', fill: '#f59e0b', pinClass: 'pin-historic' },
-  nature: { title: 'Doğa & Şelale & Kanyon', icon: 'trees', emoji: '🌲', color: '#059669', fill: '#10b981', pinClass: 'pin-nature' },
-  photography: { title: 'Fotoğraf & Seyir Noktası', icon: 'camera', emoji: '📸', color: '#7c3aed', fill: '#8b5cf6', pinClass: 'pin-photography' },
-  beach: { title: 'Sahil & Plaj & Koy', icon: 'waves', emoji: '🌊', color: '#0284c7', fill: '#38bdf8', pinClass: 'pin-beach' },
-  gastronomy: { title: 'Gastronomi & Meşhur Lezzet', icon: 'utensils', emoji: '🍴', color: '#e11d48', fill: '#f43f5e', pinClass: 'pin-gastronomy' },
-  cafe: { title: 'Mola Yeri & Kafe', icon: 'coffee', emoji: '☕', color: '#0f766e', fill: '#14b8a6', pinClass: 'pin-cafe' },
-  fuel: { title: 'Akaryakıt İstasyonu', icon: 'fuel', emoji: '⛽', color: '#047857', fill: '#10b981', pinClass: 'pin-fuel' },
-  ev_charge: { title: 'Elektrikli Araç Şarj (EV)', icon: 'zap', emoji: '⚡', color: '#0891b2', fill: '#06b6d4', pinClass: 'pin-ev_charge' },
-  camping: { title: 'Karavan & Kamp Alanı', icon: 'tent', emoji: '🚐', color: '#65a30d', fill: '#84cc16', pinClass: 'pin-camping' },
-  viewpoint: { title: 'Seyir Noktası & Geçit', icon: 'mountain', emoji: '🌄', color: '#ea580c', fill: '#f97316', pinClass: 'pin-viewpoint' },
-  mountain_pass: { title: 'Dağ Geçidi', icon: 'mountain-snow', emoji: '⛰️', color: '#4f46e5', fill: '#6366f1', pinClass: 'pin-mountain_pass' }
+  historic: { title: 'Tarihi Yer & Antik Kent', title_en: 'Historic & Ancient Site', icon: 'landmark', emoji: '🏛️', color: '#d97706', fill: '#f59e0b', pinClass: 'pin-historic' },
+  nature: { title: 'Doğa & Şelale & Kanyon', title_en: 'Nature, Waterfall & Canyon', icon: 'trees', emoji: '🌲', color: '#059669', fill: '#10b981', pinClass: 'pin-nature' },
+  photography: { title: 'Fotoğraf & Seyir Noktası', title_en: 'Photography & Viewpoint', icon: 'camera', emoji: '📸', color: '#7c3aed', fill: '#8b5cf6', pinClass: 'pin-photography' },
+  beach: { title: 'Sahil & Plaj & Koy', title_en: 'Beach & Bay', icon: 'waves', emoji: '🌊', color: '#0284c7', fill: '#38bdf8', pinClass: 'pin-beach' },
+  gastronomy: { title: 'Gastronomi & Meşhur Lezzet', title_en: 'Gastronomy & Culinary', icon: 'utensils', emoji: '🍴', color: '#e11d48', fill: '#f43f5e', pinClass: 'pin-gastronomy' },
+  cafe: { title: 'Mola Yeri & Kafe', title_en: 'Rest Stop & Cafe', icon: 'coffee', emoji: '☕', color: '#0f766e', fill: '#14b8a6', pinClass: 'pin-cafe' },
+  fuel: { title: 'Akaryakıt İstasyonu', title_en: 'Fuel Station', icon: 'fuel', emoji: '⛽', color: '#047857', fill: '#10b981', pinClass: 'pin-fuel' },
+  ev_charge: { title: 'Elektrikli Araç Şarj (EV)', title_en: 'EV Charging Station', icon: 'zap', emoji: '⚡', color: '#0891b2', fill: '#06b6d4', pinClass: 'pin-ev_charge' },
+  camping: { title: 'Karavan & Kamp Alanı', title_en: 'Camper & Camping Site', icon: 'tent', emoji: '🚐', color: '#65a30d', fill: '#84cc16', pinClass: 'pin-camping' },
+  viewpoint: { title: 'Seyir Noktası & Geçit', title_en: 'Scenic Viewpoint & Pass', icon: 'mountain', emoji: '🌄', color: '#ea580c', fill: '#f97316', pinClass: 'pin-viewpoint' },
+  mountain_pass: { title: 'Dağ Geçidi', title_en: 'Mountain Pass', icon: 'mountain-snow', emoji: '⛰️', color: '#4f46e5', fill: '#6366f1', pinClass: 'pin-mountain_pass' }
 };
+
+function getCategoryTitle(cat) {
+  const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG.historic;
+  return (window.state && window.state.lang === 'en' && cfg.title_en) ? cfg.title_en : cfg.title;
+}
 
 // 6 Primary Category Filter Groups Mapping all 871 Places Harmoniously
 const CATEGORY_GROUPS = {
@@ -444,19 +451,19 @@ function selectVehicle(vehicle) {
   const badge = document.getElementById('vehicle-label-badge');
   const scoreLabel = document.getElementById('label-stat-score');
   const labels = {
-    car: 'Otomobil',
-    motorcycle: 'Motosiklet',
-    camper: 'Karavan',
-    bicycle: 'Bisiklet',
-    walk: 'Yaya'
+    car: (typeof t === 'function') ? t('veh_car', 'Otomobil') : 'Otomobil',
+    motorcycle: (typeof t === 'function') ? t('veh_moto', 'Motosiklet') : 'Motosiklet',
+    camper: (typeof t === 'function') ? t('veh_camper', 'Karavan') : 'Karavan',
+    bicycle: (typeof t === 'function') ? t('veh_bicycle', 'Bisiklet') : 'Bisiklet',
+    walk: (typeof t === 'function') ? t('veh_walk', 'Yaya') : 'Yaya'
   };
   if (badge) badge.textContent = labels[vehicle] || vehicle;
   if (scoreLabel) {
-    if (vehicle === 'motorcycle') scoreLabel.textContent = 'Viraj Puanı';
-    else if (vehicle === 'car') scoreLabel.textContent = 'Konfor Skoru';
-    else if (vehicle === 'camper') scoreLabel.textContent = 'Karavan Uyumu';
-    else if (vehicle === 'bicycle') scoreLabel.textContent = 'Bisiklet Uyumu';
-    else scoreLabel.textContent = 'Yürüyüş Uyumu';
+    if (vehicle === 'motorcycle') scoreLabel.textContent = (typeof t === 'function') ? t('score_curviness', 'Viraj Puanı') : 'Viraj Puanı';
+    else if (vehicle === 'car') scoreLabel.textContent = (typeof t === 'function') ? t('score_comfort', 'Konfor Skoru') : 'Konfor Skoru';
+    else if (vehicle === 'camper') scoreLabel.textContent = (typeof t === 'function') ? t('score_camper', 'Karavan Uyumu') : 'Karavan Uyumu';
+    else if (vehicle === 'bicycle') scoreLabel.textContent = (typeof t === 'function') ? t('score_bicycle', 'Bisiklet Uyumu') : 'Bisiklet Uyumu';
+    else scoreLabel.textContent = (typeof t === 'function') ? t('score_walk', 'Yürüyüş Uyumu') : 'Yürüyüş Uyumu';
   }
 
   // Also sync hero selector if present
@@ -888,7 +895,7 @@ function updateWaypointsListUI() {
       <div class="p-1 shrink-0 flex items-center justify-center">${iconHtml}</div>
       <input type="text" value="${escapeHtml(wp.name || '')}" 
         list="turkey-cities-list"
-        placeholder="${isStart ? 'Başlangıç Noktası (Örn: İstanbul)' : isEnd ? 'Varış Noktası (Örn: Antalya)' : 'Ara Durak ' + index}" 
+        placeholder="${isStart ? (typeof t === 'function' ? t('wp_start_placeholder', 'Başlangıç Noktası (Örn: İstanbul)') : 'Başlangıç Noktası') : isEnd ? (typeof t === 'function' ? t('wp_end_placeholder', 'Varış Noktası (Örn: Antalya)') : 'Varış Noktası') : ((typeof t === 'function' ? t('wp_stop_prefix', 'Ara Durak ') : 'Ara Durak ') + index)}" 
         oninput="handleWaypointNameChange(${index}, this.value)"
         onblur="handleWaypointBlur(${index}, this.value)"
         onkeydown="if(event.key==='Enter') { handleWaypointBlur(${index}, this.value); calculateRouteMain(); }"
@@ -1490,7 +1497,14 @@ function renderRouteAlternativesUI(routes, activeIdx) {
     const isActive = idx === activeIdx;
     const distKm = (r.distance / 1000).toFixed(1);
     const m = Math.floor(r.duration / 60);
-    const durStr = `${Math.floor(m / 60)} sa ${m % 60} dk`;
+    const isEn = (window.state && window.state.lang === 'en');
+    const durStr = isEn ? `${Math.floor(m / 60)} h ${m % 60} m` : `${Math.floor(m / 60)} sa ${m % 60} dk`;
+    const sourceLabel = r.source === 'valhalla'
+      ? ((typeof t === 'function') ? t('source_scenic', 'Manzaralı Bölge Yolları') : 'Manzaralı Bölge Yolları')
+      : ((typeof t === 'function') ? t('source_highway', 'Hızlı Otoyol Güzergahı') : 'Hızlı Otoyol Güzergahı');
+    const titleLabel = r.type === 'recommended'
+      ? ((typeof t === 'function') ? t('recommended_badge', '⭐ ROTAM Öneriyor') : '⭐ ROTAM Öneriyor')
+      : r.title;
 
     const div = document.createElement('div');
     div.className = `route-card p-2.5 rounded-xl border flex items-center justify-between text-xs ${
@@ -1502,8 +1516,8 @@ function renderRouteAlternativesUI(routes, activeIdx) {
       <div class="flex items-center space-x-2">
         <span class="w-2.5 h-2.5 rounded-full ${isActive ? 'bg-brand-500' : 'bg-slate-600'}"></span>
         <div>
-          <p class="font-bold text-white text-xs">${r.title}</p>
-          <p class="text-[10px] text-slate-400">${r.source === 'valhalla' ? 'Manzaralı Bölge Yolları' : 'Hızlı Otoyol Güzergahı'}</p>
+          <p class="font-bold text-white text-xs">${titleLabel}</p>
+          <p class="text-[10px] text-slate-400">${sourceLabel}</p>
         </div>
       </div>
       <div class="text-right">
@@ -1522,10 +1536,18 @@ function displayRouteStats(route) {
   const durSec = route.duration;
   const hours = Math.floor(durSec / 3600);
   const minutes = Math.floor((durSec % 3600) / 60);
-  const durStr = `${hours} sa ${minutes} dk`;
+  const isEn = (window.state && window.state.lang === 'en');
+  const durStr = isEn
+    ? `${hours > 0 ? hours + ' h ' : ''}${minutes} m`
+    : `${hours > 0 ? hours + ' sa ' : ''}${minutes} dk`;
 
   document.getElementById('stat-distance').textContent = `${distKm} km`;
   document.getElementById('stat-duration').textContent = durStr;
+
+  const miniDist = document.getElementById('mobile-mini-dist');
+  const miniDur = document.getElementById('mobile-mini-dur');
+  if (miniDist) miniDist.textContent = `${distKm} km`;
+  if (miniDur) miniDur.textContent = durStr;
 
   // Curviness / Score Evaluation
   const score = calculateCurvinessScore(route.geometry.coordinates);
@@ -1542,8 +1564,12 @@ function displayRouteStats(route) {
 
   const fuelEl = document.getElementById('stat-fuel-stops');
   const breakEl = document.getElementById('stat-coffee-breaks');
-  if (fuelEl) fuelEl.textContent = `Tahmini Yakıt: ${fuelStops} Durak`;
-  if (breakEl) breakEl.textContent = `Önerilen Mola: ${breaks}`;
+  const fuelPrefix = (typeof t === 'function') ? t('est_fuel_prefix', 'Tahmini Yakıt:') : 'Tahmini Yakıt:';
+  const fuelSuffix = (typeof t === 'function') ? t('fuel_stops_suffix', 'Durak') : 'Durak';
+  const breaksPrefix = (typeof t === 'function') ? t('suggested_breaks_prefix', 'Önerilen Mola:') : 'Önerilen Mola:';
+
+  if (fuelEl) fuelEl.textContent = `${fuelPrefix} ${fuelStops} ${fuelSuffix}`;
+  if (breakEl) breakEl.textContent = `${breaksPrefix} ${breaks}`;
 }
 
 // Curviness Score Algorithm
@@ -1811,17 +1837,17 @@ function renderCorridorPoiList() {
         </div>
         <p class="text-[10px] text-slate-400 line-clamp-2 mt-0.5">${escapeHtml(p.description || '')}</p>
         <div class="flex items-center space-x-2 mt-1">
-          <span class="text-[9px] text-amber-400 font-semibold">📍 Rotadan ${p.distKm} km</span>
+          <span class="text-[9px] text-amber-400 font-semibold">${(window.state && window.state.lang === 'en') ? `📍 ${p.distKm} km from route` : `📍 Rotadan ${p.distKm} km`}</span>
           ${p.recommended_duration ? `<span class="text-[9px] text-slate-400">⏱️ ${p.recommended_duration}</span>` : ''}
         </div>
       </div>
       <div class="flex flex-col space-y-1 shrink-0">
         <button onclick="addPlaceByIdToRoute(${p.id})" class="p-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-[10px] font-semibold flex items-center space-x-1 shadow-sm" title="Rotaya Ekle">
           <i data-lucide="plus" class="w-3 h-3"></i>
-          <span>Ekle</span>
+          <span>${(typeof t === 'function') ? t('btn_add_card', 'Ekle') : 'Ekle'}</span>
         </button>
         <button onclick="openPlaceDetailById(${p.id})" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-[10px] font-medium text-center" title="Detayları İncele">
-          Detay
+          ${(typeof t === 'function') ? t('btn_details', 'Detay') : 'Detay'}
         </button>
       </div>
     `;
@@ -1968,12 +1994,12 @@ function renderJourneyTimeline() {
         <div class="w-10 h-10 rounded-xl bg-brand-500/10 text-brand-400 mx-auto flex items-center justify-center">
           <i data-lucide="clock" class="w-5 h-5"></i>
         </div>
-        <p class="text-xs font-bold text-white">Yolculuk Akışı Hazır Değil</p>
+        <p class="text-xs font-bold text-white">${(typeof t === 'function') ? t('timeline_not_ready_title', 'Yolculuk Akışı Hazır Değil') : 'Yolculuk Akışı Hazır Değil'}</p>
         <p class="text-[11px] text-slate-400 leading-relaxed">
-          Başlangıç ve varış noktalarınızı belirleyip rotanızı oluşturduğunuzda, sürüş sırasına göre tüm duraklar, mola önerileri ve etap süreleri bu akışta yer alacaktır.
+          ${(typeof t === 'function') ? t('timeline_not_ready_desc', 'Başlangıç ve varış noktalarınızı belirleyip rotanızı oluşturduğunuzda, sürüş sırasına göre tüm duraklar, mola önerileri ve etap süreleri bu akışta yer alacaktır.') : ''}
         </p>
         <button onclick="showHomepagePlanner()" class="mt-1 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs py-2 px-4 rounded-xl active:scale-95 transition-all">
-          Durakları Belirle
+          ${(typeof t === 'function') ? t('timeline_set_stops_btn', 'Durakları Belirle') : 'Durakları Belirle'}
         </button>
       </div>
     `;
@@ -1986,26 +2012,28 @@ function renderJourneyTimeline() {
   const totalMinutes = Math.floor(state.routeData.duration / 60);
   const totalH = Math.floor(totalMinutes / 60);
   const totalM = totalMinutes % 60;
+  const isEn = (window.state && window.state.lang === 'en');
+  const durStr = isEn ? `${totalH > 0 ? totalH + ' h ' : ''}${totalM} m` : `${totalH > 0 ? totalH + ' sa ' : ''}${totalM} dk`;
   const stopsCount = valid.length - 2;
 
   const summaryCard = document.createElement('div');
   summaryCard.className = 'glass-card p-3 rounded-2xl border border-brand-500/20 bg-gradient-to-r from-slate-950 via-slate-900 to-amber-950/20 mb-3 text-xs space-y-1.5';
   summaryCard.innerHTML = `
     <div class="flex items-center justify-between">
-      <span class="text-[10px] font-bold text-brand-400 uppercase tracking-wider">Sürüş Özeti</span>
-      <span class="text-[10px] bg-brand-500/20 text-brand-300 px-2 py-0.5 rounded-full font-bold">${valid.length} Nokta</span>
+      <span class="text-[10px] font-bold text-brand-400 uppercase tracking-wider">${(typeof t === 'function') ? t('timeline_summary_title', 'Sürüş Özeti') : 'Sürüş Özeti'}</span>
+      <span class="text-[10px] bg-brand-500/20 text-brand-300 px-2 py-0.5 rounded-full font-bold">${valid.length} ${(typeof t === 'function') ? t('timeline_points_count', 'Nokta') : 'Nokta'}</span>
     </div>
     <div class="flex items-center justify-between text-white font-bold text-sm">
       <span>${totalKm} km</span>
-      <span class="text-amber-400">${totalH} sa ${totalM} dk</span>
+      <span class="text-amber-400">${durStr}</span>
     </div>
     <div class="text-[10px] text-slate-400 flex items-center justify-between pt-1 border-t border-slate-800">
-      <span>Ara Durak: ${stopsCount > 0 ? stopsCount : 'Doğrudan Rota'}</span>
-      <span>Önerilen Dinlenme: ${Math.max(1, Math.floor(totalMinutes / 120))} Mola</span>
+      <span>${isEn ? 'Stops: ' + (stopsCount > 0 ? stopsCount : 'Direct Route') : 'Ara Durak: ' + (stopsCount > 0 ? stopsCount : 'Doğrudan Rota')}</span>
+      <span>${isEn ? 'Suggested Breaks: ' + Math.max(1, Math.floor(totalMinutes / 120)) : 'Önerilen Dinlenme: ' + Math.max(1, Math.floor(totalMinutes / 120)) + ' Mola'}</span>
     </div>
     <button onclick="openInGoogleMaps()" class="w-full mt-2 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-md shadow-emerald-600/20 active:scale-95 transition-all" title="Google Maps Navigasyonu Başlat">
       <i data-lucide="navigation" class="w-3.5 h-3.5 text-white"></i>
-      <span>Google Maps ile Sürüşü Başlat</span>
+      <span>${(typeof t === 'function') ? t('timeline_gmaps_btn', 'Google Maps ile Sürüşü Başlat') : 'Google Maps ile Sürüşü Başlat'}</span>
     </button>
   `;
   container.appendChild(summaryCard);
@@ -2021,7 +2049,9 @@ function renderJourneyTimeline() {
     div.className = 'timeline-item flex items-start space-x-3 text-xs relative pb-4';
 
     let dotColor = isStart ? 'bg-emerald-500 shadow-emerald-500/50' : isEnd ? 'bg-red-500 shadow-red-500/50' : 'bg-amber-500 shadow-amber-500/50';
-    let label = isStart ? 'BAŞLANGIÇ NOKTASI' : isEnd ? 'VARIŞ NOKTASI' : `ARA DURAK ${idx}`;
+    let label = isStart ? ((typeof t === 'function') ? t('timeline_start', 'BAŞLANGIÇ NOKTASI') : 'BAŞLANGIÇ NOKTASI')
+      : isEnd ? ((typeof t === 'function') ? t('timeline_end', 'VARIŞ NOKTASI') : 'VARIŞ NOKTASI')
+      : `${(typeof t === 'function') ? t('timeline_waypoint', 'ARA DURAK') : 'ARA DURAK'} ${idx}`;
     let icon = isStart ? '🏁' : isEnd ? '🎯' : '📍';
 
     div.innerHTML = `
@@ -2439,7 +2469,7 @@ function filterDiscoverPlaces() {
         <div class="flex items-center justify-between mb-1">
           <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider flex items-center space-x-1">
             <span>${cfg.emoji}</span>
-            <span>${cfg.title}</span>
+            <span>${(window.state && window.state.lang === 'en' && cfg.title_en) ? cfg.title_en : cfg.title}</span>
           </span>
           <span class="text-[10px] text-slate-400">${p.city || p.region || 'Türkiye'}</span>
         </div>
@@ -2448,17 +2478,17 @@ function filterDiscoverPlaces() {
       </div>
 
       <div class="flex items-center justify-between pt-2 border-t border-slate-800/80 text-[10px]">
-        <span class="text-slate-400">⏱️ ${p.recommended_duration || '1 saat'}</span>
+        <span class="text-slate-400">⏱️ ${p.recommended_duration || ((window.state && window.state.lang === 'en') ? '1 hour' : '1 saat')}</span>
         <div class="flex items-center space-x-1.5">
           <button onclick="openPlaceDetailById(${p.id})" class="px-2 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/30 flex items-center space-x-1" title="Fotoğraflar ve Detaylar">
             <i data-lucide="camera" class="w-3 h-3"></i>
-            <span>Fotoğraf</span>
+            <span>${(typeof t === 'function') ? t('btn_photo', 'Fotoğraf') : 'Fotoğraf'}</span>
           </button>
           <button onclick="setAsDestination(${p.lat}, ${p.lon}, '${safeName}')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold">
-            Hedef
+            ${(typeof t === 'function') ? t('btn_target', 'Hedef') : 'Hedef'}
           </button>
           <button onclick="addPoiToRoute(${p.lat}, ${p.lon}, '${safeName}')" class="px-2 py-1 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-semibold">
-            Ekle
+            ${(typeof t === 'function') ? t('btn_add_card', 'Ekle') : 'Ekle'}
           </button>
         </div>
       </div>
@@ -2984,28 +3014,30 @@ async function openPlaceDetailById(id) {
   const modal = document.getElementById('modal-place-detail');
   const cfg = CATEGORY_CONFIG[place.category] || CATEGORY_CONFIG.historic;
 
+  const isEn = window.state && window.state.lang === 'en';
+
   // Bilgi Alanları
   const nameEl = document.getElementById('place-detail-name');
   if (nameEl) nameEl.textContent = place.name;
 
   const catBadge = document.getElementById('place-detail-cat-badge');
   if (catBadge) {
-    catBadge.textContent = `${cfg.emoji} ${cfg.title}`;
+    catBadge.textContent = `${cfg.emoji} ${getCategoryTitle(place.category)}`;
     catBadge.style.borderColor = `${cfg.color}60`;
     catBadge.style.color = cfg.color;
   }
 
   const cityEl = document.getElementById('place-detail-city');
-  if (cityEl) cityEl.textContent = place.city || place.region || 'Türkiye';
+  if (cityEl) cityEl.textContent = place.city || place.region || (isEn ? 'Turkey' : 'Türkiye');
 
   const descEl = document.getElementById('place-detail-desc');
-  if (descEl) descEl.textContent = place.description || 'Bu mekan hakkında henüz detaylı açıklama girilmemiş.';
+  if (descEl) descEl.textContent = place.description || (isEn ? 'No detailed description available yet for this place.' : 'Bu mekan hakkında henüz detaylı açıklama girilmemiş.');
 
   const timeEl = document.getElementById('place-detail-time');
-  if (timeEl) timeEl.textContent = place.best_time || 'Tüm Yıl Boyunca';
+  if (timeEl) timeEl.textContent = place.best_time || (isEn ? 'All Year Round' : 'Tüm Yıl Boyunca');
 
   const durEl = document.getElementById('place-detail-duration');
-  if (durEl) durEl.textContent = place.recommended_duration || '1-2 saat';
+  if (durEl) durEl.textContent = place.recommended_duration || (isEn ? '1-2 hours' : '1-2 saat');
 
   // Google Maps Canlı Fotoğraf ve 360° Linki
   const gmapsBtn = document.getElementById('btn-place-gmaps-photos');
@@ -3292,6 +3324,7 @@ function initIcons() {
 
 // DOM CONTENT LOADED EVENT
 document.addEventListener('DOMContentLoaded', () => {
+  if (typeof applyTranslations === 'function') applyTranslations();
   initPlacesDatabase();
   populateCityDatalist();
   initMap();
