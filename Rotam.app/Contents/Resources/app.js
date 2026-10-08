@@ -2016,10 +2016,16 @@ function renderJourneyTimeline() {
       <span>${isEn ? 'Stops: ' + (stopsCount > 0 ? stopsCount : 'Direct Route') : 'Ara Durak: ' + (stopsCount > 0 ? stopsCount : 'Doğrudan Rota')}</span>
       <span>${isEn ? 'Suggested Breaks: ' + Math.max(1, Math.floor(totalMinutes / 120)) : 'Önerilen Dinlenme: ' + Math.max(1, Math.floor(totalMinutes / 120)) + ' Mola'}</span>
     </div>
-    <button onclick="openInGoogleMaps()" class="w-full mt-2 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-md shadow-emerald-600/20 active:scale-95 transition-all" title="Google Maps Navigasyonu Başlat">
-      <i data-lucide="navigation" class="w-3.5 h-3.5 text-white"></i>
-      <span>${(typeof t === 'function') ? t('timeline_gmaps_btn', 'Google Maps ile Sürüşü Başlat') : 'Google Maps ile Sürüşü Başlat'}</span>
-    </button>
+    <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-800">
+      <button onclick="startLiveRide()" class="col-span-2 py-2.5 px-3 bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-md shadow-cyan-600/30 active:scale-95 transition-all" title="Canlı Sürüş & GPS Takip Modu">
+        <i data-lucide="play" class="w-3.5 h-3.5 fill-white text-white"></i>
+        <span>${(typeof t === 'function') ? t('btn_start_live_ride', 'CANLI SÜRÜŞÜ BAŞLAT') : 'CANLI SÜRÜŞÜ BAŞLAT'}</span>
+      </button>
+      <button onclick="openInGoogleMaps()" class="col-span-2 py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold rounded-xl text-xs flex items-center justify-center space-x-1.5 active:scale-95 transition-all" title="Google Maps Navigasyonu Başlat">
+        <i data-lucide="navigation" class="w-3.5 h-3.5 text-emerald-400"></i>
+        <span>${(typeof t === 'function') ? t('timeline_gmaps_btn', "Google Maps'e Gönder") : "Google Maps'e Gönder"}</span>
+      </button>
+    </div>
   `;
   container.appendChild(summaryCard);
 
@@ -4098,3 +4104,563 @@ window.addEventListener('load', () => {
 // Run immediate viewport sync
 checkStandalonePWA();
 syncViewportHeight();
+
+/* ==========================================================================
+   LIVE NAVIGATION & GPS RIDE TRACKING CONTROLLER (#40)
+   ========================================================================== */
+function calculateBearing(lat1, lon1, lat2, lon2) {
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const lat1Rad = lat1 * Math.PI / 180;
+  const lat2Rad = lat2 * Math.PI / 180;
+  const y = Math.sin(dLon) * Math.cos(lat2Rad);
+  const x = Math.cos(lat1Rad) * Math.sin(lat2Rad) -
+            Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLon);
+  const brng = Math.atan2(y, x) * 180 / Math.PI;
+  return (brng + 360) % 360;
+}
+
+const LiveNavigation = {
+  isActive: false,
+  isSimulation: false,
+  voiceEnabled: true,
+  wakeLock: null,
+  watchId: null,
+  marker: null,
+  simIndex: 0,
+  simInterval: null,
+  lastCoord: null,
+  lastHeading: 0,
+  speedKmH: 0,
+  notifiedPois: new Set(),
+  autoCenter: true,
+  bannerTimer: null,
+
+  start(forceSimulation = false) {
+    const valid = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
+    if (!state.routeData || valid.length < 2) {
+      const msg = (typeof t === 'function')
+        ? t('toast_fill_inputs', 'Lütfen önce başlangıç ve varış noktalarını girip rota oluşturun.')
+        : 'Lütfen önce başlangıç ve varış noktalarını girip rota oluşturun.';
+      showToast(msg, 'info');
+      if (window.innerWidth < 768) {
+        openMobileSidebar();
+      }
+      return;
+    }
+
+    this.isActive = true;
+    this.notifiedPois.clear();
+    this.autoCenter = true;
+
+    // Show Live HUD overlay
+    const overlay = document.getElementById('live-nav-overlay');
+    if (overlay) overlay.classList.remove('hidden');
+
+    // Request screen wake lock
+    this.requestWakeLock();
+
+    // Clean UI for distraction-free riding cockpit
+    if (typeof closeMobileSidebar === 'function') closeMobileSidebar();
+    if (typeof closeRightPanel === 'function') closeRightPanel();
+    if (typeof dismissHomepagePlanner === 'function') dismissHomepagePlanner();
+
+    // Map drag listener to pause auto-center
+    if (map) {
+      map.on('dragstart', () => {
+        if (this.isActive) this.autoCenter = false;
+      });
+    }
+
+    // Coordinates of current route
+    const coords = state.routeData.geometry.coordinates;
+    const startPt = coords[0];
+    this.lastCoord = [startPt[1], startPt[0]];
+
+    // Create Rider Marker and set view
+    this.createRiderMarker(this.lastCoord);
+    if (map) {
+      map.setView(this.lastCoord, 16, { animate: true });
+    }
+
+    // Voice announcement
+    if (this.voiceEnabled) {
+      const isEn = (window.state && window.state.lang === 'en');
+      this.speak(isEn ? 'Live ride tracking started. Have a safe journey!' : 'Canlı sürüş takibi başladı. İyi yolculuklar!');
+    }
+
+    const startTitle = (typeof t === 'function') ? t('live_nav_title', 'Canlı Sürüş Modu') : 'Canlı Sürüş Modu';
+    showToast(`${startTitle} aktif!`, 'success');
+
+    if (forceSimulation) {
+      this.startSimulation();
+    } else {
+      this.startGPS();
+    }
+
+    this.updateControlsUI();
+    if (typeof initIcons === 'function') initIcons();
+  },
+
+  stop() {
+    this.isActive = false;
+    this.stopGPS();
+    this.stopSimulation();
+    this.releaseWakeLock();
+
+    // Remove rider marker
+    if (this.marker && map) {
+      map.removeLayer(this.marker);
+      this.marker = null;
+    }
+
+    // Hide HUD overlay
+    const overlay = document.getElementById('live-nav-overlay');
+    if (overlay) overlay.classList.add('hidden');
+
+    // Hide alert banner
+    this.dismissAlertBanner();
+
+    // Reset map view to full route bounds
+    if (map && state.routeLayer) {
+      try {
+        map.fitBounds(state.routeLayer.getBounds(), { padding: [40, 40] });
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    const isEn = (window.state && window.state.lang === 'en');
+    showToast(isEn ? 'Ride completed.' : 'Sürüş sonlandırıldı.', 'info');
+  },
+
+  startGPS() {
+    if (!navigator.geolocation) {
+      this.switchToSimulationWithMessage();
+      return;
+    }
+
+    this.isSimulation = false;
+    this.updateModeBadge();
+
+    const options = {
+      enableHighAccuracy: true,
+      maximumAge: 1000,
+      timeout: 10000
+    };
+
+    let gpsReceived = false;
+
+    this.watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        gpsReceived = true;
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        const speed = (pos.coords.speed !== null && !isNaN(pos.coords.speed))
+          ? Math.max(0, Math.round(pos.coords.speed * 3.6))
+          : 0;
+
+        let heading = pos.coords.heading;
+        if (heading === null || isNaN(heading)) {
+          if (this.lastCoord) {
+            heading = calculateBearing(this.lastCoord[0], this.lastCoord[1], lat, lon);
+          } else {
+            heading = this.lastHeading || 0;
+          }
+        }
+        this.onLocationUpdate(lat, lon, speed, heading);
+      },
+      (err) => {
+        console.warn('Geolocation in LiveNavigation:', err);
+        if (!gpsReceived && this.isActive && !this.isSimulation) {
+          this.switchToSimulationWithMessage();
+        }
+      },
+      options
+    );
+
+    // Fallback if no GPS fix after 4 seconds (desktop / indoor test)
+    setTimeout(() => {
+      if (this.isActive && !this.isSimulation && !gpsReceived) {
+        this.switchToSimulationWithMessage();
+      }
+    }, 4000);
+  },
+
+  stopGPS() {
+    if (this.watchId !== null) {
+      navigator.geolocation.clearWatch(this.watchId);
+      this.watchId = null;
+    }
+  },
+
+  switchToSimulationWithMessage() {
+    if (!this.isActive) return;
+    const msg = (typeof t === 'function')
+      ? t('live_nav_gps_error', 'GPS sinyali alınamadı. Demo simülasyon moduna geçiliyor.')
+      : 'GPS sinyali alınamadı. Demo simülasyon moduna geçiliyor.';
+    showToast(msg, 'info');
+    this.startSimulation();
+  },
+
+  startSimulation() {
+    this.stopGPS();
+    this.isSimulation = true;
+    this.updateModeBadge();
+
+    const coords = state.routeData?.geometry?.coordinates;
+    if (!coords || coords.length === 0) return;
+
+    this.simIndex = 0;
+    if (this.simInterval) clearInterval(this.simInterval);
+
+    this.simInterval = setInterval(() => {
+      if (!this.isActive || !this.isSimulation) {
+        clearInterval(this.simInterval);
+        return;
+      }
+
+      if (this.simIndex >= coords.length - 1) {
+        const last = coords[coords.length - 1];
+        this.onLocationUpdate(last[1], last[0], 0, this.lastHeading);
+        this.onDestinationReached();
+        clearInterval(this.simInterval);
+        return;
+      }
+
+      const current = coords[this.simIndex];
+      const next = coords[Math.min(this.simIndex + 1, coords.length - 1)];
+
+      const heading = calculateBearing(current[1], current[0], next[1], next[0]);
+      // Touring speed ~ 70-85 km/h
+      const speed = Math.floor(70 + Math.random() * 15);
+
+      this.onLocationUpdate(current[1], current[0], speed, heading);
+      this.simIndex += 1;
+    }, 650);
+  },
+
+  stopSimulation() {
+    if (this.simInterval) {
+      clearInterval(this.simInterval);
+      this.simInterval = null;
+    }
+    this.isSimulation = false;
+  },
+
+  toggleSimulation() {
+    if (this.isSimulation) {
+      const msg = (typeof t === 'function') ? t('live_nav_gps', 'Gerçek GPS moduna geçiliyor...') : 'Gerçek GPS moduna geçiliyor...';
+      showToast(msg, 'info');
+      this.stopSimulation();
+      this.startGPS();
+    } else {
+      const msg = (typeof t === 'function') ? t('live_nav_demo', 'Demo simülasyonu başlatılıyor...') : 'Demo simülasyonu başlatılıyor...';
+      showToast(msg, 'info');
+      this.stopGPS();
+      this.startSimulation();
+    }
+    this.updateModeBadge();
+  },
+
+  createRiderMarker(latlng) {
+    if (this.marker && map) {
+      map.removeLayer(this.marker);
+    }
+
+    const iconHtml = `
+      <div class="live-rider-marker">
+        <div class="live-rider-pulse"></div>
+        <div class="live-rider-icon" id="live-rider-icon-elem">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/>
+          </svg>
+        </div>
+      </div>
+    `;
+
+    const customIcon = L.divIcon({
+      className: '',
+      html: iconHtml,
+      iconSize: [56, 56],
+      iconAnchor: [28, 28]
+    });
+
+    this.marker = L.marker(latlng, { icon: customIcon, zIndexOffset: 1000 }).addTo(map);
+  },
+
+  onLocationUpdate(lat, lon, speed, heading) {
+    this.speedKmH = speed;
+    this.lastHeading = heading || 0;
+    this.lastCoord = [lat, lon];
+
+    if (this.marker) {
+      this.marker.setLatLng([lat, lon]);
+    } else {
+      this.createRiderMarker([lat, lon]);
+    }
+
+    const iconElem = document.getElementById('live-rider-icon-elem');
+    if (iconElem) {
+      iconElem.style.transform = `rotate(${Math.round(this.lastHeading)}deg)`;
+    }
+
+    if (this.autoCenter && map) {
+      map.panTo([lat, lon], { animate: true, duration: 0.5 });
+    }
+
+    const speedEl = document.getElementById('live-nav-speed-val');
+    if (speedEl) speedEl.textContent = Math.round(this.speedKmH);
+
+    this.updateRouteProgress(lat, lon);
+    this.checkProximityAlerts(lat, lon);
+  },
+
+  updateRouteProgress(lat, lon) {
+    const valid = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
+    if (valid.length < 2) return;
+
+    let nextWp = null;
+    let nextDistKm = 0;
+
+    for (let i = 0; i < valid.length; i++) {
+      const wp = valid[i];
+      const d = haversineMeters(lat, lon, wp.lat, wp.lon) / 1000;
+      if (d > 0.15) {
+        nextWp = wp;
+        nextDistKm = d;
+        break;
+      }
+    }
+
+    if (!nextWp) {
+      const dest = valid[valid.length - 1];
+      nextWp = dest;
+      nextDistKm = haversineMeters(lat, lon, dest.lat, dest.lon) / 1000;
+    }
+
+    const finalDest = valid[valid.length - 1];
+    const totalRemKm = haversineMeters(lat, lon, finalDest.lat, finalDest.lon) / 1000;
+
+    const effectiveSpeed = Math.max(30, this.speedKmH || 65);
+    const remMinutes = Math.round((totalRemKm / effectiveSpeed) * 60);
+    const remH = Math.floor(remMinutes / 60);
+    const remM = remMinutes % 60;
+    const isEn = (window.state && window.state.lang === 'en');
+    const timeStr = isEn ? `${remH > 0 ? remH + 'h ' : ''}${remM}m` : `${remH > 0 ? remH + ' sa ' : ''}${remM} dk`;
+
+    const distEl = document.getElementById('live-nav-next-dist');
+    const nameEl = document.getElementById('live-nav-next-name');
+    if (distEl && nameEl) {
+      distEl.textContent = (nextDistKm < 1)
+        ? `${Math.round(nextDistKm * 1000)} m`
+        : `${nextDistKm.toFixed(1)} km`;
+      nameEl.textContent = nextWp.name || (isEn ? 'Next Destination' : 'Sonraki Hedef');
+    }
+
+    const dirIcon = document.getElementById('live-nav-dir-icon');
+    if (dirIcon && nextWp) {
+      const targetBearing = calculateBearing(lat, lon, nextWp.lat, nextWp.lon);
+      const relativeBearing = targetBearing - (this.lastHeading || 0);
+      dirIcon.style.transform = `rotate(${Math.round(relativeBearing)}deg)`;
+    }
+
+    const remDistEl = document.getElementById('live-nav-rem-dist');
+    const remTimeEl = document.getElementById('live-nav-rem-time');
+    if (remDistEl) remDistEl.textContent = `${totalRemKm.toFixed(1)} km`;
+    if (remTimeEl) remTimeEl.textContent = timeStr;
+  },
+
+  checkProximityAlerts(lat, lon) {
+    const isEn = (window.state && window.state.lang === 'en');
+    const targets = [];
+
+    const valid = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
+    valid.slice(1).forEach((wp, idx) => {
+      targets.push({
+        id: `wp_${idx}`,
+        name: wp.name || `${isEn ? 'Waypoint' : 'Durak'} ${idx + 1}`,
+        lat: wp.lat,
+        lon: wp.lon
+      });
+    });
+
+    if (state.corridorPois && Array.isArray(state.corridorPois)) {
+      state.corridorPois.forEach(poi => {
+        targets.push({
+          id: `poi_${poi.id || poi.name}`,
+          name: poi.name,
+          lat: poi.lat,
+          lon: poi.lon
+        });
+      });
+    }
+
+    for (const target of targets) {
+      if (this.notifiedPois.has(target.id)) continue;
+
+      const distM = haversineMeters(lat, lon, target.lat, target.lon);
+
+      if (distM <= 1000 && distM >= 60) {
+        this.notifiedPois.add(target.id);
+        this.showProximityBanner(target.name, Math.round(distM));
+
+        if (this.voiceEnabled) {
+          const speechText = isEn
+            ? `Approaching ${target.name} in ${Math.round(distM)} meters`
+            : `${target.name} noktasına ${Math.round(distM)} metre kaldı`;
+          this.speak(speechText);
+        }
+        break;
+      }
+    }
+  },
+
+  showProximityBanner(name, distM) {
+    const banner = document.getElementById('live-nav-alert-banner');
+    const textEl = document.getElementById('live-nav-alert-text');
+    if (!banner || !textEl) return;
+
+    textEl.textContent = `${name} (${distM}m)`;
+    banner.classList.remove('hidden');
+
+    if (this.bannerTimer) clearTimeout(this.bannerTimer);
+    this.bannerTimer = setTimeout(() => {
+      banner.classList.add('hidden');
+    }, 7000);
+  },
+
+  dismissAlertBanner() {
+    const banner = document.getElementById('live-nav-alert-banner');
+    if (banner) banner.classList.add('hidden');
+  },
+
+  onDestinationReached() {
+    const isEn = (window.state && window.state.lang === 'en');
+    const msg = isEn ? 'You have arrived at your destination! Congratulations!' : 'Hedefe ulaştınız! Tebrikler!';
+    if (this.voiceEnabled) {
+      this.speak(msg);
+    }
+    showToast(msg, 'success');
+  },
+
+  recenterMap() {
+    this.autoCenter = true;
+    if (this.lastCoord && map) {
+      map.setView(this.lastCoord, 16, { animate: true });
+      const isEn = (window.state && window.state.lang === 'en');
+      showToast(isEn ? 'Map centered on rider' : 'Harita sürücüye ortalandı', 'info');
+    }
+  },
+
+  toggleVoice() {
+    this.voiceEnabled = !this.voiceEnabled;
+    this.updateControlsUI();
+    const isEn = (window.state && window.state.lang === 'en');
+    const msg = this.voiceEnabled
+      ? (isEn ? 'Voice guidance turned ON' : 'Sesli yönlendirme açıldı')
+      : (isEn ? 'Voice guidance turned OFF' : 'Sesli yönlendirme kapatıldı');
+    showToast(msg, 'info');
+  },
+
+  speak(text) {
+    if (!('speechSynthesis' in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = (window.state && window.state.lang === 'en') ? 'en-US' : 'tr-TR';
+      utterance.rate = 1.05;
+      utterance.pitch = 1.0;
+      window.speechSynthesis.speak(utterance);
+    } catch (e) {
+      console.warn('Speech synthesis error:', e);
+    }
+  },
+
+  async requestWakeLock() {
+    if ('wakeLock' in navigator) {
+      try {
+        this.wakeLock = await navigator.wakeLock.request('screen');
+        this.wakeLock.addEventListener('release', () => {
+          this.wakeLock = null;
+        });
+      } catch (err) {
+        console.warn('Wake Lock request error:', err);
+      }
+    }
+  },
+
+  releaseWakeLock() {
+    if (this.wakeLock) {
+      try {
+        this.wakeLock.release();
+      } catch (e) {
+        // ignore
+      }
+      this.wakeLock = null;
+    }
+  },
+
+  updateModeBadge() {
+    const badgeText = document.getElementById('live-nav-mode-text');
+    const demoBtnText = document.getElementById('live-nav-demo-text');
+    const isEn = (window.state && window.state.lang === 'en');
+
+    if (this.isSimulation) {
+      if (badgeText) badgeText.textContent = isEn ? 'Demo Ride' : 'Demo Sürüş';
+      if (demoBtnText) demoBtnText.textContent = isEn ? 'Live GPS' : 'GPS Modu';
+    } else {
+      if (badgeText) badgeText.textContent = isEn ? 'Live GPS' : 'GPS Canlı';
+      if (demoBtnText) demoBtnText.textContent = isEn ? 'Demo' : 'Demo';
+    }
+  },
+
+  updateControlsUI() {
+    const voiceText = document.getElementById('live-nav-voice-text');
+    const voiceBtn = document.getElementById('live-nav-voice-btn');
+    const voiceIcon = document.getElementById('live-nav-voice-icon');
+    const isEn = (window.state && window.state.lang === 'en');
+
+    if (voiceText) {
+      voiceText.textContent = this.voiceEnabled
+        ? (isEn ? 'Voice On' : 'Ses Açık')
+        : (isEn ? 'Voice Off' : 'Ses Kapalı');
+    }
+
+    if (voiceBtn) {
+      if (this.voiceEnabled) {
+        voiceBtn.classList.remove('text-slate-400');
+        voiceBtn.classList.add('text-emerald-400');
+      } else {
+        voiceBtn.classList.remove('text-emerald-400');
+        voiceBtn.classList.add('text-slate-400');
+      }
+    }
+
+    if (voiceIcon) {
+      voiceIcon.setAttribute('data-lucide', this.voiceEnabled ? 'volume-2' : 'volume-x');
+    }
+    if (typeof initIcons === 'function') initIcons();
+  }
+};
+
+// Global hooks for HTML button triggers
+window.startLiveRide = function(forceSim = false) {
+  LiveNavigation.start(forceSim);
+};
+
+window.stopLiveRide = function() {
+  LiveNavigation.stop();
+};
+
+window.dismissLiveHudAlert = function() {
+  LiveNavigation.dismissAlertBanner();
+};
+
+window.LiveNavigation = LiveNavigation;
+
+// Re-request Screen Wake Lock when tab becomes visible again
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && LiveNavigation.isActive) {
+    LiveNavigation.requestWakeLock();
+  }
+});

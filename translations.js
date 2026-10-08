@@ -248,6 +248,24 @@ window.TRANSLATIONS = {
     points_suffix: "Nokta",
     discoveries_suffix: "Keşif",
 
+    // Live Navigation & Ride Tracking Mode (#40)
+    btn_start_live_ride: "CANLI SÜRÜŞÜ BAŞLAT",
+    live_nav_title: "Canlı Sürüş Modu",
+    live_nav_speed: "km/s",
+    live_nav_speed_label: "HIZ",
+    live_nav_next_stop: "Sonraki Hedef",
+    live_nav_remaining: "Kalan",
+    live_nav_recenter: "Ortala",
+    live_nav_voice_on: "Ses Açık",
+    live_nav_voice_off: "Ses Kapalı",
+    live_nav_demo: "Demo Sürüş",
+    live_nav_gps: "GPS Canlı",
+    live_nav_stop_ride: "Sürüşü Bitir",
+    live_nav_proximity: "Yaklaşıyorsunuz:",
+    live_nav_wakelock_active: "Ekran açık tutuluyor",
+    live_nav_gps_error: "GPS sinyali alınamadı. Simülasyon moduna geçiliyor.",
+    live_nav_arrived: "Hedefe ulaştınız! Tebrikler!",
+
     // Toasts & Messages
     toast_fill_inputs: "Lütfen başlangıç ve varış noktalarını girin.",
     toast_loc_not_found: "konumu bulunamadı. Lütfen kontrol edip tekrar deneyin.",
@@ -506,6 +524,24 @@ window.TRANSLATIONS = {
     km: "km",
     points_suffix: "Points",
     discoveries_suffix: "Spots",
+
+    // Live Navigation & Ride Tracking Mode (#40)
+    btn_start_live_ride: "START LIVE RIDE",
+    live_nav_title: "Live Ride Navigation",
+    live_nav_speed: "km/h",
+    live_nav_speed_label: "SPEED",
+    live_nav_next_stop: "Next Stop",
+    live_nav_remaining: "Remaining",
+    live_nav_recenter: "Recenter",
+    live_nav_voice_on: "Voice On",
+    live_nav_voice_off: "Voice Off",
+    live_nav_demo: "Demo Ride",
+    live_nav_gps: "Live GPS",
+    live_nav_stop_ride: "End Ride",
+    live_nav_proximity: "Approaching:",
+    live_nav_wakelock_active: "Screen kept awake",
+    live_nav_gps_error: "GPS signal unavailable. Switching to demo simulation.",
+    live_nav_arrived: "You have arrived at your destination!",
 
     // Toasts & Messages
     toast_fill_inputs: "Please enter both start and destination points.",

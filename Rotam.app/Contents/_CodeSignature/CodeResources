@@ -10,7 +10,7 @@
 		</data>
 		<key>Resources/app.js</key>
 		<data>
-		5oj9POiaVWQUGkoccm9fWc8BlcQ=
+		elxgN6gHASEqAcikig4csUV7wT8=
 		</data>
 		<key>Resources/database.py</key>
 		<data>
@@ -18,7 +18,7 @@
 		</data>
 		<key>Resources/index.html</key>
 		<data>
-		DeAfZkP+kQC31m7V6wC5xhmzSAY=
+		cCGDT60poRPi3evwBxzh2AB1h2o=
 		</data>
 		<key>Resources/manifest.json</key>
 		<data>
@@ -42,7 +42,7 @@
 		</data>
 		<key>Resources/styles.css</key>
 		<data>
-		KqR8pg70DtMnJptMLRaPWaq0XoA=
+		xH4uJzpqQLY2BBrwRg2UBvRfJU0=
 		</data>
 		<key>Resources/sw.js</key>
 		<data>
@@ -50,7 +50,7 @@
 		</data>
 		<key>Resources/translations.js</key>
 		<data>
-		74lvks++FUigeaVWVcv9uC9zZxo=
+		XxIulA5g1H+30cc295+ZPiCRx+M=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -66,7 +66,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			i+cUtp79nZzMSbHYPZAGXEFUeaXTNlEdjp/pnpZRk4A=
+			/Y4N0O9xge7ZsyPPeaeWyLySfgUKhnZcE1pDa2azZWI=
 			</data>
 		</dict>
 		<key>Resources/database.py</key>
@@ -80,7 +80,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			wVotpeQzKnmC7BfIgc1FY9v64z0Le1ZYt10uaRiBjYw=
+			2PSNRdf2i+ZB2j3Go7u/8u6BFv37S3JTmSRSTs6GXXg=
 			</data>
 		</dict>
 		<key>Resources/manifest.json</key>
@@ -122,7 +122,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			dWwC7X2hY9sFyCrTZ60ZiHUKVaW1ZGeZdTGfFfcfCdI=
+			2CiddfZA3YM6RlLuFt+G2ZquHovIBffecqKHhbK0Vh8=
 			</data>
 		</dict>
 		<key>Resources/sw.js</key>
@@ -136,7 +136,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			sZJdb45l0I9AdBxICKDcaca4hR0MnSgXt4OKht8ka/o=
+			0xEK8xcRJjBQluypVAZvmLZfGk/2NDe//MJLo3BtCdA=
 			</data>
 		</dict>
 	</dict>
