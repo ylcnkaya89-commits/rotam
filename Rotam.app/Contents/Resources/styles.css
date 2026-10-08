@@ -35,6 +35,8 @@ body {
   max-height: var(--app-height, 100%);
   margin: 0;
   padding: 0;
+  display: flex !important;
+  flex-direction: column !important;
   overflow: hidden;
   overflow-x: hidden;
   overscroll-behavior: none;
@@ -42,18 +44,27 @@ body {
   touch-action: manipulation;
 }
 
-header {
-  padding-top: max(0.5rem, env(safe-area-inset-top));
-  padding-left: max(0.75rem, env(safe-area-inset-left));
-  padding-right: max(0.75rem, env(safe-area-inset-right));
-  width: 100%;
-  max-width: 100%;
+#app-header, header {
+  padding-top: max(0.65rem, env(safe-area-inset-top)) !important;
+  padding-bottom: 0.65rem !important;
+  padding-left: max(0.75rem, env(safe-area-inset-left)) !important;
+  padding-right: max(0.75rem, env(safe-area-inset-right)) !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
 }
 
 #mobile-bottom-nav {
-  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
-  width: 100%;
-  max-width: 100%;
+  padding-top: 0.35rem !important;
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom)) !important;
+  padding-left: max(0.5rem, env(safe-area-inset-left)) !important;
+  padding-right: max(0.5rem, env(safe-area-inset-right)) !important;
+  min-height: calc(3.6rem + env(safe-area-inset-bottom)) !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  flex-shrink: 0 !important;
 }
 
 @media (max-width: 768px) {

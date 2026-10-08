@@ -1,5 +1,5 @@
 // Rotam PWA Service Worker
-const CACHE_NAME = 'rotam-cache-v1';
+const CACHE_NAME = 'rotam-cache-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
