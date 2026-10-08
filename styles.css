@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 /* Mobile Responsive & Viewport Optimization (iOS, iPadOS, Android & Desktop) */
+:root {
+  --app-height: 100%;
+}
+
 html {
   height: 100%;
   width: 100%;
@@ -10,6 +14,8 @@ html {
   padding: 0;
   overflow: hidden;
   box-sizing: border-box;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 *, *::before, *::after {
@@ -17,14 +23,21 @@ html {
 }
 
 body {
-  height: 100%;
-  height: 100dvh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   width: 100%;
   max-width: 100%;
+  height: 100%;
+  height: var(--app-height, 100%);
+  max-height: var(--app-height, 100%);
   margin: 0;
   padding: 0;
   overflow: hidden;
   overflow-x: hidden;
+  overscroll-behavior: none;
   -webkit-text-size-adjust: 100%;
   touch-action: manipulation;
 }
@@ -45,8 +58,10 @@ header {
 
 @media (max-width: 768px) {
   .modal-dialog {
+    max-height: calc(var(--app-height, 100%) * 0.9) !important;
     max-height: 90dvh !important;
-    width: 96vw !important;
+    width: calc(100% - 1.5rem) !important;
+    max-width: calc(100% - 1.5rem) !important;
   }
 }
 
@@ -468,8 +483,8 @@ main {
 
   .responsive-modal-card {
     height: 100% !important;
-    height: 100dvh !important;
-    max-height: 100dvh !important;
+    height: var(--app-height, 100%) !important;
+    max-height: var(--app-height, 100%) !important;
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
@@ -582,14 +597,14 @@ main {
     transform: scale(0.92);
   }
 
-  /* Safe Area Padding for Mobile Bottom Bar */
+  /* Position Mobile Bottom Floating Card directly above bottom nav */
   #mobile-bottom-bar {
-    bottom: max(0.75rem, env(safe-area-inset-bottom)) !important;
+    bottom: 0.75rem !important;
   }
 
-  /* On mobile, elevate cockpit card & ensure elevation doesn't collide */
+  /* On mobile, elevate elevation panel above bottom card without clipping */
   #elevation-panel {
-    bottom: 84px !important;
+    bottom: 4.5rem !important;
     max-width: calc(100% - 1.5rem) !important;
     z-index: 1015 !important;
   }

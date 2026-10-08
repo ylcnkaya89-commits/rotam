@@ -3351,6 +3351,8 @@ function initIcons() {
 
 // DOM CONTENT LOADED EVENT
 document.addEventListener('DOMContentLoaded', () => {
+  checkStandalonePWA();
+  syncViewportHeight();
   if (typeof applyTranslations === 'function') applyTranslations();
   initPlacesDatabase();
   populateCityDatalist();
@@ -3403,18 +3405,47 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 1400);
 });
 
+// Standalone PWA & Dynamic Viewport Synchronizer (iOS 'Ana Ekrana Ekle' & Android PWA)
+function syncViewportHeight() {
+  const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  document.documentElement.style.setProperty('--app-height', `${vh}px`);
+  if (map) {
+    map.invalidateSize();
+  }
+}
+
+function checkStandalonePWA() {
+  const isIosStandalone = ('standalone' in window.navigator) && window.navigator.standalone;
+  const isMatchStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+  if (isIosStandalone || isMatchStandalone) {
+    document.documentElement.classList.add('is-pwa-standalone');
+    document.body.classList.add('is-pwa-standalone');
+  }
+}
+
 // Window-level size invalidation listeners for flawless responsive rendering
 window.addEventListener('resize', () => {
-  if (map) map.invalidateSize();
+  syncViewportHeight();
 });
 
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', syncViewportHeight);
+}
+
 window.addEventListener('orientationchange', () => {
-  setTimeout(() => { if (map) map.invalidateSize(); }, 200);
+  setTimeout(syncViewportHeight, 150);
+  setTimeout(syncViewportHeight, 400);
 });
 
 window.addEventListener('load', () => {
+  checkStandalonePWA();
+  syncViewportHeight();
   if (map) {
     map.invalidateSize();
     setTimeout(() => map.invalidateSize(), 300);
   }
 });
+
+// Run immediate viewport sync
+checkStandalonePWA();
+syncViewportHeight();

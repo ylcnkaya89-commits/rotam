@@ -10,7 +10,7 @@
 		</data>
 		<key>Resources/app.js</key>
 		<data>
-		L1Hs03OZljdVrVtX6wSlz3kqp0A=
+		MEVfQQVzs4QMmZuWmyX0DoA511E=
 		</data>
 		<key>Resources/database.py</key>
 		<data>
@@ -18,11 +18,11 @@
 		</data>
 		<key>Resources/index.html</key>
 		<data>
-		a4atFswkaM9Txs/LyWVooLye3Lc=
+		WRabQPPPUD3VOPLfT7a1Pj4a1uQ=
 		</data>
 		<key>Resources/manifest.json</key>
 		<data>
-		6lh5Aoc7uox6yK3rqwEZoHebMeY=
+		5pgos3O3xjyppct7GBx2nUym3mM=
 		</data>
 		<key>Resources/places_data.js</key>
 		<data>
@@ -42,7 +42,7 @@
 		</data>
 		<key>Resources/styles.css</key>
 		<data>
-		S3Anv5pbovVgEYYdCHTlp+T7TL4=
+		ddD3vJYCVrrDdN1G08X+P1j59yg=
 		</data>
 		<key>Resources/sw.js</key>
 		<data>
@@ -66,7 +66,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			zyEaXjr1JXgVyopaSVp8cOXCPwOsoq+uejNCwdz+TiU=
+			pq2ctbm4mbdQyIoj5FVKk1W6XTNFShQebNMuQCa7Ba4=
 			</data>
 		</dict>
 		<key>Resources/database.py</key>
@@ -80,14 +80,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			rOHc7ipp4TMHANiqpz+hZQHAidZxa01Goj9ePGfzuyU=
+			+V/2hmAz2exz/TZHn0vGP8UASDFexSmhB4enjp70kAA=
 			</data>
 		</dict>
 		<key>Resources/manifest.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			tz4IMTwldsUolCA1GQYy+70SR8SUq0KfyBszBivwd3I=
+			z2IPzChlH6ki1C1Bo2jnozIQ+2SbkjG46NnkgjppzvU=
 			</data>
 		</dict>
 		<key>Resources/places_data.js</key>
@@ -122,7 +122,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			mBdr8jGtPCUmBzDGGTAetQai5XiSFEfBM8I5DG/wjfQ=
+			jd2DsxF91TLs9v6GcFov+RR1CWFPkQRGFs6i/WZ0UEs=
 			</data>
 		</dict>
 		<key>Resources/sw.js</key>
