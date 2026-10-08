@@ -270,6 +270,19 @@ window.TRANSLATIONS = {
     home_quick_pick_desc: "Rotanı oluştur ve sürüşe başla",
     btn_quick_start: "Sürüşü Başlat",
     mobile_enter_dest_first: "Lütfen önce gitmek istediğiniz varış noktasını seçin.",
+    live_nav_quick_fuel: "Yakıt/Mola",
+    live_nav_nearest_fuel_title: "En Yakın İstasyon & Mola:",
+    live_nav_add_stop_btn: "Rotaya Ekle",
+    live_nav_summary_title: "Rotam Sürüş Karnesi",
+    live_nav_summary_subtitle: "Tebrikler! Sürüşünüz başarıyla tamamlandı.",
+    live_nav_summary_dist: "Kat Edilen Yol",
+    live_nav_summary_dur: "Sürüş Süresi",
+    live_nav_summary_avg_speed: "Ortalama Hız",
+    live_nav_summary_max_speed: "Maks. Hız",
+    live_nav_summary_elevation: "Tırmanış Kazancı",
+    live_nav_summary_pois: "Keşif Durakları",
+    live_nav_summary_share: "Karneni Paylaş",
+    live_nav_summary_close: "Tamamla",
 
     // Toasts & Messages
     toast_fill_inputs: "Lütfen başlangıç ve varış noktalarını girin.",
@@ -552,6 +565,19 @@ window.TRANSLATIONS = {
     home_quick_pick_desc: "Plan route and start riding",
     btn_quick_start: "Start Ride",
     mobile_enter_dest_first: "Please select your destination first.",
+    live_nav_quick_fuel: "Fuel/Rest",
+    live_nav_nearest_fuel_title: "Nearest Station & Rest:",
+    live_nav_add_stop_btn: "Add to Route",
+    live_nav_summary_title: "Rotam Ride Report",
+    live_nav_summary_subtitle: "Congratulations! Your ride is completed.",
+    live_nav_summary_dist: "Distance Traveled",
+    live_nav_summary_dur: "Ride Duration",
+    live_nav_summary_avg_speed: "Avg Speed",
+    live_nav_summary_max_speed: "Max Speed",
+    live_nav_summary_elevation: "Elevation Gain",
+    live_nav_summary_pois: "POIs Visited",
+    live_nav_summary_share: "Share Report",
+    live_nav_summary_close: "Done",
 
     // Toasts & Messages
     toast_fill_inputs: "Please enter both start and destination points.",
@@ -584,7 +610,11 @@ function t(key, fallback = '') {
     btn_quick_start: lang === 'en' ? 'Start Ride' : 'Sürüşü Başlat',
     home_quick_pick_dest: lang === 'en' ? 'Choose Destination' : 'Varış Noktası Seç',
     home_quick_pick_desc: lang === 'en' ? 'Plan route & start ride' : 'Rotanı oluştur ve sürüşe başla',
-    mobile_enter_dest_first: lang === 'en' ? 'Please select your destination first.' : 'Lütfen önce gitmek istediğiniz varış noktasını seçin.'
+    mobile_enter_dest_first: lang === 'en' ? 'Please select your destination first.' : 'Lütfen önce gitmek istediğiniz varış noktasını seçin.',
+    live_nav_quick_fuel: lang === 'en' ? 'Fuel/Rest' : 'Yakıt/Mola',
+    live_nav_summary_title: lang === 'en' ? 'Rotam Ride Report' : 'Rotam Sürüş Karnesi',
+    live_nav_summary_share: lang === 'en' ? 'Share Report' : 'Karneni Paylaş',
+    live_nav_summary_close: lang === 'en' ? 'Done' : 'Tamamla'
   };
   return defaultFallbacks[key] || key;
 }

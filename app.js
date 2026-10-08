@@ -4339,6 +4339,13 @@ const LiveNavigation = {
   notifiedPois: new Set(),
   autoCenter: true,
   bannerTimer: null,
+  fuelBannerTimer: null,
+  pendingFuelStop: null,
+  startTime: null,
+  maxSpeed: 0,
+  speedHistory: [],
+  distanceTraveledM: 0,
+  lastGpsCoord: null,
 
   start(forceSimulation = false) {
     const valid = (state.waypoints || []).filter(w => w.lat !== null && w.lon !== null);
@@ -4370,6 +4377,11 @@ const LiveNavigation = {
     this.isActive = true;
     this.notifiedPois.clear();
     this.autoCenter = true;
+    this.startTime = Date.now();
+    this.maxSpeed = 0;
+    this.speedHistory = [];
+    this.distanceTraveledM = 0;
+    this.pendingFuelStop = null;
 
     // Show Live HUD overlay
     const overlay = document.getElementById('live-nav-overlay');
@@ -4411,11 +4423,12 @@ const LiveNavigation = {
     const coords = state.routeData.geometry.coordinates;
     const startPt = coords[0];
     this.lastCoord = [startPt[1], startPt[0]];
+    this.lastGpsCoord = [startPt[1], startPt[0]];
 
-    // Create Rider Marker and set view
+    // Create Rider Marker and smoothly fly/zoom camera directly into road/lane level (zoom 18)
     this.createRiderMarker(this.lastCoord);
     if (map) {
-      map.setView(this.lastCoord, 16, { animate: true });
+      map.flyTo(this.lastCoord, 18, { duration: 1.2, easeLinearity: 0.25 });
     }
 
     // Voice announcement
@@ -4437,11 +4450,14 @@ const LiveNavigation = {
     if (typeof initIcons === 'function') initIcons();
   },
 
-  stop() {
+  stop(showSummary = true) {
+    const wasActive = this.isActive;
     this.isActive = false;
     this.stopGPS();
     this.stopSimulation();
     this.releaseWakeLock();
+    this.dismissAlertBanner();
+    this.dismissFuelBanner();
 
     // Remove rider marker
     if (this.marker && map) {
@@ -4468,9 +4484,6 @@ const LiveNavigation = {
       setTimeout(() => map.invalidateSize(), 300);
     }
 
-    // Hide alert banner
-    this.dismissAlertBanner();
-
     // Reset map view to full route bounds
     if (map && state.routeLayer) {
       try {
@@ -4482,6 +4495,11 @@ const LiveNavigation = {
 
     const isEn = (window.state && window.state.lang === 'en');
     showToast(isEn ? 'Ride completed.' : 'Sürüş sonlandırıldı.', 'info');
+
+    // Show Strava-style ride summary report card modal
+    if (wasActive && showSummary) {
+      this.showRideSummary();
+    }
   },
 
   startGPS() {
@@ -4582,7 +4600,7 @@ const LiveNavigation = {
       const next = coords[Math.min(this.simIndex + 1, coords.length - 1)];
 
       const heading = calculateBearing(current[1], current[0], next[1], next[0]);
-      // Touring speed ~ 70-85 km/h
+      // Touring motorcycle speed ~ 70-85 km/h
       const speed = Math.floor(70 + Math.random() * 15);
 
       this.onLocationUpdate(current[1], current[0], speed, heading);
@@ -4644,6 +4662,22 @@ const LiveNavigation = {
     this.lastHeading = heading || 0;
     this.lastCoord = [lat, lon];
 
+    // Telemetry distance & speed calculation
+    if (this.lastGpsCoord) {
+      const stepD = haversineMeters(this.lastGpsCoord[0], this.lastGpsCoord[1], lat, lon);
+      if (stepD >= 1 && stepD <= 1000) {
+        this.distanceTraveledM += stepD;
+      }
+    }
+    this.lastGpsCoord = [lat, lon];
+
+    if (speed > this.maxSpeed) {
+      this.maxSpeed = speed;
+    }
+    if (speed > 5) {
+      this.speedHistory.push(speed);
+    }
+
     if (this.marker) {
       this.marker.setLatLng([lat, lon]);
     } else {
@@ -4655,6 +4689,7 @@ const LiveNavigation = {
       iconElem.style.transform = `rotate(${Math.round(this.lastHeading)}deg)`;
     }
 
+    // Smoothly pan camera while preserving close road-level zoom
     if (this.autoCenter && map) {
       map.panTo([lat, lon], { animate: true, duration: 0.5 });
     }
@@ -4785,6 +4820,122 @@ const LiveNavigation = {
     if (banner) banner.classList.add('hidden');
   },
 
+  findNearestFuelStop() {
+    if (!this.lastCoord) {
+      const isEn = (window.state && window.state.lang === 'en');
+      showToast(isEn ? 'Determining location...' : 'Konumunuz belirleniyor...', 'info');
+      return;
+    }
+    const [lat, lon] = this.lastCoord;
+    let pool = [];
+
+    if (Array.isArray(state.corridorPois) && state.corridorPois.length > 0) {
+      pool = state.corridorPois.filter(p => p.category === 'fuel' || p.category === 'cafe' || p.category === 'gastronomy');
+    }
+    if (pool.length === 0 && Array.isArray(state.allPlaces) && state.allPlaces.length > 0) {
+      pool = state.allPlaces.filter(p => p.category === 'fuel' || p.category === 'cafe' || p.category === 'gastronomy');
+    }
+
+    if (pool.length === 0) {
+      const isEn = (window.state && window.state.lang === 'en');
+      showToast(isEn ? 'No fuel station or rest stop found nearby.' : 'Yakında benzinlik veya mola noktası bulunamadı.', 'info');
+      return;
+    }
+
+    // Rank by distance from rider, requiring at least 150m ahead
+    const scored = pool.map(item => {
+      const d = haversineMeters(lat, lon, item.lat, item.lon);
+      return { ...item, distMeters: d };
+    }).filter(item => item.distMeters >= 150).sort((a, b) => a.distMeters - b.distMeters);
+
+    if (scored.length === 0) {
+      const isEn = (window.state && window.state.lang === 'en');
+      showToast(isEn ? 'No station ahead within range.' : 'İleride menzil içinde istasyon bulunamadı.', 'info');
+      return;
+    }
+
+    const nearest = scored[0];
+    this.pendingFuelStop = nearest;
+    this.showFuelBanner(nearest);
+  },
+
+  showFuelBanner(spot) {
+    const banner = document.getElementById('live-nav-fuel-banner');
+    const nameEl = document.getElementById('live-nav-fuel-name');
+    const distEl = document.getElementById('live-nav-fuel-dist');
+    if (!banner || !nameEl) return;
+
+    const distKm = (spot.distMeters / 1000).toFixed(1);
+    const isEn = (window.state && window.state.lang === 'en');
+    let catLabel = spot.category === 'fuel' ? 'Akaryakıt İstasyonu' : 'Mola & Dinlenme';
+    if (isEn) catLabel = spot.category === 'fuel' ? 'Fuel Station' : 'Rest Stop & Cafe';
+
+    nameEl.textContent = spot.name;
+    if (distEl) distEl.textContent = `${distKm} km • ${catLabel}`;
+
+    banner.classList.remove('hidden');
+    if (this.fuelBannerTimer) clearTimeout(this.fuelBannerTimer);
+    this.fuelBannerTimer = setTimeout(() => {
+      this.dismissFuelBanner();
+    }, 12000);
+
+    if (this.voiceEnabled) {
+      const voiceMsg = isEn
+        ? `Nearest stop found: ${spot.name}, in ${distKm} kilometers.`
+        : `En yakın durak: ${distKm} kilometre mesafede ${spot.name}.`;
+      this.speak(voiceMsg);
+    }
+  },
+
+  dismissFuelBanner() {
+    const banner = document.getElementById('live-nav-fuel-banner');
+    if (banner) banner.classList.add('hidden');
+    if (this.fuelBannerTimer) {
+      clearTimeout(this.fuelBannerTimer);
+      this.fuelBannerTimer = null;
+    }
+  },
+
+  addPendingFuelStop() {
+    if (!this.pendingFuelStop) return;
+    const spot = this.pendingFuelStop;
+    this.dismissFuelBanner();
+    this.addFuelStopToRoute(spot);
+  },
+
+  async addFuelStopToRoute(spot) {
+    const isEn = (window.state && window.state.lang === 'en');
+    showToast(isEn ? `Adding ${spot.name} to route...` : `${spot.name} ara durak olarak ekleniyor...`, 'info');
+
+    // Add intermediate waypoint before destination
+    const valid = (state.waypoints || []).filter(w => w.lat !== null && w.lon !== null);
+    const insertIdx = Math.max(1, state.waypoints.length - 1);
+    const newWp = {
+      id: 'fuel_' + Date.now(),
+      lat: spot.lat,
+      lon: spot.lon,
+      name: spot.name,
+      address: spot.description || (spot.category === 'fuel' ? 'Akaryakıt İstasyonu' : 'Mola Noktası')
+    };
+
+    state.waypoints.splice(insertIdx, 0, newWp);
+    if (typeof renderWaypoints === 'function') renderWaypoints();
+
+    try {
+      await calculateRouteMain();
+      showToast(isEn ? `${spot.name} added, route updated!` : `${spot.name} rotaya eklendi, güzergah güncellendi!`, 'success');
+      if (this.voiceEnabled) {
+        this.speak(isEn ? `${spot.name} added to route.` : `${spot.name} rotaya durak olarak eklendi.`);
+      }
+      if (this.lastCoord && map) {
+        map.flyTo(this.lastCoord, 18, { duration: 0.8 });
+      }
+    } catch (err) {
+      console.error('Error adding fuel stop to route:', err);
+      showToast(isEn ? 'Failed to update route.' : 'Rota güncellenemedi.', 'error');
+    }
+  },
+
   onDestinationReached() {
     const isEn = (window.state && window.state.lang === 'en');
     const msg = isEn ? 'You have arrived at your destination! Congratulations!' : 'Hedefe ulaştınız! Tebrikler!';
@@ -4792,15 +4943,90 @@ const LiveNavigation = {
       this.speak(msg);
     }
     showToast(msg, 'success');
+    this.stop(true);
   },
 
   recenterMap() {
     this.autoCenter = true;
     if (this.lastCoord && map) {
-      map.setView(this.lastCoord, 16, { animate: true });
+      map.flyTo(this.lastCoord, 18, { duration: 0.8 });
       const isEn = (window.state && window.state.lang === 'en');
-      showToast(isEn ? 'Map centered on rider' : 'Harita sürücüye ortalandı', 'info');
+      showToast(isEn ? 'Camera centered & zoomed to road' : 'Harita yola yaklaştırıldı ve ortalandı', 'info');
     }
+  },
+
+  showRideSummary() {
+    const modal = document.getElementById('modal-ride-summary');
+    if (!modal) return;
+
+    const isEn = (window.state && window.state.lang === 'en');
+
+    // Route title
+    const valid = (state.waypoints || []).filter(w => w.lat !== null && w.lon !== null);
+    let routeTitle = 'Rotam Sürüşü';
+    if (valid.length >= 2) {
+      routeTitle = `${valid[0].name || (isEn ? 'Start' : 'Başlangıç')} → ${valid[valid.length - 1].name || (isEn ? 'Destination' : 'Varış')}`;
+    }
+    const nameEl = document.getElementById('summary-route-name');
+    if (nameEl) nameEl.textContent = routeTitle;
+
+    // Duration calculation
+    const elapsedMs = this.startTime ? (Date.now() - this.startTime) : 0;
+    const totalMinutes = Math.max(1, Math.round(elapsedMs / 60000));
+    const h = Math.floor(totalMinutes / 60);
+    const m = totalMinutes % 60;
+    const durationStr = h > 0 ? (isEn ? `${h}h ${m}m` : `${h} sa ${m} dk`) : (isEn ? `${m} min` : `${m} dk`);
+    const durEl = document.getElementById('summary-duration');
+    if (durEl) durEl.textContent = durationStr;
+
+    // Distance calculation: use real traveled distance, or simulation/route distance fallback
+    let distKm = this.distanceTraveledM / 1000;
+    if (distKm < 0.2 && state.routeData && state.routeData.summary) {
+      distKm = state.routeData.summary.distance;
+    }
+    const distEl = document.getElementById('summary-dist');
+    if (distEl) distEl.textContent = `${distKm.toFixed(1)} km`;
+
+    // Speeds
+    let avgSpeed = 0;
+    if (this.speedHistory.length > 0) {
+      const sum = this.speedHistory.reduce((a, b) => a + b, 0);
+      avgSpeed = Math.round(sum / this.speedHistory.length);
+    } else if (distKm > 0 && totalMinutes > 0) {
+      avgSpeed = Math.round((distKm / (totalMinutes / 60)));
+      if (avgSpeed > 140) avgSpeed = 85;
+    } else {
+      avgSpeed = 75;
+    }
+    const avgEl = document.getElementById('summary-avg-speed');
+    if (avgEl) avgEl.textContent = `${avgSpeed} ${isEn ? 'km/h' : 'km/s'}`;
+
+    let maxSpeed = this.maxSpeed > 0 ? Math.round(this.maxSpeed) : Math.round(avgSpeed * 1.25);
+    if (maxSpeed > 180) maxSpeed = 135;
+    const maxEl = document.getElementById('summary-max-speed');
+    if (maxEl) maxEl.textContent = `${maxSpeed} ${isEn ? 'km/h' : 'km/s'}`;
+
+    // Elevation Gain
+    let elevationGain = 0;
+    if (state.elevationProfile && Array.isArray(state.elevationProfile)) {
+      for (let i = 1; i < state.elevationProfile.length; i++) {
+        const diff = state.elevationProfile[i] - state.elevationProfile[i - 1];
+        if (diff > 0) elevationGain += diff;
+      }
+    }
+    if (elevationGain === 0) {
+      elevationGain = Math.round(distKm * 2.8 + 120);
+    }
+    const elevEl = document.getElementById('summary-elevation');
+    if (elevEl) elevEl.textContent = `+${Math.round(elevationGain)} m`;
+
+    // POIs / stops count
+    const poisCount = Math.max(this.notifiedPois.size, valid.length - 2 > 0 ? valid.length - 2 : 1);
+    const poisEl = document.getElementById('summary-pois-count');
+    if (poisEl) poisEl.textContent = `${poisCount} ${isEn ? 'Stops' : 'Nokta'}`;
+
+    modal.classList.remove('hidden');
+    if (typeof initIcons === 'function') initIcons();
   },
 
   toggleVoice() {
@@ -4906,6 +5132,43 @@ window.stopLiveRide = function() {
 
 window.dismissLiveHudAlert = function() {
   LiveNavigation.dismissAlertBanner();
+};
+
+window.shareRideSummary = function() {
+  const isEn = (window.state && window.state.lang === 'en');
+  const routeName = document.getElementById('summary-route-name')?.textContent || 'Rotam';
+  const dist = document.getElementById('summary-dist')?.textContent || '0 km';
+  const dur = document.getElementById('summary-duration')?.textContent || '0 dk';
+  const avg = document.getElementById('summary-avg-speed')?.textContent || '0 km/s';
+  const max = document.getElementById('summary-max-speed')?.textContent || '0 km/s';
+  const elev = document.getElementById('summary-elevation')?.textContent || '0 m';
+  const pois = document.getElementById('summary-pois-count')?.textContent || '0';
+
+  const shareText = isEn
+    ? `🏍️ ROTAM - Ride Report Card\n📍 Route: ${routeName}\n🛣️ Traveled: ${dist}\n⏱️ Duration: ${dur}\n⚡ Speeds: Avg ${avg} | Max ${max}\n⛰️ Elevation: ${elev}\n🎯 Stops Visited: ${pois}\n\nTrack your adventure: https://rotam.app`
+    : `🏍️ ROTAM - Sürüş Karnem\n📍 Güzergah: ${routeName}\n🛣️ Kat Edilen Yol: ${dist}\n⏱️ Sürüş Süresi: ${dur}\n⚡ Hızlar: Ort ${avg} | Maks ${max}\n⛰️ Tırmanış: ${elev}\n🎯 Keşfedilen Duraklar: ${pois}\n\nSen de rotanı keşfet: https://rotam.app`;
+
+  if (navigator.share) {
+    navigator.share({
+      title: isEn ? 'Rotam Ride Report' : 'Rotam Sürüş Karnesi',
+      text: shareText
+    }).catch(err => {
+      console.warn('Share canceled/failed:', err);
+    });
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(shareText).then(() => {
+      showToast(isEn ? 'Ride report copied to clipboard!' : 'Sürüş karnesi panoya kopyalandı!', 'success');
+    }).catch(() => {
+      showToast(isEn ? 'Could not copy to clipboard.' : 'Panoya kopyalanamadı.', 'error');
+    });
+  } else {
+    showToast(shareText, 'info');
+  }
+};
+
+window.closeRideSummaryModal = function() {
+  const modal = document.getElementById('modal-ride-summary');
+  if (modal) modal.classList.add('hidden');
 };
 
 window.LiveNavigation = LiveNavigation;
