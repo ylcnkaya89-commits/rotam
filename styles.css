@@ -625,6 +625,7 @@ main {
   /* Position Mobile Bottom Floating Card directly above bottom nav */
   #mobile-bottom-bar {
     bottom: 0.75rem !important;
+    z-index: 1020 !important;
   }
 
   /* On mobile, elevate elevation panel above bottom card without clipping */

@@ -67,7 +67,7 @@
   <meta name="theme-color" content="#090d16">
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="styles.css?v=2.2">
+  <link rel="stylesheet" href="styles.css?v=2.3">
 </head>
 <body class="h-full flex flex-col overflow-hidden font-sans selection:bg-brand-500 selection:text-white bg-slate-950">
 
@@ -979,7 +979,7 @@
       </div>
 
       <!-- MOBİL YÜZEN ALT ÇUBUK (HARİTA ÜZERİNDE) -->
-      <div id="mobile-bottom-bar" class="md:hidden absolute bottom-3 left-3 right-3 z-25 flex flex-col items-center pointer-events-none transition-all duration-300">
+      <div id="mobile-bottom-bar" class="md:hidden absolute bottom-3 left-3 right-3 z-[1020] flex flex-col items-center pointer-events-none transition-all duration-300">
         <!-- Rota hesaplandığında modern mobil kokpit kartı (Sürüşü Başlat Ana Ekranda) -->
         <div id="mobile-mini-cockpit" class="hidden pointer-events-auto w-full glass-card p-3 rounded-2xl flex flex-col space-y-2 border border-slate-800/90 shadow-2xl backdrop-blur-xl animate-slide-in">
           <!-- Üst Bilgi Satırı: Süre, Mesafe ve Keşif Noktası -->
@@ -1740,7 +1740,7 @@
     <!-- ORTA ÖNE ÇIKAN CANLI SÜRÜŞÜ BAŞLAT BUTONU -->
     <button id="mobile-nav-btn-ride" onclick="handleMobileNavRideStart()" class="flex flex-col items-center justify-center px-3.5 py-1 -mt-3 bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white rounded-2xl shadow-xl shadow-cyan-600/40 border border-cyan-400/50 active:scale-95 transition-all shrink-0" title="Canlı Sürüş Modunu Başlat">
       <i data-lucide="play" class="w-4 h-4 fill-white text-white mb-0.5"></i>
-      <span class="text-[9px] font-black uppercase tracking-wider" data-i18n="nav_start_ride_short">Sürüş</span>
+      <span class="text-[8.5px] font-black uppercase tracking-tight whitespace-nowrap" data-i18n="nav_start_ride_short">Sürüşü Başlat</span>
     </button>
     <button onclick="openNearbyModal()" class="flex-1 flex flex-col items-center justify-center p-1 text-slate-400 hover:text-white text-[10px] active:scale-95 transition-all">
       <i data-lucide="navigation" class="w-4 h-4 mb-0.5"></i>
@@ -1756,10 +1756,10 @@
   <datalist id="turkey-cities-list"></datalist>
 
   <!-- Kapsamlı Mekan Veritabanı (870+ Yer) -->
-  <script src="places_data.js?v=2.2"></script>
+  <script src="places_data.js?v=2.3"></script>
   <!-- Çoklu Dil ve Çeviri Motoru (TR / EN) -->
-  <script src="translations.js?v=2.2"></script>
+  <script src="translations.js?v=2.3"></script>
   <!-- V2 JavaScript Uygulama Mantığı -->
-  <script src="app.js?v=2.2"></script>
+  <script src="app.js?v=2.3"></script>
 </body>
 </html>

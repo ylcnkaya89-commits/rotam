@@ -265,7 +265,7 @@ window.TRANSLATIONS = {
     live_nav_wakelock_active: "Ekran açık tutuluyor",
     live_nav_gps_error: "GPS sinyali alınamadı. Simülasyon moduna geçiliyor.",
     live_nav_arrived: "Hedefe ulaştınız! Tebrikler!",
-    nav_start_ride_short: "Sürüş",
+    nav_start_ride_short: "Sürüşü Başlat",
     home_quick_pick_dest: "Varış Noktası Seç",
     home_quick_pick_desc: "Rotanı oluştur ve sürüşe başla",
     btn_quick_start: "Sürüşü Başlat",
@@ -547,7 +547,7 @@ window.TRANSLATIONS = {
     live_nav_wakelock_active: "Screen kept awake",
     live_nav_gps_error: "GPS signal unavailable. Switching to demo simulation.",
     live_nav_arrived: "You have arrived at your destination!",
-    nav_start_ride_short: "Ride",
+    nav_start_ride_short: "Start Ride",
     home_quick_pick_dest: "Select Destination",
     home_quick_pick_desc: "Plan route and start riding",
     btn_quick_start: "Start Ride",
@@ -573,8 +573,20 @@ window.TRANSLATIONS = {
  */
 function t(key, fallback = '') {
   const lang = (window.state && window.state.lang) || localStorage.getItem('rotam_lang') || 'tr';
-  const dict = window.TRANSLATIONS[lang] || window.TRANSLATIONS.tr;
-  return dict[key] !== undefined ? dict[key] : (fallback || key);
+  const dict = (window.TRANSLATIONS && window.TRANSLATIONS[lang]) || (window.TRANSLATIONS && window.TRANSLATIONS.tr) || {};
+  if (dict[key] !== undefined) return dict[key];
+  if (fallback) return fallback;
+
+  // Resilient fallback dictionary for critical navigation actions so raw keys never leak
+  const defaultFallbacks = {
+    nav_start_ride_short: lang === 'en' ? 'Start Ride' : 'Sürüşü Başlat',
+    btn_start_live_ride: lang === 'en' ? 'START LIVE RIDE' : 'SÜRÜŞÜ BAŞLAT',
+    btn_quick_start: lang === 'en' ? 'Start Ride' : 'Sürüşü Başlat',
+    home_quick_pick_dest: lang === 'en' ? 'Choose Destination' : 'Varış Noktası Seç',
+    home_quick_pick_desc: lang === 'en' ? 'Plan route & start ride' : 'Rotanı oluştur ve sürüşe başla',
+    mobile_enter_dest_first: lang === 'en' ? 'Please select your destination first.' : 'Lütfen önce gitmek istediğiniz varış noktasını seçin.'
+  };
+  return defaultFallbacks[key] || key;
 }
 
 /**
@@ -588,21 +600,24 @@ function applyTranslations() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.dataset.i18n;
     const translation = t(key);
-    if (translation) el.textContent = translation;
+    // Never overwrite an existing text with the raw key name
+    if (translation && translation !== key) {
+      el.textContent = translation;
+    }
   });
 
   // Update HTML input placeholders with data-i18n-placeholder
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     const key = el.dataset.i18nPlaceholder;
     const translation = t(key);
-    if (translation) el.placeholder = translation;
+    if (translation && translation !== key) el.placeholder = translation;
   });
 
   // Update HTML tooltips / titles with data-i18n-title
   document.querySelectorAll('[data-i18n-title]').forEach(el => {
     const key = el.dataset.i18nTitle;
     const translation = t(key);
-    if (translation) el.title = translation;
+    if (translation && translation !== key) el.title = translation;
   });
 
   // Update language toggle buttons in Header & Settings

@@ -425,17 +425,44 @@ function handleMobileNavPlan() {
 }
 
 function handleMobileNavRideStart() {
-  const valid = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
+  if (typeof LiveNavigation !== 'undefined' && LiveNavigation.isActive) {
+    LiveNavigation.recenterMap();
+    const isEn = (window.state && window.state.lang === 'en');
+    showToast(isEn ? 'Live navigation is already active.' : 'Canlı sürüş takibi aktif.', 'info');
+    return;
+  }
+
+  const valid = (state.waypoints || []).filter(w => w.lat !== null && w.lon !== null);
+
+  // If active route is already calculated and ready
   if (state.routeData && valid.length >= 2) {
     if (typeof LiveNavigation !== 'undefined') {
       LiveNavigation.start();
     }
-  } else {
-    const isEn = (window.state && window.state.lang === 'en');
-    showToast(isEn ? 'Please select your destination first.' : 'Lütfen önce gitmek istediğiniz varış noktasını seçin.', 'info');
-    openMobileSidebar('end');
+    return;
   }
+
+  // If 2+ valid waypoints are present but routeData hasn't been computed yet
+  if (valid.length >= 2) {
+    const isEn = (window.state && window.state.lang === 'en');
+    showToast(isEn ? 'Preparing route, starting ride...' : 'Rota hazırlanıyor, sürüş başlatılıyor...', 'info');
+    calculateRouteMain().then(() => {
+      if (state.routeData && typeof LiveNavigation !== 'undefined') {
+        LiveNavigation.start();
+      }
+    }).catch(err => {
+      console.error('Ride route calculation error:', err);
+      showToast(isEn ? 'Route calculation failed.' : 'Rota hesaplanamadı.', 'error');
+    });
+    return;
+  }
+
+  // Less than 2 waypoints: prompt user to select destination
+  const isEn = (window.state && window.state.lang === 'en');
+  showToast(isEn ? 'Please select your destination first.' : 'Lütfen önce gitmek istediğiniz varış noktasını seçin.', 'info');
+  openMobileSidebar('end');
 }
+window.handleMobileNavRideStart = handleMobileNavRideStart;
 
 // Vehicle Selection (Car, Moto, Camper, Bicycle, Walk)
 function selectVehicle(vehicle) {
@@ -1149,6 +1176,7 @@ function clearRouteDisplay() {
   document.getElementById('route-alternatives-container')?.classList.add('hidden');
   document.getElementById('mobile-mini-cockpit')?.classList.add('hidden');
   document.getElementById('mobile-home-prompt-card')?.classList.remove('hidden');
+  document.getElementById('mobile-bottom-bar')?.classList.remove('hidden');
   document.getElementById('badge-right-panel-poi-count')?.classList.add('hidden');
 
   const corridorTotal = document.getElementById('corridor-total-count');
@@ -1384,6 +1412,8 @@ async function calculateRouteMain() {
     document.getElementById('btn-save-route-modal')?.removeAttribute('disabled');
 
     // Mobile mini cockpit
+    const bottomBar = document.getElementById('mobile-bottom-bar');
+    if (bottomBar) bottomBar.classList.remove('hidden');
     const mini = document.getElementById('mobile-mini-cockpit');
     const promptCard = document.getElementById('mobile-home-prompt-card');
     const plannerBtn = document.getElementById('btn-mobile-open-planner');
@@ -3117,6 +3147,9 @@ function loadPresetRoute(presetId) {
   // Close mobile sidebar if open
   closeMobileSidebar();
 
+  const bottomBar = document.getElementById('mobile-bottom-bar');
+  if (bottomBar) bottomBar.classList.remove('hidden');
+
   // Calculate route immediately
   calculateRouteMain();
 
@@ -4304,15 +4337,29 @@ const LiveNavigation = {
   bannerTimer: null,
 
   start(forceSimulation = false) {
-    const valid = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
-    if (!state.routeData || valid.length < 2) {
+    const valid = (state.waypoints || []).filter(w => w.lat !== null && w.lon !== null);
+    if (valid.length < 2) {
       const msg = (typeof t === 'function')
-        ? t('toast_fill_inputs', 'Lütfen önce başlangıç ve varış noktalarını girip rota oluşturun.')
-        : 'Lütfen önce başlangıç ve varış noktalarını girip rota oluşturun.';
+        ? t('mobile_enter_dest_first', 'Lütfen önce gitmek istediğiniz varış noktasını seçin.')
+        : 'Lütfen önce gitmek istediğiniz varış noktasını seçin.';
       showToast(msg, 'info');
       if (window.innerWidth < 768) {
-        openMobileSidebar();
+        openMobileSidebar('end');
       }
+      return;
+    }
+
+    if (!state.routeData) {
+      const isEn = (window.state && window.state.lang === 'en');
+      showToast(isEn ? 'Preparing route, starting ride...' : 'Rota hazırlanıyor, sürüş başlatılıyor...', 'info');
+      calculateRouteMain().then(() => {
+        if (state.routeData) {
+          LiveNavigation.start(forceSimulation);
+        }
+      }).catch(err => {
+        console.error('Route calculation failed before live ride:', err);
+        showToast(isEn ? 'Route calculation failed.' : 'Rota hesaplanamadı.', 'error');
+      });
       return;
     }
 
@@ -4323,6 +4370,10 @@ const LiveNavigation = {
     // Show Live HUD overlay
     const overlay = document.getElementById('live-nav-overlay');
     if (overlay) overlay.classList.remove('hidden');
+
+    // Hide mobile floating bar during active live HUD
+    const bottomBar = document.getElementById('mobile-bottom-bar');
+    if (bottomBar) bottomBar.classList.add('hidden');
 
     // Request screen wake lock
     this.requestWakeLock();
@@ -4384,6 +4435,10 @@ const LiveNavigation = {
     // Hide HUD overlay
     const overlay = document.getElementById('live-nav-overlay');
     if (overlay) overlay.classList.add('hidden');
+
+    // Restore mobile bottom bar
+    const bottomBar = document.getElementById('mobile-bottom-bar');
+    if (bottomBar) bottomBar.classList.remove('hidden');
 
     // Hide alert banner
     this.dismissAlertBanner();
@@ -4812,6 +4867,7 @@ const LiveNavigation = {
 };
 
 // Global hooks for HTML button triggers
+window.handleMobileNavRideStart = handleMobileNavRideStart;
 window.startLiveRide = function(forceSim = false) {
   LiveNavigation.start(forceSim);
 };
