@@ -411,7 +411,9 @@ function closeMobileSidebar() {
   // On mobile, restore bottom floating bar
   if (window.innerWidth < 768) {
     const bottomBar = document.getElementById('mobile-bottom-bar');
-    if (bottomBar) bottomBar.classList.remove('hidden');
+    if (bottomBar && (!window.LiveNavigation || !window.LiveNavigation.isActive)) {
+      bottomBar.classList.remove('hidden');
+    }
   }
 }
 
@@ -2356,7 +2358,9 @@ function closeRightPanel() {
 
   panel.classList.add('hidden');
   panel.classList.remove('flex');
-  if (toggleBtn) toggleBtn.classList.remove('hidden');
+  if (toggleBtn && (!window.LiveNavigation || !window.LiveNavigation.isActive)) {
+    toggleBtn.classList.remove('hidden');
+  }
   if (navBtn) {
     navBtn.classList.remove('bg-slate-800', 'text-white', 'border', 'border-amber-500/40');
     navBtn.classList.add('text-slate-300');
@@ -4371,17 +4375,30 @@ const LiveNavigation = {
     const overlay = document.getElementById('live-nav-overlay');
     if (overlay) overlay.classList.remove('hidden');
 
-    // Hide mobile floating bar during active live HUD
-    const bottomBar = document.getElementById('mobile-bottom-bar');
-    if (bottomBar) bottomBar.classList.add('hidden');
-
-    // Request screen wake lock
-    this.requestWakeLock();
-
     // Clean UI for distraction-free riding cockpit
     if (typeof closeMobileSidebar === 'function') closeMobileSidebar();
     if (typeof closeRightPanel === 'function') closeRightPanel();
     if (typeof dismissHomepagePlanner === 'function') dismissHomepagePlanner();
+
+    // Hide all colliding floating controls and cards during Live HUD
+    const bottomBar = document.getElementById('mobile-bottom-bar');
+    if (bottomBar) bottomBar.classList.add('hidden');
+
+    document.getElementById('floating-map-controls')?.classList.add('hidden');
+    document.getElementById('btn-toggle-right-panel')?.classList.add('hidden');
+    document.getElementById('map-hint')?.classList.add('hidden');
+    document.getElementById('elevation-panel')?.classList.add('hidden');
+
+    // On desktop, collapse sidebar for full-screen immersive map navigation
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) sidebar.classList.add('live-nav-hidden');
+    if (map) {
+      setTimeout(() => map.invalidateSize(), 100);
+      setTimeout(() => map.invalidateSize(), 300);
+    }
+
+    // Request screen wake lock
+    this.requestWakeLock();
 
     // Map drag listener to pause auto-center
     if (map) {
@@ -4436,9 +4453,20 @@ const LiveNavigation = {
     const overlay = document.getElementById('live-nav-overlay');
     if (overlay) overlay.classList.add('hidden');
 
-    // Restore mobile bottom bar
+    // Restore floating controls and cards
     const bottomBar = document.getElementById('mobile-bottom-bar');
     if (bottomBar) bottomBar.classList.remove('hidden');
+
+    document.getElementById('floating-map-controls')?.classList.remove('hidden');
+    document.getElementById('btn-toggle-right-panel')?.classList.remove('hidden');
+
+    // Restore desktop sidebar
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) sidebar.classList.remove('live-nav-hidden');
+    if (map) {
+      setTimeout(() => map.invalidateSize(), 100);
+      setTimeout(() => map.invalidateSize(), 300);
+    }
 
     // Hide alert banner
     this.dismissAlertBanner();
