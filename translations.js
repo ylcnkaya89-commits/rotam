@@ -265,6 +265,11 @@ window.TRANSLATIONS = {
     live_nav_wakelock_active: "Ekran açık tutuluyor",
     live_nav_gps_error: "GPS sinyali alınamadı. Simülasyon moduna geçiliyor.",
     live_nav_arrived: "Hedefe ulaştınız! Tebrikler!",
+    nav_start_ride_short: "Sürüş",
+    home_quick_pick_dest: "Varış Noktası Seç",
+    home_quick_pick_desc: "Rotanı oluştur ve sürüşe başla",
+    btn_quick_start: "Sürüşü Başlat",
+    mobile_enter_dest_first: "Lütfen önce gitmek istediğiniz varış noktasını seçin.",
 
     // Toasts & Messages
     toast_fill_inputs: "Lütfen başlangıç ve varış noktalarını girin.",
@@ -542,6 +547,11 @@ window.TRANSLATIONS = {
     live_nav_wakelock_active: "Screen kept awake",
     live_nav_gps_error: "GPS signal unavailable. Switching to demo simulation.",
     live_nav_arrived: "You have arrived at your destination!",
+    nav_start_ride_short: "Ride",
+    home_quick_pick_dest: "Select Destination",
+    home_quick_pick_desc: "Plan route and start riding",
+    btn_quick_start: "Start Ride",
+    mobile_enter_dest_first: "Please select your destination first.",
 
     // Toasts & Messages
     toast_fill_inputs: "Please enter both start and destination points.",

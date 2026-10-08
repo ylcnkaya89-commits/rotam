@@ -366,7 +366,7 @@ function toggleSidebar() {
   }
 }
 
-function openMobileSidebar() {
+function openMobileSidebar(focusTarget = null) {
   const sidebar = document.getElementById('sidebar');
   if (sidebar) {
     sidebar.classList.remove('hidden');
@@ -374,9 +374,24 @@ function openMobileSidebar() {
     initIcons();
     if (map) setTimeout(() => map.invalidateSize(), 150);
   }
-  // On mobile, close right-panel to prevent overlay collision
+  // On mobile, close right-panel and hide floating widgets to prevent overlay collision
   if (window.innerWidth < 768) {
     closeRightPanel();
+    const bottomBar = document.getElementById('mobile-bottom-bar');
+    if (bottomBar) bottomBar.classList.add('hidden');
+    const elev = document.getElementById('elevation-panel');
+    if (elev) elev.classList.add('hidden');
+  }
+
+  if (focusTarget === 'end') {
+    setTimeout(() => {
+      const inputs = document.querySelectorAll('#waypoints-container input');
+      if (inputs && inputs.length > 0) {
+        const destInput = inputs[inputs.length - 1];
+        destInput.focus();
+        destInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 200);
   }
 }
 
@@ -390,6 +405,14 @@ function closeMobileSidebar() {
       setTimeout(() => map.invalidateSize(), 300);
     }
   }
+  if (typeof closeWaypointAutocomplete === 'function') {
+    closeWaypointAutocomplete();
+  }
+  // On mobile, restore bottom floating bar
+  if (window.innerWidth < 768) {
+    const bottomBar = document.getElementById('mobile-bottom-bar');
+    if (bottomBar) bottomBar.classList.remove('hidden');
+  }
 }
 
 function handleMobileNavPlan() {
@@ -398,6 +421,19 @@ function handleMobileNavPlan() {
     closeMobileSidebar();
   } else {
     openMobileSidebar();
+  }
+}
+
+function handleMobileNavRideStart() {
+  const valid = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
+  if (state.routeData && valid.length >= 2) {
+    if (typeof LiveNavigation !== 'undefined') {
+      LiveNavigation.start();
+    }
+  } else {
+    const isEn = (window.state && window.state.lang === 'en');
+    showToast(isEn ? 'Please select your destination first.' : 'Lütfen önce gitmek istediğiniz varış noktasını seçin.', 'info');
+    openMobileSidebar('end');
   }
 }
 
@@ -630,7 +666,8 @@ function setSidebarStart(city) {
   }
   const heroInp = document.getElementById('hero-start-input');
   if (heroInp) heroInp.value = city;
-  updateWaypointsListUI();
+  const inputs = document.querySelectorAll('#waypoints-container input');
+  if (inputs && inputs[0]) inputs[0].value = city;
   updateWaypointMarkers();
   checkAndPanToWaypoint(0);
 }
@@ -647,7 +684,9 @@ function setSidebarEnd(city) {
   }
   const heroInp = document.getElementById('hero-end-input');
   if (heroInp) heroInp.value = city;
-  updateWaypointsListUI();
+  const inputs = document.querySelectorAll('#waypoints-container input');
+  if (inputs && inputs[lastIdx]) inputs[lastIdx].value = city;
+  if (typeof closeWaypointAutocomplete === 'function') closeWaypointAutocomplete();
   updateWaypointMarkers();
   checkAndPanToWaypoint(lastIdx);
 }
@@ -844,7 +883,7 @@ function updateWaypointsListUI() {
     const isWaypoint = !isStart && !isEnd;
 
     const div = document.createElement('div');
-    div.className = 'flex items-center space-x-2 bg-slate-950/70 p-2 rounded-xl border border-slate-800/80 group transition-all';
+    div.className = 'flex items-center space-x-2 bg-slate-950/70 p-2 rounded-xl border border-slate-800/80 group transition-all relative';
 
     let iconHtml = '';
     if (isStart) iconHtml = '<span class="w-3 h-3 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>';
@@ -854,11 +893,12 @@ function updateWaypointsListUI() {
     div.innerHTML = `
       <div class="p-1 shrink-0 flex items-center justify-center">${iconHtml}</div>
       <input type="text" value="${escapeHtml(wp.name || '')}" 
-        list="turkey-cities-list"
+        autocomplete="off" autocorrect="off" spellcheck="false"
         placeholder="${isStart ? (typeof t === 'function' ? t('wp_start_placeholder', 'Başlangıç Noktası (Örn: İstanbul)') : 'Başlangıç Noktası') : isEnd ? (typeof t === 'function' ? t('wp_end_placeholder', 'Varış Noktası (Örn: Antalya)') : 'Varış Noktası') : ((typeof t === 'function' ? t('wp_stop_prefix', 'Ara Durak ') : 'Ara Durak ') + index)}" 
-        oninput="handleWaypointNameChange(${index}, this.value)"
-        onblur="handleWaypointBlur(${index}, this.value)"
-        onkeydown="if(event.key==='Enter') { handleWaypointBlur(${index}, this.value); calculateRouteMain(); }"
+        oninput="handleWaypointNameChange(${index}, this.value, this)"
+        onfocus="handleWaypointFocus(${index}, this.value, this)"
+        onblur="setTimeout(closeWaypointAutocomplete, 300); handleWaypointBlur(${index}, this.value)"
+        onkeydown="if(event.key==='Enter') { closeWaypointAutocomplete(); handleWaypointBlur(${index}, this.value); calculateRouteMain(); }"
         class="bg-transparent flex-1 text-xs text-white placeholder-slate-500 focus:outline-none truncate font-medium">
       <div class="flex items-center space-x-1 shrink-0">
         ${isWaypoint ? `
@@ -875,7 +915,72 @@ function updateWaypointsListUI() {
   initIcons();
 }
 
-function handleWaypointNameChange(index, value) {
+function getLocalGeoSuggestions(query, limit = 5) {
+  if (!query || typeof query !== 'string') return [];
+  const q = normalizeTurkish(query.trim());
+  if (!q || q.length < 2) return [];
+
+  const results = [];
+  const seen = new Set();
+
+  const geoDb = (window.TURKEY_GEO_DATABASE && Array.isArray(window.TURKEY_GEO_DATABASE)) ? window.TURKEY_GEO_DATABASE : [];
+  const placesDb = (state && state.allPlaces && Array.isArray(state.allPlaces)) ? state.allPlaces : (window.DEFAULT_HISTORIC_PLACES || []);
+
+  // 1. Starts-with in provinces / districts
+  geoDb.forEach(item => {
+    if (results.length >= limit) return;
+    const nameNorm = normalizeTurkish(item.name);
+    if (nameNorm.startsWith(q) && !seen.has(item.name)) {
+      seen.add(item.name);
+      results.push({ name: item.name, subtitle: item.region || 'İl / İlçe', lat: item.lat, lon: item.lon, type: 'city' });
+    }
+  });
+
+  // 2. Starts-with in Places DB
+  placesDb.forEach(p => {
+    if (results.length >= limit) return;
+    const nameNorm = normalizeTurkish(p.name);
+    if (nameNorm.startsWith(q) && !seen.has(p.name)) {
+      seen.add(p.name);
+      results.push({ name: p.name, subtitle: p.city || 'Tarihi & Doğa', lat: p.lat, lon: p.lon, type: 'place' });
+    }
+  });
+
+  // 3. Includes in provinces
+  if (results.length < limit) {
+    geoDb.forEach(item => {
+      if (results.length >= limit) return;
+      const nameNorm = normalizeTurkish(item.name);
+      if (nameNorm.includes(q) && !seen.has(item.name)) {
+        seen.add(item.name);
+        results.push({ name: item.name, subtitle: item.region || 'İl / İlçe', lat: item.lat, lon: item.lon, type: 'city' });
+      }
+    });
+  }
+
+  // 4. Includes in places
+  if (results.length < limit) {
+    placesDb.forEach(p => {
+      if (results.length >= limit) return;
+      const nameNorm = normalizeTurkish(p.name);
+      if (nameNorm.includes(q) && !seen.has(p.name)) {
+        seen.add(p.name);
+        results.push({ name: p.name, subtitle: p.city || 'Tarihi & Doğa', lat: p.lat, lon: p.lon, type: 'place' });
+      }
+    });
+  }
+
+  return results;
+}
+
+function handleWaypointFocus(index, value, inputEl) {
+  if (value && value.trim().length >= 2) {
+    const suggestions = getLocalGeoSuggestions(value, 5);
+    renderWaypointAutocomplete(index, suggestions, inputEl);
+  }
+}
+
+function handleWaypointNameChange(index, value, inputEl) {
   if (!state.waypoints[index]) return;
   state.waypoints[index].name = value;
 
@@ -888,13 +993,70 @@ function handleWaypointNameChange(index, value) {
     if (heroEnd && heroEnd.value !== value) heroEnd.value = value;
   }
 
-  // Quick instant match check
-  const local = searchLocalGeo(value);
-  if (local) {
-    state.waypoints[index].lat = local.lat;
-    state.waypoints[index].lon = local.lon;
-    updateWaypointMarkers();
-    checkAndPanToWaypoint(index);
+  // Render non-clashing custom dropdown under active input
+  const suggestions = getLocalGeoSuggestions(value, 5);
+  renderWaypointAutocomplete(index, suggestions, inputEl);
+}
+
+function renderWaypointAutocomplete(index, suggestions, inputEl) {
+  let box = document.getElementById('waypoint-autocomplete-box');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'waypoint-autocomplete-box';
+    document.body.appendChild(box);
+  }
+
+  if (!suggestions || suggestions.length === 0 || !inputEl) {
+    box.style.display = 'none';
+    return;
+  }
+
+  const rect = inputEl.getBoundingClientRect();
+  box.style.position = 'fixed';
+  box.style.top = `${rect.bottom + 4}px`;
+  box.style.left = `${Math.max(12, rect.left)}px`;
+  box.style.width = `${Math.min(window.innerWidth - 24, rect.width + 36)}px`;
+  box.style.display = 'block';
+
+  box.innerHTML = suggestions.map(s => `
+    <div class="p-2.5 hover:bg-slate-800 active:bg-slate-750 cursor-pointer flex items-center justify-between text-xs border-b border-slate-800 last:border-b-0 transition-colors"
+         onmousedown="event.preventDefault(); selectWaypointSuggestion(${index}, '${escapeHtml(s.name)}', ${s.lat}, ${s.lon});">
+      <div class="flex items-center space-x-2 min-w-0">
+        <span class="text-amber-400 shrink-0">${s.type === 'city' ? '🏙️' : '📍'}</span>
+        <div class="truncate">
+          <span class="font-bold text-white block truncate">${escapeHtml(s.name)}</span>
+          <span class="text-[10px] text-slate-400 block truncate">${escapeHtml(s.subtitle || '')}</span>
+        </div>
+      </div>
+      <span class="text-[10px] bg-brand-500/20 text-brand-300 px-2 py-0.5 rounded font-semibold shrink-0 ml-1">Seç</span>
+    </div>
+  `).join('');
+}
+
+function selectWaypointSuggestion(index, name, lat, lon) {
+  if (!state.waypoints[index]) return;
+  state.waypoints[index].name = name;
+  state.waypoints[index].lat = lat;
+  state.waypoints[index].lon = lon;
+
+  const inputs = document.querySelectorAll('#waypoints-container input');
+  if (inputs && inputs[index]) {
+    inputs[index].value = name;
+  }
+
+  closeWaypointAutocomplete();
+  updateWaypointMarkers();
+
+  const valid = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
+  if (valid.length >= 2) {
+    calculateRouteMain();
+  }
+}
+
+function closeWaypointAutocomplete() {
+  const box = document.getElementById('waypoint-autocomplete-box');
+  if (box) {
+    box.style.display = 'none';
   }
 }
 
@@ -986,7 +1148,7 @@ function clearRouteDisplay() {
   document.getElementById('elevation-panel')?.classList.add('hidden');
   document.getElementById('route-alternatives-container')?.classList.add('hidden');
   document.getElementById('mobile-mini-cockpit')?.classList.add('hidden');
-  document.getElementById('btn-mobile-open-planner')?.classList.remove('hidden');
+  document.getElementById('mobile-home-prompt-card')?.classList.remove('hidden');
   document.getElementById('badge-right-panel-poi-count')?.classList.add('hidden');
 
   const corridorTotal = document.getElementById('corridor-total-count');
@@ -1223,9 +1385,11 @@ async function calculateRouteMain() {
 
     // Mobile mini cockpit
     const mini = document.getElementById('mobile-mini-cockpit');
+    const promptCard = document.getElementById('mobile-home-prompt-card');
     const plannerBtn = document.getElementById('btn-mobile-open-planner');
     if (mini) {
       mini.classList.remove('hidden');
+      if (promptCard) promptCard.classList.add('hidden');
       if (plannerBtn) plannerBtn.classList.add('hidden');
       document.getElementById('mobile-mini-dist').textContent = (activeRoute.distance / 1000).toFixed(1) + ' km';
       const m = Math.floor(activeRoute.duration / 60);
@@ -4062,9 +4226,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Standalone PWA & Dynamic Viewport Synchronizer (iOS 'Ana Ekrana Ekle' & Android PWA)
 function syncViewportHeight() {
+  const isInputFocused = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA');
   const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-  document.documentElement.style.setProperty('--app-height', `${vh}px`);
-  if (map) {
+  // If user is actively typing, do not aggressively crush container height or invalidate map
+  if (!isInputFocused) {
+    document.documentElement.style.setProperty('--app-height', `${vh}px`);
+  }
+  if (map && !isInputFocused) {
     map.invalidateSize();
   }
 }

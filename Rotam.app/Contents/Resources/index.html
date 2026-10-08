@@ -980,8 +980,8 @@
 
       <!-- MOBİL YÜZEN ALT ÇUBUK (HARİTA ÜZERİNDE) -->
       <div id="mobile-bottom-bar" class="md:hidden absolute bottom-3 left-3 right-3 z-25 flex flex-col items-center pointer-events-none transition-all duration-300">
-        <!-- Rota hesaplandığında modern mobil rota kartı -->
-        <div id="mobile-mini-cockpit" class="hidden pointer-events-auto w-full glass-card p-3 rounded-2xl flex flex-col space-y-2.5 border border-slate-800/90 shadow-2xl backdrop-blur-xl animate-slide-in">
+        <!-- Rota hesaplandığında modern mobil kokpit kartı (Sürüşü Başlat Ana Ekranda) -->
+        <div id="mobile-mini-cockpit" class="hidden pointer-events-auto w-full glass-card p-3 rounded-2xl flex flex-col space-y-2 border border-slate-800/90 shadow-2xl backdrop-blur-xl animate-slide-in">
           <!-- Üst Bilgi Satırı: Süre, Mesafe ve Keşif Noktası -->
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-2">
@@ -992,31 +992,46 @@
             <span id="mobile-mini-pois" class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">- Keşif</span>
           </div>
 
-          <!-- Alt Buton Satırı: Canlı Sürüş + Google Maps + Keşfet -->
-          <div class="flex items-center space-x-1.5">
-            <button onclick="startLiveRide()" class="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-2.5 px-2 rounded-xl text-xs shadow-lg shadow-cyan-600/30 flex items-center justify-center space-x-1 active:scale-95 transition-all" title="Uygulama İçi Canlı Sürüş Modu">
-              <i data-lucide="play" class="w-3.5 h-3.5 fill-white text-white shrink-0"></i>
-              <span class="tracking-wide font-extrabold" data-i18n="btn_start_live_ride">Canlı Sürüş</span>
-            </button>
-            <button onclick="openInGoogleMaps()" class="px-2.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-xl text-xs font-semibold border border-slate-700 flex items-center space-x-1 active:scale-95 transition-all" title="Google Maps'e Aktar">
+          <!-- ANA EKRANDA BÜYÜK VE NET: SÜRÜŞÜ BAŞLAT BUTONU -->
+          <button onclick="startLiveRide()" class="w-full bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-black py-3 px-3 rounded-xl text-xs sm:text-sm shadow-xl shadow-cyan-600/35 flex items-center justify-center space-x-2 active:scale-[0.98] transition-all border border-cyan-400/40" title="Rotam Canlı GPS Sürüş Modunu Başlat">
+            <i data-lucide="play" class="w-4 h-4 fill-white text-white"></i>
+            <span class="tracking-wide" data-i18n="btn_start_live_ride">SÜRÜŞÜ BAŞLAT</span>
+            <span class="text-[9px] bg-cyan-400/20 text-cyan-200 px-1.5 py-0.5 rounded font-bold uppercase ml-1">CANLI HUD</span>
+          </button>
+
+          <!-- Alt Buton Satırı: Google Maps + Keşfet + Detay -->
+          <div class="flex items-center space-x-1.5 pt-0.5">
+            <button onclick="openInGoogleMaps()" class="flex-1 py-2 px-2 bg-slate-800/90 hover:bg-slate-700 text-emerald-400 rounded-xl text-xs font-semibold border border-slate-700 flex items-center justify-center space-x-1 active:scale-95 transition-all" title="Google Maps'e Aktar">
               <i data-lucide="navigation" class="w-3.5 h-3.5 shrink-0"></i>
-              <span class="hidden xs:inline">Maps</span>
+              <span>Google Maps</span>
             </button>
-            <button onclick="openRightPanel()" class="px-2.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-xl text-xs font-semibold border border-slate-700 flex items-center space-x-1 active:scale-95 transition-all" title="Rotadaki Keşif Noktaları">
+            <button onclick="openRightPanel()" class="py-2 px-3 bg-slate-800/90 hover:bg-slate-700 text-amber-400 rounded-xl text-xs font-semibold border border-slate-700 flex items-center space-x-1 active:scale-95 transition-all" title="Rotadaki Keşif Noktaları">
               <i data-lucide="compass" class="w-3.5 h-3.5 shrink-0"></i>
               <span data-i18n="mobile_nav_discover">Keşfet</span>
             </button>
-            <button onclick="openMobileSidebar()" class="px-2.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold border border-slate-700 flex items-center space-x-1 active:scale-95 transition-all" title="Rota Detayları ve Duraklar">
+            <button onclick="openMobileSidebar()" class="py-2 px-3 bg-slate-800/90 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold border border-slate-700 flex items-center space-x-1 active:scale-95 transition-all" title="Rota Detayları ve Duraklar">
+              <span data-i18n="btn_details">Detay</span>
               <i data-lucide="chevron-up" class="w-3.5 h-3.5 shrink-0"></i>
             </button>
           </div>
         </div>
 
-        <!-- Rota hesaplanmamışken açma butonu -->
-        <button id="btn-mobile-open-planner" onclick="openMobileSidebar()" class="pointer-events-auto bg-gradient-to-r from-brand-600 via-amber-500 to-orange-600 text-white font-bold px-5 py-2.5 rounded-full shadow-xl shadow-brand-600/30 border border-amber-400/30 text-xs flex items-center space-x-2 active:scale-95 transition-all">
-          <i data-lucide="compass" class="w-4 h-4 text-amber-200"></i>
-          <span data-i18n="btn_mobile_plan_route">Rotanı Planla</span>
-        </button>
+        <!-- Rota hesaplanmamışken ana ekranda şık hızlı başlangıç kartı -->
+        <div id="mobile-home-prompt-card" class="pointer-events-auto w-full glass-card p-2.5 sm:p-3 rounded-2xl flex items-center justify-between border border-slate-800 shadow-2xl backdrop-blur-xl animate-slide-in">
+          <div class="flex items-center space-x-2.5 min-w-0 flex-1 cursor-pointer" onclick="openMobileSidebar('end')">
+            <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+              <i data-lucide="map-pin" class="w-4 h-4"></i>
+            </div>
+            <div class="truncate">
+              <span class="text-xs font-bold text-white block truncate" data-i18n="home_quick_pick_dest">Varış Noktası Seç</span>
+              <span class="text-[10px] text-slate-400 block truncate" data-i18n="home_quick_pick_desc">Rotanı oluştur ve sürüşe başla</span>
+            </div>
+          </div>
+          <button onclick="handleMobileNavRideStart()" class="py-2 px-3 bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-cyan-600/30 active:scale-95 flex items-center space-x-1.5 shrink-0 border border-cyan-400/40 ml-2" title="Sürüşü Başlat">
+            <i data-lucide="play" class="w-3.5 h-3.5 fill-white"></i>
+            <span data-i18n="btn_quick_start">Sürüşü Başlat</span>
+          </button>
+        </div>
       </div>
 
       <!-- ALT PANEL: ETKİLEŞİMLİ YÜKSEKLİK & EĞİM PROFİLİ -->
@@ -1712,22 +1727,27 @@
     </div>
   </div>
 
-  <!-- MOBİL ALT SABİT MENÜ (MOBILE BOTTOM NAV - 4 TEMEL SEYAHAT SEKMESİ) -->
-  <nav id="mobile-bottom-nav" class="md:hidden bg-slate-900/95 border-t border-slate-800/80 px-2 flex items-center justify-around z-30 shrink-0 backdrop-blur-xl w-full max-w-full">
+  <!-- MOBİL ALT SABİT MENÜ (MOBILE BOTTOM NAV - 5 TEMEL SEÇENEK: ROTA, KEŞFET, SÜRÜŞÜ BAŞLAT, YAKINIMDA, ROTALARIM) -->
+  <nav id="mobile-bottom-nav" class="md:hidden bg-slate-900/95 border-t border-slate-800/80 px-2 py-1 flex items-center justify-around z-30 shrink-0 backdrop-blur-xl w-full max-w-full">
     <button id="mobile-nav-btn-plan" onclick="handleMobileNavPlan()" class="flex-1 flex flex-col items-center justify-center p-1 text-brand-400 font-semibold text-[10px] active:scale-95 transition-all">
-      <i data-lucide="map" class="w-5 h-5 mb-0.5"></i>
+      <i data-lucide="map" class="w-4 h-4 mb-0.5"></i>
       <span data-i18n="mobile_nav_plan">Rota</span>
     </button>
     <button onclick="openDiscoverModal()" class="flex-1 flex flex-col items-center justify-center p-1 text-slate-400 hover:text-white text-[10px] active:scale-95 transition-all">
-      <i data-lucide="compass" class="w-5 h-5 mb-0.5"></i>
+      <i data-lucide="compass" class="w-4 h-4 mb-0.5"></i>
       <span data-i18n="mobile_nav_discover">Keşfet</span>
     </button>
+    <!-- ORTA ÖNE ÇIKAN CANLI SÜRÜŞÜ BAŞLAT BUTONU -->
+    <button id="mobile-nav-btn-ride" onclick="handleMobileNavRideStart()" class="flex flex-col items-center justify-center px-3.5 py-1 -mt-3 bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white rounded-2xl shadow-xl shadow-cyan-600/40 border border-cyan-400/50 active:scale-95 transition-all shrink-0" title="Canlı Sürüş Modunu Başlat">
+      <i data-lucide="play" class="w-4 h-4 fill-white text-white mb-0.5"></i>
+      <span class="text-[9px] font-black uppercase tracking-wider" data-i18n="nav_start_ride_short">Sürüş</span>
+    </button>
     <button onclick="openNearbyModal()" class="flex-1 flex flex-col items-center justify-center p-1 text-slate-400 hover:text-white text-[10px] active:scale-95 transition-all">
-      <i data-lucide="navigation" class="w-5 h-5 mb-0.5"></i>
+      <i data-lucide="navigation" class="w-4 h-4 mb-0.5"></i>
       <span data-i18n="mobile_nav_nearby">Yakınımda</span>
     </button>
     <button onclick="openSavedRoutesModal()" class="flex-1 flex flex-col items-center justify-center p-1 text-slate-400 hover:text-white text-[10px] active:scale-95 transition-all">
-      <i data-lucide="folder-heart" class="w-5 h-5 mb-0.5"></i>
+      <i data-lucide="folder-heart" class="w-4 h-4 mb-0.5"></i>
       <span data-i18n="mobile_nav_saved">Rotalarım</span>
     </button>
   </nav>
