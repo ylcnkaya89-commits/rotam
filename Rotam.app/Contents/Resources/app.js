@@ -2631,12 +2631,362 @@ function handleSaveRouteSubmit(e) {
   showToast('Rota başarıyla kaydedildi!', 'success');
 }
 
+// ==========================================
+// EFSANE HAZIR ROTALAR (CURATED SCENIC ROUTES)
+// ==========================================
+const PRESET_ROUTES = [
+  {
+    id: 'kas-kalkan-fethiye',
+    title: 'Kaş - Kalkan - Fethiye Sahil Yolu (D400)',
+    category: 'Motosiklet & Deniz Manzarası',
+    tag: 'coast',
+    description: 'Turkuaz deniz manzaralı, keskin uçurum virajları ve Kaputaş Kanyonu geçişiyle Türkiye\'nin en popüler kıyı sürüş rotası.',
+    difficulty: 'Orta / İleri',
+    twistiness: 94,
+    distanceKm: 106,
+    durationText: '2 saat 15 dk',
+    badgeClass: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+    points: [
+      { name: 'Kaş Marina (Antalya)', lat: 36.1993, lon: 29.6377 },
+      { name: 'Kaputaş Plajı & Kanyonu', lat: 36.2287, lon: 29.4491 },
+      { name: 'Kalkan Seyir Tepesi', lat: 36.2625, lon: 29.4146 },
+      { name: 'Fethiye Ölüdeniz (Muğla)', lat: 36.5498, lon: 29.1256 }
+    ]
+  },
+  {
+    id: 'sakar-gecidi-akyaka-datca',
+    title: 'Muğla Sakar Geçidi & Akyaka - Datça',
+    category: 'Efsane Saç Tokası Virajlar',
+    tag: 'moto',
+    description: '670 metreden deniz seviyesine inen meşhur Sakar Geçidi saç tokası virajları, Gökova Körfezi panoraması ve Datça Yarımadası.',
+    difficulty: 'İleri',
+    twistiness: 96,
+    distanceKm: 142,
+    durationText: '2 saat 40 dk',
+    badgeClass: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+    points: [
+      { name: 'Muğla Merkez', lat: 37.2153, lon: 28.3636 },
+      { name: 'Sakar Geçidi Seyir Terası', lat: 37.0678, lon: 28.3412 },
+      { name: 'Akyaka Azmak Nehri', lat: 37.0545, lon: 28.3242 },
+      { name: 'Datça Yarımadası', lat: 36.7262, lon: 27.6841 }
+    ]
+  },
+  {
+    id: 'bolu-dagi-abant-yedigoller',
+    title: 'Bolu Dağı Eski Geçit & Abant Virajları',
+    category: 'Dağ & Orman Virajları',
+    tag: 'nature',
+    description: 'Otoyol tüneli yerine eski Bolu Dağı zirve geçidi ve Abant çam ormanları arasındaki saf sürüş keyfi sunan teknik virajlar.',
+    difficulty: 'Orta',
+    twistiness: 88,
+    distanceKm: 85,
+    durationText: '1 saat 50 dk',
+    badgeClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+    points: [
+      { name: 'Düzce Kaynaşlı', lat: 40.7781, lon: 31.3094 },
+      { name: 'Bolu Dağı Eski Geçit Zirve', lat: 40.7421, lon: 31.4285 },
+      { name: 'Abant Gölü Tabiat Parkı', lat: 40.6053, lon: 31.2828 },
+      { name: 'Gölcük Tabiat Parkı (Bolu)', lat: 40.6558, lon: 31.6288 }
+    ]
+  },
+  {
+    id: 'likya-antik-rotasi',
+    title: 'Likya Antik Kentleri & Kıyı Virajları Turu',
+    category: 'Antik Kent & Kıyı Virajları',
+    tag: 'history',
+    description: 'Tlos, Patara, Kaş Antiphellos ve Simena Batık Şehir üzerinden Akdeniz\'in en büyüleyici tarihi rotası.',
+    difficulty: 'Orta',
+    twistiness: 95,
+    distanceKm: 118,
+    durationText: '2 saat 30 dk',
+    badgeClass: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+    points: [
+      { name: 'Tlos Antik Kenti & Akropol', lat: 36.5539, lon: 29.3533 },
+      { name: 'Patara Antik Kenti & Meclisi', lat: 36.2608, lon: 29.3142 },
+      { name: 'Kaş Antiphellos Tiyatrosu', lat: 36.1993, lon: 29.6377 },
+      { name: 'Simena Kalesi & Kekova', lat: 36.1906, lon: 29.8617 }
+    ]
+  },
+  {
+    id: 'kapadokya-ihlara-vadisi',
+    title: 'Kapadokya Peri Bacaları & Ihlara Kanyonu',
+    category: 'Jeolojik Doğa & Kanyon',
+    tag: 'nature',
+    description: 'Göreme Açık Hava Müzesi, Uçhisar Kalesi, Derinkuyu Yeraltı Şehri ve 14 km\'lik Ihlara Kanyonu boyunca masalsı bir Orta Anadolu sürüşü.',
+    difficulty: 'Kolay / Orta',
+    twistiness: 87,
+    distanceKm: 115,
+    durationText: '2 saat 10 dk',
+    badgeClass: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+    points: [
+      { name: 'Göreme Açık Hava Müzesi', lat: 38.6402, lon: 34.8453 },
+      { name: 'Uçhisar Kalesi Zirve', lat: 38.6300, lon: 34.8055 },
+      { name: 'Derinkuyu Yeraltı Şehri', lat: 38.3736, lon: 34.7347 },
+      { name: 'Ihlara Vadisi Kanyon Girişi', lat: 38.2389, lon: 34.3014 }
+    ]
+  },
+  {
+    id: 'canakkale-gelibolu-sehitlik',
+    title: 'Çanakkale Boğazı & Gelibolu Tarihi Rota',
+    category: 'Tarih & Rüzgarlı Sahil',
+    tag: 'history',
+    description: 'Kilitbahir, Alçıtepe, Şehitler Abidesi ve Anzak Koyu virajlarında Ege Denizi ve Boğaz manzarası eşliğinde duygu yüklü bir rota.',
+    difficulty: 'Kolay / Rahat',
+    twistiness: 76,
+    distanceKm: 72,
+    durationText: '1 saat 35 dk',
+    badgeClass: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
+    points: [
+      { name: 'Kilitbahir Kalesi', lat: 40.1478, lon: 26.3792 },
+      { name: 'Çanakkale Şehitler Abidesi', lat: 40.0500, lon: 26.2183 },
+      { name: 'Alçıtepe Şehitlik Yolu', lat: 40.0954, lon: 26.2307 },
+      { name: 'Kabatepe Limanı & Anzak Koyu', lat: 40.2031, lon: 26.2736 }
+    ]
+  },
+  {
+    id: 'frigya-kral-yolu',
+    title: 'Frigya Vadisi & Midas Krallığı Dağ Yolu',
+    category: 'Kaya Şehirleri & Dağ Yolu',
+    tag: 'history',
+    description: 'Eskişehir-Afyon arasında 3000 yıllık devasa Midas Yazılıkaya Anıtı, Emre Gölü ve Ayazini kaya metropolisi arasındaki gizemli rota.',
+    difficulty: 'Orta',
+    twistiness: 85,
+    distanceKm: 135,
+    durationText: '2 saat 35 dk',
+    badgeClass: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+    points: [
+      { name: 'Pessinus Antik Kenti (Sivrihisar)', lat: 39.3364, lon: 31.5858 },
+      { name: 'Midas Anıtı (Yazılıkaya)', lat: 39.2003, lon: 30.7136 },
+      { name: 'Emre Gölü & Frigya Balon Alanı', lat: 39.0988, lon: 30.5524 },
+      { name: 'Ayazini Kaya Evleri Metropolisi', lat: 39.0142, lon: 30.6558 }
+    ]
+  },
+  {
+    id: 'kusyuvasi-gecidi-toroslar',
+    title: 'Toroslar & Alanya Kuşyuvası Geçidi',
+    category: 'Uçurum & Dağ Tünelleri',
+    tag: 'moto',
+    description: 'Toros Dağları\'nda kayalara oyulmuş 1400 metre rakımlı tüneller, baş döndürücü uçurumlar ve Akdeniz\'e inen nefes kesici virajlar.',
+    difficulty: 'Uzman / İleri',
+    twistiness: 97,
+    distanceKm: 88,
+    durationText: '2 saat 20 dk',
+    badgeClass: 'bg-red-500/20 text-red-400 border-red-500/30',
+    points: [
+      { name: 'Alanya Kalesi & Liman', lat: 36.5333, lon: 31.9961 },
+      { name: 'Dim Çayı Vadisi', lat: 36.5411, lon: 32.0833 },
+      { name: 'Kuşyuvası Geçidi Zirvesi (1400m)', lat: 36.6219, lon: 32.3275 },
+      { name: 'Sarıveliler Toros Zirvesi', lat: 36.7028, lon: 32.6144 }
+    ]
+  },
+  {
+    id: 'dogu-urartu-saraylari',
+    title: 'Doğu Anadolu: Urartu & İshak Paşa Sarayı',
+    category: 'Yüksek Rakım & Tarih (1800m+)',
+    tag: 'history',
+    description: 'Kars Ani Katedrali\'nden Ağrı Dağı eteklerindeki masalsı İshak Paşa Sarayı, Muradiye Şelalesi ve Van Kalesi\'ne uzanan efsane rota.',
+    difficulty: 'İleri / Macera',
+    twistiness: 89,
+    distanceKm: 340,
+    durationText: '5 saat 15 dk',
+    badgeClass: 'bg-sky-500/20 text-sky-400 border-sky-500/30',
+    points: [
+      { name: 'Ani Harabeleri & Katedral (Kars)', lat: 40.5075, lon: 43.5728 },
+      { name: 'İshak Paşa Sarayı (Doğubayazıt)', lat: 39.5211, lon: 44.1294 },
+      { name: 'Muradiye Şelalesi', lat: 39.0436, lon: 43.7533 },
+      { name: 'Van Kalesi (Tuşpa)', lat: 38.5028, lon: 43.3403 }
+    ]
+  },
+  {
+    id: 'kackarlar-firtina-vadisi',
+    title: 'Karadeniz Fırtına Vadisi & Ayder - Zilkale',
+    category: 'Yağmur Ormanı & Yayla Virajları',
+    tag: 'nature',
+    description: 'Tarihi taş kemer köprüler, sarp kayalık üzerindeki Zilkale, Palovit Şelalesi ve Kaçkar Dağları sisli yayla geçitleri.',
+    difficulty: 'Orta / İleri',
+    twistiness: 93,
+    distanceKm: 92,
+    durationText: '2 saat 25 dk',
+    badgeClass: 'bg-teal-500/20 text-teal-400 border-teal-500/30',
+    points: [
+      { name: 'Rize Ardeşen Sahili', lat: 41.1914, lon: 40.9875 },
+      { name: 'Fırtına Vadisi Taş Köprüler (Çamlıhemşin)', lat: 41.0442, lon: 40.9631 },
+      { name: 'Zil Kale (Sarp Kaya Zirvesi)', lat: 40.9333, lon: 40.9639 },
+      { name: 'Ayder Yaylası & Kaplıcalar', lat: 40.9567, lon: 41.0967 }
+    ]
+  }
+];
+
+let activePresetCategory = 'all';
+
+function openPresetsModal() {
+  const modal = document.getElementById('modal-presets');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  renderPresetsList('presets-routes-container', activePresetCategory);
+  initIcons();
+}
+
+function closePresetsModal() {
+  document.getElementById('modal-presets')?.classList.add('hidden');
+}
+
+function filterPresetsByCategory(tag) {
+  activePresetCategory = tag;
+  document.querySelectorAll('.preset-filter-btn').forEach(btn => {
+    const isTarget = btn.dataset.tag === tag;
+    btn.className = isTarget
+      ? 'preset-filter-btn active text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-amber-600 text-white shrink-0 shadow-sm'
+      : 'preset-filter-btn text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white shrink-0';
+  });
+  filterPresetsList();
+}
+
+function filterPresetsList() {
+  const query = (document.getElementById('presets-search-input')?.value || '').toLowerCase().trim();
+  renderPresetsList('presets-routes-container', activePresetCategory, query);
+}
+
+function renderPresetsList(containerId = 'presets-routes-container', categoryTag = 'all', searchQuery = '') {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  let filtered = PRESET_ROUTES;
+  if (categoryTag && categoryTag !== 'all') {
+    filtered = filtered.filter(p => p.tag === categoryTag);
+  }
+  if (searchQuery) {
+    filtered = filtered.filter(p =>
+      p.title.toLowerCase().includes(searchQuery) ||
+      p.description.toLowerCase().includes(searchQuery) ||
+      p.points.some(pt => pt.name.toLowerCase().includes(searchQuery))
+    );
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-10 text-slate-400 text-xs">
+        <i data-lucide="search-x" class="w-8 h-8 text-slate-600 mx-auto mb-2"></i>
+        <p>Aramanızla eşleşen hazır rota bulunamadı.</p>
+      </div>
+    `;
+    initIcons();
+    return;
+  }
+
+  container.innerHTML = filtered.map(preset => `
+    <div class="glass-card p-4 rounded-2xl border border-slate-800 hover:border-amber-500/50 bg-slate-900/90 transition-all flex flex-col justify-between space-y-3 group">
+      <div>
+        <div class="flex items-start justify-between gap-2 mb-1.5">
+          <div>
+            <h4 class="text-sm font-bold text-white group-hover:text-amber-300 transition-colors flex items-center gap-1.5">
+              <span>${escapeHtml(preset.title)}</span>
+            </h4>
+            <div class="flex items-center space-x-2 text-[10px] text-slate-400 mt-0.5">
+              <span class="text-amber-400 font-semibold">${escapeHtml(preset.category)}</span>
+              <span>•</span>
+              <span>${preset.distanceKm} km</span>
+              <span>•</span>
+              <span>${preset.durationText}</span>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0 ${preset.badgeClass || 'bg-amber-500/20 text-amber-300 border-amber-500/30'}">
+            %${preset.twistiness} Viraj
+          </span>
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed">${escapeHtml(preset.description)}</p>
+      </div>
+
+      <!-- Duraklar Çipleri & Yükle Butonu -->
+      <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between flex-wrap gap-2 text-xs">
+        <div class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-0.5 max-w-[70%]">
+          ${preset.points.map((pt, i) => `
+            <span class="inline-flex items-center text-[10px] bg-slate-950/80 px-2 py-0.5 rounded-lg border border-slate-800 text-slate-300 shrink-0">
+              <span class="w-3.5 h-3.5 rounded-full ${i === 0 ? 'bg-emerald-500' : i === preset.points.length - 1 ? 'bg-rose-500' : 'bg-brand-500'} text-white text-[8px] flex items-center justify-center font-bold mr-1 shrink-0">${i + 1}</span>
+              <span class="truncate max-w-[110px]">${escapeHtml(pt.name)}</span>
+            </span>
+          `).join('')}
+        </div>
+
+        <button onclick="loadPresetRoute('${preset.id}')" class="px-3.5 py-1.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white rounded-xl font-bold text-xs shadow-md shadow-amber-600/20 active:scale-95 transition-all flex items-center space-x-1.5 shrink-0 ml-auto">
+          <i data-lucide="map" class="w-3.5 h-3.5"></i>
+          <span>Rotayı Yükle</span>
+          <span>&rarr;</span>
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  initIcons();
+}
+
+function loadPresetRoute(presetId) {
+  const preset = PRESET_ROUTES.find(p => p.id === presetId);
+  if (!preset) return;
+
+  // Clear existing route and markers
+  clearAllRoute();
+
+  // Populate waypoints from preset
+  state.waypoints = preset.points.map((pt, idx) => ({
+    id: idx === 0 ? 'start' : idx === preset.points.length - 1 ? 'end' : 'wp-' + Date.now() + '-' + idx,
+    type: idx === 0 ? 'start' : idx === preset.points.length - 1 ? 'end' : 'waypoint',
+    name: pt.name,
+    lat: pt.lat,
+    lon: pt.lon,
+    marker: null
+  }));
+
+  updateWaypointsListUI();
+  updateWaypointMarkers();
+
+  // Close modals
+  closePresetsModal();
+  closeSavedRoutesModal();
+
+  // Close mobile sidebar if open
+  closeMobileSidebar();
+
+  // Calculate route immediately
+  calculateRouteMain();
+
+  showToast(`"${preset.title}" hazır rotası haritaya yüklendi!`, 'success');
+}
+
+function switchSavedModalTab(tab) {
+  const btnPresets = document.getElementById('btn-tab-preset-routes');
+  const btnSaved = document.getElementById('btn-tab-my-saved');
+  const contPresets = document.getElementById('saved-modal-presets-container');
+  const contSaved = document.getElementById('saved-routes-list');
+
+  if (tab === 'presets') {
+    if (btnPresets) btnPresets.className = 'px-3 py-1.5 rounded-xl font-bold bg-amber-600 text-white shadow-sm transition-all flex items-center space-x-1.5';
+    if (btnSaved) btnSaved.className = 'px-3 py-1.5 rounded-xl font-semibold bg-slate-800 text-slate-300 hover:text-white transition-all flex items-center space-x-1.5';
+    contPresets?.classList.remove('hidden');
+    contSaved?.classList.add('hidden');
+    renderPresetsList('saved-modal-presets-container');
+  } else {
+    if (btnPresets) btnPresets.className = 'px-3 py-1.5 rounded-xl font-semibold bg-slate-800 text-slate-300 hover:text-white transition-all flex items-center space-x-1.5';
+    if (btnSaved) btnSaved.className = 'px-3 py-1.5 rounded-xl font-bold bg-rose-600 text-white shadow-sm transition-all flex items-center space-x-1.5';
+    contPresets?.classList.add('hidden');
+    contSaved?.classList.remove('hidden');
+    renderSavedRoutesList();
+  }
+}
+
 function openSavedRoutesModal() {
   const modal = document.getElementById('modal-saved-routes');
-  const list = document.getElementById('saved-routes-list');
-  if (!modal || !list) return;
-
+  if (!modal) return;
   modal.classList.remove('hidden');
+
+  // Default to presets so user sees curated routes right away
+  switchSavedModalTab('presets');
+  initIcons();
+}
+
+function renderSavedRoutesList() {
+  const list = document.getElementById('saved-routes-list');
+  if (!list) return;
   list.innerHTML = '';
 
   let savedList = [];
@@ -2646,7 +2996,7 @@ function openSavedRoutesModal() {
   } catch (err) {}
 
   if (savedList.length === 0) {
-    list.innerHTML = '<p class="text-xs text-slate-400 py-6 text-center">Henüz kaydedilmiş rotanız bulunmuyor.</p>';
+    list.innerHTML = '<p class="text-xs text-slate-400 py-8 text-center">Henüz kaydedilmiş bir özel rotanız bulunmuyor.<br><span class="text-[11px] text-slate-500">Hazır rotaları yukarıdaki "Hazır Efsane Rotalar" sekmesinden inceleyebilirsiniz.</span></p>';
     return;
   }
 

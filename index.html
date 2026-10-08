@@ -144,6 +144,12 @@
         <span class="hidden xl:inline" data-i18n="nav_discover">Türkiye'yi Keşfet</span>
         <span class="xl:hidden" data-i18n="mobile_nav_discover">Keşfet</span>
       </button>
+      <button id="nav-btn-presets" onclick="openPresetsModal()" class="flex items-center space-x-1.5 px-2.5 lg:px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all whitespace-nowrap" title="Efsane Hazır Motosiklet ve Gezi Rotaları">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
+        <span class="hidden xl:inline" data-i18n="nav_presets">Hazır Rotalar</span>
+        <span class="xl:hidden">Hazır</span>
+        <span class="px-1.5 py-0.2 bg-amber-500/20 text-amber-300 rounded-full text-[10px] font-bold border border-amber-500/30">10</span>
+      </button>
       <button id="nav-btn-nearby" onclick="openNearbyModal()" class="flex items-center space-x-1.5 px-2.5 lg:px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all whitespace-nowrap">
         <i data-lucide="navigation" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>
         <span data-i18n="nav_nearby">Yakınımda</span>
@@ -265,6 +271,20 @@
             </button>
           </div>
         </div>
+
+        <!-- HAZIR EFSANE ROTALAR HIZLI SEÇİM KARTI -->
+        <button type="button" onclick="openPresetsModal()" class="w-full flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-slate-900 border border-amber-500/30 hover:border-amber-400 text-amber-300 hover:text-white active:scale-[0.99] transition-all shadow-sm text-left group">
+          <div class="flex items-center space-x-2.5 min-w-0">
+            <span class="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform shrink-0">
+              <i data-lucide="sparkles" class="w-4 h-4"></i>
+            </span>
+            <div class="min-w-0">
+              <p class="text-xs font-bold text-white group-hover:text-amber-300 transition-colors truncate" data-i18n="sidebar_discover_presets">Hazır Efsane Rotaları Keşfet</p>
+              <p class="text-[10px] text-slate-400 truncate">Kaş-Kalkan, Sakar Geçidi, Likya, Bolu Dağı...</p>
+            </div>
+          </div>
+          <span class="text-[10px] font-bold bg-amber-500/25 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/40 shrink-0 ml-1">10 Rota &rarr;</span>
+        </button>
 
         <!-- 2. ROTA DURAKLARI KARTI -->
         <div class="glass-card rounded-2xl p-4 border border-slate-800/80">
@@ -998,18 +1018,62 @@
     </div>
   </div>
 
-  <!-- MODAL: KAYITLI ROTALARIM -->
+  <!-- MODAL: HAZIR EFSANE ROTALAR (CURATED SCENIC ROUTES) -->
+  <div id="modal-presets" class="hidden fixed inset-0 z-[1000] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
+    <div class="responsive-modal-card bg-slate-900 border border-slate-800 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
+      <!-- Header -->
+      <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h3 class="text-base font-bold text-white" data-i18n="modal_presets_title">Efsane Hazır Rotalar</h3>
+              <span class="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[10px] font-bold">10 Küratör Güzergah</span>
+            </div>
+            <p class="text-xs text-slate-400" data-i18n="modal_presets_sub">Motosiklet ve seyahat tutkunları için özenle seçilmiş ikonik Türkiye güzergahları</p>
+          </div>
+        </div>
+        <button onclick="closePresetsModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" title="Kapat">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Filtreler & Arama -->
+      <div class="p-3 bg-slate-950 border-b border-slate-800 flex flex-col sm:flex-row gap-2">
+        <div class="relative flex-1">
+          <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5"></i>
+          <input type="text" id="presets-search-input" oninput="filterPresetsList()" placeholder="Hazır rota veya bölge ara (Örn: Kaş, Sakar, Bolu, Kapadokya...)" data-i18n-placeholder="presets_search_placeholder" class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500">
+        </div>
+        <div class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar pb-0.5">
+          <button onclick="filterPresetsByCategory('all')" class="preset-filter-btn active text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-amber-600 text-white shrink-0" data-tag="all" data-i18n="presets_filter_all">Tümü</button>
+          <button onclick="filterPresetsByCategory('moto')" class="preset-filter-btn text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white shrink-0" data-tag="moto" data-i18n="presets_filter_moto">🏍️ Viraj</button>
+          <button onclick="filterPresetsByCategory('history')" class="preset-filter-btn text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white shrink-0" data-tag="history" data-i18n="presets_filter_history">🏛️ Tarih</button>
+          <button onclick="filterPresetsByCategory('nature')" class="preset-filter-btn text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white shrink-0" data-tag="nature" data-i18n="presets_filter_nature">🌲 Doğa</button>
+          <button onclick="filterPresetsByCategory('coast')" class="preset-filter-btn text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white shrink-0" data-tag="coast" data-i18n="presets_filter_coast">🌊 Sahil</button>
+        </div>
+      </div>
+
+      <!-- Liste Container -->
+      <div class="p-4 overflow-y-auto space-y-3 flex-1" id="presets-routes-container">
+        <!-- JS ile render edilir -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: KAYITLI ROTALARIM & HAZIR ROTALAR -->
   <div id="modal-saved-routes" class="hidden fixed inset-0 z-[1000] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
     <div class="responsive-modal-card bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
       <div class="p-4 border-b border-slate-800 flex items-center justify-between">
         <div class="flex items-center space-x-2">
           <i data-lucide="folder-heart" class="w-5 h-5 text-rose-400"></i>
-          <h3 class="text-base font-bold text-white" data-i18n="modal_saved_title">Kayıtlı Rotalarım</h3>
-          <span class="px-2 py-0.5 text-[10px] rounded bg-slate-800 text-slate-400 font-mono">SQLite / Depolama</span>
+          <h3 class="text-base font-bold text-white" data-i18n="modal_saved_title">Kayıtlı & Hazır Rotalar</h3>
         </div>
         <div class="flex items-center space-x-1.5">
-          <button onclick="openAdminModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" title="Veri & Yönetim Paneli" data-i18n-title="nav_admin">
-            <i data-lucide="settings-2" class="w-4 h-4"></i>
+          <button onclick="openPresetsModal()" class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold hover:bg-amber-500/30 transition-all flex items-center space-x-1" title="Tüm Hazır Rotalar">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Tüm Hazır Rotalar</span>
           </button>
           <button onclick="closeSavedRoutesModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
             <i data-lucide="x" class="w-5 h-5"></i>
@@ -1017,7 +1081,26 @@
         </div>
       </div>
 
-      <div class="p-4 overflow-y-auto space-y-3" id="saved-routes-list">
+      <!-- Sekmeler: Hazır Efsane Rotalar & Kaydettiklerim -->
+      <div class="px-4 py-2 bg-slate-950/80 border-b border-slate-800 flex items-center space-x-2 text-xs">
+        <button id="btn-tab-preset-routes" onclick="switchSavedModalTab('presets')" class="px-3 py-1.5 rounded-xl font-bold bg-amber-600 text-white shadow-sm transition-all flex items-center space-x-1.5">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+          <span data-i18n="tab_presets">✨ Hazır Efsane Rotalar</span>
+          <span class="px-1.5 py-0.2 bg-white/20 text-white rounded-full text-[9px] font-bold">10</span>
+        </button>
+        <button id="btn-tab-my-saved" onclick="switchSavedModalTab('saved')" class="px-3 py-1.5 rounded-xl font-semibold bg-slate-800 text-slate-300 hover:text-white transition-all flex items-center space-x-1.5">
+          <i data-lucide="folder-heart" class="w-3.5 h-3.5"></i>
+          <span data-i18n="tab_my_saved">📁 Kaydettiğim Rotalar</span>
+        </button>
+      </div>
+
+      <!-- Tab 1: Hazır Efsane Rotalar -->
+      <div class="p-4 overflow-y-auto space-y-3 flex-1" id="saved-modal-presets-container">
+        <!-- JS tarafından doldurulur -->
+      </div>
+
+      <!-- Tab 2: Kaydettiğim Özel Rotalar -->
+      <div class="hidden p-4 overflow-y-auto space-y-3 flex-1" id="saved-routes-list">
         <!-- Rotalar JS tarafından listelenir -->
       </div>
     </div>
