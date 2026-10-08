@@ -255,63 +255,13 @@ function initMap() {
   setTimeout(() => { if (map) map.invalidateSize(); }, 700);
   setTimeout(() => { if (map) map.invalidateSize(); }, 1500);
 
-  // Render initial famous discovery spots across Turkey
-  renderInitialHighlights();
+  // Clean, uncluttered map on startup: no pins or symbols
+  clearHighlightMarkers();
 }
 
-// Initial Highlight Discovery Pins (Rendered when no route is active)
+// Initial Highlight Discovery Pins (Kept clean on startup)
 function renderInitialHighlights() {
   clearHighlightMarkers();
-  if (!map || !state.allPlaces || state.allPlaces.length === 0) return;
-  if (state.routeData) return; // Do not clutter when route is displayed
-
-  // Pick top 35 iconic places across Turkey
-  const curatedIds = [1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36];
-  const highlightPlaces = state.allPlaces.filter(p => curatedIds.includes(p.id) || p.rating === 5).slice(0, 35);
-
-  highlightPlaces.forEach(p => {
-    const cat = p.category || 'historic';
-    const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG.historic;
-    const pinClass = cfg.pinClass || 'pin-historic';
-
-    const icon = L.divIcon({
-      className: 'custom-poi-marker',
-      html: `
-        <div class="custom-pin ${pinClass} w-7 h-7 text-xs flex items-center justify-center shadow-lg transition-transform hover:scale-125" title="${escapeHtml(p.name)}">
-          <span>${cfg.emoji}</span>
-        </div>
-      `,
-      iconSize: [28, 28],
-      iconAnchor: [14, 14]
-    });
-
-    const marker = L.marker([p.lat, p.lon], { icon }).addTo(map);
-    const safeName = escapeHtml(p.name).replace(/'/g, "\\'");
-
-    marker.bindPopup(`
-      <div class="text-xs p-1">
-        <div class="flex items-center justify-between mb-1.5 gap-2">
-          <strong style="color:${cfg.color}" class="font-bold flex items-center gap-1">
-            <span>${cfg.emoji}</span>
-            <span>${cfg.title}</span>
-          </strong>
-          <span class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">★ ${p.rating || 5}.0</span>
-        </div>
-        <p class="font-bold text-white text-sm mt-0.5">${escapeHtml(p.name)}</p>
-        ${p.description ? `<p class="text-[11px] text-slate-300 mt-1 leading-relaxed">${escapeHtml(p.description)}</p>` : ''}
-        <div class="flex items-center space-x-1.5 mt-3 pt-2 border-t border-slate-800">
-          <button onclick="addPoiToRoute(${p.lat}, ${p.lon}, '${safeName}')" class="text-[10px] bg-brand-600 hover:bg-brand-500 text-white px-2.5 py-1.5 rounded-lg font-semibold shadow-md shadow-brand-600/30">
-            Rotaya Ekle
-          </button>
-          <button onclick="openPlaceDetailById(${p.id})" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1.5 rounded-lg">
-            Detaylar
-          </button>
-        </div>
-      </div>
-    `);
-
-    state.highlightMarkers.push(marker);
-  });
 }
 
 function clearHighlightMarkers() {
@@ -973,6 +923,9 @@ function addWaypointField() {
   };
   state.waypoints.splice(newIndex, 0, newWp);
   updateWaypointsListUI();
+  if (typeof RotamTelemetry !== 'undefined') {
+    RotamTelemetry.recordStopAdded();
+  }
 }
 
 function removeWaypoint(index) {
@@ -1021,7 +974,7 @@ function clearRouteDisplay() {
   state.routeAlternatives = [];
   state.corridorPois = [];
   state.smartRecommendations = [];
-  renderInitialHighlights();
+  clearHighlightMarkers();
 
   if (map) {
     map.setView([39.0, 35.2], 6);
@@ -1227,6 +1180,11 @@ async function calculateRouteMain() {
     state.activeRouteIndex = 0;
     const activeRoute = alternatives[0];
     state.routeData = activeRoute;
+
+    // Record Real Telemetry for Route Calculation
+    if (typeof RotamTelemetry !== 'undefined') {
+      RotamTelemetry.recordRoute(validPoints);
+    }
 
     // Clear initial highlight pins when active route takes over
     clearHighlightMarkers();
@@ -1978,6 +1936,9 @@ function addPoiToRoute(lat, lon, name) {
   state.waypoints.splice(insertIndex, 0, newWp);
   updateWaypointsListUI();
   updateWaypointMarkers();
+  if (typeof RotamTelemetry !== 'undefined') {
+    RotamTelemetry.recordStopAdded();
+  }
   calculateRouteMain();
 
   showToast(`"${name}" rotanıza durak olarak eklendi! Güzergah güncelleniyor...`, 'success');
@@ -2788,7 +2749,110 @@ function switchAdminTab(tab) {
   }
 }
 
-function openAdminModal() {
+// ==========================================
+// ADMIN AUTHENTICATION & ACCESS CONTROL (#34)
+// ==========================================
+const ADMIN_CONFIG = {
+  SESSION_KEY: 'rotam_admin_session',
+  PASS_KEY: 'rotam_admin_pass',
+  DEFAULT_PASS: 'rotam2026'
+};
+
+function isAdminAuthenticated() {
+  try {
+    return sessionStorage.getItem(ADMIN_CONFIG.SESSION_KEY) === 'true';
+  } catch (e) {
+    return false;
+  }
+}
+
+function openAdminAuthModal() {
+  const modal = document.getElementById('modal-admin-auth');
+  const input = document.getElementById('admin-password-input');
+  const err = document.getElementById('admin-auth-error');
+  if (err) err.classList.add('hidden');
+  if (input) {
+    input.value = '';
+    setTimeout(() => input.focus(), 100);
+  }
+  if (modal) modal.classList.remove('hidden');
+  initIcons();
+}
+
+function closeAdminAuthModal() {
+  const modal = document.getElementById('modal-admin-auth');
+  if (modal) modal.classList.add('hidden');
+}
+
+function handleAdminLogin(event) {
+  if (event && event.preventDefault) event.preventDefault();
+  const input = document.getElementById('admin-password-input');
+  const err = document.getElementById('admin-auth-error');
+  const enteredPass = (input ? input.value : '').trim();
+
+  let currentPass = ADMIN_CONFIG.DEFAULT_PASS;
+  try {
+    const saved = localStorage.getItem(ADMIN_CONFIG.PASS_KEY);
+    if (saved && saved.trim()) currentPass = saved.trim();
+  } catch (e) {}
+
+  if (enteredPass === currentPass) {
+    try {
+      sessionStorage.setItem(ADMIN_CONFIG.SESSION_KEY, 'true');
+    } catch (e) {}
+    closeAdminAuthModal();
+    openAdminModal(true);
+    showToast('Yetkili giriş başarılı!', 'success');
+  } else {
+    if (err) err.classList.remove('hidden');
+    if (input) {
+      input.classList.add('border-rose-500');
+      setTimeout(() => input.classList.remove('border-rose-500'), 1500);
+    }
+  }
+}
+
+function logoutAdmin() {
+  try {
+    sessionStorage.removeItem(ADMIN_CONFIG.SESSION_KEY);
+  } catch (e) {}
+  closeAdminModal();
+  showToast('Yönetici oturumu kapatıldı.', 'info');
+}
+
+function changeAdminPassword() {
+  let currentPass = ADMIN_CONFIG.DEFAULT_PASS;
+  try {
+    const saved = localStorage.getItem(ADMIN_CONFIG.PASS_KEY);
+    if (saved && saved.trim()) currentPass = saved.trim();
+  } catch (e) {}
+
+  const oldInput = prompt('Mevcut yönetici şifrenizi girin:');
+  if (oldInput === null) return;
+  if (oldInput.trim() !== currentPass) {
+    showToast('Mevcut şifre hatalı!', 'error');
+    return;
+  }
+
+  const newPass = prompt('Yeni yönetici şifresini girin (en az 4 karakter):');
+  if (!newPass || newPass.trim().length < 4) {
+    showToast('Yeni şifre en az 4 karakter olmalıdır.', 'warning');
+    return;
+  }
+
+  try {
+    localStorage.setItem(ADMIN_CONFIG.PASS_KEY, newPass.trim());
+    showToast('Yönetici şifresi başarıyla güncellendi.', 'success');
+  } catch (e) {
+    showToast('Şifre kaydedilemedi.', 'error');
+  }
+}
+
+function openAdminModal(bypassAuth = false) {
+  if (!bypassAuth && !isAdminAuthenticated()) {
+    openAdminAuthModal();
+    return;
+  }
   const modal = document.getElementById('modal-admin');
   if (!modal) return;
   modal.classList.remove('hidden');
@@ -2796,11 +2860,246 @@ function openAdminModal() {
   switchAdminTab('places');
   updateAdminStats();
   renderAdminPlacesList();
+  initIcons();
 }
 
 function closeAdminModal() {
   document.getElementById('modal-admin')?.classList.add('hidden');
 }
+
+// ==========================================
+// REAL-TIME TELEMETRY & ANALYTICS ENGINE
+// ==========================================
+const RotamTelemetry = {
+  KEYS: {
+    TOTAL_VISITS: 'rotam_telemetry_total_visits',
+    TODAY_PREFIX: 'rotam_telemetry_daily_',
+    ROUTES_COUNT: 'rotam_telemetry_routes_count',
+    STOPS_COUNT: 'rotam_telemetry_stops_count',
+    POPULAR_ROUTES: 'rotam_telemetry_popular_routes',
+    DEVICE_MOBILE: 'rotam_telemetry_dev_mobile',
+    DEVICE_DESKTOP: 'rotam_telemetry_dev_desktop',
+    DEVICE_TABLET: 'rotam_telemetry_dev_tablet',
+    SESSION_FLAG: 'rotam_session_logged'
+  },
+
+  getTodayKey() {
+    const d = new Date();
+    return `${this.KEYS.TODAY_PREFIX}${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  },
+
+  detectDevice() {
+    const ua = ((typeof navigator !== 'undefined' ? navigator.userAgent : '') || (typeof window !== 'undefined' && window.navigator ? window.navigator.userAgent : '') || '').toLowerCase();
+    const isTablet = /(ipad|tablet|(android(?!.*mobile))|(windows(?!.*phone)(.*touch))|kindle|playbook|silk)/i.test(ua);
+    if (isTablet) return 'tablet';
+    const width = typeof window !== 'undefined' ? window.innerWidth : 1200;
+    const isMobile = /mobile|iphone|ipod|android.*mobile|blackberry|opera mini|iemobile|wpdesktop/i.test(ua) || width <= 768;
+    if (isMobile) return 'mobile';
+    return 'desktop';
+  },
+
+  init() {
+    try {
+      const alreadyLogged = sessionStorage.getItem(this.KEYS.SESSION_FLAG);
+      if (!alreadyLogged) {
+        sessionStorage.setItem(this.KEYS.SESSION_FLAG, 'true');
+
+        // Total visits
+        const total = parseInt(localStorage.getItem(this.KEYS.TOTAL_VISITS) || '0', 10) + 1;
+        localStorage.setItem(this.KEYS.TOTAL_VISITS, String(total));
+
+        // Today visits
+        const todayKey = this.getTodayKey();
+        const today = parseInt(localStorage.getItem(todayKey) || '0', 10) + 1;
+        localStorage.setItem(todayKey, String(today));
+
+        // Device breakdown
+        const dev = this.detectDevice();
+        if (dev === 'mobile') {
+          const m = parseInt(localStorage.getItem(this.KEYS.DEVICE_MOBILE) || '0', 10) + 1;
+          localStorage.setItem(this.KEYS.DEVICE_MOBILE, String(m));
+        } else if (dev === 'tablet') {
+          const tab = parseInt(localStorage.getItem(this.KEYS.DEVICE_TABLET) || '0', 10) + 1;
+          localStorage.setItem(this.KEYS.DEVICE_TABLET, String(tab));
+        } else {
+          const dsk = parseInt(localStorage.getItem(this.KEYS.DEVICE_DESKTOP) || '0', 10) + 1;
+          localStorage.setItem(this.KEYS.DEVICE_DESKTOP, String(dsk));
+        }
+      }
+    } catch (e) {
+      console.warn('Telemetry init failed:', e);
+    }
+  },
+
+  recordRoute(validPoints) {
+    try {
+      const current = parseInt(localStorage.getItem(this.KEYS.ROUTES_COUNT) || '0', 10) + 1;
+      localStorage.setItem(this.KEYS.ROUTES_COUNT, String(current));
+
+      if (validPoints && validPoints.length >= 2) {
+        const start = (validPoints[0].name || 'Başlangıç').trim();
+        const end = (validPoints[validPoints.length - 1].name || 'Varış').trim();
+        const routeName = `${start} → ${end}`;
+
+        let routesMap = {};
+        try {
+          const raw = localStorage.getItem(this.KEYS.POPULAR_ROUTES);
+          if (raw) routesMap = JSON.parse(raw);
+        } catch (e) {}
+
+        routesMap[routeName] = (routesMap[routeName] || 0) + 1;
+        localStorage.setItem(this.KEYS.POPULAR_ROUTES, JSON.stringify(routesMap));
+      }
+    } catch (e) {
+      console.warn('Record route failed:', e);
+    }
+  },
+
+  recordStopAdded() {
+    try {
+      const current = parseInt(localStorage.getItem(this.KEYS.STOPS_COUNT) || '0', 10) + 1;
+      localStorage.setItem(this.KEYS.STOPS_COUNT, String(current));
+    } catch (e) {
+      console.warn('Record stop failed:', e);
+    }
+  },
+
+  getStats() {
+    let totalVisits = 0;
+    let todayVisits = 0;
+    let routesCount = 0;
+    let stopsCount = 0;
+    let popularRoutes = [];
+    let devices = { mobile: 0, desktop: 0, tablet: 0 };
+
+    try {
+      totalVisits = parseInt(localStorage.getItem(this.KEYS.TOTAL_VISITS) || '0', 10);
+      todayVisits = parseInt(localStorage.getItem(this.getTodayKey()) || '0', 10);
+      routesCount = parseInt(localStorage.getItem(this.KEYS.ROUTES_COUNT) || '0', 10);
+      stopsCount = parseInt(localStorage.getItem(this.KEYS.STOPS_COUNT) || '0', 10);
+
+      const m = parseInt(localStorage.getItem(this.KEYS.DEVICE_MOBILE) || '0', 10);
+      const d = parseInt(localStorage.getItem(this.KEYS.DEVICE_DESKTOP) || '0', 10);
+      const tab = parseInt(localStorage.getItem(this.KEYS.DEVICE_TABLET) || '0', 10);
+      devices = { mobile: m, desktop: d, tablet: tab };
+
+      const rawRoutes = localStorage.getItem(this.KEYS.POPULAR_ROUTES);
+      if (rawRoutes) {
+        const map = JSON.parse(rawRoutes);
+        popularRoutes = Object.entries(map)
+          .map(([name, count]) => ({ name, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 5);
+      }
+    } catch (e) {}
+
+    const totalDev = devices.mobile + devices.desktop + devices.tablet;
+    const mobilePct = totalDev > 0 ? Math.round((devices.mobile / totalDev) * 100) : 0;
+    const desktopPct = totalDev > 0 ? Math.round((devices.desktop / totalDev) * 100) : 0;
+    const tabletPct = totalDev > 0 ? Math.max(0, 100 - mobilePct - desktopPct) : 0;
+
+    return {
+      totalVisits,
+      todayVisits,
+      routesCount,
+      stopsCount,
+      popularRoutes,
+      devices: {
+        mobile: devices.mobile,
+        desktop: devices.desktop,
+        tablet: devices.tablet,
+        mobilePct,
+        desktopPct,
+        tabletPct
+      }
+    };
+  },
+
+  renderAdminUI() {
+    const stats = this.getStats();
+
+    const totalEl = document.getElementById('analytics-total-visits');
+    if (totalEl) totalEl.textContent = stats.totalVisits.toLocaleString('tr-TR');
+
+    const todayEl = document.getElementById('analytics-today-visits');
+    if (todayEl) todayEl.textContent = stats.todayVisits.toLocaleString('tr-TR');
+
+    const routesEl = document.getElementById('analytics-routes-created');
+    if (routesEl) routesEl.textContent = stats.routesCount.toLocaleString('tr-TR');
+
+    const stopsEl = document.getElementById('analytics-stops-added');
+    if (stopsEl) stopsEl.textContent = stats.stopsCount.toLocaleString('tr-TR');
+
+    // Popular routes list
+    const routesListEl = document.getElementById('analytics-popular-routes-list');
+    if (routesListEl) {
+      if (stats.popularRoutes.length === 0) {
+        routesListEl.innerHTML = `
+          <div class="text-center py-4 text-slate-500 text-xs italic">
+            ${(typeof t === 'function' ? t('admin_analytics_no_routes') : null) || 'Henüz hesaplanan rota bulunmuyor.'}
+          </div>
+        `;
+      } else {
+        routesListEl.innerHTML = stats.popularRoutes.map(r => `
+          <div class="flex items-center justify-between p-2 bg-slate-950/70 border border-slate-800/80 rounded-xl">
+            <span class="text-white font-medium truncate max-w-[200px]" title="${escapeHtml(r.name)}">${escapeHtml(r.name)}</span>
+            <span class="text-amber-400 font-bold shrink-0 ml-2 text-xs bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">${r.count} arama</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    // Devices
+    const dev = stats.devices;
+    const mobPctEl = document.getElementById('analytics-mobile-pct');
+    const mobBarEl = document.getElementById('analytics-mobile-bar');
+    if (mobPctEl) mobPctEl.textContent = `${dev.mobilePct}% (${dev.mobile})`;
+    if (mobBarEl) mobBarEl.style.width = `${dev.mobilePct}%`;
+
+    const dskPctEl = document.getElementById('analytics-desktop-pct');
+    const dskBarEl = document.getElementById('analytics-desktop-bar');
+    if (dskPctEl) dskPctEl.textContent = `${dev.desktopPct}% (${dev.desktop})`;
+    if (dskBarEl) dskBarEl.style.width = `${dev.desktopPct}%`;
+
+    const tabPctEl = document.getElementById('analytics-tablet-pct');
+    const tabBarEl = document.getElementById('analytics-tablet-bar');
+    if (tabPctEl) tabPctEl.textContent = `${dev.tabletPct}% (${dev.tablet})`;
+    if (tabBarEl) tabBarEl.style.width = `${dev.tabletPct}%`;
+
+    initIcons();
+  },
+
+  resetConfirm() {
+    if (confirm('Tüm analitik ve telemetri sayaçlarını sıfırlamak istediğinize emin misiniz?')) {
+      try {
+        localStorage.removeItem(this.KEYS.TOTAL_VISITS);
+        localStorage.removeItem(this.KEYS.ROUTES_COUNT);
+        localStorage.removeItem(this.KEYS.STOPS_COUNT);
+        localStorage.removeItem(this.KEYS.POPULAR_ROUTES);
+        localStorage.removeItem(this.KEYS.DEVICE_MOBILE);
+        localStorage.removeItem(this.KEYS.DEVICE_DESKTOP);
+        localStorage.removeItem(this.KEYS.DEVICE_TABLET);
+        localStorage.removeItem(this.getTodayKey());
+        this.renderAdminUI();
+        showToast('Telemetri sayaçları sıfırlandı.', 'info');
+      } catch (e) {
+        showToast('Sıfırlama başarısız.', 'error');
+      }
+    }
+  },
+
+  exportJson() {
+    const stats = this.getStats();
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(stats, null, 2));
+    const dlAnchor = document.createElement('a');
+    dlAnchor.setAttribute("href", dataStr);
+    dlAnchor.setAttribute("download", `rotam_telemetry_${new Date().toISOString().slice(0, 10)}.json`);
+    document.body.appendChild(dlAnchor);
+    dlAnchor.click();
+    dlAnchor.remove();
+    showToast('Analitik verileri JSON olarak indirildi.', 'success');
+  }
+};
 
 function updateAdminStats() {
   const total = state.allPlaces.length;
@@ -2808,15 +3107,17 @@ function updateAdminStats() {
   const nature = state.allPlaces.filter(p => p.category === 'nature').length;
   const gastro = state.allPlaces.filter(p => p.category === 'gastronomy' || p.category === 'cafe').length;
 
-  document.getElementById('admin-stat-total').textContent = total;
-  document.getElementById('admin-stat-historic').textContent = historic;
-  document.getElementById('admin-stat-nature').textContent = nature;
-  document.getElementById('admin-stat-gastro').textContent = gastro;
+  const totalEl = document.getElementById('admin-stat-total');
+  if (totalEl) totalEl.textContent = total;
+  const histEl = document.getElementById('admin-stat-historic');
+  if (histEl) histEl.textContent = historic;
+  const natEl = document.getElementById('admin-stat-nature');
+  if (natEl) natEl.textContent = nature;
+  const gastEl = document.getElementById('admin-stat-gastro');
+  if (gastEl) gastEl.textContent = gastro;
 
-  // Local analytics tracking (#34)
-  let visits = parseInt(localStorage.getItem('rotam_visits') || '1428', 10);
-  const totalVisitsEl = document.getElementById('analytics-total-visits');
-  if (totalVisitsEl) totalVisitsEl.textContent = visits.toLocaleString('tr-TR');
+  // Render Real Telemetry Metrics
+  RotamTelemetry.renderAdminUI();
 }
 
 function toggleAdminAddForm() {
@@ -3362,12 +3663,10 @@ document.addEventListener('DOMContentLoaded', () => {
   renderJourneyTimeline();
   initIcons();
 
-  // Increment local visits telemetry (#34)
-  try {
-    let visits = parseInt(localStorage.getItem('rotam_visits') || '1428', 10);
-    visits++;
-    localStorage.setItem('rotam_visits', visits.toString());
-  } catch (e) {}
+  // Initialize real-time telemetry (#34)
+  if (typeof RotamTelemetry !== 'undefined') {
+    RotamTelemetry.init();
+  }
 
   // Restore personalized preferences (#27)
   try {
