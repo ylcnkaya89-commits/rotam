@@ -4472,94 +4472,237 @@ const LiveNavigation = {
   compassMode: 'heading',
   isOverviewMode: false,
   incidentMarkers: [],
+  currentSpeedLimit: 90,
+  lastOverspeedWarningTime: 0,
+  offRouteCounter: 0,
+  isRerouting: false,
+  isHudMirrored: false,
+  audioCtx: null,
 
-  initRouteSteps() {
-    this.steps = [];
-    if (state.routeData && Array.isArray(state.routeData.steps) && state.routeData.steps.length > 0) {
-      this.steps = state.routeData.steps;
-    } else {
-      // Fallback: derive synthetic steps from waypoints or route geometry
-      const valid = (state.waypoints || []).filter(w => w.lat !== null && w.lon !== null);
-      if (valid.length >= 2) {
-        for (let i = 0; i < valid.length; i++) {
-          const wp = valid[i];
-          const isFirst = (i === 0);
-          const isLast = (i === valid.length - 1);
-          this.steps.push({
-            maneuver: {
-              type: isFirst ? 'depart' : (isLast ? 'arrive' : 'turn'),
-              modifier: isFirst ? 'straight' : (isLast ? 'straight' : (i % 2 === 0 ? 'right' : 'slight left')),
-              location: [wp.lon, wp.lat]
-            },
-            name: wp.name || (isLast ? ((state.lang === 'en') ? 'Destination' : 'Varış Noktası') : `Durak ${i + 1}`),
-            distance: 1200
-          });
-        }
+  playNavSound(type) {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      if (!this.audioCtx) this.audioCtx = new AudioCtx();
+      if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+
+      const now = this.audioCtx.currentTime;
+      const osc = this.audioCtx.createOscillator();
+      const gain = this.audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(this.audioCtx.destination);
+
+      if (type === 'turn') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, now); // D5
+        osc.frequency.setValueAtTime(880.00, now + 0.12); // A5
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.start(now);
+        osc.stop(now + 0.36);
+      } else if (type === 'overspeed') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.setValueAtTime(600, now + 0.1);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        osc.start(now);
+        osc.stop(now + 0.26);
+      } else if (type === 'reroute') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.setValueAtTime(554.37, now + 0.1);
+        osc.frequency.setValueAtTime(659.25, now + 0.2);
+        gain.gain.setValueAtTime(0.22, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        osc.start(now);
+        osc.stop(now + 0.46);
       }
+    } catch (e) {
+      // Audio context error or not allowed yet
     }
   },
 
-  getManeuverInfo(step) {
-    const isEn = (window.state && window.state.lang === 'en');
-    if (!step || !step.maneuver) {
-      return {
-        arrow: '↑',
-        action: isEn ? 'towards' : 'yönüne doğru',
-        street: isEn ? 'Continue straight' : 'Düz devam edin'
-      };
+  getSpeedLimitForStep(streetName = '') {
+    const s = (streetName || '').toLowerCase();
+    if (s.includes('otoyol') || s.includes('otoban') || s.includes('kuzey marmara') || s.includes('o-') || s.includes('motorway')) {
+      return 130;
+    }
+    if (s.includes('çevre yolu') || s.includes('cevre yolu') || s.includes('d-') || s.includes('d100') || s.includes('d200') || s.includes('d300') || s.includes('d400') || s.includes('bulvar') || s.includes('blv') || s.includes('expressway')) {
+      return 90;
+    }
+    if (s.includes('cd') || s.includes('caddesi') || s.includes('sokak') || s.includes('sk') || s.includes('mahalle') || s.includes('avenue') || s.includes('street')) {
+      return 50;
+    }
+    return 80;
+  },
+
+  updateLaneGuidance(step, distMeters) {
+    const bar = document.getElementById('live-nav-lanes-bar');
+    const container = document.getElementById('live-nav-lanes-container');
+    if (!bar || !container) return;
+
+    if (!step || distMeters > 700 || distMeters <= 0) {
+      bar.classList.add('hidden');
+      return;
     }
 
-    const type = step.maneuver.type || 'turn';
-    const mod = step.maneuver.modifier || 'straight';
-    let street = step.name && step.name.trim().length > 0 ? step.name : '';
-    if (!street) {
-      const valid = (state.waypoints || []).filter(w => w.lat !== null && w.lon !== null);
-      if (valid.length > 0) {
-        street = valid[valid.length - 1].name || (isEn ? 'Destination route' : 'Varış güzergahı');
-      } else {
-        street = isEn ? 'Main Road' : 'Ana Yol';
+    const mod = step.maneuver?.modifier || '';
+    if (mod === 'right' || mod === 'sharp right' || mod === 'slight right') {
+      container.innerHTML = `
+        <span class="gmaps-lane-box">↑</span>
+        <span class="gmaps-lane-box">↑</span>
+        <span class="gmaps-lane-box lane-active">↱</span>
+      `;
+      bar.classList.remove('hidden');
+    } else if (mod === 'left' || mod === 'sharp left' || mod === 'slight left') {
+      container.innerHTML = `
+        <span class="gmaps-lane-box lane-active">↰</span>
+        <span class="gmaps-lane-box">↑</span>
+        <span class="gmaps-lane-box">↑</span>
+      `;
+      bar.classList.remove('hidden');
+    } else if (mod === 'straight' || step.maneuver?.type === 'fork') {
+      container.innerHTML = `
+        <span class="gmaps-lane-box lane-active">↑</span>
+        <span class="gmaps-lane-box lane-active">↑</span>
+        <span class="gmaps-lane-box">↱</span>
+      `;
+      bar.classList.remove('hidden');
+    } else {
+      bar.classList.add('hidden');
+    }
+  },
+
+  detectUpcomingCurvature(lat, lon) {
+    const pill = document.getElementById('live-nav-curve-pill');
+    const textEl = document.getElementById('live-nav-curve-text');
+    if (!pill || !textEl) return;
+
+    const coords = state.routeData?.geometry?.coordinates;
+    if (!coords || coords.length < 5) {
+      pill.classList.add('hidden');
+      return;
+    }
+
+    let closestIdx = 0;
+    let minD = Infinity;
+    for (let i = 0; i < coords.length; i++) {
+      const d = haversineMeters(lat, lon, coords[i][1], coords[i][0]);
+      if (d < minD) {
+        minD = d;
+        closestIdx = i;
       }
     }
 
-    let arrow = '↑';
-    let action = isEn ? 'towards' : 'yönüne doğru';
+    let sharpCurveDetected = false;
+    let curveDistanceM = 0;
+    const scanLimit = Math.min(coords.length - 2, closestIdx + 25);
 
-    if (type === 'depart') {
-      arrow = '↑';
-      action = isEn ? 'head towards' : 'yönüne doğru ilerleyin';
-    } else if (type === 'arrive') {
-      arrow = '🏁';
-      action = isEn ? 'destination reached' : 'varış noktasına ulaştınız';
-    } else if (type === 'roundabout' || type === 'rotary') {
-      arrow = '🔄';
-      action = isEn ? 'enter roundabout' : 'dönel kavşaktan devam edin';
-    } else if (type === 'uturn' || mod === 'uturn') {
-      arrow = '↩';
-      action = isEn ? 'make U-turn' : 'U dönüşü yapın';
-    } else if (mod === 'sharp right') {
-      arrow = '↴';
-      action = isEn ? 'turn sharp right' : 'keskin sağa dönün';
-    } else if (mod === 'right') {
-      arrow = '↱';
-      action = isEn ? 'turn right' : 'sağa dönün';
-    } else if (mod === 'slight right') {
-      arrow = '↗';
-      action = isEn ? 'keep right' : 'sağdan devam edin';
-    } else if (mod === 'sharp left') {
-      arrow = '↲';
-      action = isEn ? 'turn sharp left' : 'keskin sola dönün';
-    } else if (mod === 'left') {
-      arrow = '↰';
-      action = isEn ? 'turn left' : 'sola dönün';
-    } else if (mod === 'slight left') {
-      arrow = '↖';
-      action = isEn ? 'keep left' : 'soldan devam edin';
-    } else if (mod === 'straight' || type === 'continue') {
-      arrow = '↑';
-      action = isEn ? 'continue straight' : 'düz devam edin';
+    for (let i = closestIdx + 1; i < scanLimit; i++) {
+      const p1 = coords[i - 1];
+      const p2 = coords[i];
+      const p3 = coords[i + 1];
+      const b1 = calculateBearing(p1[1], p1[0], p2[1], p2[0]);
+      const b2 = calculateBearing(p2[1], p2[0], p3[1], p3[0]);
+      let diff = Math.abs(b1 - b2);
+      if (diff > 180) diff = 360 - diff;
+
+      if (diff > 55) {
+        sharpCurveDetected = true;
+        curveDistanceM = Math.round(haversineMeters(lat, lon, p2[1], p2[0]));
+        break;
+      }
     }
 
-    return { arrow, action, street };
+    if (sharpCurveDetected && curveDistanceM >= 50 && curveDistanceM <= 900) {
+      const isEn = (window.state && window.state.lang === 'en');
+      textEl.textContent = isEn
+        ? `⚠️ Sharp Curve Ahead (${curveDistanceM}m)`
+        : `⚠️ İleride Keskin Viraj (${curveDistanceM}m)`;
+      pill.classList.remove('hidden');
+    } else {
+      pill.classList.add('hidden');
+    }
+  },
+
+  checkOffRoute(lat, lon) {
+    if (this.isRerouting || this.isSimulation) return;
+    const coords = state.routeData?.geometry?.coordinates;
+    if (!coords || coords.length < 2) return;
+
+    let minDistM = Infinity;
+    for (let i = 0; i < coords.length; i++) {
+      const d = haversineMeters(lat, lon, coords[i][1], coords[i][0]);
+      if (d < minDistM) minDistM = d;
+      if (minDistM < 30) break;
+    }
+
+    if (minDistM > 90) {
+      this.offRouteCounter = (this.offRouteCounter || 0) + 1;
+      if (this.offRouteCounter >= 2) {
+        this.triggerAutoReroute(lat, lon);
+      }
+    } else {
+      this.offRouteCounter = 0;
+    }
+  },
+
+  async triggerAutoReroute(lat, lon) {
+    if (this.isRerouting) return;
+    this.isRerouting = true;
+    this.offRouteCounter = 0;
+
+    const banner = document.getElementById('live-nav-reroute-banner');
+    if (banner) banner.classList.remove('hidden');
+
+    this.playNavSound('reroute');
+    const isEn = (window.state && window.state.lang === 'en');
+    if (this.voiceEnabled) {
+      this.speak(isEn ? 'Off route. Recalculating route.' : 'Rotadan çıkıldı. Yeni rota hesaplanıyor.');
+    }
+
+    if (state.waypoints && state.waypoints.length > 0) {
+      state.waypoints[0].lat = lat;
+      state.waypoints[0].lon = lon;
+      state.waypoints[0].name = isEn ? 'Current Location' : 'Mevcut Konum';
+    }
+
+    try {
+      await calculateRouteMain();
+      if (state.routeData) {
+        this.initRouteSteps();
+        this.currentStepIndex = 0;
+        this.updateManeuverUI(0);
+        if (this.voiceEnabled) {
+          this.speak(isEn ? 'New route ready.' : 'Yeni rota hazır.');
+        }
+      }
+    } catch (e) {
+      console.warn('Auto reroute failed:', e);
+    } finally {
+      if (banner) banner.classList.add('hidden');
+      this.isRerouting = false;
+    }
+  },
+
+  toggleHudMirror() {
+    this.isHudMirrored = !this.isHudMirrored;
+    const overlay = document.getElementById('live-nav-overlay');
+    const hudBtn = document.getElementById('live-nav-btn-hud');
+    const isEn = (window.state && window.state.lang === 'en');
+
+    if (overlay) {
+      if (this.isHudMirrored) {
+        overlay.classList.add('hud-mirror-active');
+        if (hudBtn) hudBtn.classList.add('text-amber-400');
+        showToast(isEn ? 'HUD Windshield Mode ON (Place on dashboard)' : 'HUD Cama Yansıtma Açık (Telefonu ön cama yerleştirin)', 'info');
+      } else {
+        overlay.classList.remove('hud-mirror-active');
+        if (hudBtn) hudBtn.classList.remove('text-amber-400');
+        showToast(isEn ? 'Normal Display Mode' : 'Normal Ekran Modu', 'info');
+      }
+    }
   },
 
   updateManeuverUI(distMeters = 0) {
@@ -4568,6 +4711,14 @@ const LiveNavigation = {
     const nextStep = this.steps[this.currentStepIndex + 1];
 
     const curInfo = this.getManeuverInfo(curStep);
+
+    // Update Speed Limit Sign
+    this.currentSpeedLimit = this.getSpeedLimitForStep(curInfo.street);
+    const limitEl = document.getElementById('live-nav-speed-limit-val');
+    if (limitEl) limitEl.textContent = this.currentSpeedLimit;
+
+    // Update Lane Guidance
+    this.updateLaneGuidance(curStep, distMeters);
 
     const iconEl = document.getElementById('live-nav-maneuver-icon');
     const distEl = document.getElementById('live-nav-maneuver-dist');
@@ -5019,13 +5170,38 @@ const LiveNavigation = {
       }
       const isEn = (window.state && window.state.lang === 'en');
       showToast(isEn ? '📍 Centered on your current location' : '📍 Bulunduğunuz konuma yaklaşıldı', 'success');
-    } else if (this.autoCenter && map) {
-      // Smoothly pan camera while preserving close road-level zoom
+    } else if (this.autoCenter && !this.isOverviewMode && map) {
+      // Dynamic Speed-Adaptive Camera Zoom
+      let targetZoom = 18;
+      if (this.speedKmH > 85) targetZoom = 16;
+      else if (this.speedKmH > 40) targetZoom = 17;
+      else targetZoom = 18;
+
+      if (map.getZoom() !== targetZoom) {
+        map.setZoom(targetZoom, { animate: true });
+      }
       map.panTo([lat, lon], { animate: true, duration: 0.5 });
     }
 
     const speedEl = document.getElementById('live-nav-speed-val');
     if (speedEl) speedEl.textContent = Math.round(this.speedKmH);
+
+    // Overspeed Danger Glow & Audio Warning
+    const speedoBox = document.getElementById('live-nav-speedo-box');
+    if (this.speedKmH > (this.currentSpeedLimit || 90) + 5) {
+      if (speedoBox) speedoBox.classList.add('overspeed');
+      const now = Date.now();
+      if (now - (this.lastOverspeedWarningTime || 0) > 30000) {
+        this.lastOverspeedWarningTime = now;
+        this.playNavSound('overspeed');
+        if (this.voiceEnabled) {
+          const isEn = (window.state && window.state.lang === 'en');
+          this.speak(isEn ? 'Speed limit exceeded!' : 'Hız sınırını aştınız!');
+        }
+      }
+    } else {
+      if (speedoBox) speedoBox.classList.remove('overspeed');
+    }
 
     // Update Google Maps Compass Needle rotation
     const needleEl = document.getElementById('live-nav-compass-needle');
@@ -5033,6 +5209,12 @@ const LiveNavigation = {
       const rot = (360 - (this.lastHeading || 0)) % 360;
       needleEl.style.transform = `rotate(${Math.round(rot)}deg)`;
     }
+
+    // Curvature & Danger Detection (Sharp curves ahead)
+    this.detectUpcomingCurvature(lat, lon);
+
+    // Off-route Detection & Auto Reroute
+    this.checkOffRoute(lat, lon);
 
     this.updateRouteProgress(lat, lon);
     this.checkProximityAlerts(lat, lon);
@@ -5051,9 +5233,16 @@ const LiveNavigation = {
         distToStep = haversineMeters(lat, lon, mLocLat, mLocLon);
       }
 
+      // Approaching turn chime (when within 180m)
+      if (distToStep <= 180 && distToStep >= 70 && !this.hasChimedForCurrentStep) {
+        this.hasChimedForCurrentStep = true;
+        this.playNavSound('turn');
+      }
+
       // Check if rider reached maneuver threshold (within 45 meters)
       if (distToStep <= 45 && this.currentStepIndex < this.steps.length - 1) {
         this.currentStepIndex++;
+        this.hasChimedForCurrentStep = false;
         const nextStep = this.steps[this.currentStepIndex];
         const info = this.getManeuverInfo(nextStep);
         if (this.voiceEnabled) {

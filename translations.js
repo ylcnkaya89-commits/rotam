@@ -297,6 +297,16 @@ window.TRANSLATIONS = {
     incident_blocked: "Yol Kapalı / Engel",
     incident_fuel: "Yakıt / Mola",
     incident_reported_toast: "Bildiriminiz kaydedildi. Yolculuğunuz güvende!",
+    live_nav_rerouting: "Yeni rota hesaplanıyor...",
+    live_nav_off_route: "Rotadan çıkıldı. Yeni rota hesaplanıyor...",
+    live_nav_speed_limit: "Hız Sınırı",
+    live_nav_speed_warning: "Hız sınırını aştınız!",
+    live_nav_hud_mirror: "HUD Cama Yansıtma Modu",
+    live_nav_hud_mirror_on: "HUD Yansıtma Aktif (Telefonu ön cama koyun)",
+    live_nav_hud_mirror_off: "Normal Ekran Moduna Dönüldü",
+    live_nav_curve_warning: "Dikkat: İleride Keskin Viraj",
+    live_nav_hairpin: "Keskin Viraj Serisi",
+    live_nav_lane_keep: "şeritte kalın",
 
     // Toasts & Messages
     toast_fill_inputs: "Lütfen başlangıç ve varış noktalarını girin.",
@@ -606,6 +616,16 @@ window.TRANSLATIONS = {
     incident_blocked: "Road Closed / Hazard",
     incident_fuel: "Fuel / Rest",
     incident_reported_toast: "Report submitted. Shared with riders!",
+    live_nav_rerouting: "Rerouting...",
+    live_nav_off_route: "Off route. Recalculating path...",
+    live_nav_speed_limit: "Speed Limit",
+    live_nav_speed_warning: "Speed limit exceeded!",
+    live_nav_hud_mirror: "HUD Windshield Mirror Mode",
+    live_nav_hud_mirror_on: "HUD Mirroring ON (Place phone on windshield)",
+    live_nav_hud_mirror_off: "Normal Display Mode Restored",
+    live_nav_curve_warning: "Caution: Sharp Curves Ahead",
+    live_nav_hairpin: "Sharp Turn Series",
+    live_nav_lane_keep: "stay in lane",
 
     // Toasts & Messages
     toast_fill_inputs: "Please enter both start and destination points.",

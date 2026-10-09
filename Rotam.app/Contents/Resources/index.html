@@ -563,6 +563,19 @@
         
         <!-- ÜST HUD: GOOGLE MAPS DÖNÜŞ & MANEVRA KARTI -->
         <div class="hud-interactive w-full max-w-xl mx-auto flex flex-col space-y-2 pointer-events-auto">
+          <!-- Akıllı Yeniden Rotalama Bildirimi (#live-nav-reroute-banner) -->
+          <div id="live-nav-reroute-banner" class="hidden gmaps-reroute-card rounded-2xl p-3 text-white shadow-2xl flex items-center justify-between animate-slide-in">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center animate-spin">
+                <i data-lucide="rotate-cw" class="w-4 h-4 text-white"></i>
+              </div>
+              <div>
+                <span class="text-xs font-black block tracking-tight" data-i18n="live_nav_rerouting">Yeni rota hesaplanıyor...</span>
+                <span class="text-[10px] text-sky-100" data-i18n="live_nav_off_route">Rotadan çıkıldı. Güzergah güncelleniyor.</span>
+              </div>
+            </div>
+          </div>
+
           <!-- Manevra Kartı -->
           <div class="gmaps-maneuver-card rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 text-white shadow-2xl relative overflow-hidden">
             <div class="flex items-center space-x-3 sm:space-x-4">
@@ -590,8 +603,14 @@
               </div>
             </div>
 
+            <!-- Şerit Yönlendirmesi (Lane Guidance) -->
+            <div id="live-nav-lanes-bar" class="hidden mt-2.5 pt-2 border-t border-white/15 flex items-center space-x-1.5 justify-start">
+              <span class="text-[9px] font-bold text-emerald-200/80 uppercase tracking-wider mr-1">ŞERİT:</span>
+              <div id="live-nav-lanes-container" class="flex items-center space-x-1"></div>
+            </div>
+
             <!-- Sonraki Manevra Bilgi Şeridi ("Sonra ↱") -->
-            <div id="live-nav-next-step-pill" class="mt-3 pt-2.5 border-t border-white/15 flex items-center justify-between text-xs text-emerald-100">
+            <div id="live-nav-next-step-pill" class="mt-2.5 pt-2 border-t border-white/15 flex items-center justify-between text-xs text-emerald-100">
               <div class="flex items-center space-x-2 truncate">
                 <span class="font-bold text-emerald-300 uppercase text-[10px] tracking-wider" data-i18n="live_nav_then">Sonra</span>
                 <span id="live-nav-sub-arrow" class="font-bold text-white text-base leading-none">↱</span>
@@ -599,6 +618,12 @@
               </div>
               <div class="text-[10px] text-emerald-200/80 shrink-0 ml-2 font-mono" id="live-nav-sub-dist">1.2 km</div>
             </div>
+          </div>
+
+          <!-- Motosiklet Viraj & Eğim Uyarısı (#live-nav-curve-pill) -->
+          <div id="live-nav-curve-pill" class="hidden gmaps-curve-pill rounded-xl px-3 py-1.5 text-white flex items-center space-x-2 shadow-lg self-center">
+            <span class="text-sm">⚠️</span>
+            <span id="live-nav-curve-text" class="text-xs font-black tracking-tight" data-i18n="live_nav_curve_warning">Dikkat: İleride Keskin Viraj</span>
           </div>
 
           <!-- Akıllı Yaklaşma Uyarısı (Proximity Banner) -->
@@ -673,7 +698,12 @@
             <i id="live-nav-overview-icon" data-lucide="crosshair" class="w-5 h-5"></i>
           </button>
 
-          <!-- 5. Olay & Durum Bildir Kapsülü ([ ⚠️ Bildir ]) -->
+          <!-- 5. HUD Cama Yansıtma Modu (Mirror for Night Windshield) -->
+          <button id="live-nav-btn-hud" onclick="LiveNavigation.toggleHudMirror()" class="w-11 h-11 sm:w-12 sm:h-12 rounded-full gmaps-tool-btn flex items-center justify-center cursor-pointer active:scale-95 transition-all text-amber-300 hover:text-amber-200 shadow-xl" title="Gece Ön Cama Yansıtma (HUD Ayna Modu)">
+            <i data-lucide="flip-horizontal" class="w-5 h-5"></i>
+          </button>
+
+          <!-- 6. Olay & Durum Bildir Kapsülü ([ ⚠️ Bildir ]) -->
           <button onclick="LiveNavigation.openIncidentReportModal()" class="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full gmaps-report-pill flex items-center space-x-1.5 cursor-pointer active:scale-95 transition-all text-white shadow-xl mt-1" title="Radar, Kaza, Yol Çalışması Bildir">
             <div class="w-4 h-4 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center">
               <i data-lucide="triangle-alert" class="w-3 h-3 text-amber-400"></i>
@@ -682,11 +712,18 @@
           </button>
         </div>
 
-        <!-- SOL ALT YÜZEN HIZ GÖSTERGESİ (GOOGLE MAPS SPEEDOMETER) -->
-        <div class="hud-interactive absolute left-3 sm:left-5 bottom-24 sm:bottom-28 pointer-events-auto z-20">
-          <div class="gmaps-speedo-card rounded-2xl px-3 py-2 flex flex-col items-center min-w-[54px] text-white">
+        <!-- SOL ALT YÜZEN HIZ VE HIZ LİMİTİ GÖSTERGESİ (SPEEDOMETER & SPEED LIMIT SIGN) -->
+        <div class="hud-interactive absolute left-3 sm:left-5 bottom-24 sm:bottom-28 pointer-events-auto z-20 flex items-center space-x-2">
+          <!-- Hız Sayacı -->
+          <div id="live-nav-speedo-box" class="gmaps-speedo-card rounded-2xl px-3 py-2 flex flex-col items-center min-w-[56px] text-white transition-all duration-300">
             <span id="live-nav-speed-val" class="text-2xl font-black font-mono leading-none tracking-tight text-white">0</span>
             <span class="text-[9px] font-bold text-slate-400 uppercase mt-0.5" data-i18n="live_nav_speed">km/s</span>
+          </div>
+
+          <!-- Resmi Hız Sınırı Tabelası (Türk & Avrupa Standartı Kırmızı Halka) -->
+          <div id="live-nav-speed-limit-badge" class="gmaps-speed-limit-sign rounded-full w-12 h-12 flex flex-col items-center justify-center shadow-xl transition-all shrink-0" title="Yol Hız Sınırı">
+            <span id="live-nav-speed-limit-val" class="text-base font-black text-slate-900 leading-none">90</span>
+            <span class="text-[7px] font-black text-slate-500 uppercase leading-none mt-0.5">LİMİT</span>
           </div>
         </div>
 
