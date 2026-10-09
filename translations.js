@@ -307,6 +307,14 @@ window.TRANSLATIONS = {
     live_nav_curve_warning: "Dikkat: İleride Keskin Viraj",
     live_nav_hairpin: "Keskin Viraj Serisi",
     live_nav_lane_keep: "şeritte kalın",
+    modal_ride_choice_title: "Sürüş Modunu Seçin",
+    ride_choice_free_title: "Serbest Sürüş (Rotasız Kokpit)",
+    ride_choice_badge_instant: "Hemen Başla",
+    ride_choice_free_desc: "Mevcut konumunuza kilitlenir; hız, pusula, viraj ve radar uyarıları hemen aktif olur.",
+    ride_choice_demo_title: "Örnek Virajlı Rota",
+    ride_choice_badge_test: "Test Et",
+    ride_choice_demo_desc: "İstanbul - Şile virajlı sahil rotasıyla canlı turn-by-turn navigasyonu deneyin.",
+    ride_choice_select_dest: "Varış Noktası Seç ve Rota Çiz",
 
     // Toasts & Messages
     toast_fill_inputs: "Lütfen başlangıç ve varış noktalarını girin.",
@@ -626,6 +634,14 @@ window.TRANSLATIONS = {
     live_nav_curve_warning: "Caution: Sharp Curves Ahead",
     live_nav_hairpin: "Sharp Turn Series",
     live_nav_lane_keep: "stay in lane",
+    modal_ride_choice_title: "Choose Ride Mode",
+    ride_choice_free_title: "Free Ride (Cockpit Mode)",
+    ride_choice_badge_instant: "Start Now",
+    ride_choice_free_desc: "Locks to your location; live speedometer, compass, curve and hazard alerts active.",
+    ride_choice_demo_title: "Scenic Demo Route",
+    ride_choice_badge_test: "Try Demo",
+    ride_choice_demo_desc: "Experience live turn-by-turn navigation with Istanbul - Sile twisty coastal route.",
+    ride_choice_select_dest: "Choose Destination & Plan Route",
 
     // Toasts & Messages
     toast_fill_inputs: "Please enter both start and destination points.",
