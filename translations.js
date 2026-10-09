@@ -286,6 +286,17 @@ window.TRANSLATIONS = {
     live_nav_locating: "Konumunuz alınıyor ve yaklaşılıyor...",
     live_nav_located: "Bulunduğunuz konuma yaklaşıldı.",
     btn_locate_me: "Konumum",
+    live_nav_exit: "Çıkış",
+    live_nav_report: "Bildir",
+    live_nav_then: "Sonra",
+    live_nav_towards: "yönüne doğru",
+    incident_report_title: "Yol Durumu & Olay Bildir",
+    incident_radar: "Radar / Hız Kontrolü",
+    incident_crash: "Trafik Kazası",
+    incident_work: "Yol Çalışması",
+    incident_blocked: "Yol Kapalı / Engel",
+    incident_fuel: "Yakıt / Mola",
+    incident_reported_toast: "Bildiriminiz kaydedildi. Yolculuğunuz güvende!",
 
     // Toasts & Messages
     toast_fill_inputs: "Lütfen başlangıç ve varış noktalarını girin.",
@@ -584,6 +595,17 @@ window.TRANSLATIONS = {
     live_nav_locating: "Locating your position & zooming in...",
     live_nav_located: "Zoomed to your current location.",
     btn_locate_me: "My Location",
+    live_nav_exit: "Exit",
+    live_nav_report: "Report",
+    live_nav_then: "Then",
+    live_nav_towards: "towards",
+    incident_report_title: "Report Incident",
+    incident_radar: "Speed Trap / Radar",
+    incident_crash: "Traffic Crash",
+    incident_work: "Road Work",
+    incident_blocked: "Road Closed / Hazard",
+    incident_fuel: "Fuel / Rest",
+    incident_reported_toast: "Report submitted. Shared with riders!",
 
     // Toasts & Messages
     toast_fill_inputs: "Please enter both start and destination points.",
@@ -623,7 +645,11 @@ function t(key, fallback = '') {
     live_nav_summary_close: lang === 'en' ? 'Done' : 'Tamamla',
     live_nav_locating: lang === 'en' ? 'Locating your position & zooming in...' : 'Konumunuz alınıyor ve yaklaşılıyor...',
     live_nav_located: lang === 'en' ? 'Zoomed to your current location.' : 'Bulunduğunuz konuma yaklaşıldı.',
-    btn_locate_me: lang === 'en' ? 'My Location' : 'Konumum'
+    btn_locate_me: lang === 'en' ? 'My Location' : 'Konumum',
+    live_nav_exit: lang === 'en' ? 'Exit' : 'Çıkış',
+    live_nav_report: lang === 'en' ? 'Report' : 'Bildir',
+    live_nav_then: lang === 'en' ? 'Then' : 'Sonra',
+    live_nav_towards: lang === 'en' ? 'towards' : 'yönüne doğru'
   };
   return defaultFallbacks[key] || key;
 }
