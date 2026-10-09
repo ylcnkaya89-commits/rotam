@@ -257,7 +257,88 @@ function initMap() {
 
   // Clean, uncluttered map on startup: no pins or symbols
   clearHighlightMarkers();
+
+  // Proactively warm GPS user location cache in background for instant navigation startup
+  proactivelyWarmUserLocation();
 }
+
+// Proactive user location cache warmer
+function proactivelyWarmUserLocation() {
+  if (typeof navigator === 'undefined' || !navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      state.userLocation = {
+        lat: pos.coords.latitude,
+        lon: pos.coords.longitude
+      };
+    },
+    () => {
+      // Ignore silently if permission prompt not yet accepted
+    },
+    { enableHighAccuracy: true, timeout: 6000, maximumAge: 120000 }
+  );
+}
+
+// Map Floating Control: Fly to current location & zoom in at street level (zoom 18)
+let nonNavLocationMarker = null;
+function showUserLocationPulseMarker(lat, lon) {
+  if (!map) return;
+  if (nonNavLocationMarker) {
+    nonNavLocationMarker.setLatLng([lat, lon]);
+    return;
+  }
+  const html = `
+    <div class="live-rider-marker">
+      <div class="live-rider-pulse"></div>
+      <div class="w-4 h-4 rounded-full bg-cyan-400 border-2 border-white shadow-lg shadow-cyan-400/80"></div>
+    </div>
+  `;
+  const icon = L.divIcon({
+    className: '',
+    html,
+    iconSize: [40, 40],
+    iconAnchor: [20, 20]
+  });
+  nonNavLocationMarker = L.marker([lat, lon], { icon, zIndexOffset: 900 }).addTo(map);
+}
+
+function flyToCurrentLocation() {
+  if (typeof navigator === 'undefined' || !navigator.geolocation) {
+    showToast('Tarayıcınız konum servisini desteklemiyor.', 'warning');
+    return;
+  }
+  const isEn = (window.state && window.state.lang === 'en');
+  showToast(isEn ? 'Locating your position...' : 'Konumunuz alınıyor ve yaklaşılıyor...', 'info');
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      state.userLocation = { lat, lon };
+
+      if (map) {
+        map.flyTo([lat, lon], 18, { duration: 1.2, easeLinearity: 0.25 });
+      }
+
+      if (typeof LiveNavigation !== 'undefined' && LiveNavigation.isActive) {
+        LiveNavigation.lastCoord = [lat, lon];
+        LiveNavigation.autoCenter = true;
+        if (LiveNavigation.marker) {
+          LiveNavigation.marker.setLatLng([lat, lon]);
+        }
+      } else {
+        showUserLocationPulseMarker(lat, lon);
+      }
+      showToast(isEn ? '📍 Centered on your current location.' : '📍 Bulunduğunuz konuma yaklaşıldı.', 'success');
+    },
+    (err) => {
+      console.warn('Geolocation error in flyToCurrentLocation:', err);
+      showToast(isEn ? 'Could not obtain location: ' + err.message : 'Konum alınamadı: ' + err.message, 'error');
+    },
+    { enableHighAccuracy: true, timeout: 8000 }
+  );
+}
+window.flyToCurrentLocation = flyToCurrentLocation;
 
 // Initial Highlight Discovery Pins (Kept clean on startup)
 function renderInitialHighlights() {
@@ -442,6 +523,43 @@ function handleMobileNavRideStart() {
       LiveNavigation.start();
     }
     return;
+  }
+
+  // If destination is defined but start point is missing: automatically use current GPS location!
+  if (state.waypoints[1] && state.waypoints[1].lat !== null && (!state.waypoints[0] || state.waypoints[0].lat === null)) {
+    const isEn = (window.state && window.state.lang === 'en');
+    if (navigator.geolocation) {
+      showToast(isEn ? 'Getting your location and preparing route...' : 'Mevcut konumunuz alınıyor ve rota oluşturuluyor...', 'info');
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          state.userLocation = { lat, lon };
+          state.waypoints[0].lat = lat;
+          state.waypoints[0].lon = lon;
+          state.waypoints[0].name = isEn ? 'Current Location' : 'Mevcut Konumum';
+          if (typeof updateWaypointsListUI === 'function') updateWaypointsListUI();
+          if (typeof updateWaypointMarkers === 'function') updateWaypointMarkers();
+
+          try {
+            await calculateRouteMain();
+            if (state.routeData && typeof LiveNavigation !== 'undefined') {
+              LiveNavigation.start();
+            }
+          } catch (e) {
+            console.error('Route calculation from GPS failed:', e);
+            showToast(isEn ? 'Route calculation failed.' : 'Rota hesaplanamadı.', 'error');
+          }
+        },
+        (err) => {
+          console.warn('Geolocation failed in handleMobileNavRideStart:', err);
+          showToast(isEn ? 'Could not get current location.' : 'Mevcut konum alınamadı. Lütfen başlangıç noktası seçin.', 'error');
+          openMobileSidebar('start');
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+      return;
+    }
   }
 
   // If 2+ valid waypoints are present but routeData hasn't been computed yet
@@ -4338,6 +4456,7 @@ const LiveNavigation = {
   speedKmH: 0,
   notifiedPois: new Set(),
   autoCenter: true,
+  hasCenteredOnCurrentLocation: false,
   bannerTimer: null,
   fuelBannerTimer: null,
   pendingFuelStop: null,
@@ -4382,6 +4501,7 @@ const LiveNavigation = {
     this.speedHistory = [];
     this.distanceTraveledM = 0;
     this.pendingFuelStop = null;
+    this.hasCenteredOnCurrentLocation = false;
 
     // Show Live HUD overlay
     const overlay = document.getElementById('live-nav-overlay');
@@ -4419,11 +4539,28 @@ const LiveNavigation = {
       });
     }
 
-    // Coordinates of current route
-    const coords = state.routeData.geometry.coordinates;
-    const startPt = coords[0];
-    this.lastCoord = [startPt[1], startPt[0]];
-    this.lastGpsCoord = [startPt[1], startPt[0]];
+    // Determine starting coordinates: prioritize rider's real current location!
+    let initialCoord = null;
+    const isEn = (window.state && window.state.lang === 'en');
+
+    if (!forceSimulation && state.userLocation && state.userLocation.lat && state.userLocation.lon) {
+      // Real GPS location is already known: fly and zoom directly into rider's current location!
+      initialCoord = [state.userLocation.lat, state.userLocation.lon];
+      this.hasCenteredOnCurrentLocation = true;
+      showToast(isEn ? '📍 Centered on your current location' : '📍 Bulunduğunuz konuma yaklaşıldı', 'success');
+    } else {
+      // Fallback to route start point (or for demo simulation)
+      const coords = state.routeData.geometry.coordinates;
+      const startPt = coords[0];
+      initialCoord = [startPt[1], startPt[0]];
+      this.hasCenteredOnCurrentLocation = forceSimulation;
+      if (!forceSimulation) {
+        showToast(isEn ? '📍 Locating your position & zooming in...' : '📍 Konumunuz alınıyor ve yaklaşılıyor...', 'info');
+      }
+    }
+
+    this.lastCoord = initialCoord;
+    this.lastGpsCoord = initialCoord;
 
     // Create Rider Marker and smoothly fly/zoom camera directly into road/lane level (zoom 18)
     this.createRiderMarker(this.lastCoord);
@@ -4433,7 +4570,6 @@ const LiveNavigation = {
 
     // Voice announcement
     if (this.voiceEnabled) {
-      const isEn = (window.state && window.state.lang === 'en');
       this.speak(isEn ? 'Live ride tracking started. Have a safe journey!' : 'Canlı sürüş takibi başladı. İyi yolculuklar!');
     }
 
@@ -4513,11 +4649,34 @@ const LiveNavigation = {
 
     const options = {
       enableHighAccuracy: true,
-      maximumAge: 1000,
+      maximumAge: 0,
       timeout: 10000
     };
 
     let gpsReceived = false;
+
+    // Instant single-shot position query to lock on and zoom as fast as hardware allows
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        if (!this.isActive || this.isSimulation) return;
+        gpsReceived = true;
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        const speed = (pos.coords.speed !== null && !isNaN(pos.coords.speed))
+          ? Math.max(0, Math.round(pos.coords.speed * 3.6))
+          : 0;
+        let heading = pos.coords.heading;
+        if (heading === null || isNaN(heading)) {
+          heading = this.lastHeading || 0;
+        }
+        state.userLocation = { lat, lon };
+        this.onLocationUpdate(lat, lon, speed, heading, true /* isInitialFix */);
+      },
+      (err) => {
+        console.warn('Initial getCurrentPosition in LiveNavigation:', err);
+      },
+      options
+    );
 
     this.watchId = navigator.geolocation.watchPosition(
       (pos) => {
@@ -4536,6 +4695,7 @@ const LiveNavigation = {
             heading = this.lastHeading || 0;
           }
         }
+        state.userLocation = { lat, lon };
         this.onLocationUpdate(lat, lon, speed, heading);
       },
       (err) => {
@@ -4547,12 +4707,12 @@ const LiveNavigation = {
       options
     );
 
-    // Fallback if no GPS fix after 4 seconds (desktop / indoor test)
+    // Fallback if no GPS fix after 6 seconds (desktop / indoor test)
     setTimeout(() => {
       if (this.isActive && !this.isSimulation && !gpsReceived) {
         this.switchToSimulationWithMessage();
       }
-    }, 4000);
+    }, 6000);
   },
 
   stopGPS() {
@@ -4657,10 +4817,11 @@ const LiveNavigation = {
     this.marker = L.marker(latlng, { icon: customIcon, zIndexOffset: 1000 }).addTo(map);
   },
 
-  onLocationUpdate(lat, lon, speed, heading) {
+  onLocationUpdate(lat, lon, speed, heading, isInitialFix = false) {
     this.speedKmH = speed;
     this.lastHeading = heading || 0;
     this.lastCoord = [lat, lon];
+    state.userLocation = { lat, lon };
 
     // Telemetry distance & speed calculation
     if (this.lastGpsCoord) {
@@ -4689,8 +4850,16 @@ const LiveNavigation = {
       iconElem.style.transform = `rotate(${Math.round(this.lastHeading)}deg)`;
     }
 
-    // Smoothly pan camera while preserving close road-level zoom
-    if (this.autoCenter && map) {
+    // Automatically zoom in & center on user's current location when journey starts!
+    if (!this.hasCenteredOnCurrentLocation || isInitialFix) {
+      this.hasCenteredOnCurrentLocation = true;
+      if (map) {
+        map.flyTo([lat, lon], 18, { duration: 1.2, easeLinearity: 0.25 });
+      }
+      const isEn = (window.state && window.state.lang === 'en');
+      showToast(isEn ? '📍 Centered on your current location' : '📍 Bulunduğunuz konuma yaklaşıldı', 'success');
+    } else if (this.autoCenter && map) {
+      // Smoothly pan camera while preserving close road-level zoom
       map.panTo([lat, lon], { animate: true, duration: 0.5 });
     }
 

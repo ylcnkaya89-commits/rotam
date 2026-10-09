@@ -283,6 +283,9 @@ window.TRANSLATIONS = {
     live_nav_summary_pois: "Keşif Durakları",
     live_nav_summary_share: "Karneni Paylaş",
     live_nav_summary_close: "Tamamla",
+    live_nav_locating: "Konumunuz alınıyor ve yaklaşılıyor...",
+    live_nav_located: "Bulunduğunuz konuma yaklaşıldı.",
+    btn_locate_me: "Konumum",
 
     // Toasts & Messages
     toast_fill_inputs: "Lütfen başlangıç ve varış noktalarını girin.",
@@ -578,6 +581,9 @@ window.TRANSLATIONS = {
     live_nav_summary_pois: "POIs Visited",
     live_nav_summary_share: "Share Report",
     live_nav_summary_close: "Done",
+    live_nav_locating: "Locating your position & zooming in...",
+    live_nav_located: "Zoomed to your current location.",
+    btn_locate_me: "My Location",
 
     // Toasts & Messages
     toast_fill_inputs: "Please enter both start and destination points.",
@@ -614,7 +620,10 @@ function t(key, fallback = '') {
     live_nav_quick_fuel: lang === 'en' ? 'Fuel/Rest' : 'Yakıt/Mola',
     live_nav_summary_title: lang === 'en' ? 'Rotam Ride Report' : 'Rotam Sürüş Karnesi',
     live_nav_summary_share: lang === 'en' ? 'Share Report' : 'Karneni Paylaş',
-    live_nav_summary_close: lang === 'en' ? 'Done' : 'Tamamla'
+    live_nav_summary_close: lang === 'en' ? 'Done' : 'Tamamla',
+    live_nav_locating: lang === 'en' ? 'Locating your position & zooming in...' : 'Konumunuz alınıyor ve yaklaşılıyor...',
+    live_nav_located: lang === 'en' ? 'Zoomed to your current location.' : 'Bulunduğunuz konuma yaklaşıldı.',
+    btn_locate_me: lang === 'en' ? 'My Location' : 'Konumum'
   };
   return defaultFallbacks[key] || key;
 }

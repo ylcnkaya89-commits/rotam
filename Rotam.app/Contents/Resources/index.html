@@ -866,9 +866,9 @@
       </div>
 
       <!-- HARİTA ÜSTÜ FLOATING KONTROLLER -->
-      <!-- Katman Seçici (Harita Tipi) -->
+      <!-- Katman Seçici (Harita Tipi) ve Konumumu Bul Butonu -->
       <div id="floating-map-controls" class="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 flex flex-col space-y-2">
-        <div class="glass-panel p-1 rounded-xl shadow-2xl flex space-x-1 border border-slate-800">
+        <div class="glass-panel p-1 rounded-xl shadow-2xl flex items-center space-x-1 border border-slate-800">
           <button id="tile-dark" onclick="switchTile('dark')" class="tile-btn px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-white" title="Karanlık Mod">
             🌙<span class="hidden sm:inline ml-1">Dark</span>
           </button>
@@ -880,6 +880,11 @@
           </button>
           <button id="tile-sat" onclick="switchTile('sat')" class="tile-btn px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Uydu">
             🛰️<span class="hidden sm:inline ml-1">Uydu</span>
+          </button>
+          <div class="h-4 w-px bg-slate-800 mx-0.5"></div>
+          <button id="btn-floating-locate" onclick="flyToCurrentLocation()" class="px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-semibold text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 flex items-center space-x-1 transition-all active:scale-95" title="Mevcut Konumuma Yaklaş">
+            <i data-lucide="crosshair" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline" data-i18n="btn_locate_me">Konumum</span>
           </button>
         </div>
       </div>
@@ -1888,10 +1893,10 @@
   <datalist id="turkey-cities-list"></datalist>
 
   <!-- Kapsamlı Mekan Veritabanı (870+ Yer) -->
-  <script src="places_data.js?v=2.4"></script>
+  <script src="places_data.js?v=2.5"></script>
   <!-- Çoklu Dil ve Çeviri Motoru (TR / EN) -->
-  <script src="translations.js?v=2.4"></script>
+  <script src="translations.js?v=2.5"></script>
   <!-- V2 JavaScript Uygulama Mantığı -->
-  <script src="app.js?v=2.4"></script>
+  <script src="app.js?v=2.5"></script>
 </body>
 </html>
