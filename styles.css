@@ -858,9 +858,15 @@ main {
   color: #04443f;
   border-color: #ffffff;
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-  transform: scale(1.08);
+/* Camper (Karavan) Mode Styling */
+.camper-preset-btn.active {
+  border-color: rgba(245, 158, 11, 0.8) !important;
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #fef08a !important;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.25) !important;
 }
 
-
-
-
+.camper-preset-btn:not(.active):hover {
+  border-color: rgba(148, 163, 184, 0.4);
+  background: rgba(30, 41, 59, 0.8);
+}

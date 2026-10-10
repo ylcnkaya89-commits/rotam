@@ -29,9 +29,55 @@ const state = {
   corridorPois: [],
   smartRecommendations: [],
   userLocation: null,
-  routeRequestId: 0
+  routeRequestId: 0,
+  camperProfile: null,
+  camperSlopeAnalysis: null
 };
 window.state = state;
+
+// Camper Profile Presets (Alkoven, Campervan, Çekme Karavan)
+const CAMPER_PRESETS = {
+  alcove: {
+    type: 'alcove',
+    title: 'Motokaravan (Alkovenli / Yarı Entegre)',
+    height: 3.10,
+    width: 2.35,
+    length: 6.80,
+    weight: 3.50,
+    avoidLowBridges: true,
+    preferWideRoads: true,
+    maxSlopeWarning: 8
+  },
+  van: {
+    type: 'van',
+    title: 'Campervan (Panelvan / Motokaravan)',
+    height: 2.65,
+    width: 2.05,
+    length: 5.99,
+    weight: 3.20,
+    avoidLowBridges: true,
+    preferWideRoads: true,
+    maxSlopeWarning: 9
+  },
+  trailer: {
+    type: 'trailer',
+    title: 'Çekme Karavan (Araç + Karavan)',
+    height: 2.60,
+    width: 2.30,
+    length: 11.50,
+    weight: 4.20,
+    avoidLowBridges: true,
+    preferWideRoads: true,
+    maxSlopeWarning: 7
+  }
+};
+
+try {
+  const savedCp = localStorage.getItem('rotam_camper_profile');
+  state.camperProfile = savedCp ? JSON.parse(savedCp) : { ...CAMPER_PRESETS.alcove };
+} catch (e) {
+  state.camperProfile = { ...CAMPER_PRESETS.alcove };
+}
 
 // Map & Layer State
 let map = null;
@@ -677,6 +723,18 @@ function selectVehicle(vehicle) {
     btn.classList.toggle('active', btn.dataset.v === vehicle);
   });
 
+  // Toggle Camper Profile & Safety Report Panels
+  const camperPanel = document.getElementById('camper-profile-panel');
+  const camperReport = document.getElementById('camper-safety-report');
+  if (vehicle === 'camper') {
+    if (camperPanel) camperPanel.classList.remove('hidden');
+    if (camperReport && state.routeData) camperReport.classList.remove('hidden');
+    syncCamperProfileUI();
+  } else {
+    if (camperPanel) camperPanel.classList.add('hidden');
+    if (camperReport) camperReport.classList.add('hidden');
+  }
+
   try {
     localStorage.setItem('rotam_user_vehicle', vehicle);
   } catch (e) {}
@@ -687,6 +745,158 @@ function selectVehicle(vehicle) {
     calculateRouteMain();
   }
 }
+
+// Camper Profile Management & Safety Functions
+function syncCamperProfileUI() {
+  const p = state.camperProfile || CAMPER_PRESETS.alcove;
+  const hInput = document.getElementById('camper-height-input');
+  const wInput = document.getElementById('camper-width-input');
+  const lInput = document.getElementById('camper-length-input');
+  const wtInput = document.getElementById('camper-weight-input');
+  const chkBridge = document.getElementById('camper-chk-lowbridge');
+  const chkWide = document.getElementById('camper-chk-wideroads');
+  const chkSlope = document.getElementById('camper-chk-slopelimit');
+
+  if (hInput) hInput.value = Number(p.height).toFixed(2);
+  if (wInput) wInput.value = Number(p.width).toFixed(2);
+  if (lInput) lInput.value = Number(p.length).toFixed(2);
+  if (wtInput) wtInput.value = Number(p.weight).toFixed(2);
+  if (chkBridge) chkBridge.checked = p.avoidLowBridges !== false;
+  if (chkWide) chkWide.checked = p.preferWideRoads !== false;
+  if (chkSlope) chkSlope.checked = Boolean(p.maxSlopeWarning);
+
+  document.querySelectorAll('.camper-preset-btn').forEach(btn => btn.classList.remove('active'));
+  if (p.type && document.getElementById(`camper-preset-${p.type}`)) {
+    document.getElementById(`camper-preset-${p.type}`).classList.add('active');
+  }
+  if (typeof initIcons === 'function') initIcons();
+}
+
+function setCamperPreset(presetKey) {
+  const preset = CAMPER_PRESETS[presetKey];
+  if (!preset) return;
+  state.camperProfile = { ...preset };
+  try {
+    localStorage.setItem('rotam_camper_profile', JSON.stringify(state.camperProfile));
+  } catch (e) {}
+  syncCamperProfileUI();
+
+  const isEn = (window.state && window.state.lang === 'en');
+  showToast(isEn ? `Camper Profile: ${preset.title}` : `Karavan Profili: ${preset.title}`, 'info');
+
+  const valid = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
+  if (valid.length >= 2) {
+    calculateRouteMain();
+  }
+}
+
+function onCamperDimChange() {
+  const h = parseFloat(document.getElementById('camper-height-input')?.value) || 3.10;
+  const w = parseFloat(document.getElementById('camper-width-input')?.value) || 2.35;
+  const l = parseFloat(document.getElementById('camper-length-input')?.value) || 6.80;
+  const wt = parseFloat(document.getElementById('camper-weight-input')?.value) || 3.50;
+
+  state.camperProfile = {
+    ...(state.camperProfile || CAMPER_PRESETS.alcove),
+    type: 'custom',
+    height: Math.max(1.8, Math.min(4.5, h)),
+    width: Math.max(1.5, Math.min(3.2, w)),
+    length: Math.max(2.5, Math.min(16.0, l)),
+    weight: Math.max(1.0, Math.min(20.0, wt))
+  };
+
+  try {
+    localStorage.setItem('rotam_camper_profile', JSON.stringify(state.camperProfile));
+  } catch (e) {}
+
+  document.querySelectorAll('.camper-preset-btn').forEach(btn => btn.classList.remove('active'));
+
+  const valid = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
+  if (valid.length >= 2) {
+    calculateRouteMain();
+  }
+}
+
+function onCamperOptionChange() {
+  const chkBridge = document.getElementById('camper-chk-lowbridge')?.checked;
+  const chkWide = document.getElementById('camper-chk-wideroads')?.checked;
+  const chkSlope = document.getElementById('camper-chk-slopelimit')?.checked;
+
+  state.camperProfile = {
+    ...(state.camperProfile || CAMPER_PRESETS.alcove),
+    avoidLowBridges: chkBridge !== false,
+    preferWideRoads: chkWide !== false,
+    maxSlopeWarning: chkSlope ? 8 : 15
+  };
+
+  try {
+    localStorage.setItem('rotam_camper_profile', JSON.stringify(state.camperProfile));
+  } catch (e) {}
+
+  const valid = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
+  if (valid.length >= 2) {
+    calculateRouteMain();
+  }
+}
+
+function updateCamperSafetyUI(route) {
+  const reportPanel = document.getElementById('camper-safety-report');
+  if (!reportPanel) return;
+
+  if (state.currentVehicle !== 'camper') {
+    reportPanel.classList.add('hidden');
+    return;
+  }
+  reportPanel.classList.remove('hidden');
+
+  const p = state.camperProfile || CAMPER_PRESETS.alcove;
+  const clearanceEl = document.getElementById('camper-report-clearance');
+  const widthEl = document.getElementById('camper-report-width');
+  const slopeEl = document.getElementById('camper-report-slope');
+  const statusBadge = document.getElementById('camper-safety-status-badge');
+  const alertBox = document.getElementById('camper-slope-alert-box');
+  const alertText = document.getElementById('camper-slope-alert-text');
+
+  if (clearanceEl) clearanceEl.textContent = `${Number(p.height).toFixed(2)} m Korumalı`;
+  if (widthEl) widthEl.textContent = p.preferWideRoads ? 'Geniş Asfalt & Ana Arterler' : 'Standart Güzergah';
+
+  const slope = state.camperSlopeAnalysis?.maxSlope || 0;
+  if (slopeEl) {
+    if (slope <= 6) {
+      slopeEl.textContent = `%${slope} (Düşük Eğim)`;
+      slopeEl.className = 'font-bold text-emerald-400';
+    } else if (slope <= 9) {
+      slopeEl.textContent = `%${slope} (Orta Eğim)`;
+      slopeEl.className = 'font-bold text-amber-300';
+    } else {
+      slopeEl.textContent = `%${slope} (Dik Rampa / Geçit)`;
+      slopeEl.className = 'font-bold text-red-400';
+    }
+  }
+
+  if (slope >= (p.maxSlopeWarning || 8)) {
+    if (statusBadge) {
+      statusBadge.textContent = '⚠️ Dik Eğim Uyarısı';
+      statusBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30';
+    }
+    if (alertBox) alertBox.classList.remove('hidden');
+    if (alertText) alertText.textContent = `Bu güzergahta maksimum %${slope} eğimli dik rampa/geçit bulunmaktadır. Karavan ile inişlerde motor kompresyon freni kullanın, aşırı balata ısınmasından kaçının.`;
+  } else {
+    if (statusBadge) {
+      statusBadge.textContent = '✅ Güvenli & Uygun';
+      statusBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+    }
+    if (alertBox) alertBox.classList.add('hidden');
+  }
+
+  if (typeof initIcons === 'function') initIcons();
+}
+
+window.syncCamperProfileUI = syncCamperProfileUI;
+window.setCamperPreset = setCamperPreset;
+window.onCamperDimChange = onCamperDimChange;
+window.onCamperOptionChange = onCamperOptionChange;
+window.updateCamperSafetyUI = updateCamperSafetyUI;
 
 function selectHeroVehicle(v) {
   selectVehicle(v);
@@ -1635,7 +1845,28 @@ async function fetchMultiRouteAlternatives(points) {
   const coordsStr = points.map(p => `${p.lon},${p.lat}`).join(';');
   const results = [];
 
-  // 1. OSRM with alternatives=true
+  // 1. If in Camper mode: Calculate Safe Truck/Camper Route via Valhalla first!
+  if (state.currentVehicle === 'camper') {
+    try {
+      const valCamper = await fetchValhallaRoute(points, 'camper');
+      if (valCamper) {
+        const cp = state.camperProfile || CAMPER_PRESETS.alcove;
+        results.push({
+          id: 'valhalla-camper-safe',
+          title: `🛡️ Karavan Güvenli (${cp.height}m Köprü/Geniş Yol)`,
+          type: 'camper-safe',
+          distance: valCamper.distance,
+          duration: valCamper.duration,
+          geometry: valCamper.geometry,
+          source: 'valhalla'
+        });
+      }
+    } catch (e) {
+      console.warn('Valhalla camper route fetch error:', e);
+    }
+  }
+
+  // 2. OSRM with alternatives=true
   try {
     const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson&alternatives=true&steps=true`;
     const res = await fetchWithTimeout(osrmUrl, {}, 12000);
@@ -1643,8 +1874,11 @@ async function fetchMultiRouteAlternatives(points) {
       const data = await res.json();
       if (data.routes && data.routes.length > 0) {
         data.routes.forEach((r, idx) => {
-          const title = idx === 0 ? '⚡ Hızlı (Ana Rota)' : `🌄 Alternatif ${idx + 1}`;
-          const type = idx === 0 ? 'fastest' : 'scenic';
+          let title = idx === 0 ? '⚡ Hızlı (Ana Rota)' : `🌄 Alternatif ${idx + 1}`;
+          let type = idx === 0 ? 'fastest' : 'scenic';
+          if (state.currentVehicle === 'camper') {
+            title = idx === 0 ? '⚡ Standart Araç Rotası' : `🌄 Alternatif Rota ${idx + 1}`;
+          }
           const steps = r.legs ? r.legs.flatMap(l => l.steps || []) : [];
           results.push({
             id: `osrm-${idx}`,
@@ -1663,23 +1897,25 @@ async function fetchMultiRouteAlternatives(points) {
     console.warn('OSRM multi-route fetch error:', e);
   }
 
-  // 2. Valhalla for Winding / Scenic if applicable
-  try {
-    const valhallaProfile = state.currentVehicle === 'motorcycle' ? 'twisty' : 'scenic';
-    const valRoute = await fetchValhallaRoute(points, valhallaProfile);
-    if (valRoute) {
-      results.push({
-        id: 'valhalla-scenic',
-        title: state.currentVehicle === 'motorcycle' ? '🏍️ Virajlı (Motosiklet)' : '🌄 Manzaralı & Sakin',
-        type: state.currentVehicle === 'motorcycle' ? 'twisty' : 'scenic',
-        distance: valRoute.distance,
-        duration: valRoute.duration,
-        geometry: valRoute.geometry,
-        source: 'valhalla'
-      });
+  // 3. Valhalla for Winding / Scenic if applicable (for Motorcycle & Car)
+  if (state.currentVehicle !== 'camper') {
+    try {
+      const valhallaProfile = state.currentVehicle === 'motorcycle' ? 'twisty' : 'scenic';
+      const valRoute = await fetchValhallaRoute(points, valhallaProfile);
+      if (valRoute) {
+        results.push({
+          id: 'valhalla-scenic',
+          title: state.currentVehicle === 'motorcycle' ? '🏍️ Virajlı (Motosiklet)' : '🌄 Manzaralı & Sakin',
+          type: state.currentVehicle === 'motorcycle' ? 'twisty' : 'scenic',
+          distance: valRoute.distance,
+          duration: valRoute.duration,
+          geometry: valRoute.geometry,
+          source: 'valhalla'
+        });
+      }
+    } catch (e) {
+      console.warn('Valhalla alternative fetch error:', e);
     }
-  } catch (e) {
-    console.warn('Valhalla alternative fetch error:', e);
   }
 
   // Deduplicate routes with identical distance (+- 2 km)
@@ -1691,8 +1927,13 @@ async function fetchMultiRouteAlternatives(points) {
 
   // Add ROTAM ÖNERİYOR (Recommended) badge if we have multiple options
   if (unique.length > 1) {
-    unique[0].title = '⭐ ROTAM Öneriyor';
-    unique[0].type = 'recommended';
+    if (state.currentVehicle === 'camper' && unique[0].id === 'valhalla-camper-safe') {
+      unique[0].title = '⭐ ROTAM Karavan Önerisi';
+      unique[0].type = 'recommended';
+    } else {
+      unique[0].title = '⭐ ROTAM Öneriyor';
+      unique[0].type = 'recommended';
+    }
   }
 
   return unique;
@@ -1703,15 +1944,30 @@ async function fetchValhallaRoute(points, profile) {
   const costingMap = {
     car: 'auto',
     motorcycle: 'motorcycle',
-    camper: 'auto',
+    camper: 'truck',
     bicycle: 'bicycle',
     walk: 'pedestrian'
   };
 
-  const costing = costingMap[state.currentVehicle] || 'auto';
+  let costing = costingMap[state.currentVehicle] || 'auto';
   let costingOptions = {};
 
-  if (costing === 'motorcycle') {
+  if (state.currentVehicle === 'camper' || profile === 'camper') {
+    costing = 'truck';
+    const cp = state.camperProfile || CAMPER_PRESETS.alcove;
+    costingOptions = {
+      truck: {
+        height: parseFloat(cp.height) || 3.10,
+        width: parseFloat(cp.width) || 2.35,
+        length: parseFloat(cp.length) || 6.80,
+        weight: parseFloat(cp.weight) || 3.50,
+        use_highways: cp.preferWideRoads ? 0.9 : 0.6,
+        use_tolls: 0.8,
+        use_primary: cp.preferWideRoads ? 0.9 : 0.6,
+        hazmat: false
+      }
+    };
+  } else if (costing === 'motorcycle') {
     costingOptions = { motorcycle: { use_highways: 0.0, use_tolls: 0.0, use_primary: 0.3 } };
   } else if (costing === 'auto' && profile === 'scenic') {
     costingOptions = { auto: { use_highways: 0.1, use_tolls: 0.2 } };
@@ -1930,6 +2186,28 @@ function displayRouteStats(route) {
 
   if (fuelEl) fuelEl.textContent = `${fuelPrefix} ${fuelStops} ${fuelSuffix}`;
   if (breakEl) breakEl.textContent = `${breaksPrefix} ${breaks}`;
+
+  // Route Mode Badge in Cockpit
+  const modeBadge = document.getElementById('route-badge-mode');
+  if (modeBadge) {
+    if (state.currentVehicle === 'camper') {
+      modeBadge.textContent = '🚐 KARAVAN GÜVENLİ';
+      modeBadge.className = 'px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30';
+    } else if (state.currentVehicle === 'motorcycle') {
+      modeBadge.textContent = '🏍️ VİRAJLI SÜRÜŞ';
+      modeBadge.className = 'px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-500/20 text-brand-400 border border-brand-500/30';
+    } else {
+      modeBadge.textContent = 'STANDART';
+      modeBadge.className = 'px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-700/40 text-slate-300 border border-slate-700';
+    }
+  }
+
+  // Trigger Camper Safety Assessment
+  if (state.currentVehicle === 'camper') {
+    updateCamperSafetyUI(route);
+  } else {
+    document.getElementById('camper-safety-report')?.classList.add('hidden');
+  }
 }
 
 // Curviness Score Algorithm
@@ -2602,10 +2880,40 @@ async function fetchAndDisplayElevation(coords) {
     if (elevations.length === 0) return;
 
     let totalAscent = 0;
+    let maxSlopeAscent = 0;
+    let maxSlopeDescent = 0;
+    let steepSlopeSegments = 0;
+    const slopeData = [];
+
     for (let i = 1; i < elevations.length; i++) {
       const diff = elevations[i] - elevations[i - 1];
       if (diff > 0) totalAscent += diff;
+
+      const p1 = samplePoints[i - 1];
+      const p2 = samplePoints[i];
+      const dMeters = haversineMeters(p1[1], p1[0], p2[1], p2[0]);
+      const slope = dMeters > 25 ? Math.round((diff / dMeters) * 100) : 0;
+
+      if (slope > maxSlopeAscent) maxSlopeAscent = slope;
+      if (slope < maxSlopeDescent) maxSlopeDescent = slope;
+      if (Math.abs(slope) >= (state.camperProfile?.maxSlopeWarning || 8)) {
+        steepSlopeSegments++;
+      }
+      slopeData.push({
+        index: i,
+        coord: [p2[1], p2[0]],
+        slopePct: slope,
+        elev: elevations[i]
+      });
     }
+
+    state.camperSlopeAnalysis = {
+      maxAscentPct: Math.min(30, Math.max(0, maxSlopeAscent)),
+      maxDescentPct: Math.min(30, Math.max(0, Math.abs(maxSlopeDescent))),
+      maxSlope: Math.min(30, Math.max(maxSlopeAscent, Math.abs(maxSlopeDescent))),
+      steepSegments: steepSlopeSegments,
+      slopeData: slopeData
+    };
 
     document.getElementById('stat-elevation').textContent = `+${Math.round(totalAscent)} m`;
     document.getElementById('elevation-max').textContent = `${Math.round(Math.max(...elevations))} m`;
@@ -2615,6 +2923,10 @@ async function fetchAndDisplayElevation(coords) {
       coord: [pt[1], pt[0]],
       elev: elevations[idx] || 0
     }));
+
+    if (state.currentVehicle === 'camper') {
+      updateCamperSafetyUI(state.routeData);
+    }
 
     // Only unhide elevation automatically on desktop (>= 768px)
     if (window.innerWidth >= 768) {
@@ -2640,13 +2952,18 @@ function setupElevationCanvas() {
     const point = state.elevationData[index];
 
     if (point) {
-      document.getElementById('elevation-hover-info').textContent = `Rakım: ${Math.round(point.elev)}m`;
+      let hoverText = `Rakım: ${Math.round(point.elev)}m`;
+      if (state.camperSlopeAnalysis?.slopeData && state.camperSlopeAnalysis.slopeData[index - 1]) {
+        const s = state.camperSlopeAnalysis.slopeData[index - 1].slopePct;
+        hoverText += ` • Eğim: ${s > 0 ? '+' : ''}${s}%`;
+      }
+      document.getElementById('elevation-hover-info').textContent = hoverText;
       if (map) {
         if (!state.elevationHoverMarker) {
           state.elevationHoverMarker = L.circleMarker(point.coord, {
             radius: 6,
             color: '#ffffff',
-            fillColor: '#f97316',
+            fillColor: state.currentVehicle === 'camper' ? '#f59e0b' : '#f97316',
             fillOpacity: 1,
             weight: 2
           }).addTo(map);
@@ -2682,9 +2999,15 @@ function drawElevationChart(data) {
   const maxElev = Math.max(...elevs) + 30;
   const range = Math.max(maxElev - minElev, 1);
 
+  const isCamper = (state.currentVehicle === 'camper');
   const grad = ctx.createLinearGradient(0, 0, 0, h);
-  grad.addColorStop(0, 'rgba(249, 115, 22, 0.4)');
-  grad.addColorStop(1, 'rgba(249, 115, 22, 0.02)');
+  if (isCamper) {
+    grad.addColorStop(0, 'rgba(245, 158, 11, 0.45)');
+    grad.addColorStop(1, 'rgba(245, 158, 11, 0.03)');
+  } else {
+    grad.addColorStop(0, 'rgba(249, 115, 22, 0.4)');
+    grad.addColorStop(1, 'rgba(249, 115, 22, 0.02)');
+  }
 
   ctx.beginPath();
   ctx.moveTo(0, h);
@@ -2705,9 +3028,16 @@ function drawElevationChart(data) {
     if (idx === 0) ctx.moveTo(x, y);
     else ctx.lineTo(x, y);
   });
-  ctx.strokeStyle = '#f97316';
+  ctx.strokeStyle = isCamper ? '#f59e0b' : '#f97316';
   ctx.lineWidth = 2;
   ctx.stroke();
+
+  // If Camper has steep slope, draw small badge in canvas
+  if (isCamper && state.camperSlopeAnalysis && state.camperSlopeAnalysis.maxSlope >= 8) {
+    ctx.fillStyle = '#f59e0b';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillText(`⚠️ Maks Eğim: %${state.camperSlopeAnalysis.maxSlope}`, Math.max(10, w - 125), 16);
+  }
 }
 
 function toggleElevationPanelVisibility() {
@@ -4410,6 +4740,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Restore personalized preferences (#27)
   try {
+    syncCamperProfileUI();
     const savedVehicle = localStorage.getItem('rotam_user_vehicle');
     if (savedVehicle) selectVehicle(savedVehicle);
 
@@ -4807,9 +5138,15 @@ const LiveNavigation = {
 
     if (sharpCurveDetected && curveDistanceM >= 50 && curveDistanceM <= 900) {
       const isEn = (window.state && window.state.lang === 'en');
-      textEl.textContent = isEn
-        ? `⚠️ Sharp Curve Ahead (${curveDistanceM}m)`
-        : `⚠️ İleride Keskin Viraj (${curveDistanceM}m)`;
+      if (state.currentVehicle === 'camper') {
+        textEl.textContent = isEn
+          ? `🚐 Wide Turn: Sharp Curve (${curveDistanceM}m)`
+          : `🚐 Geniş Dönüş: Keskin Viraj (${curveDistanceM}m)`;
+      } else {
+        textEl.textContent = isEn
+          ? `⚠️ Sharp Curve Ahead (${curveDistanceM}m)`
+          : `⚠️ İleride Keskin Viraj (${curveDistanceM}m)`;
+      }
       pill.classList.remove('hidden');
     } else {
       pill.classList.add('hidden');
