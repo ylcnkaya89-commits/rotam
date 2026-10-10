@@ -4548,6 +4548,7 @@ const LiveNavigation = {
   steps: [],
   currentStepIndex: 0,
   compassMode: 'heading',
+  currentMapRotation: 0,
   isOverviewMode: false,
   incidentMarkers: [],
   currentSpeedLimit: 90,
@@ -5036,6 +5037,7 @@ const LiveNavigation = {
     showToast(isEn ? '🏍️ Free Ride Mode Active' : '🏍️ Serbest Sürüş Modu Aktif', 'success');
 
     this.startGPS();
+    document.getElementById('live-nav-btn-compass')?.classList.add('compass-heading-active');
     this.updateControlsUI();
     if (typeof initIcons === 'function') initIcons();
   },
@@ -5164,6 +5166,7 @@ const LiveNavigation = {
       this.startGPS();
     }
 
+    document.getElementById('live-nav-btn-compass')?.classList.add('compass-heading-active');
     this.updateControlsUI();
     if (typeof initIcons === 'function') initIcons();
   },
@@ -5215,6 +5218,15 @@ const LiveNavigation = {
       setTimeout(() => map.invalidateSize(), 100);
       setTimeout(() => map.invalidateSize(), 300);
     }
+
+    // Reset Dönen Harita (Heading-Up) camera rotation back to 0deg (North-Up)
+    const mapEl = document.getElementById('map');
+    if (mapEl) {
+      mapEl.classList.remove('live-nav-rotating');
+      mapEl.style.transform = '';
+    }
+    this.currentMapRotation = 0;
+    document.getElementById('live-nav-btn-compass')?.classList.remove('compass-heading-active');
 
     // Reset map view to full route bounds
     if (map && state.routeLayer) {
@@ -5470,6 +5482,39 @@ const LiveNavigation = {
     this.marker = L.marker(latlng, { icon: customIcon, zIndexOffset: 1000 }).addTo(map);
   },
 
+  updateMapHeading(heading) {
+    const mapEl = document.getElementById('map');
+    if (!mapEl) return;
+
+    if (this.compassMode === 'north' || this.isOverviewMode || !this.isActive) {
+      if (mapEl.classList.contains('live-nav-rotating')) {
+        mapEl.style.transform = 'scale(1) rotate(0deg)';
+        setTimeout(() => {
+          if (!this.isActive || this.compassMode === 'north' || this.isOverviewMode) {
+            mapEl.classList.remove('live-nav-rotating');
+            mapEl.style.transform = '';
+          }
+        }, 450);
+      }
+      this.currentMapRotation = 0;
+      return;
+    }
+
+    if (!mapEl.classList.contains('live-nav-rotating')) {
+      mapEl.classList.add('live-nav-rotating');
+    }
+
+    // Shortest-path angle unwrapping: prevents 360-degree spin across North (0/360)
+    const targetRot = -heading;
+    let diff = (targetRot - (this.currentMapRotation || 0)) % 360;
+    if (diff > 180) diff -= 360;
+    if (diff < -180) diff += 360;
+    this.currentMapRotation = (this.currentMapRotation || 0) + diff;
+
+    // Scale 1.55 covers the viewport diagonal completely at any orientation
+    mapEl.style.transform = `scale(1.55) rotate(${this.currentMapRotation}deg)`;
+  },
+
   onLocationUpdate(lat, lon, speed, heading, isInitialFix = false) {
     this.speedKmH = speed;
     this.lastHeading = heading || 0;
@@ -5524,6 +5569,9 @@ const LiveNavigation = {
       map.panTo([lat, lon], { animate: true, duration: 0.5 });
     }
 
+    // Dönen Harita (Heading-Up Navigation Camera Mode)
+    this.updateMapHeading(this.lastHeading || 0);
+
     const speedEl = document.getElementById('live-nav-speed-val');
     if (speedEl) speedEl.textContent = Math.round(this.speedKmH);
 
@@ -5547,8 +5595,11 @@ const LiveNavigation = {
     // Update Google Maps Compass Needle rotation
     const needleEl = document.getElementById('live-nav-compass-needle');
     if (needleEl) {
-      const rot = (360 - (this.lastHeading || 0)) % 360;
-      needleEl.style.transform = `rotate(${Math.round(rot)}deg)`;
+      if (this.compassMode === 'heading') {
+        needleEl.style.transform = `rotate(${Math.round(this.currentMapRotation || 0)}deg)`;
+      } else {
+        needleEl.style.transform = 'rotate(0deg)';
+      }
     }
 
     // Curvature & Danger Detection (Sharp curves ahead)
@@ -6012,17 +6063,23 @@ const LiveNavigation = {
 
   toggleCompassOrientation() {
     const isEn = (window.state && window.state.lang === 'en');
+    const needleEl = document.getElementById('live-nav-compass-needle');
+    const compassBtn = document.getElementById('live-nav-btn-compass');
+
     if (this.compassMode === 'heading') {
       this.compassMode = 'north';
-      showToast(isEn ? 'Compass: North-Up locked' : 'Pusula: Kuzey Yukarı Kilitlendi', 'info');
-      const needleEl = document.getElementById('live-nav-compass-needle');
+      showToast(isEn ? '🧭 North-Up: Fixed North mode' : '🧭 Sabit Kuzey Modu', 'info');
+      this.updateMapHeading(0);
       if (needleEl) needleEl.style.transform = 'rotate(0deg)';
+      if (compassBtn) compassBtn.classList.remove('compass-heading-active');
       if (map && this.lastCoord) {
         map.panTo(this.lastCoord, { animate: true });
       }
     } else {
       this.compassMode = 'heading';
-      showToast(isEn ? 'Compass: Driving Direction mode' : 'Pusula: Sürüş Yönü Takip Modu', 'info');
+      showToast(isEn ? '🧭 Rotating Map: Heading-Up active' : '🧭 Dönen Harita: Sürüş Yönü Takip Modu', 'info');
+      if (compassBtn) compassBtn.classList.add('compass-heading-active');
+      this.updateMapHeading(this.lastHeading || 0);
       this.recenterMap();
     }
   },
@@ -6034,6 +6091,7 @@ const LiveNavigation = {
     if (!this.isOverviewMode) {
       this.isOverviewMode = true;
       this.autoCenter = false;
+      this.updateMapHeading(0); // Reset map rotation while viewing full overview
       if (overviewIcon) overviewIcon.setAttribute('data-lucide', 'locate-fixed');
       if (map && state.routeLayer) {
         try {
@@ -6048,6 +6106,7 @@ const LiveNavigation = {
       this.autoCenter = true;
       if (overviewIcon) overviewIcon.setAttribute('data-lucide', 'crosshair');
       this.recenterMap();
+      this.updateMapHeading(this.lastHeading || 0); // Re-apply heading rotation
     }
     if (typeof initIcons === 'function') initIcons();
   },
