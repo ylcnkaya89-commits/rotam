@@ -870,3 +870,75 @@ main {
   border-color: rgba(148, 163, 184, 0.4);
   background: rgba(30, 41, 59, 0.8);
 }
+
+/* Community Hazard Map Pins (Waze Style) */
+.community-hazard-divicon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.community-hazard-pin {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  background: #0f172a;
+  border: 2px solid #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.community-hazard-pin:hover {
+  transform: scale(1.18);
+}
+
+.community-hazard-pin.hazard-radar {
+  border-color: #06b6d4 !important;
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.65) !important;
+}
+
+.community-hazard-pin.hazard-crash {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.65) !important;
+}
+
+.community-hazard-pin.hazard-oil {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.65) !important;
+}
+
+.community-hazard-pin.hazard-work {
+  border-color: #f97316 !important;
+  box-shadow: 0 0 16px rgba(249, 115, 22, 0.55) !important;
+}
+
+.community-hazard-pin.hazard-camper {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.55) !important;
+}
+
+.community-hazard-pin .hazard-emoji {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.community-hazard-pin .hazard-pulse {
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  border: 2px solid currentColor;
+  opacity: 0.75;
+  animation: hazard-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes hazard-ping {
+  75%, 100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}

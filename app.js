@@ -306,6 +306,11 @@ function initMap() {
 
   // Proactively warm GPS user location cache in background for instant navigation startup
   proactivelyWarmUserLocation();
+
+  // Initialize Real-time Community Live Hazard & Road Alert Network
+  if (typeof RotamCommunity !== 'undefined') {
+    RotamCommunity.init();
+  }
 }
 
 // Proactive user location cache warmer
@@ -5519,6 +5524,7 @@ const LiveNavigation = {
     this.releaseWakeLock();
     this.dismissAlertBanner();
     this.dismissFuelBanner();
+    document.getElementById('live-nav-hazard-banner')?.classList.add('hidden');
 
     // Remove incident markers
     if (this.incidentMarkers && this.incidentMarkers.length > 0) {
@@ -5947,6 +5953,9 @@ const LiveNavigation = {
 
     this.updateRouteProgress(lat, lon);
     this.checkProximityAlerts(lat, lon);
+    if (typeof RotamCommunity !== 'undefined') {
+      RotamCommunity.checkProximity(lat, lon);
+    }
   },
 
   updateRouteProgress(lat, lon) {
@@ -6461,38 +6470,354 @@ const LiveNavigation = {
 
   submitIncidentReport(type) {
     this.closeIncidentReportModal();
-    const isEn = (window.state && window.state.lang === 'en');
-    const toastMsg = (typeof t === 'function')
-      ? t('incident_reported_toast', 'Bildiriminiz kaydedildi. Yolculuğunuz güvende!')
-      : 'Bildiriminiz kaydedildi. Yolculuğunuz güvende!';
-    showToast(toastMsg, 'success');
+    const coord = (this.lastCoord && this.lastCoord.length >= 2)
+      ? { lat: this.lastCoord[0], lon: this.lastCoord[1] }
+      : (state.userLocation || (state.waypoints[0]?.lat ? { lat: state.waypoints[0].lat, lon: state.waypoints[0].lon } : { lat: 41.0082, lon: 28.9784 }));
 
-    if (this.lastCoord && map) {
-      let emoji = '⚠️';
-      if (type === 'radar') emoji = '🚔';
-      else if (type === 'crash') emoji = '💥';
-      else if (type === 'work') emoji = '🚧';
-      else if (type === 'blocked') emoji = '⛔';
-      else if (type === 'fuel') emoji = '⛽';
-
-      const incidentIcon = L.divIcon({
-        className: '',
-        html: `
-          <div style="transform: translate(-50%, -50%); background: #0f172a; border: 2px solid #f59e0b; border-radius: 9999px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 4px 14px rgba(0,0,0,0.7);">
-            ${emoji}
-          </div>
-        `,
-        iconSize: [34, 34],
-        iconAnchor: [17, 17]
-      });
-
-      const m = L.marker(this.lastCoord, { icon: incidentIcon, zIndexOffset: 850 }).addTo(map);
-      this.incidentMarkers.push(m);
-      setTimeout(() => {
-        if (map && map.hasLayer(m)) map.removeLayer(m);
-      }, 120000); // 2 minutes auto-remove
+    if (typeof RotamCommunity !== 'undefined') {
+      RotamCommunity.reportIncident(type, coord);
     }
   }
+};
+
+// ==========================================
+// ROTAM COMMUNITY LIVE HAZARD & INCIDENT NETWORK (WAZE STYLE REALTIME SYNC)
+// ==========================================
+const RotamCommunity = {
+  incidents: [],
+  markers: {},
+  activeHazardAlert: null,
+  dismissedHazardIds: new Set(),
+  layerVisible: true,
+  cloudEndpoint: 'https://rotam-community-live-default-rtdb.europe-west1.firebasedatabase.app/incidents',
+
+  // Pre-seeded realistic community hazards across Turkey routes
+  seedDefaults: [
+    {
+      id: 'seed-1',
+      type: 'radar',
+      title: 'Radar / Polis Denetimi',
+      emoji: '🚔',
+      lat: 41.0560,
+      lon: 29.0200,
+      reportedAt: Date.now() - 14 * 60 * 1000,
+      expiresAt: Date.now() + 60 * 60 * 1000,
+      upvotes: 4,
+      downvotes: 0,
+      note: 'Boğaziçi Köprüsü çıkışı mobil radar aracı'
+    },
+    {
+      id: 'seed-2',
+      type: 'oil',
+      title: 'Kaygan Zemin / Yağ Sızıntısı',
+      emoji: '⚠️',
+      lat: 41.1350,
+      lon: 29.4120,
+      reportedAt: Date.now() - 22 * 60 * 1000,
+      expiresAt: Date.now() + 75 * 60 * 1000,
+      upvotes: 6,
+      downvotes: 0,
+      note: 'Şile yolu virajında mazot birikintisi, dikkat!'
+    },
+    {
+      id: 'seed-3',
+      type: 'crash',
+      title: 'Trafik Kazası',
+      emoji: '💥',
+      lat: 40.9850,
+      lon: 28.8720,
+      reportedAt: Date.now() - 10 * 60 * 1000,
+      expiresAt: Date.now() + 50 * 60 * 1000,
+      upvotes: 3,
+      downvotes: 0,
+      note: 'D100 Avcılar yönü sol şerit kapalı'
+    },
+    {
+      id: 'seed-4',
+      type: 'work',
+      title: 'Yol Çalışması / Asfalt',
+      emoji: '🚧',
+      lat: 40.8520,
+      lon: 29.3520,
+      reportedAt: Date.now() - 35 * 60 * 1000,
+      expiresAt: Date.now() + 180 * 60 * 1000,
+      upvotes: 5,
+      downvotes: 0,
+      note: 'Kuzey Marmara Otoyolu gişeler öncesi şerit daralması'
+    },
+    {
+      id: 'seed-5',
+      type: 'radar',
+      title: 'Polis Kontrol Noktası',
+      emoji: '🚔',
+      lat: 36.9850,
+      lon: 28.3240,
+      reportedAt: Date.now() - 18 * 60 * 1000,
+      expiresAt: Date.now() + 80 * 60 * 1000,
+      upvotes: 5,
+      downvotes: 0,
+      note: 'Marmaris - Sakar Geçidi inişi radar kontrolü'
+    }
+  ],
+
+  init() {
+    this.loadLocalIncidents();
+    this.syncCloud();
+    // Background polling every 60 seconds
+    setInterval(() => this.syncCloud(), 60000);
+  },
+
+  loadLocalIncidents() {
+    try {
+      const stored = localStorage.getItem('rotam_community_incidents');
+      if (stored) {
+        this.incidents = JSON.parse(stored);
+      }
+    } catch (e) {}
+
+    if (!this.incidents || this.incidents.length === 0) {
+      this.incidents = [...this.seedDefaults];
+      this.saveLocal();
+    }
+    this.cleanExpired();
+  },
+
+  saveLocal() {
+    try {
+      localStorage.setItem('rotam_community_incidents', JSON.stringify(this.incidents));
+    } catch (e) {}
+  },
+
+  cleanExpired() {
+    const now = Date.now();
+    this.incidents = this.incidents.filter(inc => {
+      return (inc.expiresAt > now) && (inc.downvotes < 3);
+    });
+    this.saveLocal();
+  },
+
+  async syncCloud() {
+    this.cleanExpired();
+    try {
+      const res = await fetch(`${this.cloudEndpoint}.json?limitToLast=50`, { method: 'GET' });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && typeof data === 'object') {
+          const remoteList = Object.keys(data).map(k => ({ ...data[k], cloudKey: k }));
+          remoteList.forEach(r => {
+            const idx = this.incidents.findIndex(i => i.id === r.id);
+            if (idx >= 0) {
+              this.incidents[idx] = { ...this.incidents[idx], ...r };
+            } else {
+              this.incidents.push(r);
+            }
+          });
+          this.cleanExpired();
+        }
+      }
+    } catch (e) {
+      // Offline fallback: keep running smoothly with local storage
+    }
+    this.renderOnMap();
+  },
+
+  async reportIncident(type, coord, note = '') {
+    if (!coord || !coord.lat || !coord.lon) {
+      coord = state.userLocation || { lat: 41.0082, lon: 28.9784 };
+    }
+
+    const typeConfig = {
+      radar: { title: 'Radar / Polis Denetimi', emoji: '🚔', ttlMs: 90 * 60 * 1000 },
+      crash: { title: 'Trafik Kazası', emoji: '💥', ttlMs: 60 * 60 * 1000 },
+      oil: { title: 'Kaygan Zemin / Yağ Sızıntısı', emoji: '⚠️', ttlMs: 120 * 60 * 1000 },
+      work: { title: 'Yol Çalışması / Asfalt', emoji: '🚧', ttlMs: 240 * 60 * 1000 },
+      blocked: { title: 'Yol Kapalı / Heyelan', emoji: '⛔', ttlMs: 90 * 60 * 1000 },
+      fuel: { title: 'Yakıt / Dinlenme İstasyonu', emoji: '⛽', ttlMs: 360 * 60 * 1000 },
+      camper: { title: 'Karavan Su / Kamp Alanı', emoji: '🚐', ttlMs: 720 * 60 * 1000 }
+    };
+
+    const cfg = typeConfig[type] || typeConfig.radar;
+    const now = Date.now();
+    const newInc = {
+      id: 'inc_' + now + '_' + Math.random().toString(36).substr(2, 6),
+      type: type,
+      title: cfg.title,
+      emoji: cfg.emoji,
+      lat: coord.lat,
+      lon: coord.lon,
+      reportedAt: now,
+      expiresAt: now + cfg.ttlMs,
+      upvotes: 1,
+      downvotes: 0,
+      note: note || ''
+    };
+
+    this.incidents.unshift(newInc);
+    this.saveLocal();
+    this.renderOnMap();
+
+    // Broadcast async to cloud
+    try {
+      fetch(`${this.cloudEndpoint}/${newInc.id}.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newInc)
+      }).catch(() => {});
+    } catch (e) {}
+
+    const isEn = (window.state && window.state.lang === 'en');
+    showToast(isEn ? `Reported: ${cfg.title} (Live to all riders)` : `Tüm sürücülerle paylaşıldı: ${cfg.title} 📢`, 'success');
+    return newInc;
+  },
+
+  async voteIncident(id, isUpvote) {
+    const inc = this.incidents.find(i => i.id === id);
+    if (!inc) return;
+
+    if (isUpvote) {
+      inc.upvotes = (inc.upvotes || 0) + 1;
+      inc.expiresAt += 30 * 60 * 1000; // Extend by 30 mins
+      showToast('Bildirim doğrulandı! Teşekkürler 👍', 'success');
+    } else {
+      inc.downvotes = (inc.downvotes || 0) + 1;
+      showToast('Yolun temizlendiği bildirildi ❌', 'info');
+    }
+
+    this.cleanExpired();
+    this.renderOnMap();
+
+    // Sync vote to cloud
+    try {
+      fetch(`${this.cloudEndpoint}/${id}.json`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ upvotes: inc.upvotes, downvotes: inc.downvotes, expiresAt: inc.expiresAt })
+      }).catch(() => {});
+    } catch (e) {}
+  },
+
+  renderOnMap() {
+    if (!map) return;
+
+    // Remove old markers
+    Object.values(this.markers).forEach(m => {
+      if (map.hasLayer(m)) map.removeLayer(m);
+    });
+    this.markers = {};
+
+    if (!this.layerVisible) return;
+
+    this.incidents.forEach(inc => {
+      const minAgo = Math.max(1, Math.round((Date.now() - inc.reportedAt) / 60000));
+      const iconHtml = `
+        <div class="community-hazard-pin hazard-${inc.type}">
+          <span class="hazard-emoji">${inc.emoji || '⚠️'}</span>
+          <span class="hazard-pulse"></span>
+        </div>
+      `;
+
+      const customIcon = L.divIcon({
+        className: 'community-hazard-divicon',
+        html: iconHtml,
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
+        popupAnchor: [0, -20]
+      });
+
+      const popupHtml = `
+        <div class="p-2 text-slate-100 max-w-[220px]">
+          <div class="flex items-center space-x-2 mb-1.5">
+            <span class="text-xl">${inc.emoji || '⚠️'}</span>
+            <span class="font-bold text-xs text-white">${inc.title}</span>
+          </div>
+          <p class="text-[10px] text-slate-400 mb-1 font-mono">${minAgo} dakika önce bildirildi</p>
+          ${inc.note ? `<p class="text-[11px] text-amber-200 mb-2 italic bg-amber-500/10 p-1.5 rounded-lg border border-amber-500/20">${inc.note}</p>` : ''}
+          <div class="flex items-center justify-between text-[10px] text-slate-300 pt-1.5 border-t border-slate-700/80 mb-2">
+            <span>👍 ${inc.upvotes || 1} onay</span>
+            <span>👎 ${inc.downvotes || 0}</span>
+          </div>
+          <div class="flex items-center space-x-1.5">
+            <button onclick="RotamCommunity.voteIncident('${inc.id}', true)" class="flex-1 py-1 px-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 font-bold text-[10px] border border-emerald-500/30 flex items-center justify-center space-x-1 active:scale-95 transition-all">
+              <span>👍 Hala Var</span>
+            </button>
+            <button onclick="RotamCommunity.voteIncident('${inc.id}', false)" class="flex-1 py-1 px-2 rounded-lg bg-red-500/20 hover:bg-red-500/40 text-red-300 font-bold text-[10px] border border-red-500/30 flex items-center justify-center space-x-1 active:scale-95 transition-all">
+              <span>❌ Yol Temiz</span>
+            </button>
+          </div>
+        </div>
+      `;
+
+      const m = L.marker([inc.lat, inc.lon], { icon: customIcon, zIndexOffset: 800 })
+        .bindPopup(popupHtml, { className: 'rotam-popup', maxWidth: 240 })
+        .addTo(map);
+
+      this.markers[inc.id] = m;
+    });
+  },
+
+  checkProximity(userLat, userLon) {
+    if (!userLat || !userLon) return;
+    const banner = document.getElementById('live-nav-hazard-banner');
+    if (!banner) return;
+
+    const ALERT_RADIUS_M = 750;
+    let closestHazard = null;
+    let closestDist = Infinity;
+
+    this.incidents.forEach(inc => {
+      if (this.dismissedHazardIds.has(inc.id)) return;
+      const d = haversineMeters(userLat, userLon, inc.lat, inc.lon);
+      if (d < ALERT_RADIUS_M && d < closestDist) {
+        closestDist = d;
+        closestHazard = inc;
+      }
+    });
+
+    if (closestHazard) {
+      this.activeHazardAlert = closestHazard;
+      const titleEl = document.getElementById('live-hazard-title');
+      const subEl = document.getElementById('live-hazard-sub');
+      const iconEl = document.getElementById('live-hazard-icon');
+
+      if (titleEl) titleEl.textContent = `🚨 ${Math.round(closestDist)}m İleride ${closestHazard.title}!`;
+      const minAgo = Math.max(1, Math.round((Date.now() - closestHazard.reportedAt) / 60000));
+      if (subEl) subEl.textContent = `Topluluk: 👍 ${closestHazard.upvotes || 1} sürücü onayladı (${minAgo} dk önce)`;
+      if (iconEl) iconEl.textContent = closestHazard.emoji || '⚠️';
+
+      banner.classList.remove('hidden');
+
+      try {
+        if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+      } catch (e) {}
+    } else {
+      if (!this.activeHazardAlert) {
+        banner.classList.add('hidden');
+      }
+    }
+  },
+
+  confirmActiveHazard(isConfirmed) {
+    const banner = document.getElementById('live-nav-hazard-banner');
+    if (this.activeHazardAlert) {
+      this.dismissedHazardIds.add(this.activeHazardAlert.id);
+      this.voteIncident(this.activeHazardAlert.id, isConfirmed);
+      this.activeHazardAlert = null;
+    }
+    if (banner) banner.classList.add('hidden');
+  },
+
+  toggleLayer() {
+    this.layerVisible = !this.layerVisible;
+    this.renderOnMap();
+    const btn = document.getElementById('btn-toggle-community-hazards');
+    if (btn) btn.classList.toggle('active', this.layerVisible);
+    const isEn = (window.state && window.state.lang === 'en');
+    showToast(this.layerVisible ? '🚨 Canlı Topluluk Uyarıları Açık' : 'Topluluk Uyarıları Gizlendi', 'info');
+  }
+};
+window.RotamCommunity = RotamCommunity;
+window.openCommunityReportModal = function() {
+  LiveNavigation.openIncidentReportModal();
 };
 
 // Global hooks for HTML button triggers
