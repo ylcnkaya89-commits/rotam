@@ -1,7 +1,7 @@
 {
-  "name": "Rotam - Motosiklet & Araç Rota Planlayıcı",
+  "name": "Rotam - Motosiklet & Karavan Rota Planlayıcı",
   "short_name": "Rotam",
-  "description": "Virajlı ve manzaralı motosiklet rota ve keşif planlayıcı",
+  "description": "Motosiklet ve karavanlar için virajlı, manzaralı rota planlayıcı ve canlı navigasyon",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "any",

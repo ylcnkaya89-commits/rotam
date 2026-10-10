@@ -16,3 +16,4 @@ check_js.html
 mock.js
 *.pyc
 __pycache__/
+ios/
