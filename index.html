@@ -497,6 +497,10 @@
               <span data-i18n="btn_start_live_ride">CANLI SÜRÜŞÜ BAŞLAT</span>
               <span class="text-[10px] bg-cyan-400/20 text-cyan-200 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ml-1">HUD</span>
             </button>
+            <button type="button" onclick="startLiveRide(true)" class="col-span-2 py-2 px-3 bg-slate-800/90 hover:bg-slate-700 text-amber-300 font-bold rounded-xl text-xs border border-amber-500/30 flex items-center justify-center space-x-1.5 active:scale-[0.99] transition-all" title="Demo Simülasyonu Başlat (Test Sürüşü)">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>Demo Test Sürüşü (Simülasyon)</span>
+            </button>
             <button type="button" onclick="openInGoogleMaps()" class="col-span-2 py-2 px-3 bg-emerald-600/90 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-md shadow-emerald-600/20 flex items-center justify-center space-x-2 active:scale-[0.99] transition-all" title="Rotayı Google Maps'te Aç ve Harici Navigasyonu Başlat">
               <i data-lucide="navigation" class="w-3.5 h-3.5 text-white"></i>
               <span data-i18n="timeline_gmaps_btn">Google Maps'e Gönder</span>
@@ -1099,11 +1103,17 @@
           </div>
 
           <!-- ANA EKRANDA BÜYÜK VE NET: SÜRÜŞÜ BAŞLAT BUTONU -->
-          <button onclick="startLiveRide()" class="w-full bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-black py-3 px-3 rounded-xl text-xs sm:text-sm shadow-xl shadow-cyan-600/35 flex items-center justify-center space-x-2 active:scale-[0.98] transition-all border border-cyan-400/40" title="Rotam Canlı GPS Sürüş Modunu Başlat">
-            <i data-lucide="play" class="w-4 h-4 fill-white text-white"></i>
-            <span class="tracking-wide" data-i18n="btn_start_live_ride">SÜRÜŞÜ BAŞLAT</span>
-            <span class="text-[9px] bg-cyan-400/20 text-cyan-200 px-1.5 py-0.5 rounded font-bold uppercase ml-1">CANLI HUD</span>
-          </button>
+          <div class="flex items-center space-x-2">
+            <button onclick="startLiveRide()" class="flex-1 bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-black py-3 px-3 rounded-xl text-xs sm:text-sm shadow-xl shadow-cyan-600/35 flex items-center justify-center space-x-2 active:scale-[0.98] transition-all border border-cyan-400/40" title="Rotam Canlı GPS Sürüş Modunu Başlat">
+              <i data-lucide="play" class="w-4 h-4 fill-white text-white"></i>
+              <span class="tracking-wide" data-i18n="btn_start_live_ride">SÜRÜŞÜ BAŞLAT</span>
+              <span class="text-[9px] bg-cyan-400/20 text-cyan-200 px-1.5 py-0.5 rounded font-bold uppercase ml-1">CANLI HUD</span>
+            </button>
+            <button onclick="startLiveRide(true)" class="py-3 px-3 bg-slate-800/90 hover:bg-slate-700 text-amber-300 font-bold rounded-xl text-xs border border-amber-500/30 flex items-center justify-center space-x-1 shrink-0 active:scale-[0.98] transition-all shadow-lg" title="Demo Simülasyon Testi">
+              <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+              <span class="text-[10px] uppercase font-bold text-amber-300">Test</span>
+            </button>
+          </div>
 
           <!-- Alt Buton Satırı: Google Maps + Keşfet + Detay -->
           <div class="flex items-center space-x-1.5 pt-0.5">

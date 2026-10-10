@@ -533,8 +533,8 @@ function startDemoRouteFromModal() {
   showToast(isEn ? 'Loading scenic demo route...' : 'Örnek virajlı rota yükleniyor...', 'info');
 
   state.waypoints = [
-    { lat: 40.9904, lon: 29.0254, name: isEn ? 'Kadikoy' : 'Kadıköy' },
-    { lat: 41.1744, lon: 29.6125, name: isEn ? 'Sile Coast' : 'Şile Sahili' }
+    { id: 'start', type: 'start', lat: 40.9904, lon: 29.0254, name: isEn ? 'Kadikoy' : 'Kadıköy' },
+    { id: 'end', type: 'end', lat: 41.1744, lon: 29.6125, name: isEn ? 'Sile Coast' : 'Şile Sahili' }
   ];
   if (typeof updateWaypointsListUI === 'function') updateWaypointsListUI();
   if (typeof updateWaypointMarkers === 'function') updateWaypointMarkers();
@@ -4507,6 +4507,19 @@ function calculateBearing(lat1, lon1, lat2, lon2) {
   return (brng + 360) % 360;
 }
 
+function destinationPoint(lat, lon, distanceMeters, bearingDeg) {
+  const R = 6371000;
+  const d = distanceMeters / R;
+  const brng = bearingDeg * Math.PI / 180;
+  const lat1 = lat * Math.PI / 180;
+  const lon1 = lon * Math.PI / 180;
+
+  const lat2 = Math.asin(Math.sin(lat1) * Math.cos(d) + Math.cos(lat1) * Math.sin(d) * Math.cos(brng));
+  const lon2 = lon1 + Math.atan2(Math.sin(brng) * Math.sin(d) * Math.cos(lat1), Math.cos(d) - Math.sin(lat1) * Math.sin(lat2));
+
+  return [lat2 * 180 / Math.PI, ((lon2 * 180 / Math.PI) + 540) % 360 - 180];
+}
+
 const LiveNavigation = {
   isActive: false,
   isSimulation: false,
@@ -4637,6 +4650,117 @@ const LiveNavigation = {
     } else {
       bar.classList.add('hidden');
     }
+  },
+
+  initRouteSteps() {
+    this.steps = [];
+    if (state.routeData) {
+      if (Array.isArray(state.routeData.steps) && state.routeData.steps.length > 0) {
+        this.steps = state.routeData.steps;
+      } else if (state.routeData.legs && Array.isArray(state.routeData.legs)) {
+        this.steps = state.routeData.legs.flatMap(l => l.steps || []);
+      }
+    }
+
+    // Fallback synthetic steps if steps are missing
+    if (this.steps.length === 0 && state.routeData?.geometry?.coordinates) {
+      const valid = (state.waypoints || []).filter(w => w.lat !== null && w.lon !== null);
+      const isEn = (window.state && window.state.lang === 'en');
+      const startName = (valid[0] && valid[0].name) || (isEn ? 'Start' : 'Başlangıç');
+      const destName = (valid.length > 1 && valid[valid.length - 1].name) || (isEn ? 'Destination' : 'Varış');
+      this.steps = [
+        {
+          name: startName,
+          distance: 100,
+          maneuver: { type: 'depart', modifier: 'straight', instruction: isEn ? 'Follow the route' : 'Yola çıkın ve rotayı takip edin' }
+        },
+        {
+          name: destName,
+          distance: state.routeData.distance || 1000,
+          maneuver: { type: 'arrive', modifier: 'straight', instruction: isEn ? 'Arrive at destination' : 'Hedefe ulaştınız' }
+        }
+      ];
+    }
+  },
+
+  getManeuverInfo(step) {
+    const isEn = (window.state && window.state.lang === 'en');
+    if (!step) {
+      return {
+        arrow: '↑',
+        street: isEn ? 'Follow the route' : 'Güzergahı takip edin',
+        action: isEn ? 'Continue straight' : 'Düz devam edin'
+      };
+    }
+
+    const name = step.name || (isEn ? 'Road' : 'Güzergah');
+    const m = step.maneuver || {};
+    const type = m.type || '';
+    const mod = m.modifier || '';
+
+    let arrow = '↑';
+    let action = isEn ? 'Continue straight' : 'Düz devam edin';
+
+    if (type === 'arrive') {
+      arrow = '🏁';
+      action = isEn ? 'Arrive at destination' : 'Hedefe varış';
+    } else if (type === 'depart') {
+      arrow = '↑';
+      action = isEn ? 'Depart and follow route' : 'Yola çıkın ve rotayı takip edin';
+    } else if (type === 'roundabout' || type === 'rotary') {
+      arrow = '🔄';
+      action = isEn ? 'Enter roundabout, take exit' : 'Dönel kavşaktan çıkın';
+    } else if (type === 'fork') {
+      if (mod.includes('left')) {
+        arrow = '↖';
+        action = isEn ? 'Keep left at the fork' : 'Çatalda soldan devam edin';
+      } else {
+        arrow = '↗';
+        action = isEn ? 'Keep right at the fork' : 'Çatalda sağdan devam edin';
+      }
+    } else if (type === 'off ramp' || type === 'on ramp') {
+      if (mod.includes('left')) {
+        arrow = '↖';
+        action = isEn ? 'Take exit on left' : 'Soldan çıkışa girin';
+      } else {
+        arrow = '↗';
+        action = isEn ? 'Take exit on right' : 'Sağdan çıkışa girin';
+      }
+    } else if (mod === 'sharp left') {
+      arrow = '⮌';
+      action = isEn ? `Sharp left onto ${name}` : `${name} yönüne keskin sola dönün`;
+    } else if (mod === 'left') {
+      arrow = '↰';
+      action = isEn ? `Turn left onto ${name}` : `${name} yönüne sola dönün`;
+    } else if (mod === 'slight left') {
+      arrow = '↖';
+      action = isEn ? `Slight left onto ${name}` : `${name} yönüne hafif sola dönün`;
+    } else if (mod === 'sharp right') {
+      arrow = '⮎';
+      action = isEn ? `Sharp right onto ${name}` : `${name} yönüne keskin sağa dönün`;
+    } else if (mod === 'right') {
+      arrow = '↱';
+      action = isEn ? `Turn right onto ${name}` : `${name} yönüne sağa dönün`;
+    } else if (mod === 'slight right') {
+      arrow = '↗';
+      action = isEn ? `Slight right onto ${name}` : `${name} yönüne hafif sağa dönün`;
+    } else if (mod === 'uturn') {
+      arrow = '↩';
+      action = isEn ? 'Make a U-turn' : 'U dönüşü yapın';
+    } else if (type === 'turn') {
+      if (mod.includes('left')) {
+        arrow = '↰';
+        action = isEn ? `Turn left onto ${name}` : `${name} yönüne sola dönün`;
+      } else if (mod.includes('right')) {
+        arrow = '↱';
+        action = isEn ? `Turn right onto ${name}` : `${name} yönüne sağa dönün`;
+      }
+    } else {
+      arrow = '↑';
+      action = isEn ? `Continue on ${name}` : `${name} boyunca düz devam edin`;
+    }
+
+    return { arrow, street: name, action };
   },
 
   detectUpcomingCurvature(lat, lon) {
@@ -4832,6 +4956,7 @@ const LiveNavigation = {
     this.isFreeRide = true;
     this.wasFreeRide = true;
     this.isSimulation = false;
+    this.forceSimulationExplicit = false;
     this.notifiedPois.clear();
     this.autoCenter = true;
     this.startTime = Date.now();
@@ -4943,6 +5068,9 @@ const LiveNavigation = {
     }
 
     this.isActive = true;
+    this.isFreeRide = false;
+    this.wasFreeRide = false;
+    this.forceSimulationExplicit = !!forceSimulation;
     this.notifiedPois.clear();
     this.autoCenter = true;
     this.startTime = Date.now();
@@ -5126,8 +5254,14 @@ const LiveNavigation = {
     // Instant single-shot position query to lock on and zoom as fast as hardware allows
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        if (!this.isActive || this.isSimulation) return;
+        if (!this.isActive) return;
         gpsReceived = true;
+        if (this.simInterval && !this.forceSimulationExplicit) {
+          clearInterval(this.simInterval);
+          this.simInterval = null;
+          this.isSimulation = false;
+          this.updateModeBadge();
+        }
         const lat = pos.coords.latitude;
         const lon = pos.coords.longitude;
         const speed = (pos.coords.speed !== null && !isNaN(pos.coords.speed))
@@ -5149,6 +5283,12 @@ const LiveNavigation = {
     this.watchId = navigator.geolocation.watchPosition(
       (pos) => {
         gpsReceived = true;
+        if (this.simInterval && !this.forceSimulationExplicit) {
+          clearInterval(this.simInterval);
+          this.simInterval = null;
+          this.isSimulation = false;
+          this.updateModeBadge();
+        }
         const lat = pos.coords.latitude;
         const lon = pos.coords.longitude;
         const speed = (pos.coords.speed !== null && !isNaN(pos.coords.speed))
@@ -5192,6 +5332,15 @@ const LiveNavigation = {
 
   switchToSimulationWithMessage() {
     if (!this.isActive) return;
+    const isEn = (window.state && window.state.lang === 'en');
+    if (this.isFreeRide || !state.routeData) {
+      const msg = isEn
+        ? 'GPS fix is pending. Cruise test simulation active.'
+        : 'GPS sinyali bekleniyor. Serbest sürüş seyir simülasyonu devrede.';
+      showToast(msg, 'info');
+      this.startFreeRideSimulation();
+      return;
+    }
     const msg = (typeof t === 'function')
       ? t('live_nav_gps_error', 'GPS sinyali alınamadı. Demo simülasyon moduna geçiliyor.')
       : 'GPS sinyali alınamadı. Demo simülasyon moduna geçiliyor.';
@@ -5199,16 +5348,47 @@ const LiveNavigation = {
     this.startSimulation();
   },
 
+  startFreeRideSimulation() {
+    this.isSimulation = true;
+    this.updateModeBadge();
+    if (this.simInterval) clearInterval(this.simInterval);
+
+    let curCoord = this.lastCoord || [41.0082, 28.9784];
+    let curHeading = this.lastHeading || 45;
+
+    this.simInterval = setInterval(() => {
+      if (!this.isActive) {
+        clearInterval(this.simInterval);
+        return;
+      }
+      curHeading = (curHeading + (Math.random() - 0.48) * 8 + 360) % 360;
+      const speed = Math.floor(52 + Math.random() * 16);
+      const distStepM = (speed * 1000 / 3600) * 0.8;
+      const nextCoord = destinationPoint(curCoord[0], curCoord[1], distStepM, curHeading);
+      curCoord = nextCoord;
+
+      this.onLocationUpdate(nextCoord[0], nextCoord[1], speed, curHeading);
+    }, 800);
+  },
+
   startSimulation() {
     this.stopGPS();
     this.isSimulation = true;
+    this.forceSimulationExplicit = true;
     this.updateModeBadge();
 
     const coords = state.routeData?.geometry?.coordinates;
-    if (!coords || coords.length === 0) return;
+    if (!coords || coords.length === 0) {
+      if (this.isFreeRide || !state.routeData) {
+        this.startFreeRideSimulation();
+      }
+      return;
+    }
 
     this.simIndex = 0;
     if (this.simInterval) clearInterval(this.simInterval);
+
+    const stepSkip = Math.max(1, Math.floor(coords.length / 280));
 
     this.simInterval = setInterval(() => {
       if (!this.isActive || !this.isSimulation) {
@@ -5225,14 +5405,14 @@ const LiveNavigation = {
       }
 
       const current = coords[this.simIndex];
-      const next = coords[Math.min(this.simIndex + 1, coords.length - 1)];
+      const nextIdx = Math.min(this.simIndex + stepSkip, coords.length - 1);
+      const next = coords[nextIdx];
 
       const heading = calculateBearing(current[1], current[0], next[1], next[0]);
-      // Touring motorcycle speed ~ 70-85 km/h
-      const speed = Math.floor(70 + Math.random() * 15);
+      const speed = Math.floor(65 + Math.random() * 15);
 
       this.onLocationUpdate(current[1], current[0], speed, heading);
-      this.simIndex += 1;
+      this.simIndex = nextIdx;
     }, 650);
   },
 
@@ -5242,6 +5422,7 @@ const LiveNavigation = {
       this.simInterval = null;
     }
     this.isSimulation = false;
+    this.forceSimulationExplicit = false;
   },
 
   toggleSimulation() {
@@ -5254,7 +5435,11 @@ const LiveNavigation = {
       const msg = (typeof t === 'function') ? t('live_nav_demo', 'Demo simülasyonu başlatılıyor...') : 'Demo simülasyonu başlatılıyor...';
       showToast(msg, 'info');
       this.stopGPS();
-      this.startSimulation();
+      if (this.isFreeRide || !state.routeData) {
+        this.startFreeRideSimulation();
+      } else {
+        this.startSimulation();
+      }
     }
     this.updateModeBadge();
   },
