@@ -491,20 +491,57 @@ function dismissHomepagePlanner() {
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   if (!sidebar) return;
-  if (!sidebar.classList.contains('hidden')) {
+  if (!sidebar.classList.contains('hidden') && sidebar.classList.contains('mobile-sheet-open')) {
+    closeMobileSidebar();
+  } else if (!sidebar.classList.contains('hidden') && window.innerWidth >= 768) {
     closeMobileSidebar();
   } else {
     openMobileSidebar();
   }
 }
 
+function toggleMobileLayersPopover() {
+  const popover = document.getElementById('mobile-layers-popover');
+  if (popover) {
+    popover.classList.toggle('hidden');
+    if (!popover.classList.contains('hidden')) {
+      const statusEl = document.getElementById('mobile-community-status');
+      if (statusEl && window.RotamCommunity) {
+        statusEl.textContent = RotamCommunity.layerVisible ? 'Aktif' : 'Kapalı';
+        statusEl.className = RotamCommunity.layerVisible ? 'text-[10px] text-emerald-400' : 'text-[10px] text-slate-500';
+      }
+    }
+  }
+}
+
+// Click outside to dismiss layers popover
+document.addEventListener('click', (e) => {
+  const popover = document.getElementById('mobile-layers-popover');
+  const fabStack = document.getElementById('mobile-floating-fabs');
+  if (popover && !popover.classList.contains('hidden') && fabStack) {
+    if (!fabStack.contains(e.target)) {
+      popover.classList.add('hidden');
+    }
+  }
+});
+
 function openMobileSidebar(focusTarget = null) {
   const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
   if (sidebar) {
     sidebar.classList.remove('hidden');
     sidebar.classList.add('flex');
+    if (window.innerWidth < 768) {
+      requestAnimationFrame(() => {
+        sidebar.classList.add('mobile-sheet-open');
+      });
+    }
     initIcons();
     if (map) setTimeout(() => map.invalidateSize(), 150);
+  }
+  if (backdrop && window.innerWidth < 768) {
+    backdrop.classList.remove('hidden');
+    requestAnimationFrame(() => backdrop.classList.add('active'));
   }
   // On mobile, close right-panel and hide floating widgets to prevent overlay collision
   if (window.innerWidth < 768) {
@@ -529,13 +566,28 @@ function openMobileSidebar(focusTarget = null) {
 
 function closeMobileSidebar() {
   const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
   if (sidebar) {
-    sidebar.classList.add('hidden');
-    sidebar.classList.remove('flex');
+    sidebar.classList.remove('mobile-sheet-open');
+    if (window.innerWidth < 768) {
+      setTimeout(() => {
+        if (!sidebar.classList.contains('mobile-sheet-open')) {
+          sidebar.classList.add('hidden');
+          sidebar.classList.remove('flex');
+        }
+      }, 300);
+    } else {
+      sidebar.classList.add('hidden');
+      sidebar.classList.remove('flex');
+    }
     if (map) {
       setTimeout(() => map.invalidateSize(), 100);
-      setTimeout(() => map.invalidateSize(), 300);
+      setTimeout(() => map.invalidateSize(), 320);
     }
+  }
+  if (backdrop) {
+    backdrop.classList.remove('active');
+    setTimeout(() => backdrop.classList.add('hidden'), 260);
   }
   if (typeof closeWaypointAutocomplete === 'function') {
     closeWaypointAutocomplete();
@@ -6811,6 +6863,11 @@ const RotamCommunity = {
     this.renderOnMap();
     const btn = document.getElementById('btn-toggle-community-hazards');
     if (btn) btn.classList.toggle('active', this.layerVisible);
+    const mobileStatus = document.getElementById('mobile-community-status');
+    if (mobileStatus) {
+      mobileStatus.textContent = this.layerVisible ? 'Aktif' : 'Kapalı';
+      mobileStatus.className = this.layerVisible ? 'text-[10px] text-emerald-400 font-bold' : 'text-[10px] text-slate-500 font-bold';
+    }
     const isEn = (window.state && window.state.lang === 'en');
     showToast(this.layerVisible ? '🚨 Canlı Topluluk Uyarıları Açık' : 'Topluluk Uyarıları Gizlendi', 'info');
   }
