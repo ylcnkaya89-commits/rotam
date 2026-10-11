@@ -70,7 +70,7 @@
   <meta name="theme-color" content="#090d16">
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="styles.css?v=3.4">
+  <link rel="stylesheet" href="styles.css?v=3.5">
 </head>
 <body class="h-full flex flex-col overflow-hidden font-sans selection:bg-brand-500 selection:text-white bg-slate-950">
 
@@ -746,6 +746,112 @@
       
       <!-- LEAFLET HARİTA DİVİ -->
       <div id="map" class="w-full h-full dark-map"></div>
+
+      <!-- HARİTA ÜSTÜ HIZLI KATEGORİ FİLTRE ÇUBUĞU (#map-category-filter-bar) -->
+      <div id="map-category-filter-bar" class="absolute top-3 left-3 right-16 sm:left-4 sm:right-auto sm:max-w-2xl z-[950] pointer-events-none transition-all duration-300">
+        <div class="pointer-events-auto flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1 px-1.5 rounded-2xl glass-panel bg-slate-950/85 backdrop-blur-xl border border-slate-800/90 shadow-2xl">
+          
+          <!-- Tümü / Master Aç-Kapa Butonu -->
+          <button id="map-filter-toggle-all" onclick="toggleAllPoiCategories()" class="map-category-pill active flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all active:scale-95 shadow-sm" title="Tüm Kategorileri Aç / Kapat">
+            <span class="text-xs">✨</span>
+            <span id="map-filter-all-label">Tümü</span>
+            <span id="map-filter-total-count" class="map-pill-count text-[10px] px-1.5 py-0.5 rounded-full font-mono bg-white/20">871</span>
+          </button>
+
+          <div class="h-4 w-px bg-slate-800 shrink-0"></div>
+
+          <!-- 1. Tarihi Yerler & Antik Kentler -->
+          <button id="map-pill-historic" onclick="togglePoiCategoryFilter('historic')" class="map-category-pill active flex items-center space-x-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all active:scale-95" title="Tarihi Yerler ve Antik Kentler">
+            <span>🏛️</span>
+            <span>Tarih</span>
+            <span id="map-count-historic" class="map-pill-count text-[10px] font-mono px-1 rounded-full">501</span>
+          </button>
+
+          <!-- 2. Doğa & Şelale & Kamp -->
+          <button id="map-pill-nature" onclick="togglePoiCategoryFilter('nature')" class="map-category-pill active flex items-center space-x-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all active:scale-95" title="Doğa, Kanyonlar ve Kamp">
+            <span>🌲</span>
+            <span>Doğa</span>
+            <span id="map-count-nature" class="map-pill-count text-[10px] font-mono px-1 rounded-full">36</span>
+          </button>
+
+          <!-- 3. Fotoğraf & Seyir Tepeleri -->
+          <button id="map-pill-photography" onclick="togglePoiCategoryFilter('photography')" class="map-category-pill active flex items-center space-x-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all active:scale-95" title="Fotoğraf ve Seyir Noktaları">
+            <span>📸</span>
+            <span>Fotoğraf</span>
+            <span id="map-count-photography" class="map-pill-count text-[10px] font-mono px-1 rounded-full">23</span>
+          </button>
+
+          <!-- 4. Sahil & Plaj & Koy -->
+          <button id="map-pill-beach" onclick="togglePoiCategoryFilter('beach')" class="map-category-pill active flex items-center space-x-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all active:scale-95" title="Plajlar ve Sahil Şeridi">
+            <span>🌊</span>
+            <span>Sahil</span>
+            <span id="map-count-beach" class="map-pill-count text-[10px] font-mono px-1 rounded-full">8</span>
+          </button>
+
+          <!-- 5. Gastronomi & Meşhur Lezzet -->
+          <button id="map-pill-gastronomy" onclick="togglePoiCategoryFilter('gastronomy')" class="map-category-pill active flex items-center space-x-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all active:scale-95" title="Yöresel Lezzet ve Mola Yerleri">
+            <span>🍴</span>
+            <span>Lezzet</span>
+            <span id="map-count-gastronomy" class="map-pill-count text-[10px] font-mono px-1 rounded-full">112</span>
+          </button>
+
+          <!-- 6. Akaryakıt & EV Şarj -->
+          <button id="map-pill-fuel" onclick="togglePoiCategoryFilter('fuel')" class="map-category-pill active flex items-center space-x-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all active:scale-95" title="Akaryakıt İstasyonları ve EV Şarj">
+            <span>⛽</span>
+            <span>Yakıt & Şarj</span>
+            <span id="map-count-fuel" class="map-pill-count text-[10px] font-mono px-1 rounded-full">191</span>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- HARİTA NOKTASI HIZLI ÖNİZLEME & AYRINTI KARTI (#quick-place-preview-card) -->
+      <div id="quick-place-preview-card" class="hidden absolute bottom-24 sm:bottom-6 left-3 right-3 sm:left-6 sm:right-auto sm:w-[400px] max-w-full z-[1010] pointer-events-auto transition-all duration-300 ease-out transform translate-y-4 opacity-0">
+        <div class="glass-card bg-slate-900/95 border border-slate-700/90 rounded-3xl p-4 shadow-2xl backdrop-blur-2xl flex flex-col space-y-3">
+          <!-- Üst Satır: Kategori Rozeti + Kapat Butonu -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2 min-w-0">
+              <span id="quick-preview-badge" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center space-x-1 shrink-0">
+                <span id="quick-preview-emoji">🏛️</span>
+                <span id="quick-preview-category">Tarihi Yer</span>
+              </span>
+              <span id="quick-preview-distance" class="text-[10px] font-semibold text-slate-300 bg-slate-800/80 px-2 py-0.5 rounded-full truncate">
+                Türkiye
+              </span>
+            </div>
+            <button onclick="dismissQuickPlacePreview()" class="w-7 h-7 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors shrink-0 ml-2" title="Kapat">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Başlık ve Kısa Açıklama -->
+          <div>
+            <h3 id="quick-preview-title" class="text-base sm:text-lg font-black text-white leading-snug">Mekan Adı</h3>
+            <p id="quick-preview-desc" class="text-xs text-slate-300 line-clamp-2 mt-1 leading-relaxed">Açıklama yükleniyor...</p>
+          </div>
+
+          <!-- Aksiyon Butonları -->
+          <div class="flex items-center space-x-2 pt-1 border-t border-slate-800">
+            <!-- 1. TÜM AYRINTILARI GÖR BUTONU -->
+            <button id="quick-preview-btn-details" onclick="openPlaceDetailFromQuickPreview()" class="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white text-xs font-bold flex items-center justify-center space-x-1.5 shadow-lg shadow-amber-500/25 active:scale-95 transition-all">
+              <i data-lucide="info" class="w-4 h-4"></i>
+              <span>Tüm Ayrıntıları Gör</span>
+            </button>
+            
+            <!-- 2. ROTAYA EKLE BUTONU -->
+            <button id="quick-preview-btn-add" onclick="addQuickPreviewToRoute()" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center justify-center space-x-1 active:scale-95 transition-all" title="Rotaya Durak Olarak Ekle">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span class="hidden sm:inline">Rotaya</span> Ekle
+            </button>
+
+            <!-- 3. HEDEF YAP BUTONU -->
+            <button id="quick-preview-btn-dest" onclick="setQuickPreviewDestination()" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 text-xs font-bold flex items-center justify-center space-x-1 active:scale-95 transition-all" title="Varış Noktası Yap">
+              <i data-lucide="flag" class="w-4 h-4"></i>
+              <span>Hedef</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
       <!-- CANLI SÜRÜŞ & NAVİGASYON MODU OVERLAY (#live-nav-overlay) - GOOGLE MAPS STYLE -->
       <div id="live-nav-overlay" class="hidden absolute inset-0 z-[2000] flex flex-col justify-between p-3 sm:p-5 pointer-events-none select-none transition-all duration-300">
@@ -2423,6 +2529,6 @@
   <!-- Çoklu Dil ve Çeviri Motoru (TR / EN) -->
   <script src="translations.js?v=3.2"></script>
   <!-- V2 JavaScript Uygulama Mantığı -->
-  <script src="app.js?v=3.6"></script>
+  <script src="app.js?v=3.7"></script>
 </body>
 </html>

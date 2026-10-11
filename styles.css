@@ -1269,4 +1269,110 @@ body.sunlight-mode .gmaps-tool-btn {
   color: #ffffff !important;
 }
 
+/* 6. HARİTA ÜSTÜ HIZLI KATEGORİ FİLTRE ÇUBUĞU (#map-category-filter-bar) */
+#map-category-filter-bar {
+  max-width: calc(100% - 4.25rem);
+}
+
+@media (min-width: 640px) {
+  #map-category-filter-bar {
+    max-width: min(720px, calc(100% - 24rem));
+  }
+}
+
+.map-category-pill {
+  background: rgba(15, 23, 42, 0.78);
+  color: #94a3b8;
+  border: 1px solid rgba(51, 65, 85, 0.7);
+  white-space: nowrap;
+  user-select: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.map-category-pill:hover {
+  color: #f8fafc;
+  border-color: rgba(148, 163, 184, 0.6);
+}
+
+.map-category-pill.active {
+  background: rgba(30, 41, 59, 0.95);
+  color: #ffffff;
+  border-color: rgba(245, 158, 11, 0.7);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.map-category-pill.active#map-filter-toggle-all {
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.9), rgba(234, 88, 12, 0.9));
+  border-color: #f59e0b;
+  color: #ffffff;
+}
+
+.map-category-pill:not(.active)#map-filter-toggle-all {
+  background: rgba(15, 23, 42, 0.85);
+  border-color: rgba(71, 85, 105, 0.5);
+  color: #64748b;
+  opacity: 0.65;
+}
+
+.map-category-pill.active#map-pill-historic {
+  border-color: rgba(245, 158, 11, 0.8);
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+}
+
+.map-category-pill.active#map-pill-nature {
+  border-color: rgba(16, 185, 129, 0.8);
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+}
+
+.map-category-pill.active#map-pill-photography {
+  border-color: rgba(168, 85, 247, 0.8);
+  background: rgba(168, 85, 247, 0.18);
+  color: #c084fc;
+}
+
+.map-category-pill.active#map-pill-beach {
+  border-color: rgba(56, 189, 248, 0.8);
+  background: rgba(56, 189, 248, 0.18);
+  color: #38bdf8;
+}
+
+.map-category-pill.active#map-pill-gastronomy {
+  border-color: rgba(244, 63, 94, 0.8);
+  background: rgba(244, 63, 94, 0.18);
+  color: #fb7185;
+}
+
+.map-category-pill.active#map-pill-fuel {
+  border-color: rgba(16, 185, 129, 0.8);
+  background: rgba(16, 185, 129, 0.18);
+  color: #6ee7b7;
+}
+
+.map-category-pill:not(.active) {
+  opacity: 0.45;
+  filter: grayscale(0.5);
+}
+
+.map-pill-count {
+  background: rgba(255, 255, 255, 0.12);
+  color: inherit;
+  font-size: 10px;
+  line-height: 1;
+}
+
+/* 7. HIZLI MEKAN ÖNİZLEME KARTI (#quick-place-preview-card) */
+#quick-place-preview-card {
+  will-change: transform, opacity;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.4);
+}
+
+#quick-place-preview-card.preview-visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+
 

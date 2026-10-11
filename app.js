@@ -280,6 +280,7 @@ function initMap() {
 
   // Map Click Listener to add waypoints
   map.on('click', async (e) => {
+    dismissQuickPlacePreview();
     handleMapClick(e.latlng.lat, e.latlng.lng);
   });
 
@@ -301,8 +302,10 @@ function initMap() {
   setTimeout(() => { if (map) map.invalidateSize(); }, 700);
   setTimeout(() => { if (map) map.invalidateSize(); }, 1500);
 
-  // Clean, uncluttered map on startup: no pins or symbols
+  // Initialize POI category filters and map markers
   clearHighlightMarkers();
+  updatePoiCategoryFilterUI();
+  renderCorridorPoiMarkers();
 
   // Proactively warm GPS user location cache in background for instant navigation startup
   proactivelyWarmUserLocation();
@@ -2015,23 +2018,9 @@ function clearRouteDisplay() {
   document.getElementById('mobile-bottom-bar')?.classList.remove('hidden');
   document.getElementById('badge-right-panel-poi-count')?.classList.add('hidden');
 
-  const corridorTotal = document.getElementById('corridor-total-count');
-  if (corridorTotal) corridorTotal.textContent = '0 Nokta';
-
-  const sidebarCount = document.getElementById('sidebar-shortcut-corridor-count');
-  if (sidebarCount) sidebarCount.textContent = '0 Keşif';
-
-  ['historic', 'nature', 'photography', 'beach', 'gastronomy', 'fuel'].forEach(cat => {
-    const pill = document.getElementById(`count-pill-${cat}`);
-    if (pill) pill.textContent = '0';
-  });
-
-  document.getElementById('btn-export-gpx')?.setAttribute('disabled', 'true');
-  document.getElementById('btn-open-gmaps')?.setAttribute('disabled', 'true');
-  document.getElementById('btn-save-route-modal')?.setAttribute('disabled', 'true');
-  document.getElementById('badge-right-panel-poi-count')?.classList.add('hidden');
-  document.getElementById('badge-header-poi-count')?.classList.add('hidden');
-
+  dismissQuickPlacePreview();
+  updatePoiCategoryFilterUI();
+  renderCorridorPoiMarkers();
   renderCorridorPoiList();
   generateSmartStopRecommendations(null);
   renderJourneyTimeline();
@@ -2800,12 +2789,104 @@ function analyzeRouteCorridor(route, radiusMeters = 50000) {
   renderCorridorPoiList();
 }
 
-// Render POI Markers on Leaflet Map
+// Quick Place Preview State
+let currentPreviewPlace = null;
+
+function showQuickPlacePreview(place) {
+  if (!place) return;
+  currentPreviewPlace = place;
+  const card = document.getElementById('quick-place-preview-card');
+  if (!card) return;
+
+  const cfg = CATEGORY_CONFIG[place.category] || CATEGORY_CONFIG.historic;
+  const isEn = window.state && window.state.lang === 'en';
+
+  const emojiEl = document.getElementById('quick-preview-emoji');
+  if (emojiEl) emojiEl.textContent = cfg.emoji;
+
+  const catEl = document.getElementById('quick-preview-category');
+  if (catEl) catEl.textContent = getCategoryTitle(place.category);
+
+  const badgeEl = document.getElementById('quick-preview-badge');
+  if (badgeEl) {
+    badgeEl.style.borderColor = `${cfg.color}60`;
+    badgeEl.style.color = cfg.color;
+  }
+
+  const distEl = document.getElementById('quick-preview-distance');
+  if (distEl) {
+    if (place.distKm !== undefined) {
+      distEl.textContent = isEn ? `Detour ${place.distKm} km` : `Rotadan ${place.distKm} km`;
+    } else {
+      distEl.textContent = place.city || place.region || (isEn ? 'Turkey' : 'Türkiye');
+    }
+  }
+
+  const titleEl = document.getElementById('quick-preview-title');
+  if (titleEl) titleEl.textContent = place.name;
+
+  const descEl = document.getElementById('quick-preview-desc');
+  if (descEl) {
+    descEl.textContent = place.description || (isEn ? 'Tap to view full details, photos and best travel season.' : 'Ayrıntılı bilgi, fotoğraflar ve en iyi ziyaret zamanı için dokunun.');
+  }
+
+  card.classList.remove('hidden');
+  requestAnimationFrame(() => {
+    card.classList.add('preview-visible');
+  });
+
+  if (typeof initIcons === 'function') initIcons();
+}
+
+function dismissQuickPlacePreview() {
+  const card = document.getElementById('quick-place-preview-card');
+  if (!card) return;
+  card.classList.remove('preview-visible');
+  setTimeout(() => {
+    if (!card.classList.contains('preview-visible')) {
+      card.classList.add('hidden');
+    }
+  }, 250);
+}
+
+function openPlaceDetailFromQuickPreview() {
+  if (currentPreviewPlace && currentPreviewPlace.id) {
+    openPlaceDetailById(currentPreviewPlace.id);
+  }
+}
+
+function addQuickPreviewToRoute() {
+  if (currentPreviewPlace) {
+    addPoiToRoute(currentPreviewPlace.lat, currentPreviewPlace.lon, currentPreviewPlace.name);
+    dismissQuickPlacePreview();
+  }
+}
+
+function setQuickPreviewDestination() {
+  if (currentPreviewPlace) {
+    setAsDestination(currentPreviewPlace.lat, currentPreviewPlace.lon, currentPreviewPlace.name);
+    dismissQuickPlacePreview();
+  }
+}
+
+function setPlaceAsDestination(id) {
+  const place = state.allPlaces.find(p => p.id === id);
+  if (!place) return;
+  setAsDestination(place.lat, place.lon, place.name);
+}
+
+// Render POI Markers on Leaflet Map (Corridor if route active, or all places if free browsing)
 function renderCorridorPoiMarkers() {
   clearPoiMarkers();
   if (!map) return;
 
-  state.corridorPois.forEach(p => {
+  const placesToRender = (state.routeData && state.corridorPois && state.corridorPois.length > 0)
+    ? state.corridorPois
+    : (state.allPlaces || []);
+
+  const isEn = window.state && window.state.lang === 'en';
+
+  placesToRender.forEach(p => {
     const cat = p.category || 'historic';
     if (!state.activePoiCategories.has(cat)) return;
 
@@ -2815,7 +2896,7 @@ function renderCorridorPoiMarkers() {
     const icon = L.divIcon({
       className: 'custom-poi-marker',
       html: `
-        <div class="custom-pin ${pinClass} w-7 h-7 text-xs flex items-center justify-center shadow-lg" title="${escapeHtml(p.name)}">
+        <div class="custom-pin ${pinClass} w-7 h-7 text-xs flex items-center justify-center shadow-lg cursor-pointer" title="${escapeHtml(p.name)}">
           <span>${cfg.emoji}</span>
         </div>
       `,
@@ -2825,27 +2906,40 @@ function renderCorridorPoiMarkers() {
 
     const marker = L.marker([p.lat, p.lon], { icon }).addTo(map);
 
+    const distBadge = p.distKm !== undefined
+      ? `<span class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">${isEn ? `Rotadan ${p.distKm} km` : `Rotadan ${p.distKm} km`}</span>`
+      : `<span class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">${escapeHtml(p.city || p.region || (isEn ? 'Turkey' : 'Türkiye'))}</span>`;
+
     marker.bindPopup(`
-      <div class="text-xs p-1">
+      <div class="text-xs p-1 min-w-[210px] max-w-[280px]">
         <div class="flex items-center justify-between mb-1.5 gap-2">
-          <strong style="color:${cfg.color}" class="font-bold flex items-center gap-1">
+          <strong style="color:${cfg.color}" class="font-bold flex items-center gap-1 truncate">
             <span>${cfg.emoji}</span>
-            <span>${cfg.title}</span>
+            <span class="truncate">${getCategoryTitle(p.category)}</span>
           </strong>
-          <span class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">Rotadan ${p.distKm} km</span>
+          ${distBadge}
         </div>
-        <p class="font-bold text-white text-sm mt-0.5">${escapeHtml(p.name)}</p>
-        ${p.description ? `<p class="text-[11px] text-slate-300 mt-1 leading-relaxed">${escapeHtml(p.description)}</p>` : ''}
-        <div class="flex items-center space-x-1.5 mt-3 pt-2 border-t border-slate-800">
-          <button onclick="addPlaceByIdToRoute(${p.id})" class="text-[10px] bg-brand-600 hover:bg-brand-500 text-white px-2.5 py-1.5 rounded-lg font-semibold shadow-md shadow-brand-600/30">
-            Rotaya Ekle
+        <p class="font-black text-white text-sm mt-0.5 leading-snug">${escapeHtml(p.name)}</p>
+        ${p.description ? `<p class="text-[11px] text-slate-300 mt-1 leading-relaxed line-clamp-3">${escapeHtml(p.description)}</p>` : ''}
+        <div class="flex flex-col space-y-1.5 mt-2.5 pt-2 border-t border-slate-800">
+          <button onclick="openPlaceDetailById(${p.id})" class="w-full text-xs bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white py-2 px-3 rounded-xl font-bold shadow-md shadow-amber-500/25 flex items-center justify-center space-x-1.5 active:scale-95 transition-all">
+            <span>ℹ️ ${isEn ? 'View All Details' : 'Tüm Ayrıntıları Gör'}</span>
           </button>
-          <button onclick="openPlaceDetailById(${p.id})" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1.5 rounded-lg">
-            Detaylar
-          </button>
+          <div class="flex items-center space-x-1.5">
+            <button onclick="addPlaceByIdToRoute(${p.id})" class="flex-1 text-[11px] bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/30 py-1.5 px-2 rounded-lg font-semibold active:scale-95 transition-all text-center">
+              + ${isEn ? 'Add Route' : 'Rotaya Ekle'}
+            </button>
+            <button onclick="setPlaceAsDestination(${p.id})" class="flex-1 text-[11px] bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 py-1.5 px-2 rounded-lg font-semibold active:scale-95 transition-all text-center">
+              🎯 ${isEn ? 'Go Here' : 'Hedefe Git'}
+            </button>
+          </div>
         </div>
       </div>
     `);
+
+    marker.on('click', () => {
+      showQuickPlacePreview(p);
+    });
 
     state.poiMarkers.push(marker);
   });
@@ -2858,21 +2952,96 @@ function clearPoiMarkers() {
   state.poiMarkers = [];
 }
 
-// Update Filter Pill Active/Inactive Visual States
+// Update Filter Pill Active/Inactive Visual States & Live Counts
 function updatePoiCategoryFilterUI() {
-  Object.keys(CATEGORY_GROUPS).forEach(key => {
-    const btn = document.getElementById(`filter-pill-${key}`);
-    if (!btn) return;
-    const primary = CATEGORY_GROUPS[key][0];
-    const isActive = state.activePoiCategories.has(primary);
-    if (isActive) {
-      btn.classList.remove('opacity-40', 'border-slate-900', 'bg-slate-950/40');
-      btn.classList.add('opacity-100', 'border-slate-800', 'bg-slate-950');
+  const isRouteActive = Boolean(state.routeData && state.corridorPois && state.corridorPois.length > 0);
+  const dataSource = isRouteActive ? state.corridorPois : (state.allPlaces || []);
+
+  const groupCounts = {
+    historic: 0,
+    nature: 0,
+    photography: 0,
+    beach: 0,
+    gastronomy: 0,
+    fuel: 0
+  };
+
+  dataSource.forEach(p => {
+    const cat = p.category || 'historic';
+    if (cat === 'nature' || cat === 'camping') {
+      groupCounts.nature++;
+    } else if (cat === 'photography' || cat === 'viewpoint' || cat === 'mountain_pass') {
+      groupCounts.photography++;
+    } else if (cat === 'gastronomy' || cat === 'cafe') {
+      groupCounts.gastronomy++;
+    } else if (cat === 'fuel' || cat === 'ev_charge') {
+      groupCounts.fuel++;
+    } else if (cat === 'beach') {
+      groupCounts.beach++;
     } else {
-      btn.classList.remove('opacity-100', 'border-slate-800', 'bg-slate-950');
-      btn.classList.add('opacity-40', 'border-slate-900', 'bg-slate-950/40');
+      groupCounts.historic++;
     }
   });
+
+  let totalActive = 0;
+  const allGroupKeys = Object.keys(CATEGORY_GROUPS);
+
+  allGroupKeys.forEach(key => {
+    const primary = CATEGORY_GROUPS[key][0];
+    const isActive = state.activePoiCategories.has(primary);
+    if (isActive) totalActive += groupCounts[key];
+
+    // Right panel pill
+    const rightBtn = document.getElementById(`filter-pill-${key}`);
+    const rightCount = document.getElementById(`count-pill-${key}`);
+    if (rightCount) rightCount.textContent = groupCounts[key];
+    if (rightBtn) {
+      if (isActive) {
+        rightBtn.classList.remove('opacity-40', 'border-slate-900', 'bg-slate-950/40');
+        rightBtn.classList.add('opacity-100', 'border-slate-800', 'bg-slate-950');
+      } else {
+        rightBtn.classList.remove('opacity-100', 'border-slate-800', 'bg-slate-950');
+        rightBtn.classList.add('opacity-40', 'border-slate-900', 'bg-slate-950/40');
+      }
+    }
+
+    // Map floating category pill
+    const mapBtn = document.getElementById(`map-pill-${key}`);
+    const mapCount = document.getElementById(`map-count-${key}`);
+    if (mapCount) mapCount.textContent = groupCounts[key];
+    if (mapBtn) {
+      if (isActive) {
+        mapBtn.classList.add('active');
+      } else {
+        mapBtn.classList.remove('active');
+      }
+    }
+  });
+
+  // Master All Toggle button
+  const toggleAllBtn = document.getElementById('map-filter-toggle-all');
+  const toggleAllCount = document.getElementById('map-filter-total-count');
+  const toggleAllLabel = document.getElementById('map-filter-all-label');
+
+  const anyActive = allGroupKeys.some(k => state.activePoiCategories.has(CATEGORY_GROUPS[k][0]));
+  const allActive = allGroupKeys.every(k => state.activePoiCategories.has(CATEGORY_GROUPS[k][0]));
+  const isEn = window.state && window.state.lang === 'en';
+
+  if (toggleAllCount) {
+    toggleAllCount.textContent = isRouteActive ? `${totalActive}/${dataSource.length}` : `${totalActive}`;
+  }
+
+  if (toggleAllBtn) {
+    if (anyActive) {
+      toggleAllBtn.classList.add('active');
+    } else {
+      toggleAllBtn.classList.remove('active');
+    }
+  }
+
+  if (toggleAllLabel) {
+    toggleAllLabel.textContent = allActive ? (isEn ? 'All' : 'Tümü') : (isEn ? 'Filters' : 'Filtreler');
+  }
 }
 
 // Toggle Corridor Filter Category Group
@@ -2887,6 +3056,31 @@ function togglePoiCategoryFilter(groupKey) {
       state.activePoiCategories.add(cat);
     }
   });
+
+  updatePoiCategoryFilterUI();
+  renderCorridorPoiMarkers();
+  renderCorridorPoiList();
+}
+
+// Toggle All Categories On or Off
+function toggleAllPoiCategories() {
+  const allGroupKeys = Object.keys(CATEGORY_GROUPS);
+  const allActive = allGroupKeys.every(k => {
+    const primary = CATEGORY_GROUPS[k][0];
+    return state.activePoiCategories.has(primary);
+  });
+
+  const isEn = window.state && window.state.lang === 'en';
+
+  if (allActive) {
+    state.activePoiCategories.clear();
+    showToast(isEn ? 'All categories turned off' : 'Tüm kategoriler kapatıldı', 'info');
+  } else {
+    allGroupKeys.forEach(k => {
+      CATEGORY_GROUPS[k].forEach(cat => state.activePoiCategories.add(cat));
+    });
+    showToast(isEn ? 'All categories turned on' : 'Tüm kategoriler açıldı', 'info');
+  }
 
   updatePoiCategoryFilterUI();
   renderCorridorPoiMarkers();
@@ -6146,6 +6340,8 @@ const LiveNavigation = {
     const bottomBar = document.getElementById('mobile-bottom-bar');
     if (bottomBar) bottomBar.classList.add('hidden');
     document.getElementById('floating-map-controls')?.classList.add('hidden');
+    document.getElementById('map-category-filter-bar')?.classList.add('hidden');
+    dismissQuickPlacePreview();
     document.getElementById('btn-toggle-right-panel')?.classList.add('hidden');
     document.getElementById('map-hint')?.classList.add('hidden');
     document.getElementById('elevation-panel')?.classList.add('hidden');
@@ -6378,6 +6574,7 @@ const LiveNavigation = {
     if (bottomBar) bottomBar.classList.remove('hidden');
 
     document.getElementById('floating-map-controls')?.classList.remove('hidden');
+    document.getElementById('map-category-filter-bar')?.classList.remove('hidden');
     document.getElementById('btn-toggle-right-panel')?.classList.remove('hidden');
 
     // Restore desktop sidebar
