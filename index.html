@@ -70,7 +70,7 @@
   <meta name="theme-color" content="#090d16">
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="styles.css?v=3.3">
+  <link rel="stylesheet" href="styles.css?v=3.4">
 </head>
 <body class="h-full flex flex-col overflow-hidden font-sans selection:bg-brand-500 selection:text-white bg-slate-950">
 
@@ -194,6 +194,12 @@
       <button id="btn-open-gmaps" onclick="openInGoogleMaps()" class="hidden sm:flex items-center space-x-1 sm:space-x-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-md border border-emerald-500/40 active:scale-95 transition-all" title="Google Maps'te Aç ve Navigasyonu Başlat">
         <i data-lucide="navigation" class="w-3.5 h-3.5 text-white shrink-0"></i>
         <span>Maps</span>
+      </button>
+
+      <!-- Tablet & Masaüstü Menüyü Daralt / Geniş Ekran Harita Butonu -->
+      <button id="btn-tablet-sidebar-toggle" onclick="RotamDisplay.toggleTabletSidebar()" class="hidden md:flex items-center space-x-1 sm:space-x-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-md border border-slate-700 active:scale-95 transition-all" title="Kenar Menüsünü Gizle / Tam Harita">
+        <i id="icon-tablet-sidebar" data-lucide="panel-left-close" class="w-3.5 h-3.5 text-brand-400 shrink-0"></i>
+        <span class="hidden xl:inline text-[11px]" id="text-tablet-sidebar">Geniş Harita</span>
       </button>
 
       <!-- Mobil Menü Toggle Butonu -->
@@ -941,6 +947,16 @@
             <i data-lucide="flip-horizontal" class="w-5 h-5"></i>
           </button>
 
+          <!-- 5.1 Güneş & Açık Hava Yüksek Kontrast Modu -->
+          <button id="live-nav-btn-sun" onclick="RotamDisplay.toggleSunlightMode()" class="w-11 h-11 sm:w-12 sm:h-12 rounded-full gmaps-tool-btn flex items-center justify-center cursor-pointer active:scale-95 transition-all text-amber-300 hover:text-amber-200 shadow-xl border border-amber-500/30" title="Güneş & Açık Hava Yüksek Kontrast Modu">
+            <span class="text-base sm:text-lg">☀️</span>
+          </button>
+
+          <!-- 5.2 Tam Ekran Modu (Fullscreen Toggle) -->
+          <button id="live-nav-btn-fullscreen" onclick="RotamDisplay.toggleFullscreen()" class="w-11 h-11 sm:w-12 sm:h-12 rounded-full gmaps-tool-btn flex items-center justify-center cursor-pointer active:scale-95 transition-all text-cyan-300 hover:text-cyan-200 shadow-xl border border-cyan-500/30" title="Tam Ekran Modu">
+            <i data-lucide="maximize" class="w-5 h-5"></i>
+          </button>
+
           <!-- 6. Olay & Durum Bildir Kapsülü ([ ⚠️ Bildir ]) -->
           <button onclick="LiveNavigation.openIncidentReportModal()" class="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full gmaps-report-pill flex items-center space-x-1.5 cursor-pointer active:scale-95 transition-all text-white shadow-xl mt-1" title="Radar, Kaza, Yol Çalışması Bildir">
             <div class="w-4 h-4 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center">
@@ -1246,6 +1262,19 @@
             </button>
             <button onclick="RotamStoryGuide.playSampleStory(); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1 rounded-lg text-[10px] text-slate-400 hover:text-amber-300 hover:bg-slate-800 flex items-center space-x-1">
               <span>🔊</span> <span>Örnek Hikaye Dinle</span>
+            </button>
+            <div class="h-px bg-slate-800 my-1"></div>
+            <button onclick="RotamDisplay.toggleSunlightMode(); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-bold text-amber-300 hover:bg-amber-500/10 flex items-center justify-between">
+              <span class="flex items-center space-x-1.5">
+                <span>☀️</span> <span>Güneş Modu</span>
+              </span>
+              <span id="mobile-sunlight-status" class="text-[10px] text-slate-400 font-semibold">Kapalı</span>
+            </button>
+            <button onclick="RotamDisplay.toggleFullscreen(); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-bold text-cyan-300 hover:bg-cyan-500/10 flex items-center justify-between">
+              <span class="flex items-center space-x-1.5">
+                <i data-lucide="maximize" class="w-3.5 h-3.5"></i> <span>Tam Ekran</span>
+              </span>
+              <span class="text-[10px] text-cyan-400 font-bold">⛶</span>
             </button>
           </div>
         </div>
@@ -2394,6 +2423,6 @@
   <!-- Çoklu Dil ve Çeviri Motoru (TR / EN) -->
   <script src="translations.js?v=3.2"></script>
   <!-- V2 JavaScript Uygulama Mantığı -->
-  <script src="app.js?v=3.5"></script>
+  <script src="app.js?v=3.6"></script>
 </body>
 </html>

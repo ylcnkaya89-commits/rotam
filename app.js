@@ -321,6 +321,11 @@ function initMap() {
   if (typeof RotamSpeech !== 'undefined') {
     RotamSpeech.init();
   }
+
+  // Initialize Display, Touch & Responsive Engine (Mobile, Tablet & Landscape)
+  if (typeof RotamDisplay !== 'undefined') {
+    RotamDisplay.init();
+  }
 }
 
 // Proactive user location cache warmer
@@ -5514,6 +5519,166 @@ const RotamSpeech = {
 
 window.RotamSpeech = RotamSpeech;
 
+// ==========================================
+// ROTAM DISPLAY & RESPONSIVE ENGINE (MOBILE, TABLET, GLOVE & COCKPIT)
+// ==========================================
+const RotamDisplay = {
+  isSunlightMode: false,
+  isFullscreen: false,
+  isTabletSidebarCollapsed: false,
+
+  init() {
+    this.setupOrientationHandler();
+    this.setupTouchTargets();
+    this.checkInitialOrientation();
+  },
+
+  haptic(pattern = 20) {
+    try {
+      if ('vibrate' in navigator) {
+        navigator.vibrate(pattern);
+      }
+    } catch (e) {}
+  },
+
+  setupOrientationHandler() {
+    const handleOrientation = () => {
+      const isLandscape = window.matchMedia('(orientation: landscape)').matches;
+      const isShort = window.innerHeight < 600;
+      if (isLandscape && isShort) {
+        document.body.classList.add('is-landscape');
+      } else {
+        document.body.classList.remove('is-landscape');
+      }
+      if (typeof map !== 'undefined' && map) {
+        setTimeout(() => map.invalidateSize(), 150);
+        setTimeout(() => map.invalidateSize(), 400);
+      }
+    };
+
+    window.addEventListener('resize', handleOrientation, { passive: true });
+    window.addEventListener('orientationchange', handleOrientation, { passive: true });
+    handleOrientation();
+  },
+
+  checkInitialOrientation() {
+    const isCoarse = window.matchMedia('(pointer: coarse)').matches;
+    if (isCoarse) {
+      document.body.classList.add('touch-device');
+    }
+  },
+
+  setupTouchTargets() {
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('button, .gmaps-tool-btn, .mobile-map-fab, .vehicle-btn');
+      if (btn) {
+        this.haptic(15);
+      }
+    }, { passive: true });
+  },
+
+  toggleSunlightMode() {
+    this.isSunlightMode = !this.isSunlightMode;
+    this.haptic(30);
+
+    const isEn = (window.state && window.state.lang === 'en');
+    const statusEl = document.getElementById('mobile-sunlight-status');
+    const hudSunBtn = document.getElementById('live-nav-btn-sun');
+
+    if (this.isSunlightMode) {
+      document.body.classList.add('sunlight-mode');
+      if (statusEl) {
+        statusEl.textContent = isEn ? 'ON' : 'Açık';
+        statusEl.className = 'text-[10px] text-amber-400 font-bold';
+      }
+      if (hudSunBtn) {
+        hudSunBtn.classList.add('bg-amber-500/30', 'border-amber-400');
+      }
+      if (typeof switchTile === 'function') {
+        switchTile('voyager');
+      }
+      showToast(isEn ? '☀️ Outdoor Sunlight Mode (High Contrast)' : '☀️ Açık Hava Güneş Modu (Yüksek Kontrast)', 'success');
+    } else {
+      document.body.classList.remove('sunlight-mode');
+      if (statusEl) {
+        statusEl.textContent = isEn ? 'OFF' : 'Kapalı';
+        statusEl.className = 'text-[10px] text-slate-400 font-semibold';
+      }
+      if (hudSunBtn) {
+        hudSunBtn.classList.remove('bg-amber-500/30', 'border-amber-400');
+      }
+      if (typeof switchTile === 'function') {
+        switchTile('dark');
+      }
+      showToast(isEn ? '🌙 Dark Mode Restored' : '🌙 Koyu Gece Moduna Dönüldü', 'info');
+    }
+
+    if (typeof map !== 'undefined' && map) {
+      setTimeout(() => map.invalidateSize(), 150);
+    }
+  },
+
+  async toggleFullscreen() {
+    this.haptic(25);
+    const isEn = (window.state && window.state.lang === 'en');
+    try {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        const docEl = document.documentElement;
+        if (docEl.requestFullscreen) {
+          await docEl.requestFullscreen();
+        } else if (docEl.webkitRequestFullscreen) {
+          await docEl.webkitRequestFullscreen();
+        }
+        this.isFullscreen = true;
+        showToast(isEn ? 'Fullscreen Activated' : 'Tam Ekran Modu Açıldı ⛶', 'info');
+      } else {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          await document.webkitExitFullscreen();
+        }
+        this.isFullscreen = false;
+        showToast(isEn ? 'Fullscreen Exited' : 'Tam Ekrandan Çıkıldı', 'info');
+      }
+    } catch (e) {
+      showToast(isEn ? 'Use browser menu to enter fullscreen' : 'Tam ekran için tarayıcı menüsünü kullanabilirsiniz', 'info');
+    }
+    if (typeof map !== 'undefined' && map) {
+      setTimeout(() => map.invalidateSize(), 200);
+    }
+  },
+
+  toggleTabletSidebar() {
+    this.haptic(20);
+    const sidebar = document.getElementById('sidebar');
+    const icon = document.getElementById('icon-tablet-sidebar');
+    const text = document.getElementById('text-tablet-sidebar');
+    if (!sidebar) return;
+
+    this.isTabletSidebarCollapsed = !this.isTabletSidebarCollapsed;
+    const isEn = (window.state && window.state.lang === 'en');
+
+    if (this.isTabletSidebarCollapsed) {
+      sidebar.classList.add('tablet-collapsed');
+      if (icon) icon.setAttribute('data-lucide', 'panel-left-open');
+      if (text) text.textContent = isEn ? 'Show Menu' : 'Menüyü Aç';
+      showToast(isEn ? 'Full Screen Map View' : 'Geniş Harita Görünümü 🗺️', 'info');
+    } else {
+      sidebar.classList.remove('tablet-collapsed');
+      if (icon) icon.setAttribute('data-lucide', 'panel-left-close');
+      if (text) text.textContent = isEn ? 'Hide Menu' : 'Geniş Harita';
+    }
+
+    if (typeof initIcons === 'function') initIcons();
+    if (typeof map !== 'undefined' && map) {
+      setTimeout(() => map.invalidateSize(), 150);
+      setTimeout(() => map.invalidateSize(), 350);
+    }
+  }
+};
+
+window.RotamDisplay = RotamDisplay;
+
 const LiveNavigation = {
   isActive: false,
   isSimulation: false,
@@ -6180,6 +6345,9 @@ const LiveNavigation = {
     this.stopGPS();
     this.stopSimulation();
     this.releaseWakeLock();
+    if (document.fullscreenElement && typeof document.exitFullscreen === 'function') {
+      try { document.exitFullscreen(); } catch (e) {}
+    }
     this.dismissAlertBanner();
     this.dismissFuelBanner();
     document.getElementById('live-nav-hazard-banner')?.classList.add('hidden');

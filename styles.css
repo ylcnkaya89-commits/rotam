@@ -1051,4 +1051,222 @@ main {
   50% { height: 14px; }
 }
 
+/* ==========================================
+   MOBILE & TABLET RESPONSIVE & COCKPIT ENGINE
+   ========================================== */
+
+/* 1. EKRAN & GÜVENLİ ALAN (SAFE AREA) */
+html, body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* 2. ELDİVEN DOSTU BÜYÜK DOKUNMA HEDEFLERİ (48px+) */
+.gmaps-tool-btn,
+.mobile-map-fab,
+#btn-toggle-sidebar,
+#btn-open-gmaps,
+#live-nav-demo-btn,
+.gmaps-bottom-cockpit button,
+.hud-interactive button {
+  min-width: 48px !important;
+  min-height: 48px !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+@media (pointer: coarse) {
+  button, a, .cursor-pointer {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+/* 3. MOTO-KOKPİT YATAY MOD (LANDSCAPE ORIENTATION) */
+@media (orientation: landscape) and (max-height: 560px) {
+  #app-header {
+    min-height: 2.75rem !important;
+    height: 2.75rem !important;
+    padding-top: max(0.2rem, env(safe-area-inset-top)) !important;
+    padding-left: max(0.75rem, env(safe-area-inset-left)) !important;
+    padding-right: max(0.75rem, env(safe-area-inset-right)) !important;
+  }
+  #app-header .splash-logo-card, #app-header img {
+    height: 1.75rem !important;
+    width: 1.75rem !important;
+  }
+
+  /* Alt sekmeyi yatay modda gizle (haritaya tam alan bırak) */
+  #mobile-bottom-nav {
+    display: none !important;
+  }
+
+  /* Mobilde sol çekmece yatayda yarım ekran slide-in */
+  #sidebar {
+    max-height: 100vh !important;
+    width: min(340px, 45vw) !important;
+    left: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    border-radius: 0 20px 20px 0 !important;
+    border-right: 1px solid rgba(249, 115, 22, 0.35) !important;
+    border-top: none !important;
+    transform: translateX(-100%);
+  }
+  #sidebar.mobile-sheet-open {
+    transform: translateX(0) !important;
+  }
+
+  /* CANLI NAVİGASYON KOKPİTİ: YATAYDA APPLE CARPLAY / GİDON DÜZENİ */
+  #live-nav-overlay {
+    padding: 0.5rem !important;
+    pointer-events: none !important;
+  }
+
+  /* Üst Dönüş Kartı: Sol Üste Taşınır */
+  #live-nav-overlay > .hud-interactive:first-child {
+    position: absolute !important;
+    left: max(0.75rem, env(safe-area-inset-left)) !important;
+    top: max(0.4rem, env(safe-area-inset-top)) !important;
+    width: min(320px, 38vw) !important;
+    max-width: 320px !important;
+    margin: 0 !important;
+    z-index: 30 !important;
+  }
+
+  .gmaps-maneuver-card {
+    padding: 0.65rem 0.85rem !important;
+    border-radius: 1.25rem !important;
+  }
+  #live-nav-maneuver-icon {
+    font-size: 1.85rem !important;
+  }
+  #live-nav-maneuver-dist {
+    font-size: 1.4rem !important;
+  }
+  #live-nav-street-name {
+    font-size: 0.95rem !important;
+  }
+
+  /* Alt Kokpit Çekmecesi: Sol Alta Taşınır */
+  #live-nav-overlay > .hud-interactive:last-child {
+    position: absolute !important;
+    left: max(0.75rem, env(safe-area-inset-left)) !important;
+    bottom: max(0.4rem, env(safe-area-inset-bottom)) !important;
+    width: min(320px, 38vw) !important;
+    max-width: 320px !important;
+    margin: 0 !important;
+    z-index: 30 !important;
+  }
+
+  .gmaps-bottom-cockpit {
+    padding: 0.5rem 0.75rem !important;
+    border-radius: 1.25rem !important;
+  }
+  .gmaps-bottom-cockpit > div:first-child {
+    display: none !important;
+  }
+  #live-nav-rem-time {
+    font-size: 1.35rem !important;
+  }
+
+  /* Hız Göstergesi: Kokpitin Hemen Yanına (Orta Alta) */
+  #live-nav-overlay > .hud-interactive:nth-child(3) {
+    position: absolute !important;
+    left: calc(max(0.75rem, env(safe-area-inset-left)) + min(325px, 38vw) + 0.5rem) !important;
+    bottom: max(0.4rem, env(safe-area-inset-bottom)) !important;
+    margin: 0 !important;
+    z-index: 25 !important;
+  }
+
+  /* Sağ Araç Çubuğu: Sağ dikey kenara */
+  #live-nav-overlay > .hud-interactive:nth-child(2) {
+    right: max(0.75rem, env(safe-area-inset-right)) !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+  }
+
+  /* Bildirim Kapsülleri: Üst Ortada Kompakt */
+  #live-nav-hazard-banner,
+  #live-nav-story-banner,
+  #live-nav-alert-banner,
+  #live-nav-fuel-banner {
+    max-width: 44vw !important;
+    padding: 0.45rem 0.75rem !important;
+  }
+}
+
+/* 4. TABLET DÜZENİ (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  #sidebar {
+    width: 320px !important;
+    transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s ease !important;
+  }
+
+  #sidebar.tablet-collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border-right: none !important;
+    visibility: hidden;
+  }
+
+  #right-panel {
+    width: 340px !important;
+    max-width: 85vw !important;
+    box-shadow: -12px 0 40px rgba(0, 0, 0, 0.8) !important;
+  }
+}
+
+/* 5. GÜNEŞ & AÇIK HAVA YÜKSEK KONTRAST MODU */
+body.sunlight-mode {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+body.sunlight-mode #map.dark-map {
+  filter: none !important;
+}
+
+body.sunlight-mode .gmaps-maneuver-card {
+  background: #022c22 !important;
+  border: 3px solid #10b981 !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9) !important;
+}
+
+body.sunlight-mode #live-nav-maneuver-icon {
+  color: #fbbf24 !important;
+  filter: drop-shadow(0 0 4px #000);
+}
+
+body.sunlight-mode #live-nav-speedo-box {
+  background: #0f172a !important;
+  border: 3px solid #fbbf24 !important;
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.6) !important;
+}
+
+body.sunlight-mode #live-nav-speed-val {
+  color: #fbbf24 !important;
+  font-weight: 900 !important;
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.9) !important;
+}
+
+body.sunlight-mode .gmaps-bottom-cockpit {
+  background: #090d16 !important;
+  border: 2px solid #38bdf8 !important;
+}
+
+body.sunlight-mode #live-nav-rem-time {
+  color: #34d399 !important;
+  text-shadow: 0 0 4px #000 !important;
+}
+
+body.sunlight-mode .gmaps-tool-btn {
+  background: #0f172a !important;
+  border: 2px solid #fbbf24 !important;
+  color: #ffffff !important;
+}
+
 
