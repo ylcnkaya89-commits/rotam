@@ -636,21 +636,28 @@ main {
   }
 }
 
-/* Custom In-App Waypoint Autocomplete Box */
+/* Custom In-App Waypoint Autocomplete & Filter Box */
 #waypoint-autocomplete-box {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 100%;
-  margin-top: 4px;
   background: rgba(15, 23, 42, 0.98);
-  border: 1px solid rgba(51, 65, 85, 0.8);
-  border-radius: 0.75rem;
-  box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
-  z-index: 100;
-  max-height: 240px;
+  border: 1.5px solid rgba(59, 130, 246, 0.4);
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  z-index: 99999 !important;
+  max-height: 380px;
   overflow-y: auto;
-  backdrop-blur: 16px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.search-filter-chip {
+  transition: all 0.15s ease-in-out;
+  user-select: none;
+}
+.search-filter-chip.active {
+  background: rgba(245, 158, 11, 0.25) !important;
+  color: #fbbf24 !important;
+  border-color: rgba(245, 158, 11, 0.6) !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
 }
 
 /* Utility: Smooth scrollbar hiding for horizontal pill bars */

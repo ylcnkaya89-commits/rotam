@@ -1253,7 +1253,32 @@ async function geocodeLocation(query) {
     };
   }
 
-  // Tier 2: OpenStreetMap Nominatim with safe timeout
+  // Tier 2: Photon Geocoder (Fast ~200ms)
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000);
+    const q = encodeURIComponent(qStr);
+    const res = await fetch(`https://photon.komoot.io/api/?q=${q}&limit=1`, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.features && data.features.length > 0) {
+        const f = data.features[0];
+        const p = f.properties || {};
+        const coords = f.geometry ? f.geometry.coordinates : null;
+        if (coords && coords.length >= 2) {
+          const sub = [p.district, p.city, p.state].filter(Boolean).join(', ');
+          return {
+            lat: coords[1],
+            lon: coords[0],
+            displayName: sub ? `${p.name || qStr}, ${sub}` : (p.name || qStr)
+          };
+        }
+      }
+    }
+  } catch (err) {}
+
+  // Tier 3: OpenStreetMap Nominatim with safe timeout
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 2800);
@@ -1372,20 +1397,37 @@ function updateWaypointsListUI() {
     else if (isEnd) iconHtml = '<span class="w-3 h-3 rounded-full bg-red-500 shadow-sm shadow-red-500/50"></span>';
     else iconHtml = '<span class="w-3 h-3 rounded-full bg-amber-500 shadow-sm shadow-amber-500/50"></span>';
 
+    const hasValue = (wp.name && wp.name.trim() !== '');
+
     div.innerHTML = `
       <div class="p-1 shrink-0 flex items-center justify-center">${iconHtml}</div>
       <input type="text" value="${escapeHtml(wp.name || '')}" 
         autocomplete="off" autocorrect="off" spellcheck="false"
-        placeholder="${isStart ? (typeof t === 'function' ? t('wp_start_placeholder', 'Başlangıç Noktası (Örn: İstanbul)') : 'Başlangıç Noktası') : isEnd ? (typeof t === 'function' ? t('wp_end_placeholder', 'Varış Noktası (Örn: Antalya)') : 'Varış Noktası') : ((typeof t === 'function' ? t('wp_stop_prefix', 'Ara Durak ') : 'Ara Durak ') + index)}" 
+        placeholder="${isStart ? (typeof t === 'function' ? t('wp_start_placeholder', 'Başlangıç Noktası (Örn: Ankara)') : 'Başlangıç Noktası') : isEnd ? (typeof t === 'function' ? t('wp_end_placeholder', 'Varış Noktası (Örn: Dikmen veya Kaş)') : 'Varış Noktası') : ((typeof t === 'function' ? t('wp_stop_prefix', 'Ara Durak ') : 'Ara Durak ') + index)}" 
         oninput="handleWaypointNameChange(${index}, this.value, this)"
         onfocus="handleWaypointFocus(${index}, this.value, this)"
-        onblur="setTimeout(closeWaypointAutocomplete, 300); handleWaypointBlur(${index}, this.value)"
+        onblur="setTimeout(closeWaypointAutocomplete, 350); handleWaypointBlur(${index}, this.value)"
         onkeydown="if(event.key==='Enter') { closeWaypointAutocomplete(); handleWaypointBlur(${index}, this.value); calculateRouteMain(); }"
         class="bg-transparent flex-1 text-xs text-white placeholder-slate-500 focus:outline-none truncate font-medium">
       <div class="flex items-center space-x-1 shrink-0">
-        ${isWaypoint ? `
-          <button onclick="removeWaypoint(${index})" class="p-1 text-slate-500 hover:text-red-400 rounded transition-colors" title="Durağı Sil">
+        ${hasValue ? `
+          <button type="button" onclick="clearWaypointInput(${index})" class="p-1 text-slate-500 hover:text-slate-300 rounded transition-colors" title="Temizle">
             <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          </button>
+        ` : ''}
+        ${isStart ? `
+          <button type="button" onclick="useCurrentLocationForStart()" class="p-1 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded transition-colors" title="Mevcut Konumumu Kullan">
+            <i data-lucide="crosshair" class="w-3.5 h-3.5"></i>
+          </button>
+        ` : ''}
+        ${isEnd ? `
+          <button type="button" onclick="activateMapPickMode(${index})" class="p-1 text-brand-400 hover:text-brand-300 hover:bg-brand-500/10 rounded transition-colors" title="Haritadan Nokta Seç">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+          </button>
+        ` : ''}
+        ${isWaypoint ? `
+          <button type="button" onclick="removeWaypoint(${index})" class="p-1 text-slate-500 hover:text-red-400 rounded transition-colors" title="Durağı Sil">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
           </button>
         ` : ''}
       </div>
@@ -1397,68 +1439,420 @@ function updateWaypointsListUI() {
   initIcons();
 }
 
-function getLocalGeoSuggestions(query, limit = 5) {
-  if (!query || typeof query !== 'string') return [];
-  const q = normalizeTurkish(query.trim());
-  if (!q || q.length < 2) return [];
-
-  const results = [];
-  const seen = new Set();
-
-  const geoDb = (window.TURKEY_GEO_DATABASE && Array.isArray(window.TURKEY_GEO_DATABASE)) ? window.TURKEY_GEO_DATABASE : [];
-  const placesDb = (state && state.allPlaces && Array.isArray(state.allPlaces)) ? state.allPlaces : (window.DEFAULT_HISTORIC_PLACES || []);
-
-  // 1. Starts-with in provinces / districts
-  geoDb.forEach(item => {
-    if (results.length >= limit) return;
-    const nameNorm = normalizeTurkish(item.name);
-    if (nameNorm.startsWith(q) && !seen.has(item.name)) {
-      seen.add(item.name);
-      results.push({ name: item.name, subtitle: item.region || 'İl / İlçe', lat: item.lat, lon: item.lon, type: 'city' });
-    }
-  });
-
-  // 2. Starts-with in Places DB
-  placesDb.forEach(p => {
-    if (results.length >= limit) return;
-    const nameNorm = normalizeTurkish(p.name);
-    if (nameNorm.startsWith(q) && !seen.has(p.name)) {
-      seen.add(p.name);
-      results.push({ name: p.name, subtitle: p.city || 'Tarihi & Doğa', lat: p.lat, lon: p.lon, type: 'place' });
-    }
-  });
-
-  // 3. Includes in provinces
-  if (results.length < limit) {
-    geoDb.forEach(item => {
-      if (results.length >= limit) return;
-      const nameNorm = normalizeTurkish(item.name);
-      if (nameNorm.includes(q) && !seen.has(item.name)) {
-        seen.add(item.name);
-        results.push({ name: item.name, subtitle: item.region || 'İl / İlçe', lat: item.lat, lon: item.lon, type: 'city' });
-      }
-    });
+function clearWaypointInput(index) {
+  if (!state.waypoints[index]) return;
+  state.waypoints[index].name = '';
+  state.waypoints[index].lat = null;
+  state.waypoints[index].lon = null;
+  if (state.waypoints[index].marker && map) {
+    map.removeLayer(state.waypoints[index].marker);
+    state.waypoints[index].marker = null;
   }
-
-  // 4. Includes in places
-  if (results.length < limit) {
-    placesDb.forEach(p => {
-      if (results.length >= limit) return;
-      const nameNorm = normalizeTurkish(p.name);
-      if (nameNorm.includes(q) && !seen.has(p.name)) {
-        seen.add(p.name);
-        results.push({ name: p.name, subtitle: p.city || 'Tarihi & Doğa', lat: p.lat, lon: p.lon, type: 'place' });
-      }
-    });
+  updateWaypointsListUI();
+  updateWaypointMarkers();
+  closeWaypointAutocomplete();
+  if (index === 0) {
+    const heroStart = document.getElementById('hero-start-input');
+    if (heroStart) heroStart.value = '';
+  } else if (index === state.waypoints.length - 1) {
+    const heroEnd = document.getElementById('hero-end-input');
+    if (heroEnd) heroEnd.value = '';
   }
-
-  return results;
 }
 
+function activateMapPickMode(index) {
+  state.mapPickTargetIndex = index;
+  const isStart = index === 0;
+  showToast(isStart ? 'Haritada başlangıç noktasına dokunun 📍' : 'Haritada varış noktasına dokunun 🏁', 'info');
+  if (typeof toggleMobileNavDrawer === 'function') {
+    const drawer = document.getElementById('mobile-nav-drawer');
+    if (drawer && !drawer.classList.contains('hidden')) {
+      toggleMobileNavDrawer(false);
+    }
+  }
+}
+
+// ==========================================
+// ROTAM AKILLI KONUM & HEDEF ARAMA MOTORU (SMART SEARCH & DISAMBIGUATION)
+// ==========================================
+const RotamSearchEngine = {
+  activeTargetIndex: 1,
+  activeFilter: 'all',
+  debounceTimer: null,
+  activeInputEl: null,
+  cachedOnlineResults: {},
+  currentSuggestions: [],
+
+  filters: [
+    { id: 'all', label: 'Tümü', icon: '✨' },
+    { id: 'twisty', label: 'Viraj & Geçit', icon: '🏍️', matchCats: ['mountain_pass', 'twisty'] },
+    { id: 'viewpoint', label: 'Manzara', icon: '🌄', matchCats: ['viewpoint', 'photography'] },
+    { id: 'historic', label: 'Tarih & Antik', icon: '🏛️', matchCats: ['historic'] },
+    { id: 'nature', label: 'Doğa & Kanyon', icon: '🌲', matchCats: ['nature'] },
+    { id: 'beach', label: 'Sahil & Deniz', icon: '🌊', matchCats: ['beach'] },
+    { id: 'cafe', label: 'Mola & Kafe', icon: '☕', matchCats: ['cafe', 'gastronomy'] },
+    { id: 'camping', label: 'Kamp & Karavan', icon: '⛺', matchCats: ['camping'] }
+  ],
+
+  getDistanceFromUser(lat, lon) {
+    const origin = state.userLocation || (state.waypoints[0] && state.waypoints[0].lat ? state.waypoints[0] : null);
+    if (!origin || !origin.lat || !origin.lon || !lat || !lon) return null;
+    return haversineMeters(origin.lat, origin.lon, lat, lon) / 1000;
+  },
+
+  formatDistance(distKm) {
+    if (distKm === null || distKm === undefined) return '';
+    if (distKm < 1) return `${Math.round(distKm * 1000)} m`;
+    return `${distKm.toFixed(distKm < 10 ? 1 : 0)} km`;
+  },
+
+  getCategoryLabel(cat) {
+    const map = {
+      mountain_pass: 'Dağ Geçidi & Viraj',
+      viewpoint: 'Seyir Terası & Manzara',
+      historic: 'Tarihi & Antik Kent',
+      nature: 'Doğa & Kanyon',
+      beach: 'Sahil & Plaj',
+      cafe: 'Motorcu Molası & Kafe',
+      camping: 'Kamp & Karavan',
+      photography: 'Fotoğraf Noktası'
+    };
+    return map[cat] || 'Özel Durak';
+  },
+
+  getExploreRecommendations(filterId) {
+    const places = (state && state.allPlaces && state.allPlaces.length)
+      ? state.allPlaces
+      : (window.DEFAULT_HISTORIC_PLACES || []);
+
+    let filtered = [];
+    if (filterId === 'all') {
+      filtered = places.slice(0, 35);
+    } else {
+      const fObj = this.filters.find(f => f.id === filterId);
+      const matchCats = fObj ? fObj.matchCats : [];
+      filtered = places.filter(p => matchCats.includes(p.category));
+    }
+
+    const list = filtered.map(p => {
+      const dist = this.getDistanceFromUser(p.lat, p.lon);
+      const icon = p.category === 'mountain_pass' ? '🏍️' : p.category === 'viewpoint' ? '🌄' : p.category === 'historic' ? '🏛️' : p.category === 'nature' ? '🌲' : p.category === 'beach' ? '🌊' : p.category === 'cafe' ? '☕' : p.category === 'camping' ? '⛺' : '📍';
+      return {
+        name: p.name,
+        fullName: p.city ? `${p.name}, ${p.city}` : p.name,
+        subtitle: p.city ? `${p.city} • ${this.getCategoryLabel(p.category)}` : (p.description ? p.description.substring(0, 48) + '...' : 'Gezilecek Nokta'),
+        category: p.category,
+        icon: icon,
+        lat: p.lat,
+        lon: p.lon,
+        distanceKm: dist,
+        type: 'explore'
+      };
+    });
+
+    if (list.some(r => r.distanceKm !== null)) {
+      list.sort((a, b) => (a.distanceKm ?? 999999) - (b.distanceKm ?? 999999));
+    }
+
+    return list.slice(0, 8);
+  },
+
+  getLocalMatches(query, filterId) {
+    if (!query || query.trim().length < 2) return [];
+    const qNorm = normalizeTurkish(query.trim());
+    const geoDb = (window.TURKEY_GEO_DATABASE && Array.isArray(window.TURKEY_GEO_DATABASE)) ? window.TURKEY_GEO_DATABASE : [];
+    const places = (state && state.allPlaces && state.allPlaces.length) ? state.allPlaces : (window.DEFAULT_HISTORIC_PLACES || []);
+
+    const results = [];
+    const seen = new Set();
+
+    if (filterId === 'all') {
+      geoDb.forEach(item => {
+        const itemNorm = normalizeTurkish(item.name);
+        if (itemNorm.includes(qNorm) && !seen.has(item.name)) {
+          seen.add(item.name);
+          const dist = this.getDistanceFromUser(item.lat, item.lon);
+          results.push({
+            name: item.name,
+            fullName: `${item.name}, Türkiye`,
+            subtitle: `${item.region || 'İl / İlçe'} Merkezi`,
+            category: 'city',
+            icon: '🏙️',
+            lat: item.lat,
+            lon: item.lon,
+            distanceKm: dist,
+            type: 'city'
+          });
+        }
+      });
+    }
+
+    const fObj = this.filters.find(f => f.id === filterId);
+    const matchCats = (fObj && filterId !== 'all') ? fObj.matchCats : null;
+
+    places.forEach(p => {
+      if (matchCats && !matchCats.includes(p.category)) return;
+      const pNorm = normalizeTurkish(p.name);
+      const descNorm = p.description ? normalizeTurkish(p.description) : '';
+      if ((pNorm.includes(qNorm) || descNorm.includes(qNorm)) && !seen.has(p.name)) {
+        seen.add(p.name);
+        const dist = this.getDistanceFromUser(p.lat, p.lon);
+        const icon = p.category === 'mountain_pass' ? '🏍️' : p.category === 'viewpoint' ? '🌄' : p.category === 'historic' ? '🏛️' : p.category === 'nature' ? '🌲' : p.category === 'beach' ? '🌊' : p.category === 'cafe' ? '☕' : p.category === 'camping' ? '⛺' : '📍';
+        results.push({
+          name: p.name,
+          fullName: p.city ? `${p.name}, ${p.city}` : p.name,
+          subtitle: p.city ? `${p.city} • ${this.getCategoryLabel(p.category)}` : (p.description ? p.description.substring(0, 48) : 'Tarihi / Doğa'),
+          category: p.category,
+          icon: icon,
+          lat: p.lat,
+          lon: p.lon,
+          distanceKm: dist,
+          type: 'place'
+        });
+      }
+    });
+
+    return results;
+  },
+
+  async fetchPhotonMatches(query) {
+    if (!query || query.trim().length < 2) return [];
+    const qKey = query.trim().toLowerCase();
+    if (this.cachedOnlineResults[qKey]) {
+      return this.cachedOnlineResults[qKey];
+    }
+
+    try {
+      const q = encodeURIComponent(query.trim());
+      let url = `https://photon.komoot.io/api/?q=${q}&limit=8`;
+      const origin = state.userLocation || (state.waypoints[0] && state.waypoints[0].lat ? state.waypoints[0] : null);
+      if (origin && origin.lat && origin.lon) {
+        url += `&lat=${origin.lat}&lon=${origin.lon}`;
+      }
+      const controller = new AbortController();
+      const tid = setTimeout(() => controller.abort(), 2600);
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(tid);
+
+      if (!res.ok) return [];
+      const data = await res.json();
+      if (!data || !data.features) return [];
+
+      const results = [];
+      const seen = new Set();
+
+      data.features.forEach(f => {
+        const p = f.properties || {};
+        const coords = f.geometry ? f.geometry.coordinates : null;
+        if (!coords || coords.length < 2) return;
+        const lon = coords[0];
+        const lat = coords[1];
+
+        const placeName = p.name || query;
+        const details = [];
+        if (p.district) details.push(p.district);
+        if (p.city && p.city !== p.district) details.push(p.city);
+        if (p.state && p.state !== p.city) details.push(p.state);
+
+        const fullSubtitle = details.length > 0 ? details.join(', ') : (p.country || 'Türkiye');
+        const key = `${placeName}|${fullSubtitle}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+
+        const fullName = `${placeName}, ${fullSubtitle}`;
+        const dist = this.getDistanceFromUser(lat, lon);
+
+        let icon = '📍';
+        if (p.type === 'city') icon = '🏙️';
+        else if (p.type === 'district' || p.type === 'locality') icon = '🏘️';
+
+        results.push({
+          name: placeName,
+          fullName: fullName,
+          subtitle: fullSubtitle,
+          category: p.type || 'place',
+          icon: icon,
+          lat: lat,
+          lon: lon,
+          distanceKm: dist,
+          type: 'online'
+        });
+      });
+
+      this.cachedOnlineResults[qKey] = results;
+      return results;
+    } catch (e) {
+      return [];
+    }
+  },
+
+  renderDropdown(index, suggestions, inputEl, isExploreMode = false) {
+    let box = document.getElementById('waypoint-autocomplete-box');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'waypoint-autocomplete-box';
+      document.body.appendChild(box);
+    }
+
+    if (!inputEl) {
+      box.style.display = 'none';
+      return;
+    }
+
+    const rect = inputEl.getBoundingClientRect();
+    box.style.position = 'fixed';
+    box.style.top = `${rect.bottom + 6}px`;
+    box.style.left = `${Math.max(10, rect.left - 4)}px`;
+    box.style.width = `${Math.min(window.innerWidth - 20, Math.max(300, rect.width + 40))}px`;
+    box.style.display = 'block';
+
+    const isEnd = (index === state.waypoints.length - 1);
+
+    let filterBarHtml = `
+      <div class="p-2 border-b border-slate-800 bg-slate-950/90 flex items-center space-x-1.5 overflow-x-auto no-scrollbar">
+        ${this.filters.map(f => {
+          const isActive = (this.activeFilter === f.id);
+          return `
+            <button type="button" 
+              onmousedown="event.preventDefault(); RotamSearchEngine.setFilter('${f.id}');"
+              class="search-filter-chip shrink-0 px-2 py-1 rounded-lg text-[10px] font-bold border flex items-center space-x-1 transition-all ${
+                isActive 
+                  ? 'bg-amber-500/25 text-amber-300 border-amber-500/60 shadow-sm' 
+                  : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
+              }">
+              <span>${f.icon}</span>
+              <span>${f.label}</span>
+            </button>
+          `;
+        }).join('')}
+      </div>
+    `;
+
+    let headerText = '';
+    if (isExploreMode) {
+      headerText = isEnd ? '🎯 Popüler Varış Noktaları (Öneriler)' : '📍 Başlangıç İçin Önerilen Yerler';
+    } else {
+      headerText = `🔍 Arama Sonuçları (${suggestions ? suggestions.length : 0})`;
+    }
+
+    let headerHtml = `
+      <div class="px-3 py-1.5 bg-slate-900/60 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800/60 flex items-center justify-between">
+        <span>${headerText}</span>
+        <button type="button" onmousedown="event.preventDefault(); closeWaypointAutocomplete();" class="text-slate-500 hover:text-slate-300">✕ Kapat</button>
+      </div>
+    `;
+
+    let listHtml = '';
+    if (!suggestions || suggestions.length === 0) {
+      listHtml = `
+        <div class="p-4 text-center text-slate-400 text-xs">
+          <p class="font-semibold text-slate-300 mb-1">Eşleşen sonuç bulunamadı.</p>
+          <p class="text-[10px] text-slate-500">İlçe veya il adını ekleyerek aramayı deneyin ya da haritadan doğrudan seçin.</p>
+          <button type="button" onmousedown="event.preventDefault(); activateMapPickMode(${index}); closeWaypointAutocomplete();" class="mt-2.5 px-3 py-1.5 rounded-lg bg-brand-500/20 text-brand-300 border border-brand-500/40 text-[11px] font-bold active:scale-95 transition-all">
+            🗺️ Haritadan Dokunarak Seç
+          </button>
+        </div>
+      `;
+    } else {
+      listHtml = suggestions.map((s, idx) => {
+        const distStr = this.formatDistance(s.distanceKm);
+        return `
+          <div class="p-2.5 hover:bg-slate-800/90 active:bg-slate-750 cursor-pointer flex items-center justify-between text-xs border-b border-slate-800/70 last:border-b-0 transition-colors group"
+               onmousedown="event.preventDefault(); RotamSearchEngine.selectItem(${index}, ${idx});">
+            <div class="flex items-center space-x-2.5 min-w-0 flex-1 pr-2">
+              <span class="text-base shrink-0 p-1 rounded-lg bg-slate-800/60 border border-slate-700/50">${s.icon || '📍'}</span>
+              <div class="truncate min-w-0">
+                <span class="font-bold text-white block truncate leading-tight group-hover:text-amber-300 transition-colors">${escapeHtml(s.name)}</span>
+                <span class="text-[10px] text-slate-400 block truncate leading-tight mt-0.5">${escapeHtml(s.subtitle || '')}</span>
+              </div>
+            </div>
+            <div class="flex items-center space-x-1.5 shrink-0">
+              ${distStr ? `
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 text-[9px] font-mono border border-cyan-500/20 font-bold">
+                  📍 ${distStr}
+                </span>
+              ` : ''}
+              <span class="text-[10px] bg-amber-500/20 group-hover:bg-amber-500/40 text-amber-300 px-2 py-1 rounded-lg font-bold border border-amber-500/30">
+                Seç
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    box.innerHTML = filterBarHtml + headerHtml + `<div class="max-h-[300px] overflow-y-auto">${listHtml}</div>`;
+  },
+
+  setFilter(filterId) {
+    this.activeFilter = filterId;
+    if (this.activeInputEl) {
+      const val = this.activeInputEl.value;
+      if (!val || val.trim().length < 2) {
+        const recs = this.getExploreRecommendations(filterId);
+        this.currentSuggestions = recs;
+        this.renderDropdown(this.activeTargetIndex, recs, this.activeInputEl, true);
+      } else {
+        this.triggerSearch(this.activeTargetIndex, val, this.activeInputEl);
+      }
+    }
+  },
+
+  async triggerSearch(index, value, inputEl) {
+    this.activeTargetIndex = index;
+    this.activeInputEl = inputEl;
+
+    const localMatches = this.getLocalMatches(value, this.activeFilter);
+    this.currentSuggestions = localMatches;
+    this.renderDropdown(index, localMatches, inputEl, false);
+
+    if (this.debounceTimer) clearTimeout(this.debounceTimer);
+    this.debounceTimer = setTimeout(async () => {
+      const onlineMatches = await this.fetchPhotonMatches(value);
+      if (onlineMatches && onlineMatches.length > 0) {
+        const merged = [...localMatches];
+        const seenNames = new Set(localMatches.map(m => normalizeTurkish(m.name)));
+
+        onlineMatches.forEach(o => {
+          const norm = normalizeTurkish(o.name);
+          if (!seenNames.has(norm) || o.subtitle.includes(',')) {
+            seenNames.add(norm + '|' + o.subtitle);
+            merged.push(o);
+          }
+        });
+
+        if (merged.some(r => r.distanceKm !== null)) {
+          merged.sort((a, b) => (a.distanceKm ?? 999999) - (b.distanceKm ?? 999999));
+        }
+
+        this.currentSuggestions = merged;
+        this.renderDropdown(index, merged, inputEl, false);
+      }
+    }, 240);
+  },
+
+  selectItem(index, itemIdx) {
+    const item = this.currentSuggestions ? this.currentSuggestions[itemIdx] : null;
+    if (!item) return;
+
+    selectWaypointSuggestion(index, item.fullName || item.name, item.lat, item.lon);
+    showToast(`Hedef seçildi: ${item.name} 🎯`, 'success');
+  }
+};
+
+window.RotamSearchEngine = RotamSearchEngine;
+
 function handleWaypointFocus(index, value, inputEl) {
+  RotamSearchEngine.activeTargetIndex = index;
+  RotamSearchEngine.activeInputEl = inputEl;
+
   if (value && value.trim().length >= 2) {
-    const suggestions = getLocalGeoSuggestions(value, 5);
-    renderWaypointAutocomplete(index, suggestions, inputEl);
+    RotamSearchEngine.triggerSearch(index, value, inputEl);
+  } else {
+    // Kutu boşken popüler keşif noktalarını ve filtreleri aç
+    const recs = RotamSearchEngine.getExploreRecommendations(RotamSearchEngine.activeFilter);
+    RotamSearchEngine.currentSuggestions = recs;
+    RotamSearchEngine.renderDropdown(index, recs, inputEl, true);
   }
 }
 
@@ -1475,44 +1869,13 @@ function handleWaypointNameChange(index, value, inputEl) {
     if (heroEnd && heroEnd.value !== value) heroEnd.value = value;
   }
 
-  // Render non-clashing custom dropdown under active input
-  const suggestions = getLocalGeoSuggestions(value, 5);
-  renderWaypointAutocomplete(index, suggestions, inputEl);
-}
-
-function renderWaypointAutocomplete(index, suggestions, inputEl) {
-  let box = document.getElementById('waypoint-autocomplete-box');
-  if (!box) {
-    box = document.createElement('div');
-    box.id = 'waypoint-autocomplete-box';
-    document.body.appendChild(box);
+  if (value && value.trim().length >= 2) {
+    RotamSearchEngine.triggerSearch(index, value, inputEl);
+  } else {
+    const recs = RotamSearchEngine.getExploreRecommendations(RotamSearchEngine.activeFilter);
+    RotamSearchEngine.currentSuggestions = recs;
+    RotamSearchEngine.renderDropdown(index, recs, inputEl, true);
   }
-
-  if (!suggestions || suggestions.length === 0 || !inputEl) {
-    box.style.display = 'none';
-    return;
-  }
-
-  const rect = inputEl.getBoundingClientRect();
-  box.style.position = 'fixed';
-  box.style.top = `${rect.bottom + 4}px`;
-  box.style.left = `${Math.max(12, rect.left)}px`;
-  box.style.width = `${Math.min(window.innerWidth - 24, rect.width + 36)}px`;
-  box.style.display = 'block';
-
-  box.innerHTML = suggestions.map(s => `
-    <div class="p-2.5 hover:bg-slate-800 active:bg-slate-750 cursor-pointer flex items-center justify-between text-xs border-b border-slate-800 last:border-b-0 transition-colors"
-         onmousedown="event.preventDefault(); selectWaypointSuggestion(${index}, '${escapeHtml(s.name)}', ${s.lat}, ${s.lon});">
-      <div class="flex items-center space-x-2 min-w-0">
-        <span class="text-amber-400 shrink-0">${s.type === 'city' ? '🏙️' : '📍'}</span>
-        <div class="truncate">
-          <span class="font-bold text-white block truncate">${escapeHtml(s.name)}</span>
-          <span class="text-[10px] text-slate-400 block truncate">${escapeHtml(s.subtitle || '')}</span>
-        </div>
-      </div>
-      <span class="text-[10px] bg-brand-500/20 text-brand-300 px-2 py-0.5 rounded font-semibold shrink-0 ml-1">Seç</span>
-    </div>
-  `).join('');
 }
 
 function selectWaypointSuggestion(index, name, lat, lon) {
@@ -1524,6 +1887,14 @@ function selectWaypointSuggestion(index, name, lat, lon) {
   const inputs = document.querySelectorAll('#waypoints-container input');
   if (inputs && inputs[index]) {
     inputs[index].value = name;
+  }
+
+  if (index === 0) {
+    const heroStart = document.getElementById('hero-start-input');
+    if (heroStart) heroStart.value = name;
+  } else if (index === state.waypoints.length - 1) {
+    const heroEnd = document.getElementById('hero-end-input');
+    if (heroEnd) heroEnd.value = name;
   }
 
   closeWaypointAutocomplete();
@@ -1659,6 +2030,28 @@ function clearRouteDisplay() {
 // Waypoint Map Click & Markers
 async function handleMapClick(lat, lon) {
   const friendlyName = findNearestCityOrPlace(lat, lon);
+
+  // 0. Explicit map pick mode
+  if (state.mapPickTargetIndex !== null && state.mapPickTargetIndex !== undefined) {
+    const targetIdx = state.mapPickTargetIndex;
+    state.mapPickTargetIndex = null;
+    state.waypoints[targetIdx].lat = lat;
+    state.waypoints[targetIdx].lon = lon;
+    state.waypoints[targetIdx].name = friendlyName;
+    if (targetIdx === 0) {
+      const heroInp = document.getElementById('hero-start-input');
+      if (heroInp) heroInp.value = friendlyName;
+    } else if (targetIdx === state.waypoints.length - 1) {
+      const heroInp = document.getElementById('hero-end-input');
+      if (heroInp) heroInp.value = friendlyName;
+    }
+    updateWaypointsListUI();
+    updateWaypointMarkers();
+    showToast(`Nokta belirlendi: ${friendlyName} 📍`, 'success');
+    const valid = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
+    if (valid.length >= 2) calculateRouteMain();
+    return;
+  }
 
   // 1. If start has no coordinates and no name entered yet
   if (state.waypoints[0].lat === null && (!state.waypoints[0].name || state.waypoints[0].name.trim() === '')) {
