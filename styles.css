@@ -1271,7 +1271,25 @@ body.sunlight-mode .gmaps-tool-btn {
 
 /* 6. HARİTA ÜSTÜ HIZLI KATEGORİ FİLTRE ÇUBUĞU (#map-category-filter-bar) */
 #map-category-filter-bar {
-  max-width: calc(100% - 4.25rem);
+  max-width: calc(100% - 3.5rem);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+#map-category-filter-bar.map-moving-dim {
+  opacity: 0.35 !important;
+  pointer-events: none !important;
+}
+
+#map-filter-toggle-collapse-btn {
+  user-select: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+#map-filter-toggle-collapse-btn:hover {
+  background: rgba(15, 23, 42, 0.98);
+  border-color: rgba(245, 158, 11, 0.6);
+  color: #ffffff;
 }
 
 @media (min-width: 640px) {
@@ -1288,6 +1306,8 @@ body.sunlight-mode .gmaps-tool-btn {
   user-select: none;
   cursor: pointer;
   touch-action: manipulation;
+  font-size: 11px;
+  line-height: 1.2;
 }
 
 .map-category-pill:hover {
@@ -1365,8 +1385,10 @@ body.sunlight-mode .gmaps-tool-btn {
 .map-pill-count {
   background: rgba(255, 255, 255, 0.12);
   color: inherit;
-  font-size: 10px;
+  font-size: 9px;
   line-height: 1;
+  padding: 1px 4px;
+  border-radius: 9999px;
 }
 
 /* 7. HIZLI MEKAN ÖNİZLEME KARTI (#quick-place-preview-card) */

@@ -279,10 +279,26 @@ function initMap() {
   state.activeTileLayer = 'dark';
   mapInitialized = true;
 
-  // Map Click Listener to add waypoints
+  // Map Click Listener to add waypoints & auto-collapse filters on mobile
   map.on('click', async (e) => {
     dismissQuickPlacePreview();
+    if (window.innerWidth < 768) {
+      const container = document.getElementById('map-filter-pills-container');
+      if (container && !container.classList.contains('hidden')) {
+        toggleMapFilterBarCollapse();
+      }
+    }
     handleMapClick(e.latlng.lat, e.latlng.lng);
+  });
+
+  // Map pan/move dimming to keep map clear and distraction-free while navigating or exploring
+  map.on('movestart', () => {
+    const filterBar = document.getElementById('map-category-filter-bar');
+    if (filterBar) filterBar.classList.add('map-moving-dim');
+  });
+  map.on('moveend', () => {
+    const filterBar = document.getElementById('map-category-filter-bar');
+    if (filterBar) filterBar.classList.remove('map-moving-dim');
   });
 
   setupElevationCanvas();
@@ -307,6 +323,7 @@ function initMap() {
   clearHighlightMarkers();
   updatePoiCategoryFilterUI();
   renderCorridorPoiMarkers();
+  initMapFilterBarState();
 
   // Proactively warm GPS user location cache in background for instant navigation startup
   proactivelyWarmUserLocation();
@@ -3051,7 +3068,82 @@ function updatePoiCategoryFilterUI() {
   if (toggleAllLabel) {
     toggleAllLabel.textContent = allActive ? (isEn ? 'All' : 'Tümü') : (isEn ? 'Filters' : 'Filtreler');
   }
+
+  // Kompakt Harita Filtre Butonu Rozeti ve Başlığı
+  const activeCount = allGroupKeys.filter(k => state.activePoiCategories.has(CATEGORY_GROUPS[k][0])).length;
+  const collapseBadge = document.getElementById('map-filter-active-count-badge');
+  const collapseTitle = document.getElementById('map-filter-collapse-title');
+
+  if (collapseBadge) {
+    if (activeCount === allGroupKeys.length) {
+      collapseBadge.textContent = isEn ? 'All' : 'Tümü';
+      collapseBadge.className = 'px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/25 text-emerald-300 font-bold border border-emerald-500/30';
+    } else if (activeCount === 0) {
+      collapseBadge.textContent = isEn ? 'Off' : '0';
+      collapseBadge.className = 'px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-slate-800 text-slate-400 font-bold border border-slate-700';
+    } else {
+      collapseBadge.textContent = `${activeCount}`;
+      collapseBadge.className = 'px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-amber-500/25 text-amber-300 font-bold border border-amber-500/30';
+    }
+  }
+
+  if (collapseTitle) {
+    collapseTitle.textContent = isEn ? 'Filters' : 'Filtreler';
+  }
+
+  // Sağ Keşif Paneli Filtre Özeti
+  const sidebarSummary = document.getElementById('sidebar-filter-active-summary');
+  if (sidebarSummary) {
+    sidebarSummary.textContent = activeCount === allGroupKeys.length ? (isEn ? 'All Active' : 'Tümü Aktif') : `${activeCount} Aktif`;
+  }
 }
+
+// Harita Üzerindeki Kategori Filtre Çubuğunu Katla / Genişlet (Collapse / Expand)
+function toggleMapFilterBarCollapse() {
+  const container = document.getElementById('map-filter-pills-container');
+  const chevron = document.getElementById('map-filter-collapse-chevron');
+  const btn = document.getElementById('map-filter-toggle-collapse-btn');
+  if (!container) return;
+
+  const isCollapsed = container.classList.contains('hidden');
+  if (isCollapsed) {
+    container.classList.remove('hidden');
+    if (chevron) chevron.setAttribute('data-lucide', 'chevron-left');
+    if (btn) btn.classList.add('border-amber-500/50', 'bg-slate-900');
+    localStorage.setItem('rotam_filter_bar_collapsed', 'false');
+  } else {
+    container.classList.add('hidden');
+    if (chevron) chevron.setAttribute('data-lucide', 'chevron-right');
+    if (btn) btn.classList.remove('border-amber-500/50', 'bg-slate-900');
+    localStorage.setItem('rotam_filter_bar_collapsed', 'true');
+  }
+  if (typeof initIcons === 'function') initIcons();
+}
+
+// Filtre Çubuğunun Başlangıç Durumunu Yükle (Mobilde varsayılan olarak katlanmış başlar)
+function initMapFilterBarState() {
+  const container = document.getElementById('map-filter-pills-container');
+  const chevron = document.getElementById('map-filter-collapse-chevron');
+  const btn = document.getElementById('map-filter-toggle-collapse-btn');
+  if (!container) return;
+
+  const saved = localStorage.getItem('rotam_filter_bar_collapsed');
+  const shouldCollapse = saved === 'true' || (saved === null && window.innerWidth < 768);
+
+  if (shouldCollapse) {
+    container.classList.add('hidden');
+    if (chevron) chevron.setAttribute('data-lucide', 'chevron-right');
+    if (btn) btn.classList.remove('border-amber-500/50', 'bg-slate-900');
+  } else {
+    container.classList.remove('hidden');
+    if (chevron) chevron.setAttribute('data-lucide', 'chevron-left');
+    if (btn) btn.classList.add('border-amber-500/50', 'bg-slate-900');
+  }
+  if (typeof initIcons === 'function') initIcons();
+}
+
+window.toggleMapFilterBarCollapse = toggleMapFilterBarCollapse;
+window.initMapFilterBarState = initMapFilterBarState;
 
 // Toggle Corridor Filter Category Group
 function togglePoiCategoryFilter(groupKey) {
