@@ -311,6 +311,11 @@ function initMap() {
   if (typeof RotamCommunity !== 'undefined') {
     RotamCommunity.init();
   }
+
+  // Initialize Real-time Rotam Cultural & Historic Audio Whisper Guide
+  if (typeof RotamStoryGuide !== 'undefined') {
+    RotamStoryGuide.init();
+  }
 }
 
 // Proactive user location cache warmer
@@ -6008,6 +6013,9 @@ const LiveNavigation = {
     if (typeof RotamCommunity !== 'undefined') {
       RotamCommunity.checkProximity(lat, lon);
     }
+    if (typeof RotamStoryGuide !== 'undefined') {
+      RotamStoryGuide.checkProximity(lat, lon);
+    }
   },
 
   updateRouteProgress(lat, lon) {
@@ -6936,3 +6944,381 @@ document.addEventListener('visibilitychange', () => {
     LiveNavigation.requestWakeLock();
   }
 });
+
+// ==========================================
+// ROTAM AKILLI KÜLTÜR & TARİH FISILTISI (SMART STORY GUIDE)
+// ==========================================
+const RotamStoryGuide = {
+  enabled: true,
+  lastSpokenTimestamp: 0,
+  minIntervalMs: 150000, // 2.5 dakika mola (aşırı konuşmayı engeller)
+  toldStoryIds: new Set(),
+  activeStory: null,
+  bannerTimeout: null,
+
+  curatedStories: [
+    {
+      id: 'story-sakar',
+      title: 'Sakar Geçidi & Gökova Körfezi',
+      lat: 37.0678,
+      lon: 28.3412,
+      radiusM: 3000,
+      teaser: 'Ege\'nin en nefes kesici virajlarına hoş geldiniz. Deniz seviyesinden 670 metre yükseklikten Gökova Körfezi\'ne iniyorsunuz.',
+      story: 'Sakar Geçidi, Ege ve Akdeniz motorcularının kutsal viraj rotasıdır. Deniz seviyesinden 670 metre irtifadan Gökova maviliğine keskin "S" virajlarıyla süzülürsünüz. Gün batımında seyir terasında durup körfeze bakmak, rüzgarın fısıltısını dinlemek ve Halikarnas Balıkçısı\'nın aşkla anlattığı mavi yolculuğun başlangıcını hissetmek paha biçilemezdir.'
+    },
+    {
+      id: 'story-kaputas',
+      title: 'Kaputaş Kanyonu & Turkuaz Virajlar',
+      lat: 36.2287,
+      lon: 29.4491,
+      radiusM: 2500,
+      teaser: 'Kaş ile Kalkan arasında, kanyonun denizle buluştuğu efsanevi turkuaz kumsal.',
+      story: 'Kaputaş Kanyonu, Likya yolunun en görkemli noktalarından biridir. Dağlardan sızan yer altı sularının denizle buluşması sayesinde suyun rengi eşsiz bir turkuaz tona bürünür. Uçurumun kenarındaki virajlar hem sürüş keyfi hem de antik Likya krallarının izlerini taşır.'
+    },
+    {
+      id: 'story-bolu',
+      title: 'Bolu Dağı Eski Geçidi',
+      lat: 40.7421,
+      lon: 31.4285,
+      radiusM: 3500,
+      teaser: 'Sisli çam ormanları, meşhur tırmanış virajları ve motorcu molalarının kalbi.',
+      story: 'Tünel açılmadan önce Anadolu\'yu İstanbul\'a bağlayan efsane Bolu Dağı Geçidi. Sisli çam kokuları, keskin virajları ve yol üstü et mangal geleneğiyle Türk yolculuk kültürünün simgelerindendir. Kışın beyaz örtüsü, baharda ise yeşilin her tonu eşlik eder.'
+    },
+    {
+      id: 'story-efes',
+      title: 'Efes Antik Kenti & Celsus Kütüphanesi',
+      lat: 37.9405,
+      lon: 27.3415,
+      radiusM: 3000,
+      teaser: 'Roma İmparatorluğu\'nun Asya eyalet başkenti, antik dünyanın ticaret ve felsefe metropolü.',
+      story: 'Efes Antik Kenti\'ne yaklaşıyorsunuz. 25 bin kişilik antik tiyatrosu, Celsus Kütüphanesi ve Artemis Tapınağı ile dünyanın en görkemli açık hava müzelerinden biridir. Mermer caddelerinde yürürken Roma konsüllerinin ve gladyatörlerin ayak seslerini hayal edebilirsiniz.'
+    },
+    {
+      id: 'story-truva',
+      title: 'Truva Antik Kenti & İlyada Destanı',
+      lat: 39.9575,
+      lon: 26.2389,
+      radiusM: 3500,
+      teaser: 'Homeros\'un ölümsüzleştirdiği Truva Savaşı\'nın ve efsanevi tahta atın mekanı.',
+      story: 'Truva Antik Kenti ve Çanakkale Boğazı rüzgarları. Homeros\'un İlyada destanına konu olan 9 katmanlı tarihi kent, Akhilleus ve Hektor\'un düellosuna şahitlik etmiştir. Çanakkale rüzgarı burada binlerce yıllık kahramanlık hikayelerini fısıldar.'
+    },
+    {
+      id: 'story-gelibolu',
+      title: 'Gelibolu Tarihi Yarımadası & Şehitlikler',
+      lat: 40.2312,
+      lon: 26.3150,
+      radiusM: 4000,
+      teaser: 'Bir ulusun kaderinin yazıldığı, Çanakkale Geçilmez destanının kutsal toprakları.',
+      story: 'Gelibolu Tarihi Alanı\'na hoş geldiniz. "Çanakkale Geçilmez" sözünün tarihe kazındığı, Mustafa Kemal Atatürk ve Mehmetçiklerin destan yazdığı bu topraklar; dünya harp tarihinin en centilmen ve fedakar mücadelesine tanıklık etmiştir.'
+    },
+    {
+      id: 'story-kapadokya',
+      title: 'Kapadokya & Peri Bacaları',
+      lat: 38.6431,
+      lon: 34.8289,
+      radiusM: 4000,
+      teaser: 'Volkanik tüflerin rüzgar ve suyla dansı; masalsı vadi ve yer altı şehirleri.',
+      story: 'Kapadokya\'nın büyülü coğrafyasındasınız. Milyonlarca yıl önce Erciyes ve Hasandağı volkanlarının püskürttüğü lavların şekillenmesiyle oluşan peri bacaları, yer altı şehirleri ve sıcak hava balonlarıyla adeta başka bir gezegeni andırır.'
+    },
+    {
+      id: 'story-nemrut',
+      title: 'Nemrut Dağı & Kommagene Krallığı',
+      lat: 37.9806,
+      lon: 38.7408,
+      radiusM: 4000,
+      teaser: '2150 metre zirvede tanrıların ve kralların devasa heykelleri.',
+      story: 'Nemrut Dağı zirvesindesiniz. Kral I. Antiochos\'un Doğu ve Batı tanrılarını birleştirmek amacıyla 2150 metre yükseklikte yaptırdığı dev kireçtaşı heykeller ve tümülüs, dünyada gün doğumu ve batımının en mistik izlendiği noktadır.'
+    },
+    {
+      id: 'story-sumela',
+      title: 'Sümela Manastırı & Karadağ Uçurumu',
+      lat: 40.6901,
+      lon: 39.6583,
+      radiusM: 3500,
+      teaser: 'Altındere Vadisi\'nde sarp kayalıklara asılı duran 1600 yıllık manastır.',
+      story: 'Trabzon Maçka\'da sarp kayalıklara kartal yuvası gibi oyulmuş Sümela Manastırı. Sisli Karadeniz ormanları, gürül gürül akan dereler ve fresklerle bezeli kaya kilisesi, Doğu Karadeniz rotalarının baş tacıdır.'
+    },
+    {
+      id: 'story-gobeklitepe',
+      title: 'Göbeklitepe & Tarihin Sıfır Noktası',
+      lat: 37.2232,
+      lon: 38.9224,
+      radiusM: 3500,
+      teaser: 'İnsanlık tarihini yeniden yazan 12.000 yıllık dünyanın ilk tapınağı.',
+      story: 'Tarihin sıfır noktası Göbeklitepe\'ye yaklaştınız. Tarım toplumuna geçmeden önce inşa edilen "T" biçimli dev sütunlar ve hayvan kabartmaları, insanlık tarihinin bildiğimiz tüm teorilerini kökten değiştirmiştir.'
+    },
+    {
+      id: 'story-pamukkale',
+      title: 'Pamukkale Travertenleri & Hierapolis',
+      lat: 37.9248,
+      lon: 29.1244,
+      radiusM: 3000,
+      teaser: 'Beyaz cennet travertenler ve şifalı termal havuzlarıyla antik sağlık merkezi.',
+      story: 'Pamukkale Travertenleri ve Hierapolis Antik Kenti. Kalsiyum oksitli termal suların yarattığı kar beyazı havuzlar ve binlerce yıllık Kleopatra Antik Havuzu, doğanın ve tarihin kusursuz birleşimidir.'
+    },
+    {
+      id: 'story-salda',
+      title: 'Salda Gölü & Türkiye\'nin Maldivleri',
+      lat: 37.5542,
+      lon: 29.7042,
+      radiusM: 3500,
+      teaser: 'Beyaz kumları ve turkuaz tonlarıyla Mars yüzeyine benzetilen krater gölü.',
+      story: 'Salda Gölü etrafındaki virajlardasınız. Magnezyum zengini beyaz hidromanyezit kumsalları ve berrak turkuaz suyu ile NASA\'nın Mars araştırmalarında referans aldığı Türkiye\'nin en derin ve temiz göllerindendir.'
+    },
+    {
+      id: 'story-ihlara',
+      title: 'Ihlara Vadisi & Melendiz Kanyonu',
+      lat: 38.2526,
+      lon: 34.3012,
+      radiusM: 3000,
+      teaser: 'Hasandağı lavlarının yardığı, kayalara oyulmuş manastır vadisi.',
+      story: 'Ihlara Vadisi, Melendiz Çayı\'nın kanyon boyunca akarken şekillendirdiği 14 kilometrelik bir doğa harikasıdır. Uçurum yamaçlarına oyulmuş erken Hristiyanlık dönemi kaya kiliseleri ve gür bitki örtüsüyle büyüleyicidir.'
+    },
+    {
+      id: 'story-assos',
+      title: 'Assos Behramkale & Athena Tapınağı',
+      lat: 39.4891,
+      lon: 26.3361,
+      radiusM: 3000,
+      teaser: 'Aristoteles\'in felsefe okulu kurduğu, Midilli Adası manzaralı antik liman.',
+      story: 'Assos Behramkale sırtlarındasınız. Dor tarzı Athena Tapınağı sütunları arasından Ege Denizi\'ne ve Midilli\'ye bakarken, felsefenin babası Aristoteles\'in burada ders verdiği günleri hayal edebilirsiniz.'
+    },
+    {
+      id: 'story-ovit',
+      title: 'Ovit Dağı Geçidi & Kaçkarlar',
+      lat: 40.6278,
+      lon: 40.7891,
+      radiusM: 4500,
+      teaser: '2640 metre irtifada bulutların üstünde virajlar ve heybetli Kaçkar zirveleri.',
+      story: 'Ovit Dağı Geçidi, 2640 metre irtifasıyla Türkiye\'nin en yüksek ve en zorlu motor rotalarındandır. Rize ile Erzurum arasında, bulut denizinin üzerinde sürüş yaparken vahşi Kaçkar doğasını ve buzul göllerini selamlarsınız.'
+    },
+    {
+      id: 'story-sirince',
+      title: 'Şirince Köyü & Ege Taş Evleri',
+      lat: 37.9442,
+      lon: 27.4331,
+      radiusM: 2500,
+      teaser: 'Zeytinlikler arasında beyaz badanalı tarihi Rum evleri ve meyve şarapları.',
+      story: 'Selçuk tepelerinde zeytinlikler arasına saklanmış Şirince. Arnavut kaldırımlı dar sokakları, tarihi mimarisi ve bereketli bağlarıyla Ege kültürünün en huzurlu duraklarından biridir.'
+    },
+    {
+      id: 'story-bergama',
+      title: 'Bergama Akropolü & Dik Tiyatro',
+      lat: 39.1322,
+      lon: 27.1840,
+      radiusM: 3000,
+      teaser: 'Parşömenin icat edildiği, dünyanın en dik antik tiyatrosuna sahip Pergamon.',
+      story: 'Pergamon Akropolü. Kralların sarayları, Zeus Sunağı ve uçuruma inşa edilmiş dünyanın en dik açılı antik tiyatrosuyla gökyüzüne uzanan bu tepe, parşömen kağıdının doğduğu kültür merkezidir.'
+    },
+    {
+      id: 'story-ani',
+      title: 'Ani Harabeleri & Binbir Kiliseli Şehir',
+      lat: 40.5103,
+      lon: 43.5714,
+      radiusM: 4000,
+      teaser: 'İpek Yolu\'nun Kafkasya kapısı, Arpaçay kanyonu kenarındaki efsanevi başkent.',
+      story: 'Ani Tarihi Kenti\'ne yaklaşıyorsunuz. Orta Çağ\'ın metropolü, "1001 Kiliseli Şehir" olarak bilinen Ani; Ermeni, Selçuklu, Gürcü ve Bizans mimarisinin sentezlendiği eşsiz bir açık hava başyapıtıdır.'
+    },
+    {
+      id: 'story-safranbolu',
+      title: 'Safranbolu Tarihi Evleri',
+      lat: 41.2458,
+      lon: 32.6936,
+      radiusM: 3000,
+      teaser: 'UNESCO Dünya Mirası, ahşap konakları ve lokum kokulu sokaklarıyla Osmanlı kenti.',
+      story: 'Safranbolu\'dasınız. 18. ve 19. yüzyıl geleneksel Osmanlı sivil mimarisini günümüze taşıyan cumbalı ahşap konaklar, arasta çarşısı ve Arnavut kaldırımları zamanda nostaljik bir yolculuk sunar.'
+    },
+    {
+      id: 'story-kackarlar',
+      title: 'Kaçkar Dağları & Fırtına Vadisi',
+      lat: 40.9500,
+      lon: 41.0000,
+      radiusM: 5000,
+      teaser: 'Tarihi kemer köprüler, şimşir ormanları ve coşkun Fırtına Deresi.',
+      story: 'Fırtına Vadisi ve Kaçkar etekleri. Yüzlerce yıllık taş kemer köprülerin altından akan köpüklü sular, yayla yolları ve horon melodileri eşliğinde Doğu Karadeniz\'in vahşi güzelliğine adım atıyorsunuz.'
+    }
+  ],
+
+  init() {
+    try {
+      const stored = localStorage.getItem('rotam_story_guide_enabled');
+      if (stored !== null) {
+        this.enabled = (stored === 'true');
+      }
+    } catch (e) {}
+    this.updateUIStatus();
+  },
+
+  updateUIStatus() {
+    const statusEl = document.getElementById('mobile-story-guide-status');
+    if (statusEl) {
+      statusEl.textContent = this.enabled ? 'Açık' : 'Kapalı';
+      statusEl.className = this.enabled ? 'text-[10px] text-emerald-400 font-bold' : 'text-[10px] text-slate-500 font-bold';
+    }
+    const btnEl = document.getElementById('live-nav-story-btn');
+    if (btnEl) {
+      if (this.enabled) {
+        btnEl.classList.remove('opacity-40', 'grayscale');
+        btnEl.title = 'Rotam Kültür Rehberi: Açık (Kapatmak için tıkla)';
+      } else {
+        btnEl.classList.add('opacity-40', 'grayscale');
+        btnEl.title = 'Rotam Kültür Rehberi: Kapalı (Açmak için tıkla)';
+      }
+    }
+  },
+
+  toggleGuide() {
+    this.enabled = !this.enabled;
+    try {
+      localStorage.setItem('rotam_story_guide_enabled', this.enabled ? 'true' : 'false');
+    } catch (e) {}
+    this.updateUIStatus();
+
+    if (!this.enabled) {
+      this.stopSpeaking();
+      this.dismissStoryBanner();
+      showToast('Kültür Rehberi Fısıltısı Kapatıldı 🔕', 'info');
+    } else {
+      showToast('Kültür & Tarih Rehberi Açık 🎙️ Yaklaştığınızda hikayeler fısıldanacak', 'success');
+    }
+  },
+
+  checkProximity(userLat, userLon) {
+    if (!this.enabled || !userLat || !userLon) return;
+
+    const now = Date.now();
+    // Cooldown check (minimum 2.5 dakika mola)
+    if (now - this.lastSpokenTimestamp < this.minIntervalMs) return;
+
+    // Don't interrupt turn-by-turn navigation voice if currently speaking
+    if (typeof window.speechSynthesis !== 'undefined' && window.speechSynthesis.speaking) {
+      return;
+    }
+
+    // 1. Search curated high-value stories first
+    for (const item of this.curatedStories) {
+      if (this.toldStoryIds.has(item.id)) continue;
+      const d = haversineMeters(userLat, userLon, item.lat, item.lon);
+      const rad = item.radiusM || 2500;
+      if (d <= rad) {
+        this.triggerStory(item, d);
+        return;
+      }
+    }
+
+    // 2. Fallback to all POIs in database (DEFAULT_HISTORIC_PLACES or state.allPlaces)
+    const allPlaces = (window.state && window.state.allPlaces && window.state.allPlaces.length) 
+      ? window.state.allPlaces 
+      : (window.DEFAULT_HISTORIC_PLACES || []);
+
+    for (const p of allPlaces) {
+      const pid = 'poi_' + (p.id || p.name);
+      if (this.toldStoryIds.has(pid)) continue;
+      if (!p.lat || !p.lon) continue;
+      const d = haversineMeters(userLat, userLon, p.lat, p.lon);
+      if (d <= 2000 && p.description && p.description.length > 20) {
+        const generatedItem = {
+          id: pid,
+          title: p.name,
+          lat: p.lat,
+          lon: p.lon,
+          teaser: p.description.substring(0, 100),
+          story: `${p.name} noktasına yaklaşıyorsunuz. ${p.description}`
+        };
+        this.triggerStory(generatedItem, d);
+        return;
+      }
+    }
+  },
+
+  triggerStory(storyItem, distanceM) {
+    this.activeStory = storyItem;
+    this.toldStoryIds.add(storyItem.id);
+    this.lastSpokenTimestamp = Date.now();
+
+    // Show HUD banner
+    const banner = document.getElementById('live-nav-story-banner');
+    const titleEl = document.getElementById('live-story-title');
+    const textEl = document.getElementById('live-story-text');
+    const distEl = document.getElementById('live-story-dist');
+
+    if (titleEl) titleEl.textContent = storyItem.title;
+    if (textEl) textEl.textContent = storyItem.story || storyItem.teaser;
+    if (distEl) {
+      const distStr = distanceM < 1000 ? `${Math.round(distanceM)} m` : `${(distanceM / 1000).toFixed(1)} km`;
+      distEl.textContent = distStr;
+    }
+
+    if (banner) {
+      banner.classList.remove('hidden');
+      if (this.bannerTimeout) clearTimeout(this.bannerTimeout);
+      // Auto-hide banner after 35 seconds
+      this.bannerTimeout = setTimeout(() => {
+        banner.classList.add('hidden');
+      }, 35000);
+    }
+
+    // Play subtle audio vibration if supported
+    try {
+      if ('vibrate' in navigator) navigator.vibrate([100, 80, 100]);
+    } catch (e) {}
+
+    // Speak story
+    this.speak(storyItem.story || storyItem.teaser);
+  },
+
+  speak(text) {
+    if (!this.enabled || !('speechSynthesis' in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'tr-TR';
+      utterance.rate = 0.96; // slightly slower, calm documentary storyteller cadence
+      utterance.pitch = 1.0;
+
+      // Select high quality Turkish voice if available
+      const voices = window.speechSynthesis.getVoices();
+      const trVoice = voices.find(v => v.lang && (v.lang === 'tr-TR' || v.lang.startsWith('tr')));
+      if (trVoice) {
+        utterance.voice = trVoice;
+      }
+
+      window.speechSynthesis.speak(utterance);
+    } catch (e) {
+      console.warn('Story speech error:', e);
+    }
+  },
+
+  stopSpeaking() {
+    if ('speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch (e) {}
+    }
+  },
+
+  replayActiveStory() {
+    if (this.activeStory) {
+      this.speak(this.activeStory.story || this.activeStory.teaser);
+      showToast('Kültür hikayesi tekrarlanıyor 🔊', 'info');
+    } else {
+      this.playSampleStory();
+    }
+  },
+
+  dismissStoryBanner() {
+    const banner = document.getElementById('live-nav-story-banner');
+    if (banner) banner.classList.add('hidden');
+    if (this.bannerTimeout) clearTimeout(this.bannerTimeout);
+    this.stopSpeaking();
+  },
+
+  playSampleStory() {
+    const sample = this.curatedStories[0]; // Sakar Geçidi & Gökova Körfezi
+    this.triggerStory(sample, 1200);
+    showToast('Örnek kültür hikayesi çalınıyor 🎙️', 'success');
+  }
+};
+
+window.RotamStoryGuide = RotamStoryGuide;
+

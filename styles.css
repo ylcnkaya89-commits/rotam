@@ -1019,3 +1019,29 @@ main {
   }
 }
 
+/* Rotam Smart Story Guide Soundwave Effect */
+.story-soundwave {
+  display: inline-flex;
+  align-items: center;
+  gap: 2.5px;
+  height: 14px;
+}
+
+.story-soundwave span {
+  display: inline-block;
+  width: 2.5px;
+  background: #f59e0b;
+  border-radius: 9999px;
+  animation: story-wave 1.1s ease-in-out infinite;
+}
+
+.story-soundwave span:nth-child(2) { animation-delay: 0.2s; }
+.story-soundwave span:nth-child(3) { animation-delay: 0.4s; }
+.story-soundwave span:nth-child(4) { animation-delay: 0.6s; }
+
+@keyframes story-wave {
+  0%, 100% { height: 4px; }
+  50% { height: 14px; }
+}
+
+
