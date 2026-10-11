@@ -6713,7 +6713,8 @@ const LiveNavigation = {
         id: `wp_${idx}`,
         name: wp.name || `${isEn ? 'Waypoint' : 'Durak'} ${idx + 1}`,
         lat: wp.lat,
-        lon: wp.lon
+        lon: wp.lon,
+        isWaypoint: true
       });
     });
 
@@ -6723,7 +6724,9 @@ const LiveNavigation = {
           id: `poi_${poi.id || poi.name}`,
           name: poi.name,
           lat: poi.lat,
-          lon: poi.lon
+          lon: poi.lon,
+          category: poi.category || 'historic',
+          poi: poi
         });
       });
     }
@@ -6735,25 +6738,50 @@ const LiveNavigation = {
 
       if (distM <= 1000 && distM >= 60) {
         this.notifiedPois.add(target.id);
-        this.showProximityBanner(target.name, Math.round(distM));
 
-        if (this.voiceEnabled) {
-          const speechText = isEn
-            ? `Approaching ${target.name} in ${Math.round(distM)} meters`
-            : `${target.name} noktasına ${Math.round(distM)} metre kaldı`;
-          this.speak(speechText);
+        const isFuel = target.category === 'fuel' || target.category === 'ev_charge' ||
+          /benzin|petrol|akaryakıt|yakıt|istasyon|opet|shell|bp|total|aytemiz|lukoil|sunpet|po\b/i.test(target.name || '');
+
+        const isHistoric = !isFuel && (target.category === 'historic' ||
+          (target.poi && (target.poi.category === 'historic' || target.poi.type === 'historic')));
+
+        // Kullanıcı kuralı: Benzinlikler için ASLA sesli uyarı verilmez. Sadece tarihi yerler sesli olarak uyarılır.
+        if (target.isWaypoint) {
+          this.showProximityBanner(target.name, Math.round(distM), 'waypoint');
+          if (this.voiceEnabled) {
+            const speechText = isEn
+              ? `Approaching ${target.name} in ${Math.round(distM)} meters`
+              : `${target.name} noktasına ${Math.round(distM)} metre kaldı`;
+            this.speak(speechText);
+          }
+        } else if (isHistoric) {
+          this.showProximityBanner(target.name, Math.round(distM), 'historic');
+          if (this.voiceEnabled) {
+            const speechText = isEn
+              ? `Approaching historical site: ${target.name} in ${Math.round(distM)} meters`
+              : `Tarihi yer: ${target.name} noktasına ${Math.round(distM)} metre kaldı`;
+            this.speak(speechText);
+          }
+        } else if (!isFuel) {
+          // Doğa veya mola gibi diğer noktalar sadece sessiz görsel banner verir, ses çıkarmaz
+          this.showProximityBanner(target.name, Math.round(distM));
         }
+        // isFuel olan istasyonlar için sesli uyarı verilmez ve HUD banner'ı temiz tutulur
         break;
       }
     }
   },
 
-  showProximityBanner(name, distM) {
+  showProximityBanner(name, distM, tag = null) {
     const banner = document.getElementById('live-nav-alert-banner');
     const textEl = document.getElementById('live-nav-alert-text');
     if (!banner || !textEl) return;
 
-    textEl.textContent = `${name} (${distM}m)`;
+    let prefix = '';
+    if (tag === 'historic') prefix = '🏛️ ';
+    else if (tag === 'waypoint') prefix = '📍 ';
+
+    textEl.textContent = `${prefix}${name} (${distM}m)`;
     banner.classList.remove('hidden');
 
     if (this.bannerTimer) clearTimeout(this.bannerTimer);
@@ -6826,12 +6854,7 @@ const LiveNavigation = {
       this.dismissFuelBanner();
     }, 12000);
 
-    if (this.voiceEnabled) {
-      const voiceMsg = isEn
-        ? `Nearest stop found: ${spot.name}, in ${distKm} kilometers.`
-        : `En yakın durak: ${distKm} kilometre mesafede ${spot.name}.`;
-      this.speak(voiceMsg);
-    }
+    // Benzinlik için sesli uyarı kapatıldı (Kullanıcı talebi: Benzinlikleri sesli uyarı olarak vermesin, sadece tarihi yerler sesli uyarılır)
   },
 
   dismissFuelBanner() {
@@ -7809,6 +7832,13 @@ const RotamStoryGuide = {
       const pid = 'poi_' + (p.id || p.name);
       if (this.toldStoryIds.has(pid)) continue;
       if (!p.lat || !p.lon) continue;
+
+      // Sadece tarihi yerler sesli olarak anlatılır; benzinlikler kesinlikle filtrelenir
+      const isFuel = p.category === 'fuel' || p.category === 'ev_charge' ||
+        /benzin|petrol|akaryakıt|yakıt|istasyon|opet|shell|bp|total|aytemiz|lukoil|sunpet|po\b/i.test(p.name || '');
+      if (isFuel) continue;
+      if (p.category !== 'historic') continue;
+
       const d = haversineMeters(userLat, userLon, p.lat, p.lon);
       if (d <= 2000 && p.description && p.description.length > 20) {
         const generatedItem = {
