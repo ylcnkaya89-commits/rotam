@@ -97,7 +97,7 @@ const CATEGORY_CONFIG = {
   cafe: { title: 'Mola Yeri & Kafe', title_en: 'Rest Stop & Cafe', icon: 'coffee', emoji: '☕', color: '#0f766e', fill: '#14b8a6', pinClass: 'pin-cafe' },
   fuel: { title: 'Akaryakıt İstasyonu', title_en: 'Fuel Station', icon: 'fuel', emoji: '⛽', color: '#047857', fill: '#10b981', pinClass: 'pin-fuel' },
   ev_charge: { title: 'Elektrikli Araç Şarj (EV)', title_en: 'EV Charging Station', icon: 'zap', emoji: '⚡', color: '#0891b2', fill: '#06b6d4', pinClass: 'pin-ev_charge' },
-  camping: { title: 'Karavan & Kamp Alanı', title_en: 'Camper & Camping Site', icon: 'tent', emoji: '🚐', color: '#65a30d', fill: '#84cc16', pinClass: 'pin-camping' },
+  camping: { title: 'Kamp & Çadır & Karavan Sahası', title_en: 'Camping, Tent & Camper Site', icon: 'tent', emoji: '🏕️', color: '#16a34a', fill: '#22c55e', pinClass: 'pin-camping' },
   viewpoint: { title: 'Seyir Noktası & Geçit', title_en: 'Scenic Viewpoint & Pass', icon: 'mountain', emoji: '🌄', color: '#ea580c', fill: '#f97316', pinClass: 'pin-viewpoint' },
   mountain_pass: { title: 'Dağ Geçidi', title_en: 'Mountain Pass', icon: 'mountain-snow', emoji: '⛰️', color: '#4f46e5', fill: '#6366f1', pinClass: 'pin-mountain_pass' }
 };
@@ -107,10 +107,11 @@ function getCategoryTitle(cat) {
   return (window.state && window.state.lang === 'en' && cfg.title_en) ? cfg.title_en : cfg.title;
 }
 
-// 6 Primary Category Filter Groups Mapping all 871 Places Harmoniously
+// Primary Category Filter Groups (Including Dedicated Camping & Outdoor Group)
 const CATEGORY_GROUPS = {
   historic: ['historic'],
-  nature: ['nature', 'camping'],
+  nature: ['nature'],
+  camping: ['camping'],
   photography: ['photography', 'viewpoint', 'mountain_pass'],
   beach: ['beach'],
   gastronomy: ['gastronomy', 'cafe'],
@@ -2700,6 +2701,7 @@ function analyzeRouteCorridor(route, radiusMeters = 50000) {
   const counts = {
     historic: 0,
     nature: 0,
+    camping: 0,
     photography: 0,
     beach: 0,
     gastronomy: 0,
@@ -2712,7 +2714,9 @@ function analyzeRouteCorridor(route, radiusMeters = 50000) {
       const distKm = (distMeters / 1000).toFixed(1);
       const cat = p.category || 'historic';
 
-      if (cat === 'nature' || cat === 'camping') {
+      if (cat === 'camping') {
+        counts.camping++;
+      } else if (cat === 'nature') {
         counts.nature++;
       } else if (cat === 'photography' || cat === 'viewpoint' || cat === 'mountain_pass') {
         counts.photography++;
@@ -2768,6 +2772,7 @@ function analyzeRouteCorridor(route, radiusMeters = 50000) {
   const countPills = {
     historic: document.getElementById('count-pill-historic'),
     nature: document.getElementById('count-pill-nature'),
+    camping: document.getElementById('count-pill-camping'),
     photography: document.getElementById('count-pill-photography'),
     beach: document.getElementById('count-pill-beach'),
     gastronomy: document.getElementById('count-pill-gastronomy'),
@@ -2776,6 +2781,7 @@ function analyzeRouteCorridor(route, radiusMeters = 50000) {
 
   if (countPills.historic) countPills.historic.textContent = counts.historic;
   if (countPills.nature) countPills.nature.textContent = counts.nature;
+  if (countPills.camping) countPills.camping.textContent = counts.camping;
   if (countPills.photography) countPills.photography.textContent = counts.photography;
   if (countPills.beach) countPills.beach.textContent = counts.beach;
   if (countPills.gastronomy) countPills.gastronomy.textContent = counts.gastronomy;
@@ -2960,6 +2966,7 @@ function updatePoiCategoryFilterUI() {
   const groupCounts = {
     historic: 0,
     nature: 0,
+    camping: 0,
     photography: 0,
     beach: 0,
     gastronomy: 0,
@@ -2968,7 +2975,9 @@ function updatePoiCategoryFilterUI() {
 
   dataSource.forEach(p => {
     const cat = p.category || 'historic';
-    if (cat === 'nature' || cat === 'camping') {
+    if (cat === 'camping') {
+      groupCounts.camping++;
+    } else if (cat === 'nature') {
       groupCounts.nature++;
     } else if (cat === 'photography' || cat === 'viewpoint' || cat === 'mountain_pass') {
       groupCounts.photography++;
@@ -5095,6 +5104,16 @@ async function openPlaceDetailById(id) {
 
   const durEl = document.getElementById('place-detail-duration');
   if (durEl) durEl.textContent = place.recommended_duration || (isEn ? '1-2 hours' : '1-2 saat');
+
+  // Kamp Alanı Donanım & İmkân Kartı (#place-detail-camping-card)
+  const campCard = document.getElementById('place-detail-camping-card');
+  if (campCard) {
+    if (place.category === 'camping') {
+      campCard.classList.remove('hidden');
+    } else {
+      campCard.classList.add('hidden');
+    }
+  }
 
   // Google Maps Canlı Fotoğraf ve 360° Linki
   const gmapsBtn = document.getElementById('btn-place-gmaps-photos');
@@ -8295,4 +8314,359 @@ const RotamStoryGuide = {
 };
 
 window.RotamStoryGuide = RotamStoryGuide;
+
+// ==========================================
+// 8. ROTAM KAMPÇI ASİSTANI & DOĞA REHBERİ (OUTDOOR ASSISTANT)
+// ==========================================
+
+const CAMPING_CHECKLIST_DATA = {
+  shelter: [
+    { id: 'tent', label: 'Çadır (Mevsime uygun, su geçirmez tente & taban)', icon: '⛺' },
+    { id: 'pegs', label: 'Çadır Kazıkları & Lastik Çekiç & Gerdirme İpleri', icon: '🔨' },
+    { id: 'bag', label: 'Uyku Tulumu (Rakıma ve gece soğuğuna uygun)', icon: '🛌' },
+    { id: 'mat', label: 'Yalıtımlı Kamp Matı / Şişme Yatak (R-Değeri 2.5+)', icon: '🧘' },
+    { id: 'pillow', label: 'Şişme Kamp Yastığı & Termal İçlik', icon: '🧣' },
+    { id: 'tarp', label: 'Gölgelik Tente (Tarp) & Zemin Örtüsü (Footprint)', icon: '🛡️' }
+  ],
+  kitchen: [
+    { id: 'stove', label: 'Taşınabilir Kamp Ocağı & Yedek Gaz Kartuşu', icon: '🔥' },
+    { id: 'lighter', label: 'Rüzgar Geçirmez Çakmak / Magnezyum Çubuğu', icon: '✨' },
+    { id: 'cookset', label: 'Kompakt Tencere & Tava & Cezve Seti', icon: '🍳' },
+    { id: 'cutlery', label: 'Çatal, Kaşık, Bıçak & Emaye / Çelik Bardak', icon: '🍴' },
+    { id: 'water', label: 'İçme Suyu (Kişi başı günlük en az 3-4 Litre)', icon: '💧' },
+    { id: 'purifier', label: 'Su Filtresi veya Su Arıtma Tableti', icon: '🧪' },
+    { id: 'food', label: 'Bozulmayan Yiyecekler (Konserve, kuruyemiş, hazır makarna)', icon: '🥫' }
+  ],
+  power: [
+    { id: 'headlamp', label: 'Kafa Lambası (Yedek pilli veya Type-C şarjlı)', icon: '🔦' },
+    { id: 'lantern', label: 'Çadır İçi Asılabilir Led Kamp Feneri', icon: '💡' },
+    { id: 'powerbank', label: 'Yüksek Kapasiteli Powerbank (20.000 mAh+)', icon: '🔋' },
+    { id: 'cables', label: 'Telefon ve Cihaz Şarj Kabloları', icon: '🔌' },
+    { id: 'offline_map', label: 'Çevrimdışı Harita (Rotam & Google Maps indirilmiş)', icon: '📱' }
+  ],
+  safety: [
+    { id: 'firstaid', label: 'Kapsamlı İlk Yardım Kiti (Sargı, yanık kremi, ağrı kesici)', icon: '🩹' },
+    { id: 'spray', label: 'Sinek & Böcek & Kene Kovucu Sprey', icon: '🦟' },
+    { id: 'knife', label: 'Çok Amaçlı Kamp Bıçağı / İsviçre Çakısı / Balta', icon: '🔪' },
+    { id: 'trash_bags', label: 'Dayanıklı Çöp Torbası (İz Bırakma - Sıfır Atık)', icon: '🗑️' },
+    { id: 'whistle', label: 'Acil Durum Düdüğü & Pusula / Yangın Söndürücü', icon: '🧭' }
+  ]
+};
+
+function getCheckedCampingItems() {
+  try {
+    const raw = localStorage.getItem('rotam_camping_checklist');
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch (e) {
+    return new Set();
+  }
+}
+
+function saveCheckedCampingItems(set) {
+  try {
+    localStorage.setItem('rotam_camping_checklist', JSON.stringify(Array.from(set)));
+  } catch (e) {}
+}
+
+function toggleCampingChecklistItem(id) {
+  const checked = getCheckedCampingItems();
+  if (checked.has(id)) {
+    checked.delete(id);
+  } else {
+    checked.add(id);
+  }
+  saveCheckedCampingItems(checked);
+  renderCampingChecklist();
+}
+
+function resetCampingChecklist() {
+  saveCheckedCampingItems(new Set());
+  renderCampingChecklist();
+  showToast('Kamp kontrol listesi sıfırlandı 🎒', 'info');
+}
+
+function renderCampingChecklist() {
+  const checked = getCheckedCampingItems();
+  let totalItems = 0;
+  let checkedCount = 0;
+
+  const cats = [
+    { key: 'shelter', elId: 'camp-checklist-shelter' },
+    { key: 'kitchen', elId: 'camp-checklist-kitchen' },
+    { key: 'power', elId: 'camp-checklist-power' },
+    { key: 'safety', elId: 'camp-checklist-safety' }
+  ];
+
+  cats.forEach(c => {
+    const container = document.getElementById(c.elId);
+    if (!container) return;
+    const items = CAMPING_CHECKLIST_DATA[c.key] || [];
+    container.innerHTML = '';
+
+    items.forEach(item => {
+      totalItems++;
+      const isDone = checked.has(item.id);
+      if (isDone) checkedCount++;
+
+      const itemEl = document.createElement('div');
+      itemEl.className = `flex items-center space-x-2.5 p-2 rounded-xl border transition-all cursor-pointer ${
+        isDone 
+          ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200' 
+          : 'bg-slate-900/80 border-slate-800 text-slate-300 hover:border-slate-700'
+      }`;
+      itemEl.onclick = () => toggleCampingChecklistItem(item.id);
+
+      itemEl.innerHTML = `
+        <div class="w-5 h-5 rounded-lg flex items-center justify-center shrink-0 border transition-colors ${
+          isDone 
+            ? 'bg-emerald-500 border-emerald-400 text-slate-950 font-black text-xs' 
+            : 'border-slate-700 bg-slate-950/60'
+        }">
+          ${isDone ? '✓' : ''}
+        </div>
+        <span class="text-sm shrink-0">${item.icon}</span>
+        <span class="text-[11px] leading-tight flex-1 ${isDone ? 'line-through opacity-75' : 'font-medium'}">${item.label}</span>
+      `;
+      container.appendChild(itemEl);
+    });
+  });
+
+  const percent = totalItems > 0 ? Math.round((checkedCount / totalItems) * 100) : 0;
+  const progressText = document.getElementById('camp-checklist-progress-text');
+  const progressBar = document.getElementById('camp-checklist-progress-bar');
+
+  if (progressText) {
+    progressText.textContent = `${checkedCount} / ${totalItems} (%${percent})`;
+  }
+  if (progressBar) {
+    progressBar.style.width = `${percent}%`;
+  }
+}
+
+function openCampingAssistantModal(tab = 'checklist') {
+  const modal = document.getElementById('modal-camping-assistant');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  switchCampingTab(tab);
+  if (typeof initIcons === 'function') initIcons();
+}
+
+function closeCampingAssistantModal() {
+  const modal = document.getElementById('modal-camping-assistant');
+  if (modal) modal.classList.add('hidden');
+}
+
+function switchCampingTab(tabKey) {
+  const tabs = ['checklist', 'safety', 'weather', 'spots'];
+  tabs.forEach(t => {
+    const btn = document.getElementById(`camp-tab-btn-${t}`);
+    const content = document.getElementById(`camp-tab-content-${t}`);
+    if (btn) {
+      if (t === tabKey) {
+        btn.classList.add('active', 'bg-emerald-600', 'text-white');
+        btn.classList.remove('text-slate-400');
+      } else {
+        btn.classList.remove('active', 'bg-emerald-600', 'text-white');
+        btn.classList.add('text-slate-400');
+      }
+    }
+    if (content) {
+      if (t === tabKey) {
+        content.classList.remove('hidden');
+      } else {
+        content.classList.add('hidden');
+      }
+    }
+  });
+
+  if (tabKey === 'checklist') {
+    renderCampingChecklist();
+  } else if (tabKey === 'spots') {
+    renderCampingSpotsList();
+  } else if (tabKey === 'weather') {
+    calculateCampNightTemp();
+  }
+
+  if (typeof initIcons === 'function') initIcons();
+}
+
+function calculateCampNightTemp() {
+  const dayTempInput = document.getElementById('calc-day-temp');
+  const campAltInput = document.getElementById('calc-camp-alt');
+  const tempResultEl = document.getElementById('calc-result-temp');
+  const bagResultEl = document.getElementById('calc-result-bag');
+  const matResultEl = document.getElementById('calc-result-mat');
+
+  const dayTemp = parseFloat(dayTempInput?.value) || 28;
+  const campAlt = Math.max(0, parseFloat(campAltInput?.value) || 1400);
+
+  // Lapse Rate: her 1000m rakımda yaklaşık 6.5°C sıcaklık düşüşü
+  const altDrop = (campAlt / 1000) * 6.5;
+  const dayTempAtAlt = dayTemp - altDrop;
+
+  // Dağlık/açık alanda gece radyatif soğuma (gündüze göre ~11-13°C düşüş)
+  const nightMin = Math.round(dayTempAtAlt - 11.5);
+  const nightMax = nightMin + 2;
+
+  if (tempResultEl) {
+    tempResultEl.textContent = `~${nightMin}°C ile ${nightMax}°C arası`;
+    tempResultEl.className = nightMin <= 5 
+      ? 'text-base font-black text-cyan-300 font-mono' 
+      : (nightMin <= 15 ? 'text-base font-black text-emerald-300 font-mono' : 'text-base font-black text-amber-300 font-mono');
+  }
+
+  let bagStr = '';
+  let matStr = '';
+
+  if (nightMin <= -2) {
+    bagStr = 'Comfort -5°C / Limit -12°C (Kışlık / Kaz Tüyü Tulum)';
+    matStr = 'R-Değeri 4.0+ (Ekstrem Kışlık Çift Kat Yalıtımlı Mat)';
+  } else if (nightMin <= 5) {
+    bagStr = 'Comfort 0°C / Limit -5°C (4 Mevsim / Yayla Tulumu)';
+    matStr = 'R-Değeri 3.0 - 3.8 (Termal Şişme Mat)';
+  } else if (nightMin <= 12) {
+    bagStr = 'Comfort +5°C / Limit 0°C (3 Mevsim Baharlık Tulum)';
+    matStr = 'R-Değeri 2.2 - 2.8 (Termal Köpük veya Şişme Mat)';
+  } else if (nightMin <= 18) {
+    bagStr = 'Comfort +10°C / Limit +5°C (Hafif Yazlık Tulum)';
+    matStr = 'R-Değeri 1.5 - 2.0 (Standart Kamp Matı)';
+  } else {
+    bagStr = 'Comfort +16°C+ veya Polar Battaniye';
+    matStr = 'R-Değeri 1.0 - 1.5 (Standart Yazlık Mat)';
+  }
+
+  if (bagResultEl) bagResultEl.textContent = bagStr;
+  if (matResultEl) matResultEl.textContent = matStr;
+}
+
+function renderCampingSpotsList(filteredSpots = null) {
+  const container = document.getElementById('camp-spots-list-container');
+  if (!container) return;
+
+  const allPlaces = (window.state && window.state.allPlaces && window.state.allPlaces.length)
+    ? window.state.allPlaces
+    : (window.DEFAULT_HISTORIC_PLACES || []);
+
+  const spots = filteredSpots || allPlaces.filter(p => p.category === 'camping');
+
+  if (spots.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full p-6 text-center text-slate-500 text-xs">
+        Aradığınız kriterde kamp alanı bulunamadı.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = spots.map(s => {
+    const city = s.city || s.region || 'Türkiye';
+    const desc = s.description ? escapeHtml(s.description.substring(0, 95)) + (s.description.length > 95 ? '...' : '') : '';
+    const tagBadges = (s.tags || []).slice(0, 3).map(t => `<span class="bg-slate-900 text-slate-400 px-1.5 py-0.5 rounded text-[9px]">#${escapeHtml(t)}</span>`).join(' ');
+
+    return `
+      <div class="glass-card bg-slate-950/70 border border-slate-800/90 hover:border-emerald-500/50 p-3 rounded-2xl flex flex-col justify-between space-y-2 transition-all group">
+        <div>
+          <div class="flex items-start justify-between gap-1.5">
+            <h5 class="font-bold text-white text-xs group-hover:text-emerald-300 transition-colors line-clamp-1 flex items-center gap-1">
+              <span>🏕️</span>
+              <span>${escapeHtml(s.name)}</span>
+            </h5>
+            <span class="text-[10px] bg-emerald-500/15 text-emerald-300 font-semibold px-2 py-0.5 rounded-full shrink-0 border border-emerald-500/25">${escapeHtml(city)}</span>
+          </div>
+          ${desc ? `<p class="text-[11px] text-slate-400 mt-1 leading-relaxed line-clamp-2">${desc}</p>` : ''}
+          <div class="flex flex-wrap gap-1 mt-1.5">${tagBadges}</div>
+        </div>
+        <div class="flex items-center space-x-1.5 pt-1.5 border-t border-slate-800/80">
+          <button onclick="showCampSpotOnMap(${s.id})" class="flex-1 py-1.5 bg-emerald-600/90 hover:bg-emerald-500 text-white rounded-xl text-[11px] font-bold flex items-center justify-center space-x-1 transition-all active:scale-95 shadow-sm">
+            <span>🗺️ Haritada Göster</span>
+          </button>
+          <button onclick="openPlaceDetailById(${s.id})" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-[11px] font-semibold transition-all" title="Detayları İncele">
+            <span>ℹ️</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function filterCampingSpotsList() {
+  const q = (document.getElementById('camp-spots-search')?.value || '').toLowerCase().trim();
+  const allPlaces = (window.state && window.state.allPlaces && window.state.allPlaces.length)
+    ? window.state.allPlaces
+    : (window.DEFAULT_HISTORIC_PLACES || []);
+
+  const campSpots = allPlaces.filter(p => p.category === 'camping');
+
+  if (!q) {
+    renderCampingSpotsList(campSpots);
+    return;
+  }
+
+  const filtered = campSpots.filter(s => {
+    const nameMatch = (s.name || '').toLowerCase().includes(q);
+    const cityMatch = (s.city || s.region || '').toLowerCase().includes(q);
+    const descMatch = (s.description || '').toLowerCase().includes(q);
+    const tagsMatch = (s.tags || []).some(t => t.toLowerCase().includes(q));
+    return nameMatch || cityMatch || descMatch || tagsMatch;
+  });
+
+  renderCampingSpotsList(filtered);
+}
+
+function showCampSpotOnMap(id) {
+  closeCampingAssistantModal();
+  const places = (window.state && window.state.allPlaces && window.state.allPlaces.length)
+    ? window.state.allPlaces
+    : (window.DEFAULT_HISTORIC_PLACES || []);
+  const place = places.find(p => p.id === id);
+  if (!place) return;
+
+  // Kamp kategorisinin haritada aktif olduğundan emin ol
+  if (!state.activePoiCategories.has('camping')) {
+    state.activePoiCategories.add('camping');
+    updatePoiCategoryFilterUI();
+    renderCorridorPoiMarkers();
+  }
+
+  if (window.map) {
+    window.map.setView([place.lat, place.lon], 13, { animate: true });
+    
+    // Varsa Leaflet marker'ın popup'ını aç
+    setTimeout(() => {
+      const match = (state.poiMarkers || []).find(m => {
+        const ll = m.getLatLng();
+        return Math.abs(ll.lat - place.lat) < 0.0001 && Math.abs(ll.lng - place.lon) < 0.0001;
+      });
+      if (match) {
+        match.openPopup();
+      } else {
+        openPlaceDetailById(place.id);
+      }
+    }, 350);
+  }
+
+  showToast(`${place.name} haritada odaklandı 🏕️`, 'success');
+}
+
+function filterMapOnlyCamping() {
+  closeCampingAssistantModal();
+  state.activePoiCategories.clear();
+  state.activePoiCategories.add('camping');
+  updatePoiCategoryFilterUI();
+  renderCorridorPoiMarkers();
+  renderCorridorPoiList();
+  showToast('Haritada sadece kamp ve karavan alanları filtrelendi 🏕️', 'success');
+}
+
+// Global scope bindings for inline HTML handlers
+window.openCampingAssistantModal = openCampingAssistantModal;
+window.closeCampingAssistantModal = closeCampingAssistantModal;
+window.switchCampingTab = switchCampingTab;
+window.toggleCampingChecklistItem = toggleCampingChecklistItem;
+window.resetCampingChecklist = resetCampingChecklist;
+window.calculateCampNightTemp = calculateCampNightTemp;
+window.filterCampingSpotsList = filterCampingSpotsList;
+window.filterMapOnlyCamping = filterMapOnlyCamping;
+window.showCampSpotOnMap = showCampSpotOnMap;
+
 
