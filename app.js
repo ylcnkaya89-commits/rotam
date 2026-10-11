@@ -21,10 +21,7 @@ const state = {
   activeTileLayer: null,
   poiMarkers: [],
   highlightMarkers: [],
-  activePoiCategories: new Set([
-    'historic', 'nature', 'photography', 'beach', 'gastronomy', 'cafe',
-    'fuel', 'ev_charge', 'camping', 'viewpoint', 'mountain_pass'
-  ]),
+  activePoiCategories: new Set(),
   allPlaces: [],
   corridorPois: [],
   smartRecommendations: [],
@@ -2016,6 +2013,7 @@ function clearRouteDisplay() {
   ghostPolylines = [];
 
   clearPoiMarkers();
+  state.activePoiCategories.clear();
   state.routeData = null;
   state.routeAlternatives = [];
   state.corridorPois = [];
@@ -2713,6 +2711,13 @@ function analyzeRouteCorridor(route, radiusMeters = 50000) {
   clearPoiMarkers();
   if (!route || !route.geometry || !route.geometry.coordinates) return;
 
+  // Rota oluşturulduğunda keşif filtreleri otomatik olarak aktif hale getirilir
+  const ALL_POI_CATEGORIES = [
+    'historic', 'nature', 'photography', 'beach', 'gastronomy', 'cafe',
+    'fuel', 'ev_charge', 'camping', 'viewpoint', 'mountain_pass'
+  ];
+  ALL_POI_CATEGORIES.forEach(cat => state.activePoiCategories.add(cat));
+
   const coords = route.geometry.coordinates;
   const found = [];
   const counts = {
@@ -3075,11 +3080,14 @@ function updatePoiCategoryFilterUI() {
   const collapseTitle = document.getElementById('map-filter-collapse-title');
 
   if (collapseBadge) {
-    if (activeCount === allGroupKeys.length) {
+    if (!isRouteActive && activeCount === 0) {
+      collapseBadge.textContent = isEn ? 'Off' : 'Kapalı';
+      collapseBadge.className = 'px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-slate-800 text-slate-400 font-bold border border-slate-700';
+    } else if (activeCount === allGroupKeys.length) {
       collapseBadge.textContent = isEn ? 'All' : 'Tümü';
       collapseBadge.className = 'px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/25 text-emerald-300 font-bold border border-emerald-500/30';
     } else if (activeCount === 0) {
-      collapseBadge.textContent = isEn ? 'Off' : '0';
+      collapseBadge.textContent = isEn ? 'Off' : 'Kapalı';
       collapseBadge.className = 'px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-slate-800 text-slate-400 font-bold border border-slate-700';
     } else {
       collapseBadge.textContent = `${activeCount}`;
@@ -3094,7 +3102,11 @@ function updatePoiCategoryFilterUI() {
   // Sağ Keşif Paneli Filtre Özeti
   const sidebarSummary = document.getElementById('sidebar-filter-active-summary');
   if (sidebarSummary) {
-    sidebarSummary.textContent = activeCount === allGroupKeys.length ? (isEn ? 'All Active' : 'Tümü Aktif') : `${activeCount} Aktif`;
+    if (!isRouteActive && activeCount === 0) {
+      sidebarSummary.textContent = isEn ? 'Waiting Route' : 'Rota Bekleniyor';
+    } else {
+      sidebarSummary.textContent = activeCount === allGroupKeys.length ? (isEn ? 'All Active' : 'Tümü Aktif') : `${activeCount} Aktif`;
+    }
   }
 }
 

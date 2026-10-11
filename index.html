@@ -70,7 +70,7 @@
   <meta name="theme-color" content="#090d16">
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="styles.css?v=3.7">
+  <link rel="stylesheet" href="styles.css?v=3.8">
 </head>
 <body class="h-full flex flex-col overflow-hidden font-sans selection:bg-brand-500 selection:text-white bg-slate-950">
 
@@ -755,7 +755,7 @@
           <button id="map-filter-toggle-collapse-btn" onclick="toggleMapFilterBarCollapse()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-2xl glass-panel bg-slate-950/90 backdrop-blur-xl border border-slate-800/90 hover:border-amber-500/50 shadow-xl text-xs font-bold text-slate-200 transition-all active:scale-95 shrink-0" title="Kategori Filtrelerini Göster / Küçült">
             <span class="text-xs">⚡</span>
             <span id="map-filter-collapse-title">Filtreler</span>
-            <span id="map-filter-active-count-badge" class="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-amber-500/25 text-amber-300 font-bold border border-amber-500/30">Tümü</span>
+            <span id="map-filter-active-count-badge" class="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-slate-800 text-slate-400 font-bold border border-slate-700">Kapalı</span>
             <i id="map-filter-collapse-chevron" data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200"></i>
           </button>
 
@@ -763,61 +763,61 @@
           <div id="map-filter-pills-container" class="hidden flex items-center space-x-1 overflow-x-auto no-scrollbar py-1 px-1.5 rounded-2xl glass-panel bg-slate-950/90 backdrop-blur-xl border border-slate-800/90 shadow-2xl transition-all duration-300">
             
             <!-- Tümü / Master Aç-Kapa Butonu -->
-            <button id="map-filter-toggle-all" onclick="toggleAllPoiCategories()" class="map-category-pill active flex items-center space-x-1 px-2.5 py-1 rounded-xl text-[11px] font-bold shrink-0 transition-all active:scale-95 shadow-sm" title="Tüm Kategorileri Aç / Kapat">
+            <button id="map-filter-toggle-all" onclick="toggleAllPoiCategories()" class="map-category-pill flex items-center space-x-1 px-2.5 py-1 rounded-xl text-[11px] font-bold shrink-0 transition-all active:scale-95 shadow-sm" title="Tüm Kategorileri Aç / Kapat">
               <span class="text-xs">✨</span>
               <span id="map-filter-all-label">Tümü</span>
-              <span id="map-filter-total-count" class="map-pill-count text-[9px] px-1 py-0.5 rounded-full font-mono bg-white/20">871</span>
+              <span id="map-filter-total-count" class="map-pill-count text-[9px] px-1 py-0.5 rounded-full font-mono bg-white/20">0</span>
             </button>
 
             <div class="h-3.5 w-px bg-slate-800 shrink-0"></div>
 
             <!-- 1. Tarihi Yerler & Antik Kentler -->
-            <button id="map-pill-historic" onclick="togglePoiCategoryFilter('historic')" class="map-category-pill active flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold shrink-0 transition-all active:scale-95" title="Tarihi Yerler ve Antik Kentler">
+            <button id="map-pill-historic" onclick="togglePoiCategoryFilter('historic')" class="map-category-pill flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold shrink-0 transition-all active:scale-95" title="Tarihi Yerler ve Antik Kentler">
               <span>🏛️</span>
               <span>Tarih</span>
-              <span id="map-count-historic" class="map-pill-count text-[9px] font-mono px-1 rounded-full">501</span>
+              <span id="map-count-historic" class="map-pill-count text-[9px] font-mono px-1 rounded-full">0</span>
             </button>
 
             <!-- 2. Kamp & Çadır & Karavan Sahaları -->
-            <button id="map-pill-camping" onclick="togglePoiCategoryFilter('camping')" class="map-category-pill active flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold shrink-0 transition-all active:scale-95" title="Kamp, Çadır ve Karavan Alanları">
+            <button id="map-pill-camping" onclick="togglePoiCategoryFilter('camping')" class="map-category-pill flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold shrink-0 transition-all active:scale-95" title="Kamp, Çadır ve Karavan Alanları">
               <span>🏕️</span>
               <span>Kamp</span>
-              <span id="map-count-camping" class="map-pill-count text-[9px] font-mono px-1 rounded-full">48</span>
+              <span id="map-count-camping" class="map-pill-count text-[9px] font-mono px-1 rounded-full">0</span>
             </button>
 
             <!-- 3. Doğa & Şelale & Kanyon -->
-            <button id="map-pill-nature" onclick="togglePoiCategoryFilter('nature')" class="map-category-pill active flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold shrink-0 transition-all active:scale-95" title="Doğa, Kanyonlar ve Şelaleler">
+            <button id="map-pill-nature" onclick="togglePoiCategoryFilter('nature')" class="map-category-pill flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold shrink-0 transition-all active:scale-95" title="Doğa, Kanyonlar ve Şelaleler">
               <span>🌲</span>
               <span>Doğa</span>
-              <span id="map-count-nature" class="map-pill-count text-[9px] font-mono px-1 rounded-full">32</span>
+              <span id="map-count-nature" class="map-pill-count text-[9px] font-mono px-1 rounded-full">0</span>
             </button>
 
             <!-- 4. Fotoğraf & Seyir Tepeleri -->
-            <button id="map-pill-photography" onclick="togglePoiCategoryFilter('photography')" class="map-category-pill active flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold shrink-0 transition-all active:scale-95" title="Fotoğraf ve Seyir Noktaları">
+            <button id="map-pill-photography" onclick="togglePoiCategoryFilter('photography')" class="map-category-pill flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold shrink-0 transition-all active:scale-95" title="Fotoğraf ve Seyir Noktaları">
               <span>📸</span>
               <span>Fotoğraf</span>
-              <span id="map-count-photography" class="map-pill-count text-[9px] font-mono px-1 rounded-full">23</span>
+              <span id="map-count-photography" class="map-pill-count text-[9px] font-mono px-1 rounded-full">0</span>
             </button>
 
             <!-- 5. Sahil & Plaj & Koy -->
-            <button id="map-pill-beach" onclick="togglePoiCategoryFilter('beach')" class="map-category-pill active flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold shrink-0 transition-all active:scale-95" title="Plajlar ve Sahil Şeridi">
+            <button id="map-pill-beach" onclick="togglePoiCategoryFilter('beach')" class="map-category-pill flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold shrink-0 transition-all active:scale-95" title="Plajlar ve Sahil Şeridi">
               <span>🌊</span>
               <span>Sahil</span>
-              <span id="map-count-beach" class="map-pill-count text-[9px] font-mono px-1 rounded-full">8</span>
+              <span id="map-count-beach" class="map-pill-count text-[9px] font-mono px-1 rounded-full">0</span>
             </button>
 
             <!-- 6. Gastronomi & Meşhur Lezzet -->
-            <button id="map-pill-gastronomy" onclick="togglePoiCategoryFilter('gastronomy')" class="map-category-pill active flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold shrink-0 transition-all active:scale-95" title="Yöresel Lezzet ve Mola Yerleri">
+            <button id="map-pill-gastronomy" onclick="togglePoiCategoryFilter('gastronomy')" class="map-category-pill flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold shrink-0 transition-all active:scale-95" title="Yöresel Lezzet ve Mola Yerleri">
               <span>🍴</span>
               <span>Lezzet</span>
-              <span id="map-count-gastronomy" class="map-pill-count text-[9px] font-mono px-1 rounded-full">112</span>
+              <span id="map-count-gastronomy" class="map-pill-count text-[9px] font-mono px-1 rounded-full">0</span>
             </button>
 
             <!-- 7. Akaryakıt & EV Şarj -->
-            <button id="map-pill-fuel" onclick="togglePoiCategoryFilter('fuel')" class="map-category-pill active flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold shrink-0 transition-all active:scale-95" title="Akaryakıt İstasyonları ve EV Şarj">
+            <button id="map-pill-fuel" onclick="togglePoiCategoryFilter('fuel')" class="map-category-pill flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold shrink-0 transition-all active:scale-95" title="Akaryakıt İstasyonları ve EV Şarj">
               <span>⛽</span>
               <span>Yakıt</span>
-              <span id="map-count-fuel" class="map-pill-count text-[9px] font-mono px-1 rounded-full">191</span>
+              <span id="map-count-fuel" class="map-pill-count text-[9px] font-mono px-1 rounded-full">0</span>
             </button>
 
             <div class="h-3.5 w-px bg-slate-800 shrink-0"></div>
@@ -1477,37 +1477,37 @@
                   <span>⚡</span>
                   <span>Kategori Filtreleri</span>
                 </span>
-                <span class="flex items-center space-x-1 text-[10px] text-amber-400 font-mono">
-                  <span id="sidebar-filter-active-summary">Tümü Aktif</span>
+                <span class="flex items-center space-x-1 text-[10px] text-slate-400 font-mono">
+                  <span id="sidebar-filter-active-summary">Kapalı (Rota Bekleniyor)</span>
                   <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 transition-transform group-open:rotate-180"></i>
                 </span>
               </summary>
               <div class="grid grid-cols-2 gap-1.5 pt-2 text-[11px]">
-                <button onclick="togglePoiCategoryFilter('historic')" id="filter-pill-historic" class="flex items-center space-x-1.5 p-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-amber-500/40 text-left transition-all">
+                <button onclick="togglePoiCategoryFilter('historic')" id="filter-pill-historic" class="flex items-center space-x-1.5 p-1.5 rounded-lg opacity-40 border border-slate-900 bg-slate-950/40 hover:border-amber-500/40 text-left transition-all">
                   <span class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span>
                   <span class="truncate">Tarih: <strong id="count-pill-historic" class="text-amber-400">0</strong></span>
                 </button>
-                <button onclick="togglePoiCategoryFilter('camping')" id="filter-pill-camping" class="flex items-center space-x-1.5 p-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-emerald-500/40 text-left transition-all">
+                <button onclick="togglePoiCategoryFilter('camping')" id="filter-pill-camping" class="flex items-center space-x-1.5 p-1.5 rounded-lg opacity-40 border border-slate-900 bg-slate-950/40 hover:border-emerald-500/40 text-left transition-all">
                   <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
                   <span class="truncate">Kamp: <strong id="count-pill-camping" class="text-emerald-400">0</strong></span>
                 </button>
-                <button onclick="togglePoiCategoryFilter('nature')" id="filter-pill-nature" class="flex items-center space-x-1.5 p-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-emerald-500/40 text-left transition-all">
+                <button onclick="togglePoiCategoryFilter('nature')" id="filter-pill-nature" class="flex items-center space-x-1.5 p-1.5 rounded-lg opacity-40 border border-slate-900 bg-slate-950/40 hover:border-emerald-500/40 text-left transition-all">
                   <span class="w-2 h-2 rounded-full bg-teal-400 shrink-0"></span>
                   <span class="truncate">Doğa: <strong id="count-pill-nature" class="text-teal-400">0</strong></span>
                 </button>
-                <button onclick="togglePoiCategoryFilter('photography')" id="filter-pill-photography" class="flex items-center space-x-1.5 p-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-purple-500/40 text-left transition-all">
+                <button onclick="togglePoiCategoryFilter('photography')" id="filter-pill-photography" class="flex items-center space-x-1.5 p-1.5 rounded-lg opacity-40 border border-slate-900 bg-slate-950/40 hover:border-purple-500/40 text-left transition-all">
                   <span class="w-2 h-2 rounded-full bg-purple-400 shrink-0"></span>
                   <span class="truncate">Fotoğraf: <strong id="count-pill-photography" class="text-purple-400">0</strong></span>
                 </button>
-                <button onclick="togglePoiCategoryFilter('beach')" id="filter-pill-beach" class="flex items-center space-x-1.5 p-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-sky-500/40 text-left transition-all">
+                <button onclick="togglePoiCategoryFilter('beach')" id="filter-pill-beach" class="flex items-center space-x-1.5 p-1.5 rounded-lg opacity-40 border border-slate-900 bg-slate-950/40 hover:border-sky-500/40 text-left transition-all">
                   <span class="w-2 h-2 rounded-full bg-sky-400 shrink-0"></span>
                   <span class="truncate">Sahil: <strong id="count-pill-beach" class="text-sky-400">0</strong></span>
                 </button>
-                <button onclick="togglePoiCategoryFilter('gastronomy')" id="filter-pill-gastronomy" class="flex items-center space-x-1.5 p-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-rose-500/40 text-left transition-all">
+                <button onclick="togglePoiCategoryFilter('gastronomy')" id="filter-pill-gastronomy" class="flex items-center space-x-1.5 p-1.5 rounded-lg opacity-40 border border-slate-900 bg-slate-950/40 hover:border-rose-500/40 text-left transition-all">
                   <span class="w-2 h-2 rounded-full bg-rose-400 shrink-0"></span>
                   <span class="truncate">Lezzet: <strong id="count-pill-gastronomy" class="text-rose-400">0</strong></span>
                 </button>
-                <button onclick="togglePoiCategoryFilter('fuel')" id="filter-pill-fuel" class="col-span-2 flex items-center space-x-1.5 p-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-teal-500/40 text-left transition-all">
+                <button onclick="togglePoiCategoryFilter('fuel')" id="filter-pill-fuel" class="col-span-2 flex items-center space-x-1.5 p-1.5 rounded-lg opacity-40 border border-slate-900 bg-slate-950/40 hover:border-teal-500/40 text-left transition-all">
                   <span class="w-2 h-2 rounded-full bg-teal-400 shrink-0"></span>
                   <span class="truncate">Yakıt & Destek: <strong id="count-pill-fuel" class="text-teal-400">0</strong></span>
                 </button>
@@ -2850,6 +2850,6 @@
   <!-- Çoklu Dil ve Çeviri Motoru (TR / EN) -->
   <script src="translations.js?v=3.2"></script>
   <!-- V2 JavaScript Uygulama Mantığı -->
-  <script src="app.js?v=3.9"></script>
+  <script src="app.js?v=4.0"></script>
 </body>
 </html>
