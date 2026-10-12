@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v28 (Firebase Smart URL Resolver & Rule Validator)
-const CACHE_NAME = 'rotam-cache-v28';
+// Rotam PWA Service Worker - v29 (Admin Voting Access & Proximity Hazard Visibility)
+const CACHE_NAME = 'rotam-cache-v29';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

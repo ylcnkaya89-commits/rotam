@@ -377,6 +377,9 @@ function initMap() {
   map.on('moveend', () => {
     const filterBar = document.getElementById('map-category-filter-bar');
     if (filterBar) filterBar.classList.remove('map-moving-dim');
+    if (typeof RotamCommunity !== 'undefined' && RotamCommunity.layerVisible) {
+      RotamCommunity.renderOnMap();
+    }
   });
 
   setupElevationCanvas();
@@ -2406,6 +2409,11 @@ async function calculateRouteMain() {
       RotamTelemetry.recordRoute(validPoints, activeRoute);
     }
 
+    // Refresh community hazard markers for new route corridor
+    if (typeof RotamCommunity !== 'undefined') {
+      RotamCommunity.renderOnMap();
+    }
+
     // Clear initial highlight pins when active route takes over
     clearHighlightMarkers();
 
@@ -2743,6 +2751,9 @@ function selectAlternativeRoute(idx) {
   fetchAndDisplayElevation(activeRoute.geometry.coordinates);
   generateSmartStopRecommendations(activeRoute);
   renderJourneyTimeline();
+  if (typeof RotamCommunity !== 'undefined') {
+    RotamCommunity.renderOnMap();
+  }
 }
 
 // Render Alternative Routes Comparison UI Cards
@@ -4860,7 +4871,10 @@ function handleAdminLogin(event) {
     } catch (e) {}
     closeAdminAuthModal();
     openAdminModal(true);
-    showToast('Yetkili giriş başarılı!', 'success');
+    if (typeof RotamCommunity !== 'undefined') {
+      RotamCommunity.renderOnMap();
+    }
+    showToast('Yetkili giriş başarılı! Tüm Türkiye noktaları yönetici modunda açıldı.', 'success');
   } else {
     if (err) err.classList.remove('hidden');
     if (input) {
@@ -4875,7 +4889,10 @@ function logoutAdmin() {
     sessionStorage.removeItem(ADMIN_CONFIG.SESSION_KEY);
   } catch (e) {}
   closeAdminModal();
-  showToast('Yönetici oturumu kapatıldı.', 'info');
+  if (typeof RotamCommunity !== 'undefined') {
+    RotamCommunity.renderOnMap();
+  }
+  showToast('Yönetici oturumu kapatıldı. Harita standart sürücü moduna geçti.', 'info');
 }
 
 // Şifre Değiştirme Modalı
@@ -9688,13 +9705,36 @@ const RotamCommunity = {
     const inc = this.incidents.find(i => i.id === id);
     if (!inc) return;
 
-    if (isUpvote) {
-      inc.upvotes = (inc.upvotes || 0) + 1;
-      inc.expiresAt += 30 * 60 * 1000; // Extend by 30 mins
-      showToast('Bildirim doğrulandı! Teşekkürler 👍', 'success');
+    const isAdm = typeof isAdminAuthenticated === 'function' && isAdminAuthenticated();
+    let userDistM = Infinity;
+    if (state.userLocation && state.userLocation.lat && state.userLocation.lon) {
+      userDistM = haversineMeters(state.userLocation.lat, state.userLocation.lon, inc.lat, inc.lon);
+    }
+
+    // Harita üzerinden sadece admin tüm noktalara oylama verebilir; normal kullanıcılar sadece yakınsa (<= 1.5 km) oy verebilir
+    if (!isAdm && userDistM > 1500) {
+      showToast('Harita üzerinden yalnızca Yönetici tüm noktalara oy verebilir. Oylamak için noktaya 1.5 km yakın olmalısınız.', 'warning');
+      return;
+    }
+
+    if (isAdm) {
+      if (isUpvote) {
+        inc.upvotes = (inc.upvotes || 0) + 3;
+        inc.expiresAt += 30 * 60 * 1000; // Extend by 30 mins
+        showToast('👑 Yönetici onayı kaydedildi (+30 dk)! 👍', 'success');
+      } else {
+        inc.downvotes = (inc.downvotes || 0) + 3;
+        showToast('👑 Yönetici bildirimi temizledi ❌', 'info');
+      }
     } else {
-      inc.downvotes = (inc.downvotes || 0) + 1;
-      showToast('Yolun temizlendiği bildirildi ❌', 'info');
+      if (isUpvote) {
+        inc.upvotes = (inc.upvotes || 0) + 1;
+        inc.expiresAt += 30 * 60 * 1000;
+        showToast('Bildirim doğrulandı! Teşekkürler 👍', 'success');
+      } else {
+        inc.downvotes = (inc.downvotes || 0) + 1;
+        showToast('Yolun temizlendiği bildirildi ❌', 'info');
+      }
     }
 
     this.cleanExpired();
@@ -9720,6 +9760,46 @@ const RotamCommunity = {
     } catch (e) {}
   },
 
+  // Kullanıcılar sadece yakın olan noktalardaki uyarıları görebilsin; Admin tüm noktaları görsün
+  isHazardVisibleToCurrentViewer(inc) {
+    // 1. Yönetici ise haritadaki TÜM noktalar eksiksiz gösterilir
+    if (typeof isAdminAuthenticated === 'function' && isAdminAuthenticated()) {
+      return true;
+    }
+
+    // 2. Kullanıcının aktif GPS konumu varsa (40 km mesafe)
+    if (state.userLocation && state.userLocation.lat && state.userLocation.lon) {
+      const dUser = haversineMeters(state.userLocation.lat, state.userLocation.lon, inc.lat, inc.lon);
+      if (dUser <= 40000) return true;
+    }
+
+    // 3. Kullanıcının aktif çizilmiş bir rotası varsa (koridor boyunca 15 km)
+    if (state.routeData?.geometry?.coordinates && typeof minDistanceToRoute === 'function') {
+      const dRoute = minDistanceToRoute(inc.lat, inc.lon, state.routeData.geometry.coordinates);
+      if (dRoute <= 15000) return true;
+    }
+
+    // 4. Rota durakları varsa (GPS açılmamış olsa bile başlangıç/varış çevresi 30 km)
+    if (state.waypoints && state.waypoints.length > 0) {
+      for (const wp of state.waypoints) {
+        if (wp.lat !== null && wp.lon !== null) {
+          const dWp = haversineMeters(wp.lat, wp.lon, inc.lat, inc.lon);
+          if (dWp <= 30000) return true;
+        }
+      }
+    }
+
+    // 5. Harita odağı: Kullanıcı belirli bir bölgeye odaklandıysa (Zoom >= 11, merkezden 25 km)
+    if (typeof map !== 'undefined' && map && map.getZoom && map.getZoom() >= 11) {
+      const center = map.getCenter();
+      const dCenter = haversineMeters(center.lat, center.lng, inc.lat, inc.lon);
+      if (dCenter <= 25000) return true;
+    }
+
+    // Diğer uzak şehirlerdeki noktalar normal sürücü haritasında gizlenir
+    return false;
+  },
+
   renderOnMap() {
     if (!map) return;
 
@@ -9731,10 +9811,22 @@ const RotamCommunity = {
 
     if (!this.layerVisible) return;
 
+    const isAdm = typeof isAdminAuthenticated === 'function' && isAdminAuthenticated();
+
     this.incidents.forEach(inc => {
+      // Sadece yakın olanlar (Admin için tümü)
+      if (!this.isHazardVisibleToCurrentViewer(inc)) return;
+
       const minAgo = Math.max(1, Math.round((Date.now() - inc.reportedAt) / 60000));
+
+      let userDistM = Infinity;
+      if (state.userLocation && state.userLocation.lat && state.userLocation.lon) {
+        userDistM = haversineMeters(state.userLocation.lat, state.userLocation.lon, inc.lat, inc.lon);
+      }
+      const isCloseEnough = userDistM <= 1500; // 1.5 km içinde mi?
+
       const iconHtml = `
-        <div class="community-hazard-pin hazard-${inc.type}">
+        <div class="community-hazard-pin hazard-${inc.type} ${isAdm ? 'ring-2 ring-cyan-400' : ''}">
           <span class="hazard-emoji">${inc.emoji || '⚠️'}</span>
           <span class="hazard-pulse"></span>
         </div>
@@ -9748,26 +9840,78 @@ const RotamCommunity = {
         popupAnchor: [0, -20]
       });
 
+      let voteSectionHtml = '';
+      if (isAdm) {
+        const distStr = userDistM < Infinity ? (userDistM > 1000 ? (userDistM / 1000).toFixed(1) + ' km' : Math.round(userDistM) + 'm') : 'Uzak nokta';
+        voteSectionHtml = `
+          <div class="mt-2 pt-2 border-t border-slate-700/80">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[9px] font-bold text-cyan-400 font-mono flex items-center space-x-1">
+                <span>👑</span>
+                <span>YÖNETİCİ OYLAMASI</span>
+              </span>
+              <span class="text-[9px] text-slate-400 font-mono">${distStr}</span>
+            </div>
+            <div class="flex items-center space-x-1.5 mb-1.5">
+              <button onclick="RotamCommunity.voteIncident('${inc.id}', true)" class="flex-1 py-1 px-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 font-bold text-[10px] border border-emerald-500/30 flex items-center justify-center space-x-1 active:scale-95 transition-all">
+                <span>👍 Onayla (+30dk)</span>
+              </button>
+              <button onclick="RotamCommunity.voteIncident('${inc.id}', false)" class="flex-1 py-1 px-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 font-bold text-[10px] border border-amber-500/30 flex items-center justify-center space-x-1 active:scale-95 transition-all">
+                <span>❌ Temizle</span>
+              </button>
+            </div>
+            <button onclick="deleteAdminHazard('${inc.id}')" class="w-full py-1 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 text-[9px] font-semibold border border-rose-800/40 flex items-center justify-center space-x-1 transition-all">
+              <span>🗑️ Bildirimi Doğrudan Kaldır</span>
+            </button>
+          </div>
+        `;
+      } else if (isCloseEnough) {
+        voteSectionHtml = `
+          <div class="mt-2 pt-2 border-t border-slate-700/80">
+            <div class="flex items-center justify-between mb-1 text-[9px] text-emerald-400 font-semibold font-mono">
+              <span>📍 Yakındasınız (~${Math.round(userDistM)}m)</span>
+              <span>Oylayabilirsiniz</span>
+            </div>
+            <div class="flex items-center space-x-1.5">
+              <button onclick="RotamCommunity.voteIncident('${inc.id}', true)" class="flex-1 py-1 px-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 font-bold text-[10px] border border-emerald-500/30 flex items-center justify-center space-x-1 active:scale-95 transition-all">
+                <span>👍 Hala Var</span>
+              </button>
+              <button onclick="RotamCommunity.voteIncident('${inc.id}', false)" class="flex-1 py-1 px-2 rounded-lg bg-red-500/20 hover:bg-red-500/40 text-red-300 font-bold text-[10px] border border-red-500/30 flex items-center justify-center space-x-1 active:scale-95 transition-all">
+                <span>❌ Yol Temiz</span>
+              </button>
+            </div>
+          </div>
+        `;
+      } else {
+        const distStr = userDistM < Infinity ? `${(userDistM / 1000).toFixed(1)} km uzaktasınız` : 'Konumunuz uzak';
+        voteSectionHtml = `
+          <div class="mt-2 pt-2 border-t border-slate-700/80">
+            <div class="p-1.5 rounded-lg bg-slate-900/80 border border-slate-800 text-[10px] text-slate-400 text-center space-y-0.5">
+              <div class="flex items-center justify-center space-x-1 text-slate-300 font-semibold">
+                <span>🔒 Harita Oylaması Kilitli</span>
+              </div>
+              <p class="text-[9px] text-slate-500 leading-tight">Harita üzerinden sadece Yönetici tüm noktalara oy verebilir. Oylama için tehlikeye 1.5 km yakın olmalısınız (${distStr}).</p>
+            </div>
+          </div>
+        `;
+      }
+
       const popupHtml = `
         <div class="p-2 text-slate-100 max-w-[220px]">
           <div class="flex items-center space-x-2 mb-1.5">
             <span class="text-xl">${inc.emoji || '⚠️'}</span>
-            <span class="font-bold text-xs text-white">${inc.title}</span>
+            <div class="min-w-0 flex-1">
+              <span class="font-bold text-xs text-white block truncate">${inc.title}</span>
+              ${inc.isOfficial ? '<span class="inline-block px-1.5 py-0.2 rounded text-[8px] bg-red-500/20 text-red-300 border border-red-500/30 font-bold">Resmi Bildirim</span>' : ''}
+            </div>
           </div>
           <p class="text-[10px] text-slate-400 mb-1 font-mono">${minAgo} dakika önce bildirildi</p>
           ${inc.note ? `<p class="text-[11px] text-amber-200 mb-2 italic bg-amber-500/10 p-1.5 rounded-lg border border-amber-500/20">${inc.note}</p>` : ''}
-          <div class="flex items-center justify-between text-[10px] text-slate-300 pt-1.5 border-t border-slate-700/80 mb-2">
+          <div class="flex items-center justify-between text-[10px] text-slate-300 pt-1 border-t border-slate-700/60 mb-1">
             <span>👍 ${inc.upvotes || 1} onay</span>
             <span>👎 ${inc.downvotes || 0}</span>
           </div>
-          <div class="flex items-center space-x-1.5">
-            <button onclick="RotamCommunity.voteIncident('${inc.id}', true)" class="flex-1 py-1 px-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 font-bold text-[10px] border border-emerald-500/30 flex items-center justify-center space-x-1 active:scale-95 transition-all">
-              <span>👍 Hala Var</span>
-            </button>
-            <button onclick="RotamCommunity.voteIncident('${inc.id}', false)" class="flex-1 py-1 px-2 rounded-lg bg-red-500/20 hover:bg-red-500/40 text-red-300 font-bold text-[10px] border border-red-500/30 flex items-center justify-center space-x-1 active:scale-95 transition-all">
-              <span>❌ Yol Temiz</span>
-            </button>
-          </div>
+          ${voteSectionHtml}
         </div>
       `;
 
