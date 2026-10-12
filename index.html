@@ -2470,7 +2470,7 @@
             <span id="firebase-sync-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 font-mono">Kontrol ediliyor...</span>
           </div>
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            <input type="url" id="admin-firebase-url" value="https://rotam-live-default-rtdb.firebaseio.com" placeholder="https://rotam-live-default-rtdb.firebaseio.com" class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-cyan-500">
+            <input type="text" id="admin-firebase-url" value="https://rotam-live-default-rtdb.firebaseio.com" placeholder="https://rotam-live-default-rtdb.firebaseio.com" class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-cyan-500">
             <div class="flex items-center space-x-1.5 shrink-0">
               <button onclick="testAndSaveFirebaseEndpoint()" class="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs flex items-center space-x-1 transition-all shadow">
                 <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
@@ -2478,18 +2478,38 @@
               </button>
             </div>
           </div>
+          <div class="flex flex-wrap items-center gap-2 pt-0.5">
+            <button type="button" onclick="fillDefaultFirebaseUrl()" class="px-2 py-0.5 rounded-md bg-slate-900 hover:bg-slate-800 text-cyan-300 text-[10px] font-medium border border-slate-800 transition-colors">⚡ rotam-live Otomatik Doldur</button>
+            <button type="button" onclick="copyFirebaseRulesToClipboard()" class="px-2 py-0.5 rounded-md bg-slate-900 hover:bg-slate-800 text-emerald-300 text-[10px] font-medium border border-slate-800 transition-colors">📋 Güvenli Kural Kodunu Kopyala</button>
+          </div>
           <div class="flex items-center justify-between text-[11px] text-slate-400">
             <span id="firebase-sync-status-msg">Tüm sürücülerin birbirini anında (1 saniyede) görmesi için Firebase Realtime Database URL'nizi bağlayın.</span>
             <button type="button" onclick="toggleFirebaseHelpGuide()" class="text-cyan-400 hover:underline shrink-0 ml-2 text-[10px] font-semibold">Nasıl Kurulur? (3 Adım) 💡</button>
           </div>
           <!-- 3 Adımlı Kurulum Rehberi (Açılır/Kapanır) -->
-          <div id="firebase-help-guide" class="hidden mt-2 p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] text-slate-300 space-y-1.5">
-            <p class="font-bold text-white text-xs">Ücretsiz Firebase Realtime Database Kurulumu (2 Dakika):</p>
-            <ol class="list-decimal list-inside space-y-1 text-slate-400">
-              <li><strong class="text-slate-200">console.firebase.google.com</strong> adresine gidip ücretsiz proje oluşturun.</li>
-              <li>Sol menüden <strong class="text-slate-200">Build &gt; Realtime Database</strong> seçip veritabanı oluşturun (Bölge: <em>europe-west1</em> seçebilirsiniz).</li>
-              <li><strong class="text-slate-200">Rules (Kurallar)</strong> sekmesine gidip <code class="text-cyan-300 font-mono">{".read": true, ".write": true}</code> yazarak yayınlayın (Publish).</li>
-              <li>Sayfanın üstündeki veritabanı URL'sini kopyalayıp yukarıdaki kutuya yapıştırın.</li>
+          <div id="firebase-help-guide" class="hidden mt-2 p-3 rounded-xl bg-slate-900/95 border border-slate-800 text-[11px] text-slate-300 space-y-2">
+            <div class="flex items-center justify-between">
+              <p class="font-bold text-white text-xs">🔥 Firebase Realtime Database Kurulum Rehberi:</p>
+              <button type="button" onclick="toggleFirebaseHelpGuide()" class="text-slate-400 hover:text-white text-xs font-bold px-1.5 py-0.5">✕</button>
+            </div>
+            <ol class="list-decimal list-inside space-y-1.5 text-slate-400">
+              <li><strong class="text-slate-200">Kullanılacak Bağlantı Adresi:</strong><br>
+                <code class="text-cyan-300 font-mono bg-slate-950 px-2 py-0.5 rounded select-all">https://rotam-live-default-rtdb.firebaseio.com</code>
+                <span class="text-[10px] text-slate-500 block mt-0.5">(Konsol linki yapıştırsanız dahi sistem otomatik olarak düzeltir)</span>
+              </li>
+              <li><strong class="text-slate-200">Firebase Güvenlik Uyarısı ve Kuralı:</strong><br>
+                Firebase konsolunda <strong class="text-slate-200">Realtime Database &gt; Rules</strong> sekmesine girin. "Public rules" uyarısını çözmek ve yazma izni vermek için aşağıdaki kuralı yapıştırıp <strong class="text-emerald-400">Publish</strong> butonuna basın:
+                <pre class="mt-1 p-2 rounded-lg bg-slate-950 border border-slate-800 font-mono text-[10px] text-emerald-300 overflow-x-auto">{
+  "rules": {
+    "incidents": {
+      ".read": true,
+      ".write": true
+    }
+  }
+}</pre>
+                <button type="button" onclick="copyFirebaseRulesToClipboard()" class="mt-1 px-2 py-1 rounded bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-[10px] font-semibold transition-colors">📋 Bu Kuralı Panoya Kopyala</button>
+              </li>
+              <li><strong class="text-slate-200">Bağlantıyı Tamamla:</strong> Yukarıdaki "Bağla &amp; Senkronize Et" butonuna tıklayın. Yeşil ışık yandığında tüm sürücülerle 1 saniyede canlı iletişim başlar!</li>
             </ol>
           </div>
         </div>

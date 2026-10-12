@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v27 (Firebase Live Hazard Real-time SSE Sync)
-const CACHE_NAME = 'rotam-cache-v27';
+// Rotam PWA Service Worker - v28 (Firebase Smart URL Resolver & Rule Validator)
+const CACHE_NAME = 'rotam-cache-v28';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

@@ -5968,16 +5968,91 @@ function toggleFirebaseHelpGuide() {
   document.getElementById('firebase-help-guide')?.classList.toggle('hidden');
 }
 
+// Firebase URL Temizleme & Akıllı Çözümleme Yardımcısı
+function sanitizeFirebaseDbUrl(raw) {
+  if (!raw || typeof raw !== 'string') return '';
+  let url = raw.trim().replace(/^["']|["']$/g, '');
+  if (!url) return '';
+
+  // 1. Firebase Console URL tespiti (Örn: console.firebase.google.com/project/rotam-live/database/rotam-live-default-rtdb/rules)
+  const dbMatch = url.match(/database\/([a-zA-Z0-9_\-]+)/i);
+  if (dbMatch && dbMatch[1]) {
+    return `https://${dbMatch[1]}.firebaseio.com`;
+  }
+  const projMatch = url.match(/console\.firebase\.google\.com\/(?:u\/\d+\/)?project\/([a-zA-Z0-9_\-]+)/i);
+  if (projMatch && projMatch[1]) {
+    return `https://${projMatch[1]}-default-rtdb.firebaseio.com`;
+  }
+
+  // 2. Eksik protokol tamamlama (https://)
+  if (!/^https?:\/\//i.test(url)) {
+    if (url.includes('.')) {
+      url = 'https://' + url;
+    } else {
+      url = `https://${url}.firebaseio.com`;
+    }
+  } else if (url.startsWith('http://')) {
+    url = 'https://' + url.slice(7);
+  }
+
+  // 3. Alt yolları temizleme (/rules, /data, /incidents, /incidents.json vb.)
+  url = url.replace(/\/+$/, '');
+  const subpaths = ['/rules.json', '/rules', '/data.json', '/data', '/incidents.json', '/incidents'];
+  for (const sp of subpaths) {
+    if (url.toLowerCase().endsWith(sp)) {
+      url = url.slice(0, -sp.length);
+    }
+  }
+  url = url.replace(/\/+$/, '');
+
+  // 4. Bölgesel yanlış yönlendirme düzeltme (rotam-live europe-west1 -> firebaseio.com)
+  if (url.includes('rotam-live-default-rtdb.europe-west1.firebasedatabase.app')) {
+    url = 'https://rotam-live-default-rtdb.firebaseio.com';
+  }
+
+  return url;
+}
+
+function copyFirebaseRulesToClipboard() {
+  const rules = '{\n  "rules": {\n    "incidents": {\n      ".read": true,\n      ".write": true\n    }\n  }\n}';
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(rules).then(() => {
+      showToast('Firebase kuralları panoya kopyalandı! 📋', 'success');
+    }).catch(() => {
+      prompt('Lütfen aşağıdaki kuralları kopyalayın:', rules);
+    });
+  } else {
+    prompt('Lütfen aşağıdaki kuralları kopyalayın:', rules);
+  }
+}
+
+function fillDefaultFirebaseUrl() {
+  const urlInp = document.getElementById('admin-firebase-url');
+  if (urlInp) {
+    urlInp.value = 'https://rotam-live-default-rtdb.firebaseio.com';
+    testAndSaveFirebaseEndpoint();
+  }
+}
+
 function initFirebaseAdminUI() {
   const urlInp = document.getElementById('admin-firebase-url');
   const badge = document.getElementById('firebase-sync-badge');
   const msg = document.getElementById('firebase-sync-status-msg');
   if (!urlInp || !badge) return;
 
-  const currentEp = (typeof RotamCommunity !== 'undefined' && RotamCommunity.getRawEndpoint && RotamCommunity.getRawEndpoint())
-    ? RotamCommunity.getRawEndpoint()
-    : (localStorage.getItem('rotam_firebase_endpoint') || 'https://rotam-live-default-rtdb.firebaseio.com');
+  let currentEp = '';
+  try {
+    currentEp = localStorage.getItem('rotam_firebase_endpoint') || '';
+  } catch (e) {}
 
+  if (!currentEp && typeof RotamCommunity !== 'undefined' && RotamCommunity.getRawEndpoint) {
+    currentEp = RotamCommunity.getRawEndpoint();
+  }
+  if (!currentEp) {
+    currentEp = 'https://rotam-live-default-rtdb.firebaseio.com';
+  }
+
+  currentEp = sanitizeFirebaseDbUrl(currentEp);
   urlInp.value = currentEp;
 
   if (currentEp && !currentEp.includes('rotam-community-live-default-rtdb')) {
@@ -6005,38 +6080,82 @@ async function testAndSaveFirebaseEndpoint() {
     return;
   }
 
-  // Clean trailing slash and path
-  rawUrl = rawUrl.replace(/\/+$/, '');
-  if (rawUrl.endsWith('/incidents.json')) rawUrl = rawUrl.replace(/\/incidents\.json$/, '');
-  if (rawUrl.endsWith('/incidents')) rawUrl = rawUrl.replace(/\/incidents$/, '');
+  // Akıllı URL çözümleme ve otomatik formatlama
+  let cleanUrl = sanitizeFirebaseDbUrl(rawUrl);
+  urlInp.value = cleanUrl;
 
   if (badge) {
     badge.textContent = 'Test ediliyor...';
     badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300 font-mono';
   }
+  if (msg) {
+    msg.textContent = 'Firebase veritabanına bağlanılıyor ve izinler test ediliyor...';
+  }
 
   try {
-    const testUrl = `${rawUrl}/incidents.json`;
-    const res = await fetch(testUrl, { method: 'GET', mode: 'cors' });
+    let testUrl = `${cleanUrl}/incidents.json`;
+    let res = await fetch(testUrl, { method: 'GET', mode: 'cors' });
+
+    // Firebase bölgesel yönlendirme ipucu (Örn: europe-west1 404 dönüp correctUrl veriyorsa)
+    if (res.status === 404) {
+      try {
+        const errBody = await res.json();
+        if (errBody && errBody.correctUrl) {
+          cleanUrl = sanitizeFirebaseDbUrl(errBody.correctUrl);
+          urlInp.value = cleanUrl;
+          testUrl = `${cleanUrl}/incidents.json`;
+          res = await fetch(testUrl, { method: 'GET', mode: 'cors' });
+        }
+      } catch (e) {}
+    }
 
     if (res.ok) {
-      localStorage.setItem('rotam_firebase_endpoint', rawUrl);
+      // Okuma testi başarılı! Şimdi yazma (write) yetkisini doğrula
+      let writeOk = false;
+      try {
+        const pingUrl = `${cleanUrl}/incidents/_ping_check.json`;
+        const pingRes = await fetch(pingUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ping: true, t: Date.now() })
+        });
+        if (pingRes.ok) {
+          writeOk = true;
+          fetch(pingUrl, { method: 'DELETE' }).catch(() => {});
+        }
+      } catch (e) {
+        writeOk = false;
+      }
+
+      localStorage.setItem('rotam_firebase_endpoint', cleanUrl);
       if (typeof RotamCommunity !== 'undefined') {
         RotamCommunity.syncCloud();
         RotamCommunity.startLiveStream();
       }
-      if (badge) {
-        badge.textContent = '🟢 Canlı Akış Bağlandı (SSE)';
-        badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono';
+
+      if (writeOk) {
+        if (badge) {
+          badge.textContent = '🟢 Aktif (Okuma & Yazma & SSE)';
+          badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono';
+        }
+        if (msg) msg.textContent = 'Harika! Firebase Realtime Database tam yetkiyle bağlandı. Yol uyarıları anında tüm sürücülere yansır.';
+        showToast('Firebase canlı bulut bağlantısı başarılı! 🔥', 'success');
+      } else {
+        if (badge) {
+          badge.textContent = '🟡 Kısmi Bağlantı (Yalnızca Okuma)';
+          badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono';
+        }
+        if (msg) {
+          msg.innerHTML = '<span class="text-amber-300 font-semibold">Okuma aktif, ancak yazma izni kilitli (.write: false).</span> Sürücülerin uyarı ekleyebilmesi için Firebase Rules sekmesinde <code>{ "rules": { "incidents": { ".read": true, ".write": true } } }</code> kuralını ekleyip Publish edin.';
+        }
+        showToast('Firebase okundu ancak yazma izni kilitli! Rules ayarını güncelleyin.', 'warning');
       }
-      if (msg) msg.textContent = 'Harika! Firebase Realtime Database başarıyla bağlandı. Bildirimler canlı senkronize ediliyor.';
-      showToast('Firebase canlı bulut senkronizasyonu başarıyla bağlandı! 🔥', 'success');
     } else if (res.status === 401 || res.status === 403) {
       if (badge) {
-        badge.textContent = '🔴 Yetki Hatası (401/403)';
+        badge.textContent = '🔴 Yetki Hatası (Okuma Kilitli)';
         badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 font-mono';
       }
-      if (msg) msg.textContent = 'Firebase Rules hatası! Lütfen Firebase konsolunda Realtime Database > Rules bölümünden { ".read": true, ".write": true } yapıp Publish edin.';
+      if (msg) msg.textContent = 'Firebase Rules hatası! Lütfen Firebase konsolunda Realtime Database > Rules bölümünden { "rules": { "incidents": { ".read": true, ".write": true } } } kuralını ekleyip Publish edin.';
       showToast('Firebase erişim izni hatası (Rules kapalı)!', 'error');
     } else {
       throw new Error(`HTTP ${res.status}`);
@@ -6046,7 +6165,9 @@ async function testAndSaveFirebaseEndpoint() {
       badge.textContent = '🔴 Bağlantı Hatası';
       badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 font-mono';
     }
-    if (msg) msg.textContent = `Hata: ${err.message}. Lütfen URL'nin doğru bir Firebase Realtime Database olduğunu kontrol edin.`;
+    if (msg) {
+      msg.innerHTML = `Hata: ${err.message}. Lütfen doğru adresin <code>https://rotam-live-default-rtdb.firebaseio.com</code> olduğunu kontrol edin.`;
+    }
     showToast('Firebase bağlantısı kurulamadı: ' + err.message, 'error');
   }
 }
@@ -9383,15 +9504,14 @@ const RotamCommunity = {
   },
 
   getEndpoint() {
-    let ep = this.getRawEndpoint();
-    if (!ep || !ep.trim()) {
-      ep = this.cloudEndpoint;
+    let ep = sanitizeFirebaseDbUrl(this.getRawEndpoint());
+    if (!ep) {
+      ep = sanitizeFirebaseDbUrl(this.cloudEndpoint);
     }
-    ep = ep.trim().replace(/\/+$/, '');
-    if (!ep.endsWith('/incidents')) {
-      ep += '/incidents';
+    if (!ep) {
+      ep = 'https://rotam-live-default-rtdb.firebaseio.com';
     }
-    return ep;
+    return ep + '/incidents';
   },
 
   init() {
