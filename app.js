@@ -879,6 +879,11 @@ function selectVehicle(vehicle) {
   try {
     localStorage.setItem('rotam_vehicle', vehicle);
   } catch (e) {}
+
+  if (typeof RotamTelemetry !== 'undefined' && RotamTelemetry.recordVehicle) {
+    RotamTelemetry.recordVehicle(vehicle);
+  }
+
   document.querySelectorAll('.vehicle-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.vehicle === vehicle);
   });
@@ -2175,6 +2180,39 @@ function clearRouteDisplay() {
 async function handleMapClick(lat, lon) {
   const friendlyName = findNearestCityOrPlace(lat, lon);
 
+  // Admin coordinate picking mode (Mekan veya Yol Tehlikesi)
+  if (state.adminCoordPickTarget) {
+    const target = state.adminCoordPickTarget;
+    state.adminCoordPickTarget = null;
+    const latFormatted = Number(lat).toFixed(4);
+    const lonFormatted = Number(lon).toFixed(4);
+
+    if (target === 'place') {
+      const latEl = document.getElementById('admin-place-lat');
+      const lonEl = document.getElementById('admin-place-lon');
+      const cityEl = document.getElementById('admin-place-city');
+      const formEl = document.getElementById('admin-add-form');
+      if (latEl) latEl.value = latFormatted;
+      if (lonEl) lonEl.value = lonFormatted;
+      if (cityEl && !cityEl.value) cityEl.value = friendlyName;
+      if (formEl) formEl.classList.remove('hidden');
+      openAdminModal(true);
+      switchAdminTab('places');
+      showToast(`Mekan konumu seçildi: ${friendlyName} (${latFormatted}, ${lonFormatted}) 📍`, 'success');
+    } else if (target === 'hazard') {
+      const latEl = document.getElementById('admin-hazard-lat');
+      const lonEl = document.getElementById('admin-hazard-lon');
+      const formEl = document.getElementById('admin-hazard-form');
+      if (latEl) latEl.value = latFormatted;
+      if (lonEl) lonEl.value = lonFormatted;
+      if (formEl) formEl.classList.remove('hidden');
+      openAdminModal(true);
+      switchAdminTab('hazards');
+      showToast(`Tehlike konumu seçildi: (${latFormatted}, ${lonFormatted}) ⚠️`, 'success');
+    }
+    return;
+  }
+
   // 0. Explicit map pick mode
   if (state.mapPickTargetIndex !== null && state.mapPickTargetIndex !== undefined) {
     const targetIdx = state.mapPickTargetIndex;
@@ -2363,9 +2401,9 @@ async function calculateRouteMain() {
     const activeRoute = alternatives[0];
     state.routeData = activeRoute;
 
-    // Record Real Telemetry for Route Calculation
+    // Record Real Telemetry for Route Calculation & Distance
     if (typeof RotamTelemetry !== 'undefined') {
-      RotamTelemetry.recordRoute(validPoints);
+      RotamTelemetry.recordRoute(validPoints, activeRoute);
     }
 
     // Clear initial highlight pins when active route takes over
@@ -4498,11 +4536,20 @@ function filterPresetsList() {
   renderPresetsList('presets-routes-container', activePresetCategory, query);
 }
 
+function getAllPresetRoutes() {
+  let custom = [];
+  try {
+    const raw = localStorage.getItem('rotam_custom_presets');
+    if (raw) custom = JSON.parse(raw);
+  } catch (e) {}
+  return [...custom, ...PRESET_ROUTES];
+}
+
 function renderPresetsList(containerId = 'presets-routes-container', categoryTag = 'all', searchQuery = '') {
   const container = document.getElementById(containerId);
   if (!container) return;
 
-  let filtered = PRESET_ROUTES;
+  let filtered = getAllPresetRoutes();
   if (categoryTag && categoryTag !== 'all') {
     filtered = filtered.filter(p => p.tag === categoryTag);
   }
@@ -4572,7 +4619,7 @@ function renderPresetsList(containerId = 'presets-routes-container', categoryTag
 }
 
 function loadPresetRoute(presetId) {
-  const preset = PRESET_ROUTES.find(p => p.id === presetId);
+  const preset = getAllPresetRoutes().find(p => p.id === presetId);
   if (!preset) return;
 
   // Clear existing route and markers
@@ -4723,34 +4770,41 @@ function deleteSavedRoute(index) {
 
 // MODAL: YÖNETİM & VERİ YÖNETİMİ PANELİ (ADMIN & JSON BACKUP)
 function switchAdminTab(tab) {
-  const tabPlaces = document.getElementById('admin-tab-places');
-  const tabAnalytics = document.getElementById('admin-tab-analytics');
-  const tabBackup = document.getElementById('admin-tab-backup');
-  const btnPlaces = document.getElementById('admin-tab-btn-places');
-  const btnAnalytics = document.getElementById('admin-tab-btn-analytics');
-  const btnBackup = document.getElementById('admin-tab-btn-backup');
-
-  if (!tabPlaces || !tabAnalytics || !tabBackup) return;
-
-  // Reset all tabs
-  tabPlaces.classList.add('hidden');
-  tabAnalytics.classList.add('hidden');
-  tabBackup.classList.add('hidden');
-
-  btnPlaces.className = 'px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white';
-  btnAnalytics.className = 'px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white';
-  btnBackup.className = 'px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white';
+  const tabs = ['places', 'presets', 'hazards', 'analytics', 'system', 'backup'];
+  tabs.forEach(tName => {
+    const tabEl = document.getElementById(`admin-tab-${tName}`);
+    const btnEl = document.getElementById(`admin-tab-btn-${tName}`);
+    if (tabEl) {
+      if (tName === tab) {
+        tabEl.classList.remove('hidden');
+        tabEl.classList.add('flex');
+      } else {
+        tabEl.classList.add('hidden');
+        tabEl.classList.remove('flex');
+      }
+    }
+    if (btnEl) {
+      if (tName === tab) {
+        btnEl.className = 'px-3 py-1 rounded-lg font-semibold bg-cyan-600 text-white shadow-sm';
+      } else {
+        btnEl.className = 'px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white';
+      }
+    }
+  });
 
   if (tab === 'places') {
-    tabPlaces.classList.remove('hidden');
-    btnPlaces.className = 'px-3 py-1 rounded-lg font-semibold bg-cyan-600 text-white shadow-sm';
+    renderAdminPlacesList();
+  } else if (tab === 'presets') {
+    renderAdminPresetsList();
+  } else if (tab === 'hazards') {
+    renderAdminHazardsList();
   } else if (tab === 'analytics') {
-    tabAnalytics.classList.remove('hidden');
-    btnAnalytics.className = 'px-3 py-1 rounded-lg font-semibold bg-cyan-600 text-white shadow-sm';
-  } else if (tab === 'backup') {
-    tabBackup.classList.remove('hidden');
-    btnBackup.className = 'px-3 py-1 rounded-lg font-semibold bg-cyan-600 text-white shadow-sm';
+    RotamTelemetry.renderAdminUI();
+  } else if (tab === 'system') {
+    checkStorageQuota();
   }
+  updateAdminStats();
+  initIcons();
 }
 
 // ==========================================
@@ -4824,28 +4878,67 @@ function logoutAdmin() {
   showToast('Yönetici oturumu kapatıldı.', 'info');
 }
 
-function changeAdminPassword() {
+// Şifre Değiştirme Modalı
+function openChangeAdminPasswordModal() {
+  const modal = document.getElementById('modal-admin-change-pass');
+  if (!modal) return;
+  const oldInp = document.getElementById('admin-old-pass-input');
+  const newInp = document.getElementById('admin-new-pass-input');
+  const repInp = document.getElementById('admin-new-pass-repeat');
+  const errEl = document.getElementById('admin-change-pass-error');
+  if (oldInp) oldInp.value = '';
+  if (newInp) newInp.value = '';
+  if (repInp) repInp.value = '';
+  if (errEl) errEl.classList.add('hidden');
+  modal.classList.remove('hidden');
+  if (oldInp) setTimeout(() => oldInp.focus(), 100);
+  initIcons();
+}
+
+function closeChangeAdminPasswordModal() {
+  const modal = document.getElementById('modal-admin-change-pass');
+  if (modal) modal.classList.add('hidden');
+}
+
+function handleAdminChangePasswordSubmit(event) {
+  if (event && event.preventDefault) event.preventDefault();
+  const oldInp = document.getElementById('admin-old-pass-input');
+  const newInp = document.getElementById('admin-new-pass-input');
+  const repInp = document.getElementById('admin-new-pass-repeat');
+  const errEl = document.getElementById('admin-change-pass-error');
+  const errTxt = document.getElementById('admin-change-pass-error-text');
+
   let currentPass = ADMIN_CONFIG.DEFAULT_PASS;
   try {
     const saved = localStorage.getItem(ADMIN_CONFIG.PASS_KEY);
     if (saved && saved.trim()) currentPass = saved.trim();
   } catch (e) {}
 
-  const oldInput = prompt('Mevcut yönetici şifrenizi girin:');
-  if (oldInput === null) return;
-  if (oldInput.trim() !== currentPass) {
-    showToast('Mevcut şifre hatalı!', 'error');
+  const oldVal = (oldInp ? oldInp.value : '').trim();
+  const newVal = (newInp ? newInp.value : '').trim();
+  const repVal = (repInp ? repInp.value : '').trim();
+
+  if (oldVal !== currentPass) {
+    if (errEl) errEl.classList.remove('hidden');
+    if (errTxt) errTxt.textContent = 'Mevcut şifre hatalı!';
     return;
   }
 
-  const newPass = prompt('Yeni yönetici şifresini girin (en az 4 karakter):');
-  if (!newPass || newPass.trim().length < 4) {
-    showToast('Yeni şifre en az 4 karakter olmalıdır.', 'warning');
+  if (newVal.length < 4) {
+    if (errEl) errEl.classList.remove('hidden');
+    if (errTxt) errTxt.textContent = 'Yeni şifre en az 4 karakter olmalıdır!';
+    return;
+  }
+
+  if (newVal !== repVal) {
+    if (errEl) errEl.classList.remove('hidden');
+    if (errTxt) errTxt.textContent = 'Yeni şifreler birbiriyle eşleşmiyor!';
     return;
   }
 
   try {
-    localStorage.setItem(ADMIN_CONFIG.PASS_KEY, newPass.trim());
+    localStorage.setItem(ADMIN_CONFIG.PASS_KEY, newVal);
+    closeChangeAdminPasswordModal();
     showToast('Yönetici şifresi başarıyla güncellendi.', 'success');
   } catch (e) {
     showToast('Şifre kaydedilemedi.', 'error');
@@ -4884,7 +4977,14 @@ const RotamTelemetry = {
     DEVICE_MOBILE: 'rotam_telemetry_dev_mobile',
     DEVICE_DESKTOP: 'rotam_telemetry_dev_desktop',
     DEVICE_TABLET: 'rotam_telemetry_dev_tablet',
-    SESSION_FLAG: 'rotam_session_logged'
+    SESSION_FLAG: 'rotam_session_logged',
+    VEHICLE_MOTO: 'rotam_telemetry_veh_moto',
+    VEHICLE_CAR: 'rotam_telemetry_veh_car',
+    VEHICLE_CAMPER: 'rotam_telemetry_veh_camper',
+    VEHICLE_BIKE: 'rotam_telemetry_veh_bike',
+    TOTAL_KM: 'rotam_telemetry_total_km',
+    TOTAL_MINS: 'rotam_telemetry_total_mins',
+    CALC_COUNT: 'rotam_telemetry_calc_count'
   },
 
   getTodayKey() {
@@ -4935,7 +5035,19 @@ const RotamTelemetry = {
     }
   },
 
-  recordRoute(validPoints) {
+  recordVehicle(vehicle) {
+    try {
+      let key = this.KEYS.VEHICLE_MOTO;
+      if (vehicle === 'car') key = this.KEYS.VEHICLE_CAR;
+      else if (vehicle === 'camper') key = this.KEYS.VEHICLE_CAMPER;
+      else if (vehicle === 'bicycle') key = this.KEYS.VEHICLE_BIKE;
+
+      const current = parseInt(localStorage.getItem(key) || '0', 10) + 1;
+      localStorage.setItem(key, String(current));
+    } catch (e) {}
+  },
+
+  recordRoute(validPoints, activeRoute) {
     try {
       const current = parseInt(localStorage.getItem(this.KEYS.ROUTES_COUNT) || '0', 10) + 1;
       localStorage.setItem(this.KEYS.ROUTES_COUNT, String(current));
@@ -4953,6 +5065,20 @@ const RotamTelemetry = {
 
         routesMap[routeName] = (routesMap[routeName] || 0) + 1;
         localStorage.setItem(this.KEYS.POPULAR_ROUTES, JSON.stringify(routesMap));
+      }
+
+      // Record Distance & Duration aggregates
+      if (activeRoute && typeof activeRoute.distance === 'number') {
+        const distKm = Math.round(activeRoute.distance / 1000);
+        const durMins = Math.round((activeRoute.duration || 0) / 60);
+
+        const totalKm = parseFloat(localStorage.getItem(this.KEYS.TOTAL_KM) || '0') + distKm;
+        const totalMins = parseFloat(localStorage.getItem(this.KEYS.TOTAL_MINS) || '0') + durMins;
+        const calcCount = parseInt(localStorage.getItem(this.KEYS.CALC_COUNT) || '0', 10) + 1;
+
+        localStorage.setItem(this.KEYS.TOTAL_KM, String(totalKm));
+        localStorage.setItem(this.KEYS.TOTAL_MINS, String(totalMins));
+        localStorage.setItem(this.KEYS.CALC_COUNT, String(calcCount));
       }
     } catch (e) {
       console.warn('Record route failed:', e);
@@ -4975,6 +5101,8 @@ const RotamTelemetry = {
     let stopsCount = 0;
     let popularRoutes = [];
     let devices = { mobile: 0, desktop: 0, tablet: 0 };
+    let vehicles = { moto: 0, car: 0, camper: 0, bike: 0 };
+    let routeMetrics = { avgKm: 0, avgMins: 0, totalKm: 0 };
 
     try {
       totalVisits = parseInt(localStorage.getItem(this.KEYS.TOTAL_VISITS) || '0', 10);
@@ -4986,6 +5114,26 @@ const RotamTelemetry = {
       const d = parseInt(localStorage.getItem(this.KEYS.DEVICE_DESKTOP) || '0', 10);
       const tab = parseInt(localStorage.getItem(this.KEYS.DEVICE_TABLET) || '0', 10);
       devices = { mobile: m, desktop: d, tablet: tab };
+
+      // Vehicles
+      const vMoto = parseInt(localStorage.getItem(this.KEYS.VEHICLE_MOTO) || '0', 10);
+      const vCar = parseInt(localStorage.getItem(this.KEYS.VEHICLE_CAR) || '0', 10);
+      const vCamper = parseInt(localStorage.getItem(this.KEYS.VEHICLE_CAMPER) || '0', 10);
+      const vBike = parseInt(localStorage.getItem(this.KEYS.VEHICLE_BIKE) || '0', 10);
+      vehicles = { moto: vMoto, car: vCar, camper: vCamper, bike: vBike };
+
+      // Aggregates
+      const totalKm = parseFloat(localStorage.getItem(this.KEYS.TOTAL_KM) || '0');
+      const totalMins = parseFloat(localStorage.getItem(this.KEYS.TOTAL_MINS) || '0');
+      const calcCount = parseInt(localStorage.getItem(this.KEYS.CALC_COUNT) || '0', 10);
+
+      if (calcCount > 0) {
+        routeMetrics = {
+          avgKm: Math.round(totalKm / calcCount),
+          avgMins: Math.round(totalMins / calcCount),
+          totalKm: Math.round(totalKm)
+        };
+      }
 
       const rawRoutes = localStorage.getItem(this.KEYS.POPULAR_ROUTES);
       if (rawRoutes) {
@@ -5002,6 +5150,12 @@ const RotamTelemetry = {
     const desktopPct = totalDev > 0 ? Math.round((devices.desktop / totalDev) * 100) : 0;
     const tabletPct = totalDev > 0 ? Math.max(0, 100 - mobilePct - desktopPct) : 0;
 
+    const totalVeh = vehicles.moto + vehicles.car + vehicles.camper + vehicles.bike;
+    const motoPct = totalVeh > 0 ? Math.round((vehicles.moto / totalVeh) * 100) : 0;
+    const carPct = totalVeh > 0 ? Math.round((vehicles.car / totalVeh) * 100) : 0;
+    const camperPct = totalVeh > 0 ? Math.round((vehicles.camper / totalVeh) * 100) : 0;
+    const bikePct = totalVeh > 0 ? Math.max(0, 100 - motoPct - carPct - camperPct) : 0;
+
     return {
       totalVisits,
       todayVisits,
@@ -5015,7 +5169,18 @@ const RotamTelemetry = {
         mobilePct,
         desktopPct,
         tabletPct
-      }
+      },
+      vehicles: {
+        moto: vehicles.moto,
+        car: vehicles.car,
+        camper: vehicles.camper,
+        bike: vehicles.bike,
+        motoPct,
+        carPct,
+        camperPct,
+        bikePct
+      },
+      routeMetrics
     };
   },
 
@@ -5033,6 +5198,41 @@ const RotamTelemetry = {
 
     const stopsEl = document.getElementById('analytics-stops-added');
     if (stopsEl) stopsEl.textContent = stats.stopsCount.toLocaleString('tr-TR');
+
+    // Vehicle breakdown
+    const veh = stats.vehicles;
+    const vMotoEl = document.getElementById('analytics-vehicle-moto');
+    const vMotoBar = document.getElementById('analytics-vehicle-moto-bar');
+    if (vMotoEl) vMotoEl.textContent = `${veh.motoPct}% (${veh.moto})`;
+    if (vMotoBar) vMotoBar.style.width = `${veh.motoPct}%`;
+
+    const vCarEl = document.getElementById('analytics-vehicle-car');
+    const vCarBar = document.getElementById('analytics-vehicle-car-bar');
+    if (vCarEl) vCarEl.textContent = `${veh.carPct}% (${veh.car})`;
+    if (vCarBar) vCarBar.style.width = `${veh.carPct}%`;
+
+    const vCamperEl = document.getElementById('analytics-vehicle-camper');
+    const vCamperBar = document.getElementById('analytics-vehicle-camper-bar');
+    if (vCamperEl) vCamperEl.textContent = `${veh.camperPct}% (${veh.camper})`;
+    if (vCamperBar) vCamperBar.style.width = `${veh.camperPct}%`;
+
+    const vBikeEl = document.getElementById('analytics-vehicle-bike');
+    const vBikeBar = document.getElementById('analytics-vehicle-bike-bar');
+    if (vBikeEl) vBikeEl.textContent = `${veh.bikePct}% (${veh.bike})`;
+    if (vBikeBar) vBikeBar.style.width = `${veh.bikePct}%`;
+
+    // Route Metrics
+    const avgDistEl = document.getElementById('analytics-avg-distance');
+    const avgDurEl = document.getElementById('analytics-avg-duration');
+    const totKmEl = document.getElementById('analytics-total-km');
+    if (avgDistEl) avgDistEl.textContent = stats.routeMetrics.avgKm > 0 ? `${stats.routeMetrics.avgKm} km` : '-- km';
+    if (avgDurEl) {
+      const m = stats.routeMetrics.avgMins;
+      const hrs = Math.floor(m / 60);
+      const rem = m % 60;
+      avgDurEl.textContent = m > 0 ? (hrs > 0 ? `${hrs}s ${rem}d` : `${rem} dk`) : '-- sa';
+    }
+    if (totKmEl) totKmEl.textContent = stats.routeMetrics.totalKm > 0 ? `${stats.routeMetrics.totalKm.toLocaleString('tr-TR')} km` : '-- km';
 
     // Popular routes list
     const routesListEl = document.getElementById('analytics-popular-routes-list');
@@ -5083,6 +5283,13 @@ const RotamTelemetry = {
         localStorage.removeItem(this.KEYS.DEVICE_MOBILE);
         localStorage.removeItem(this.KEYS.DEVICE_DESKTOP);
         localStorage.removeItem(this.KEYS.DEVICE_TABLET);
+        localStorage.removeItem(this.KEYS.VEHICLE_MOTO);
+        localStorage.removeItem(this.KEYS.VEHICLE_CAR);
+        localStorage.removeItem(this.KEYS.VEHICLE_CAMPER);
+        localStorage.removeItem(this.KEYS.VEHICLE_BIKE);
+        localStorage.removeItem(this.KEYS.TOTAL_KM);
+        localStorage.removeItem(this.KEYS.TOTAL_MINS);
+        localStorage.removeItem(this.KEYS.CALC_COUNT);
         localStorage.removeItem(this.getTodayKey());
         this.renderAdminUI();
         showToast('Telemetri sayaçları sıfırlandı.', 'info');
@@ -5120,20 +5327,115 @@ function updateAdminStats() {
   const gastEl = document.getElementById('admin-stat-gastro');
   if (gastEl) gastEl.textContent = gastro;
 
+  // Presets count
+  const allPresets = (typeof getAllPresetRoutes === 'function') ? getAllPresetRoutes() : PRESET_ROUTES;
+  let customPresets = [];
+  try {
+    const raw = localStorage.getItem('rotam_custom_presets');
+    if (raw) customPresets = JSON.parse(raw);
+  } catch (e) {}
+  const totPresetsEl = document.getElementById('admin-stat-presets-total');
+  const custPresetsEl = document.getElementById('admin-stat-presets-custom');
+  const sysPresetsEl = document.getElementById('admin-stat-presets-system');
+  if (totPresetsEl) totPresetsEl.textContent = allPresets.length;
+  if (custPresetsEl) custPresetsEl.textContent = customPresets.length;
+  if (sysPresetsEl) sysPresetsEl.textContent = PRESET_ROUTES.length;
+
+  // Hazards count
+  if (typeof RotamCommunity !== 'undefined' && RotamCommunity.incidents) {
+    const incidents = RotamCommunity.incidents;
+    const totHazardsEl = document.getElementById('admin-stat-hazards-total');
+    const radEl = document.getElementById('admin-stat-hazards-radar');
+    const wrkEl = document.getElementById('admin-stat-hazards-work');
+    const crsEl = document.getElementById('admin-stat-hazards-crash');
+    if (totHazardsEl) totHazardsEl.textContent = incidents.length;
+    if (radEl) radEl.textContent = incidents.filter(i => i.type === 'radar').length;
+    if (wrkEl) wrkEl.textContent = incidents.filter(i => i.type === 'work').length;
+    if (crsEl) crsEl.textContent = incidents.filter(i => i.type === 'crash').length;
+  }
+
   // Render Real Telemetry Metrics
   RotamTelemetry.renderAdminUI();
 }
 
+// ==========================================
+// MEKAN YÖNETİMİ & DÜZENLEME (TAB 1)
+// ==========================================
 function toggleAdminAddForm() {
-  document.getElementById('admin-add-form')?.classList.toggle('hidden');
+  const form = document.getElementById('admin-add-form');
+  if (!form) return;
+  const isHidden = form.classList.contains('hidden');
+  if (isHidden) {
+    // Reset to create mode
+    const idInp = document.getElementById('admin-edit-place-id');
+    const heading = document.getElementById('admin-form-heading');
+    const saveBtn = document.getElementById('admin-place-save-btn');
+    if (idInp) idInp.value = '';
+    if (heading) heading.innerHTML = '<span>📍</span> <span>Yeni Keşif Noktası Ekle</span>';
+    if (saveBtn) saveBtn.textContent = 'Kaydet';
+
+    ['admin-place-name', 'admin-place-lat', 'admin-place-lon', 'admin-place-city', 'admin-place-img', 'admin-place-tags', 'admin-place-desc'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    form.classList.remove('hidden');
+  } else {
+    form.classList.add('hidden');
+  }
+}
+
+function editAdminPlace(id) {
+  const place = state.allPlaces.find(p => p.id === id);
+  if (!place) return;
+  const form = document.getElementById('admin-add-form');
+  const heading = document.getElementById('admin-form-heading');
+  const saveBtn = document.getElementById('admin-place-save-btn');
+  const idInp = document.getElementById('admin-edit-place-id');
+
+  if (idInp) idInp.value = place.id;
+  if (heading) heading.innerHTML = '<span>✏️</span> <span>Mekanı Düzenle</span>';
+  if (saveBtn) saveBtn.textContent = 'Güncellemeyi Kaydet';
+
+  const nameEl = document.getElementById('admin-place-name');
+  const catEl = document.getElementById('admin-place-cat');
+  const latEl = document.getElementById('admin-place-lat');
+  const lonEl = document.getElementById('admin-place-lon');
+  const cityEl = document.getElementById('admin-place-city');
+  const imgEl = document.getElementById('admin-place-img');
+  const tagsEl = document.getElementById('admin-place-tags');
+  const descEl = document.getElementById('admin-place-desc');
+
+  if (nameEl) nameEl.value = place.name || '';
+  if (catEl) catEl.value = place.category || 'historic';
+  if (latEl) latEl.value = place.lat || '';
+  if (lonEl) lonEl.value = place.lon || '';
+  if (cityEl) cityEl.value = place.city || '';
+  if (imgEl) imgEl.value = place.image_url || '';
+  if (tagsEl) tagsEl.value = Array.isArray(place.tags) ? place.tags.join(', ') : (place.tags || '');
+  if (descEl) descEl.value = place.description || '';
+
+  if (form) form.classList.remove('hidden');
+  form?.scrollIntoView({ behavior: 'smooth' });
+}
+
+function pickPlaceCoordOnMap() {
+  state.adminCoordPickTarget = 'place';
+  closeAdminModal();
+  showToast('Haritada bir konuma tıklayarak koordinatları seçin 📍', 'info');
 }
 
 function submitAdminNewPlace() {
+  const idInp = document.getElementById('admin-edit-place-id');
+  const isEdit = idInp && idInp.value && idInp.value.trim() !== '';
+  const editId = isEdit ? (isNaN(idInp.value) ? idInp.value : Number(idInp.value)) : null;
+
   const name = document.getElementById('admin-place-name')?.value.trim();
-  const cat = document.getElementById('admin-place-cat')?.value;
+  const cat = document.getElementById('admin-place-cat')?.value || 'historic';
   const lat = parseFloat(document.getElementById('admin-place-lat')?.value);
   const lon = parseFloat(document.getElementById('admin-place-lon')?.value);
   const city = document.getElementById('admin-place-city')?.value.trim();
+  const imgUrl = document.getElementById('admin-place-img')?.value.trim();
+  const tagsRaw = document.getElementById('admin-place-tags')?.value.trim();
   const desc = document.getElementById('admin-place-desc')?.value.trim();
 
   if (!name || isNaN(lat) || isNaN(lon)) {
@@ -5141,67 +5443,131 @@ function submitAdminNewPlace() {
     return;
   }
 
-  const newPlace = {
-    id: Date.now(),
-    name,
-    category: cat,
-    lat,
-    lon,
-    city,
-    description: desc,
-    rating: 4.8,
-    recommended_duration: '1 saat'
-  };
+  const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
 
-  state.allPlaces.push(newPlace);
-
-  // Persist to custom local storage
   let custom = [];
   try {
     const raw = localStorage.getItem('rotam_custom_places');
     if (raw) custom = JSON.parse(raw);
   } catch (e) {}
-  custom.push(newPlace);
-  localStorage.setItem('rotam_custom_places', JSON.stringify(custom));
+
+  if (isEdit) {
+    const placeIdx = state.allPlaces.findIndex(p => p.id === editId);
+    if (placeIdx >= 0) {
+      state.allPlaces[placeIdx] = {
+        ...state.allPlaces[placeIdx],
+        name,
+        category: cat,
+        lat,
+        lon,
+        city: city || state.allPlaces[placeIdx].city,
+        image_url: imgUrl || undefined,
+        tags: tags.length ? tags : undefined,
+        description: desc
+      };
+    }
+    // Also update custom storage
+    const customIdx = custom.findIndex(p => p.id === editId);
+    if (customIdx >= 0) {
+      custom[customIdx] = { ...state.allPlaces[placeIdx] };
+    } else if (placeIdx >= 0) {
+      custom.push({ ...state.allPlaces[placeIdx] });
+    }
+    localStorage.setItem('rotam_custom_places', JSON.stringify(custom));
+    showToast(`"${name}" mekan bilgileri güncellendi!`, 'success');
+  } else {
+    const newPlace = {
+      id: Date.now(),
+      name,
+      category: cat,
+      lat,
+      lon,
+      city: city || 'Türkiye',
+      image_url: imgUrl || undefined,
+      tags: tags.length ? tags : undefined,
+      description: desc,
+      rating: 4.8,
+      recommended_duration: '1 saat'
+    };
+    state.allPlaces.push(newPlace);
+    custom.push(newPlace);
+    localStorage.setItem('rotam_custom_places', JSON.stringify(custom));
+    showToast('Yeni mekan başarıyla eklendi!', 'success');
+  }
 
   updateAdminStats();
   renderAdminPlacesList();
   toggleAdminAddForm();
-  showToast('Yeni mekan başarıyla eklendi!', 'success');
 }
 
 function renderAdminPlacesList() {
   const container = document.getElementById('admin-places-list');
   const search = document.getElementById('admin-search-input')?.value.toLowerCase().trim() || '';
+  const filterCat = document.getElementById('admin-filter-category')?.value || 'all';
+  const filterOrigin = document.getElementById('admin-filter-origin')?.value || 'all';
   if (!container) return;
 
-  container.innerHTML = '';
-  const filtered = state.allPlaces.filter(p => {
-    if (!search) return true;
-    return (p.name || '').toLowerCase().includes(search) || (p.city || '').toLowerCase().includes(search);
+  let customIds = new Set();
+  try {
+    const raw = localStorage.getItem('rotam_custom_places');
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) arr.forEach(p => customIds.add(p.id));
+    }
+  } catch (e) {}
+
+  let filtered = state.allPlaces.filter(p => {
+    if (search) {
+      const matchName = (p.name || '').toLowerCase().includes(search);
+      const matchCity = (p.city || '').toLowerCase().includes(search);
+      const matchDesc = (p.description || '').toLowerCase().includes(search);
+      if (!matchName && !matchCity && !matchDesc) return false;
+    }
+    if (filterCat !== 'all' && p.category !== filterCat) return false;
+    if (filterOrigin === 'custom' && !customIds.has(p.id)) return false;
+    if (filterOrigin === 'default' && customIds.has(p.id)) return false;
+    return true;
   });
 
-  filtered.slice(0, 50).forEach((p, idx) => {
-    const cfg = CATEGORY_CONFIG[p.category] || CATEGORY_CONFIG.historic;
-    const div = document.createElement('div');
-    div.className = 'glass-card p-2.5 rounded-xl border border-slate-800 flex items-center justify-between text-xs space-x-2';
-
-    div.innerHTML = `
-      <div class="min-w-0 flex-1">
-        <div class="flex items-center space-x-1">
-          <span>${cfg.emoji}</span>
-          <span class="font-bold text-white truncate">${escapeHtml(p.name)}</span>
-          <span class="text-[10px] text-slate-500">(${p.city || '-'})</span>
-        </div>
-        <p class="text-[10px] text-slate-400 truncate mt-0.5">${escapeHtml(p.description || '')}</p>
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-8 text-slate-500 text-xs">
+        <i data-lucide="map-pin-off" class="w-8 h-8 text-slate-600 mx-auto mb-1.5"></i>
+        <p>Arama kriterlerinize uygun mekan bulunamadı.</p>
       </div>
-      <button onclick="deleteAdminPlace(${p.id})" class="text-slate-500 hover:text-red-400 p-1" title="Sil">
-        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-      </button>
     `;
+    initIcons();
+    return;
+  }
 
-    container.appendChild(div);
-  });
+  container.innerHTML = filtered.slice(0, 60).map(p => {
+    const cfg = CATEGORY_CONFIG[p.category] || CATEGORY_CONFIG.historic;
+    const isCustom = customIds.has(p.id);
+    return `
+      <div class="glass-card p-3 rounded-xl border border-slate-800/80 hover:border-slate-700 bg-slate-900/80 flex items-center justify-between text-xs gap-2 transition-all">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center space-x-1.5 flex-wrap">
+            <span class="text-sm">${cfg.emoji || '📍'}</span>
+            <span class="font-bold text-white truncate max-w-[200px] sm:max-w-[280px]" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</span>
+            <span class="text-[10px] text-slate-400">(${escapeHtml(p.city || '-')})</span>
+            ${isCustom ? '<span class="text-[9px] bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-1.5 py-0.2 rounded-full font-bold">Özel</span>' : '<span class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.2 rounded-full">Sistem</span>'}
+          </div>
+          <p class="text-[11px] text-slate-400 truncate mt-0.5">${escapeHtml(p.description || (p.lat + ', ' + p.lon))}</p>
+        </div>
+        <div class="flex items-center space-x-1 shrink-0">
+          <button onclick="focusPlaceOnMapFromAdmin(${p.id})" class="p-1.5 rounded-lg text-slate-400 hover:text-cyan-400 hover:bg-slate-800 transition-colors" title="Haritada Odaklan">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+          </button>
+          <button onclick="editAdminPlace(${p.id})" class="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-slate-800 transition-colors" title="Düzenle">
+            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+          </button>
+          <button onclick="deleteAdminPlace(${p.id})" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors" title="Sil">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
 
   initIcons();
 }
@@ -5226,6 +5592,519 @@ function deleteAdminPlace(id) {
 
   updateAdminStats();
   renderAdminPlacesList();
+  showToast('Mekan silindi.', 'info');
+}
+
+function focusPlaceOnMapFromAdmin(id) {
+  const place = state.allPlaces.find(p => p.id === id);
+  if (!place || !map) return;
+  closeAdminModal();
+  map.setView([place.lat, place.lon], 15, { animate: true });
+  showToast(`${place.name} haritada odaklandı 📍`, 'info');
+  setTimeout(() => {
+    if (typeof openPlaceDetailById === 'function') openPlaceDetailById(id);
+  }, 300);
+}
+
+// ==========================================
+// HAZIR ROTALAR YÖNETİMİ (TAB 2)
+// ==========================================
+function renderAdminPresetsList() {
+  const container = document.getElementById('admin-presets-list');
+  if (!container) return;
+
+  const allPresets = (typeof getAllPresetRoutes === 'function') ? getAllPresetRoutes() : PRESET_ROUTES;
+  let custom = [];
+  try {
+    const raw = localStorage.getItem('rotam_custom_presets');
+    if (raw) custom = JSON.parse(raw);
+  } catch (e) {}
+  const customIds = new Set(custom.map(p => p.id));
+
+  // Update counts in header
+  const totEl = document.getElementById('admin-stat-presets-total');
+  const custEl = document.getElementById('admin-stat-presets-custom');
+  const sysEl = document.getElementById('admin-stat-presets-system');
+  if (totEl) totEl.textContent = allPresets.length;
+  if (custEl) custEl.textContent = custom.length;
+  if (sysEl) sysEl.textContent = PRESET_ROUTES.length;
+
+  if (allPresets.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-8 text-slate-500 text-xs">
+        <i data-lucide="route" class="w-8 h-8 text-slate-600 mx-auto mb-1.5"></i>
+        <p>Kayıtlı hazır rota bulunmuyor.</p>
+      </div>
+    `;
+    initIcons();
+    return;
+  }
+
+  container.innerHTML = allPresets.map(preset => {
+    const isCustom = customIds.has(preset.id);
+    return `
+      <div class="glass-card p-3 rounded-xl border border-slate-800/80 hover:border-slate-700 bg-slate-900/80 flex items-center justify-between text-xs gap-2 transition-all">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center space-x-1.5 flex-wrap">
+            <span class="font-bold text-white truncate max-w-[220px] sm:max-w-[320px]">${escapeHtml(preset.title)}</span>
+            <span class="text-[10px] text-amber-400 font-semibold">• ${preset.distanceKm} km</span>
+            <span class="text-[10px] text-slate-400">• ${escapeHtml(preset.durationText || '')}</span>
+            ${isCustom ? '<span class="text-[9px] bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-1.5 py-0.2 rounded-full font-bold">Özel Rota</span>' : '<span class="text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.2 rounded-full font-bold">Sistem Şablonu</span>'}
+          </div>
+          <p class="text-[11px] text-slate-400 truncate mt-0.5">${escapeHtml(preset.description || '')}</p>
+          <div class="flex items-center space-x-1 text-[10px] text-slate-500 mt-1">
+            <span>Duraklar (${preset.points?.length || 0}):</span>
+            <span class="truncate text-slate-300 font-mono">${(preset.points || []).map(p => p.name).join(' → ')}</span>
+          </div>
+        </div>
+        <div class="flex items-center space-x-1.5 shrink-0">
+          <button onclick="loadPresetRoute('${preset.id}'); closeAdminModal();" class="px-2.5 py-1.5 rounded-lg bg-amber-600/30 hover:bg-amber-600 text-amber-300 hover:text-white border border-amber-500/40 text-[11px] font-bold flex items-center space-x-1 transition-all">
+            <i data-lucide="play" class="w-3 h-3"></i>
+            <span>Yükle</span>
+          </button>
+          ${isCustom ? `
+            <button onclick="deleteAdminPreset('${preset.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors" title="Sil">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  initIcons();
+}
+
+function toggleAdminPresetForm() {
+  document.getElementById('admin-preset-form')?.classList.toggle('hidden');
+}
+
+function importActiveRouteAsPreset() {
+  const validPoints = (state.waypoints || []).filter(w => w.lat !== null && w.lon !== null);
+  if (validPoints.length < 2) {
+    showToast('Haritada aktif bir rota bulunmuyor. Önce başlangıç ve varış noktalarını belirleyin.', 'warning');
+    return;
+  }
+
+  const form = document.getElementById('admin-preset-form');
+  if (form) form.classList.remove('hidden');
+
+  const startName = validPoints[0].name || 'Başlangıç';
+  const endName = validPoints[validPoints.length - 1].name || 'Varış';
+  const autoTitle = `${startName} → ${endName} Rotası`;
+
+  const titleInp = document.getElementById('admin-preset-title');
+  const catInp = document.getElementById('admin-preset-cat');
+  const distInp = document.getElementById('admin-preset-dist');
+  const durInp = document.getElementById('admin-preset-dur');
+  const descInp = document.getElementById('admin-preset-desc');
+  const ptsInp = document.getElementById('admin-preset-points');
+
+  if (titleInp) titleInp.value = autoTitle;
+  if (catInp) catInp.value = state.currentVehicle === 'motorcycle' ? 'Viraj & Manzara' : state.currentVehicle === 'camper' ? 'Karavan & Doğa' : 'Panoramik Sürüş';
+
+  if (state.routeData) {
+    if (distInp) distInp.value = Math.round(state.routeData.distance / 1000);
+    const hrs = Math.floor(state.routeData.duration / 3600);
+    const mins = Math.round((state.routeData.duration % 3600) / 60);
+    if (durInp) durInp.value = hrs > 0 ? `${hrs} saat ${mins} dk` : `${mins} dk`;
+  } else {
+    if (distInp) distInp.value = 120;
+    if (durInp) durInp.value = '2 saat';
+  }
+
+  if (descInp) descInp.value = `${startName} noktasından ${endName} varışına uzanan özel sürüş ve keşif rotası.`;
+
+  if (ptsInp) {
+    ptsInp.value = validPoints.map(p => `${p.name || 'Nokta'}, ${Number(p.lat).toFixed(4)}, ${Number(p.lon).toFixed(4)}`).join('\n');
+  }
+
+  showToast('Aktif harita rotası şablon formuna aktarıldı! 🚀', 'success');
+}
+
+function submitAdminPreset() {
+  const title = document.getElementById('admin-preset-title')?.value.trim();
+  const category = document.getElementById('admin-preset-cat')?.value.trim() || 'Özel Rota';
+  const difficulty = document.getElementById('admin-preset-diff')?.value || 'Orta / Dinamik';
+  const distanceKm = parseInt(document.getElementById('admin-preset-dist')?.value, 10) || 100;
+  const durationText = document.getElementById('admin-preset-dur')?.value.trim() || '2 saat';
+  const description = document.getElementById('admin-preset-desc')?.value.trim() || '';
+  const pointsText = document.getElementById('admin-preset-points')?.value.trim() || '';
+
+  if (!title || !pointsText) {
+    showToast('Lütfen rota başlığını ve en az iki durağı eksiksiz girin.', 'warning');
+    return;
+  }
+
+  const lines = pointsText.split('\n').map(l => l.trim()).filter(Boolean);
+  const points = [];
+  for (const line of lines) {
+    const parts = line.split(',');
+    if (parts.length >= 3) {
+      const name = parts[0].trim();
+      const lat = parseFloat(parts[1].trim());
+      const lon = parseFloat(parts[2].trim());
+      if (!isNaN(lat) && !isNaN(lon)) {
+        points.push({ name, lat, lon });
+      }
+    }
+  }
+
+  if (points.length < 2) {
+    showToast('Hata: Duraklar satır formatında olmalıdır (Örn: Kaş, 36.20, 29.64). En az 2 durak gereklidir.', 'warning');
+    return;
+  }
+
+  const newPreset = {
+    id: 'preset_custom_' + Date.now(),
+    title,
+    category,
+    tag: 'custom',
+    description: description || `${title} gezi rotası.`,
+    difficulty,
+    twistiness: 85,
+    distanceKm,
+    durationText,
+    badgeClass: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+    points
+  };
+
+  let custom = [];
+  try {
+    const raw = localStorage.getItem('rotam_custom_presets');
+    if (raw) custom = JSON.parse(raw);
+  } catch (e) {}
+
+  custom.push(newPreset);
+  localStorage.setItem('rotam_custom_presets', JSON.stringify(custom));
+
+  toggleAdminPresetForm();
+  renderAdminPresetsList();
+  showToast(`"${title}" hazır rotası başarıyla eklendi!`, 'success');
+}
+
+function deleteAdminPreset(id) {
+  if (!confirm('Bu özel hazır rotayı silmek istediğinize emin misiniz?')) return;
+  try {
+    const raw = localStorage.getItem('rotam_custom_presets');
+    if (raw) {
+      let custom = JSON.parse(raw);
+      custom = custom.filter(p => p.id !== id);
+      localStorage.setItem('rotam_custom_presets', JSON.stringify(custom));
+      renderAdminPresetsList();
+      showToast('Hazır rota silindi.', 'info');
+    }
+  } catch (e) {
+    showToast('Silme işlemi başarısız.', 'error');
+  }
+}
+
+// ==========================================
+// YOL BİLDİRİMLERİ & MODERASYON (TAB 3)
+// ==========================================
+function renderAdminHazardsList() {
+  const container = document.getElementById('admin-hazards-list');
+  if (!container) return;
+
+  const incidents = (typeof RotamCommunity !== 'undefined' && RotamCommunity.incidents) ? RotamCommunity.incidents : [];
+
+  // Update counts
+  const totEl = document.getElementById('admin-stat-hazards-total');
+  const radEl = document.getElementById('admin-stat-hazards-radar');
+  const wrkEl = document.getElementById('admin-stat-hazards-work');
+  const crsEl = document.getElementById('admin-stat-hazards-crash');
+
+  if (totEl) totEl.textContent = incidents.length;
+  if (radEl) radEl.textContent = incidents.filter(i => i.type === 'radar').length;
+  if (wrkEl) wrkEl.textContent = incidents.filter(i => i.type === 'work').length;
+  if (crsEl) crsEl.textContent = incidents.filter(i => i.type === 'crash').length;
+
+  if (incidents.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-8 text-slate-500 text-xs">
+        <i data-lucide="check-circle" class="w-8 h-8 text-emerald-500/50 mx-auto mb-1.5"></i>
+        <p>Şu anda aktif yol tehlikesi bildirimi bulunmuyor. Yollar temiz!</p>
+      </div>
+    `;
+    initIcons();
+    return;
+  }
+
+  const now = Date.now();
+  container.innerHTML = incidents.map(inc => {
+    const remainingMins = Math.max(0, Math.round((inc.expiresAt - now) / 60000));
+    const isOfficial = !!inc.isOfficial;
+    return `
+      <div class="glass-card p-3 rounded-xl border border-slate-800/80 hover:border-slate-700 bg-slate-900/80 flex items-center justify-between text-xs gap-2 transition-all">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center space-x-1.5 flex-wrap">
+            <span class="text-sm">${inc.emoji || '⚠️'}</span>
+            <span class="font-bold text-white truncate max-w-[220px]">${escapeHtml(inc.title || 'Yol Bildirimi')}</span>
+            ${isOfficial ? '<span class="text-[9px] bg-rose-500/20 text-rose-300 border border-rose-500/30 px-1.5 py-0.2 rounded-full font-bold">Resmi Uyarı</span>' : '<span class="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.2 rounded-full font-bold">Kullanıcı Bildirimi</span>'}
+            <span class="text-[10px] text-slate-400">👍 ${inc.upvotes || 0} onay</span>
+          </div>
+          <p class="text-[11px] text-slate-300 truncate mt-0.5 font-medium">${escapeHtml(inc.note || (inc.lat.toFixed(4) + ', ' + inc.lon.toFixed(4)))}</p>
+          <div class="flex items-center space-x-2 text-[10px] text-slate-500 mt-1">
+            <span>Kalan Süre: <strong class="text-slate-300 font-mono">${remainingMins} dk</strong></span>
+            <span>•</span>
+            <span class="font-mono">${Number(inc.lat).toFixed(4)}, ${Number(inc.lon).toFixed(4)}</span>
+          </div>
+        </div>
+        <div class="flex items-center space-x-1 shrink-0">
+          <button onclick="focusHazardOnMapFromAdmin(${inc.lat}, ${inc.lon})" class="p-1.5 rounded-lg text-slate-400 hover:text-cyan-400 hover:bg-slate-800 transition-colors" title="Haritada Odaklan">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+          </button>
+          <button onclick="upvoteAdminHazard('${inc.id}')" class="px-2 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold flex items-center space-x-1 transition-all" title="Yönetici Olarak Onayla">
+            <i data-lucide="check" class="w-3 h-3"></i>
+            <span>Onayla</span>
+          </button>
+          <button onclick="deleteAdminHazard('${inc.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors" title="Sil">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  initIcons();
+}
+
+function toggleAdminHazardForm() {
+  document.getElementById('admin-hazard-form')?.classList.toggle('hidden');
+}
+
+function submitAdminHazard() {
+  const type = document.getElementById('admin-hazard-type')?.value || 'radar';
+  const durationHours = parseInt(document.getElementById('admin-hazard-duration')?.value, 10) || 3;
+  const lat = parseFloat(document.getElementById('admin-hazard-lat')?.value);
+  const lon = parseFloat(document.getElementById('admin-hazard-lon')?.value);
+  const note = document.getElementById('admin-hazard-note')?.value.trim();
+
+  if (isNaN(lat) || isNaN(lon)) {
+    showToast('Lütfen geçerli enlem ve boylam koordinatı girin.', 'warning');
+    return;
+  }
+
+  const typeConfig = {
+    radar: { title: 'Radar / Polis Kontrolü', emoji: '🚔' },
+    work: { title: 'Yol Çalışması & Asfalt', emoji: '🚧' },
+    crash: { title: 'Trafik Kazası', emoji: '💥' },
+    oil: { title: 'Kaygan Zemin / Yağ Sızıntısı', emoji: '⚠️' },
+    hazard: { title: 'Yol Kapalı / Engel', emoji: '🛑' }
+  };
+  const cfg = typeConfig[type] || typeConfig.radar;
+  const now = Date.now();
+
+  const officialIncident = {
+    id: 'official_' + now + '_' + Math.random().toString(36).substr(2, 6),
+    type,
+    title: cfg.title,
+    emoji: cfg.emoji,
+    lat,
+    lon,
+    reportedAt: now,
+    expiresAt: now + (durationHours * 60 * 60 * 1000),
+    upvotes: 20,
+    downvotes: 0,
+    isOfficial: true,
+    note: note || 'Resmi Yönetici Uyarısı'
+  };
+
+  if (typeof RotamCommunity !== 'undefined') {
+    RotamCommunity.incidents.unshift(officialIncident);
+    RotamCommunity.saveLocal();
+    RotamCommunity.renderOnMap();
+  }
+
+  toggleAdminHazardForm();
+  renderAdminHazardsList();
+  showToast('Resmi yol uyarısı haritada yayınlandı! 🚨', 'success');
+}
+
+function upvoteAdminHazard(id) {
+  if (typeof RotamCommunity !== 'undefined') {
+    const inc = RotamCommunity.incidents.find(i => i.id === id);
+    if (inc) {
+      inc.upvotes = (inc.upvotes || 0) + 10;
+      inc.downvotes = 0;
+      inc.isOfficial = true;
+      RotamCommunity.saveLocal();
+      RotamCommunity.renderOnMap();
+      renderAdminHazardsList();
+      showToast('Bildirim onaylandı ve güvenilirliği yükseltildi! 👍', 'success');
+    }
+  }
+}
+
+function deleteAdminHazard(id) {
+  if (typeof RotamCommunity !== 'undefined') {
+    RotamCommunity.incidents = RotamCommunity.incidents.filter(i => i.id !== id);
+    RotamCommunity.saveLocal();
+    RotamCommunity.renderOnMap();
+    renderAdminHazardsList();
+    showToast('Yol bildirimi kaldırıldı.', 'info');
+  }
+}
+
+function focusHazardOnMapFromAdmin(lat, lon) {
+  if (!map) return;
+  closeAdminModal();
+  map.setView([lat, lon], 15, { animate: true });
+  showToast('Tehlike konumu haritada gösteriliyor 📍', 'info');
+}
+
+function pickHazardCoordOnMap() {
+  state.adminCoordPickTarget = 'hazard';
+  closeAdminModal();
+  showToast('Haritada tehlike konumuna tıklayın ⚠️', 'info');
+}
+
+// ==========================================
+// SİSTEM SAĞLIĞI & ÖNBELLEK DİAGNOSTİĞİ (TAB 5)
+// ==========================================
+async function runApiHealthChecks() {
+  const apis = [
+    {
+      id: 'osrm',
+      name: 'OSRM Rota Motoru',
+      url: 'https://router.project-osrm.org/route/v1/driving/28.97,41.00;29.02,41.05?overview=false',
+      dotId: 'api-dot-osrm',
+      badgeId: 'api-status-osrm',
+      pingId: 'api-ping-osrm'
+    },
+    {
+      id: 'valhalla',
+      name: 'Valhalla Karavan / Güvenli Rota',
+      url: 'https://valhalla1.openstreetmap.de/route?json={"locations":[{"lat":41.00,"lon":28.97},{"lat":41.05,"lon":29.02}],"costing":"auto"}',
+      dotId: 'api-dot-valhalla',
+      badgeId: 'api-status-valhalla',
+      pingId: 'api-ping-valhalla'
+    },
+    {
+      id: 'meteo',
+      name: 'Open-Meteo Canlı Hava',
+      url: 'https://api.open-meteo.com/v1/forecast?latitude=41.00&longitude=28.97&current_weather=true',
+      dotId: 'api-dot-meteo',
+      badgeId: 'api-status-meteo',
+      pingId: 'api-ping-meteo'
+    },
+    {
+      id: 'photon',
+      name: 'Photon Geocoding Arama',
+      url: 'https://photon.komoot.io/api/?q=istanbul&limit=1',
+      dotId: 'api-dot-photon',
+      badgeId: 'api-status-photon',
+      pingId: 'api-ping-photon'
+    }
+  ];
+
+  for (const api of apis) {
+    const dot = document.getElementById(api.dotId);
+    const badge = document.getElementById(api.badgeId);
+    const ping = document.getElementById(api.pingId);
+
+    if (badge) {
+      badge.textContent = 'Test ediliyor...';
+      badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400';
+    }
+
+    const startTime = performance.now();
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const res = await fetch(api.url, { signal: controller.signal, mode: 'cors' });
+      clearTimeout(timeoutId);
+      const elapsed = Math.round(performance.now() - startTime);
+
+      if (res.ok || res.status < 500) {
+        if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+        if (badge) {
+          badge.textContent = 'Aktif';
+          badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+        }
+        if (ping) ping.textContent = `${elapsed} ms`;
+      } else {
+        throw new Error('HTTP ' + res.status);
+      }
+    } catch (e) {
+      const elapsed = Math.round(performance.now() - startTime);
+      if (dot) dot.className = 'w-2 h-2 rounded-full bg-rose-500';
+      if (badge) {
+        badge.textContent = 'Yavaş / Kesik';
+        badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30';
+      }
+      if (ping) ping.textContent = elapsed > 5000 ? 'Zaman aşımı' : `${elapsed} ms (Hata)`;
+    }
+  }
+}
+
+async function checkStorageQuota() {
+  const usageEl = document.getElementById('storage-usage-val');
+  const quotaEl = document.getElementById('storage-quota-val');
+  const badgeEl = document.getElementById('storage-quota-badge');
+
+  if (navigator.storage && navigator.storage.estimate) {
+    try {
+      const { usage, quota } = await navigator.storage.estimate();
+      const usageMb = (usage / (1024 * 1024)).toFixed(1);
+      const quotaMb = (quota / (1024 * 1024)).toFixed(0);
+      const pct = quota > 0 ? ((usage / quota) * 100).toFixed(2) : 0;
+
+      if (usageEl) usageEl.textContent = `${usageMb} MB`;
+      if (quotaEl) quotaEl.textContent = `${quotaMb} MB`;
+      if (badgeEl) {
+        badgeEl.textContent = `%${pct} Kullanımda`;
+        badgeEl.className = 'text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-mono font-bold';
+      }
+    } catch (e) {
+      if (usageEl) usageEl.textContent = 'Bilinmiyor';
+    }
+  } else {
+    if (usageEl) usageEl.textContent = 'Tahmini ~15 MB';
+    if (quotaEl) quotaEl.textContent = 'Sınırsız (Tarayıcı)';
+    if (badgeEl) badgeEl.textContent = 'Aktif';
+  }
+}
+
+async function clearTileCaches() {
+  if (!confirm('Çevrimdışı indirilen ve önbelleğe alınan harita karolarını temizlemek istediğinize emin misiniz?')) return;
+  try {
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      const tileCaches = cacheNames.filter(name => name.includes('tile') || name.includes('map'));
+      await Promise.all(tileCaches.map(c => caches.delete(c)));
+    }
+    if (typeof indexedDB !== 'undefined') {
+      try { indexedDB.deleteDatabase('rotam_tiles'); } catch (e) {}
+      try { indexedDB.deleteDatabase('rotam_offline_tiles'); } catch (e) {}
+    }
+    checkStorageQuota();
+    showToast('Harita karo önbelleği başarıyla temizlendi 🧹', 'success');
+  } catch (e) {
+    showToast('Önbellek temizlenemedi: ' + e.message, 'error');
+  }
+}
+
+async function clearAllAppCaches() {
+  if (!confirm('Tüm uygulama önbelleğini, servis çalışanı (Service Worker) kayıtlarını ve geçici verileri sıfırlamak istediğinize emin misiniz? Sayfa yeniden yüklenecektir.')) return;
+  try {
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const reg of registrations) {
+        await reg.unregister();
+      }
+    }
+    showToast('Tüm önbellek sıfırlandı. Yeniden başlatılıyor...', 'info');
+    setTimeout(() => {
+      window.location.reload(true);
+    }, 1000);
+  } catch (e) {
+    showToast('Sıfırlama hatası: ' + e.message, 'error');
+  }
 }
 
 // JSON Backup & Restore
