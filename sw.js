@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v29 (Admin Voting Access & Proximity Hazard Visibility)
-const CACHE_NAME = 'rotam-cache-v29';
+// Rotam PWA Service Worker - v30 (Mobile Admin Access & UI Enhancements)
+const CACHE_NAME = 'rotam-cache-v30';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
