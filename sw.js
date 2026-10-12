@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v31 (Discreet Logo-Only Admin Access)
-const CACHE_NAME = 'rotam-cache-v31';
+// Rotam PWA Service Worker - v32 (5-Tap Discreet Logo Admin Trigger)
+const CACHE_NAME = 'rotam-cache-v32';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

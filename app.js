@@ -4835,9 +4835,28 @@ function isAdminAuthenticated() {
   }
 }
 
+let _logoTapCount = 0;
+let _logoTapTimer = null;
 function handleLogoAdminClick(e) {
   if (e && e.stopPropagation) e.stopPropagation();
-  openAdminModal();
+  _logoTapCount++;
+  clearTimeout(_logoTapTimer);
+  _logoTapTimer = setTimeout(() => {
+    _logoTapCount = 0;
+  }, 2200);
+
+  if (_logoTapCount >= 5) {
+    clearTimeout(_logoTapTimer);
+    _logoTapCount = 0;
+    try {
+      if ('vibrate' in navigator) navigator.vibrate([50, 50, 100]);
+    } catch (err) {}
+    openAdminModal();
+  } else if (_logoTapCount === 1) {
+    if (typeof showHomepagePlanner === 'function') {
+      showHomepagePlanner();
+    }
+  }
 }
 window.handleLogoAdminClick = handleLogoAdminClick;
 
