@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v26 (Full Comprehensive Admin Panel Suite)
-const CACHE_NAME = 'rotam-cache-v26';
+// Rotam PWA Service Worker - v27 (Firebase Live Hazard Real-time SSE Sync)
+const CACHE_NAME = 'rotam-cache-v27';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

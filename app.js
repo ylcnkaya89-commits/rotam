@@ -5803,6 +5803,7 @@ function deleteAdminPreset(id) {
 // YOL BİLDİRİMLERİ & MODERASYON (TAB 3)
 // ==========================================
 function renderAdminHazardsList() {
+  initFirebaseAdminUI();
   const container = document.getElementById('admin-hazards-list');
   if (!container) return;
 
@@ -5941,6 +5942,9 @@ function deleteAdminHazard(id) {
     RotamCommunity.incidents = RotamCommunity.incidents.filter(i => i.id !== id);
     RotamCommunity.saveLocal();
     RotamCommunity.renderOnMap();
+    if (typeof RotamCommunity.deleteRemoteIncident === 'function') {
+      RotamCommunity.deleteRemoteIncident(id);
+    }
     renderAdminHazardsList();
     showToast('Yol bildirimi kaldırıldı.', 'info');
   }
@@ -5957,6 +5961,94 @@ function pickHazardCoordOnMap() {
   state.adminCoordPickTarget = 'hazard';
   closeAdminModal();
   showToast('Haritada tehlike konumuna tıklayın ⚠️', 'info');
+}
+
+// Firebase Canlı Senkronizasyon Yapılandırması (Admin)
+function toggleFirebaseHelpGuide() {
+  document.getElementById('firebase-help-guide')?.classList.toggle('hidden');
+}
+
+function initFirebaseAdminUI() {
+  const urlInp = document.getElementById('admin-firebase-url');
+  const badge = document.getElementById('firebase-sync-badge');
+  const msg = document.getElementById('firebase-sync-status-msg');
+  if (!urlInp || !badge) return;
+
+  const currentEp = (typeof RotamCommunity !== 'undefined' && RotamCommunity.getRawEndpoint)
+    ? RotamCommunity.getRawEndpoint()
+    : (localStorage.getItem('rotam_firebase_endpoint') || '');
+
+  urlInp.value = currentEp;
+
+  if (currentEp && !currentEp.includes('rotam-community-live-default-rtdb')) {
+    badge.textContent = '🟢 Aktif / Bağlı';
+    badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono';
+    if (msg) msg.textContent = 'Canlı bulut akışı aktif! Yeni yol uyarıları tüm sürücülerin ekranına SSE ile anında yansır.';
+  } else {
+    badge.textContent = '🟡 Yapılandırma Bekleniyor';
+    badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono';
+    if (msg) msg.textContent = 'Tüm sürücülerin birbirini anında (1 saniyede) görmesi için Firebase Realtime Database URL\'nizi bağlayın.';
+  }
+}
+
+async function testAndSaveFirebaseEndpoint() {
+  const urlInp = document.getElementById('admin-firebase-url');
+  const badge = document.getElementById('firebase-sync-badge');
+  const msg = document.getElementById('firebase-sync-status-msg');
+  if (!urlInp) return;
+
+  let rawUrl = (urlInp.value || '').trim();
+  if (!rawUrl) {
+    localStorage.removeItem('rotam_firebase_endpoint');
+    showToast('Firebase adresi kaldırıldı. Yalnızca yerel mod aktif.', 'info');
+    initFirebaseAdminUI();
+    return;
+  }
+
+  // Clean trailing slash and path
+  rawUrl = rawUrl.replace(/\/+$/, '');
+  if (rawUrl.endsWith('/incidents.json')) rawUrl = rawUrl.replace(/\/incidents\.json$/, '');
+  if (rawUrl.endsWith('/incidents')) rawUrl = rawUrl.replace(/\/incidents$/, '');
+
+  if (badge) {
+    badge.textContent = 'Test ediliyor...';
+    badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300 font-mono';
+  }
+
+  try {
+    const testUrl = `${rawUrl}/incidents.json?limitToLast=1`;
+    const res = await fetch(testUrl, { method: 'GET', mode: 'cors' });
+
+    if (res.ok) {
+      localStorage.setItem('rotam_firebase_endpoint', rawUrl);
+      if (typeof RotamCommunity !== 'undefined') {
+        RotamCommunity.syncCloud();
+        RotamCommunity.startLiveStream();
+      }
+      if (badge) {
+        badge.textContent = '🟢 Canlı Akış Bağlandı (SSE)';
+        badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono';
+      }
+      if (msg) msg.textContent = 'Harika! Firebase Realtime Database başarıyla bağlandı. Bildirimler canlı senkronize ediliyor.';
+      showToast('Firebase canlı bulut senkronizasyonu başarıyla bağlandı! 🔥', 'success');
+    } else if (res.status === 401 || res.status === 403) {
+      if (badge) {
+        badge.textContent = '🔴 Yetki Hatası (401/403)';
+        badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 font-mono';
+      }
+      if (msg) msg.textContent = 'Firebase Rules hatası! Lütfen Firebase konsolunda Realtime Database > Rules bölümünden { ".read": true, ".write": true } yapıp Publish edin.';
+      showToast('Firebase erişim izni hatası (Rules kapalı)!', 'error');
+    } else {
+      throw new Error(`HTTP ${res.status}`);
+    }
+  } catch (err) {
+    if (badge) {
+      badge.textContent = '🔴 Bağlantı Hatası';
+      badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 font-mono';
+    }
+    if (msg) msg.textContent = `Hata: ${err.message}. Lütfen URL'nin doğru bir Firebase Realtime Database olduğunu kontrol edin.`;
+    showToast('Firebase bağlantısı kurulamadı: ' + err.message, 'error');
+  }
 }
 
 // ==========================================
@@ -9210,6 +9302,7 @@ const RotamCommunity = {
   activeHazardAlert: null,
   dismissedHazardIds: new Set(),
   layerVisible: true,
+  eventSource: null,
   cloudEndpoint: 'https://rotam-community-live-default-rtdb.europe-west1.firebasedatabase.app/incidents',
 
   // Pre-seeded realistic community hazards across Turkey routes
@@ -9281,11 +9374,90 @@ const RotamCommunity = {
     }
   ],
 
+  getRawEndpoint() {
+    try {
+      return localStorage.getItem('rotam_firebase_endpoint') || '';
+    } catch (e) {
+      return '';
+    }
+  },
+
+  getEndpoint() {
+    let ep = this.getRawEndpoint();
+    if (!ep || !ep.trim()) {
+      ep = this.cloudEndpoint;
+    }
+    ep = ep.trim().replace(/\/+$/, '');
+    if (!ep.endsWith('/incidents')) {
+      ep += '/incidents';
+    }
+    return ep;
+  },
+
   init() {
     this.loadLocalIncidents();
     this.syncCloud();
-    // Background polling every 60 seconds
+    this.startLiveStream();
+    // Background polling fallback every 60 seconds
     setInterval(() => this.syncCloud(), 60000);
+  },
+
+  startLiveStream() {
+    if (typeof EventSource === 'undefined') return;
+    if (this.eventSource) {
+      try { this.eventSource.close(); } catch(e){}
+      this.eventSource = null;
+    }
+
+    const rawEp = this.getRawEndpoint();
+    if (!rawEp || rawEp.includes('rotam-community-live-default-rtdb')) return;
+
+    try {
+      const ep = this.getEndpoint();
+      this.eventSource = new EventSource(`${ep}.json`);
+
+      this.eventSource.addEventListener('put', (e) => {
+        try {
+          const parsed = JSON.parse(e.data);
+          if (parsed) {
+            if (parsed.path === '/' && parsed.data && typeof parsed.data === 'object') {
+              Object.values(parsed.data).forEach(r => {
+                if (!r || !r.id) return;
+                const idx = this.incidents.findIndex(i => i.id === r.id);
+                if (idx >= 0) this.incidents[idx] = { ...this.incidents[idx], ...r };
+                else this.incidents.push(r);
+              });
+              this.cleanExpired();
+              this.renderOnMap();
+            } else if (parsed.data && parsed.data.id) {
+              const r = parsed.data;
+              const idx = this.incidents.findIndex(i => i.id === r.id);
+              if (idx >= 0) this.incidents[idx] = { ...this.incidents[idx], ...r };
+              else this.incidents.unshift(r);
+              this.cleanExpired();
+              this.renderOnMap();
+            }
+          }
+        } catch (err) {}
+      });
+
+      this.eventSource.addEventListener('patch', (e) => {
+        try {
+          const parsed = JSON.parse(e.data);
+          if (parsed && parsed.data && parsed.path) {
+            const key = parsed.path.replace(/^\//, '');
+            const idx = this.incidents.findIndex(i => i.id === key);
+            if (idx >= 0) {
+              this.incidents[idx] = { ...this.incidents[idx], ...parsed.data };
+              this.cleanExpired();
+              this.renderOnMap();
+            }
+          }
+        } catch (err) {}
+      });
+    } catch (err) {
+      console.warn('Firebase EventSource stream connection error:', err);
+    }
   },
 
   loadLocalIncidents() {
@@ -9319,8 +9491,9 @@ const RotamCommunity = {
 
   async syncCloud() {
     this.cleanExpired();
+    const ep = this.getEndpoint();
     try {
-      const res = await fetch(`${this.cloudEndpoint}.json?limitToLast=50`, { method: 'GET' });
+      const res = await fetch(`${ep}.json?limitToLast=50`, { method: 'GET' });
       if (res.ok) {
         const data = await res.json();
         if (data && typeof data === 'object') {
@@ -9377,9 +9550,10 @@ const RotamCommunity = {
     this.saveLocal();
     this.renderOnMap();
 
-    // Broadcast async to cloud
+    // Broadcast async to cloud (Firebase RTDB)
+    const ep = this.getEndpoint();
     try {
-      fetch(`${this.cloudEndpoint}/${newInc.id}.json`, {
+      fetch(`${ep}/${newInc.id}.json`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newInc)
@@ -9407,12 +9581,22 @@ const RotamCommunity = {
     this.cleanExpired();
     this.renderOnMap();
 
-    // Sync vote to cloud
+    // Sync vote to cloud (Firebase RTDB)
+    const ep = this.getEndpoint();
     try {
-      fetch(`${this.cloudEndpoint}/${id}.json`, {
+      fetch(`${ep}/${id}.json`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ upvotes: inc.upvotes, downvotes: inc.downvotes, expiresAt: inc.expiresAt })
+      }).catch(() => {});
+    } catch (e) {}
+  },
+
+  async deleteRemoteIncident(id) {
+    const ep = this.getEndpoint();
+    try {
+      fetch(`${ep}/${id}.json`, {
+        method: 'DELETE'
       }).catch(() => {});
     } catch (e) {}
   },
