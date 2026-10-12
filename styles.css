@@ -823,6 +823,12 @@ body.sunlight-mode .leaflet-container {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
 }
 
+.gmaps-speed-limit-sign.overspeed {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.9), 0 0 40px rgba(220, 38, 38, 0.6) !important;
+  animation: overspeedPulse 0.8s ease-in-out infinite alternate;
+}
+
 /* Overspeed Warning Glow */
 .gmaps-speedo-card.overspeed {
   border-color: #ef4444 !important;
@@ -837,6 +843,36 @@ body.sunlight-mode .leaflet-container {
 @keyframes overspeedPulse {
   0% { transform: scale(1); }
   100% { transform: scale(1.06); }
+}
+
+/* Sürüş Araçları Popover Menüsü */
+#live-nav-tools-popover {
+  box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.12);
+  transform-origin: top right;
+  animation: popoverScaleIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+}
+
+@keyframes popoverScaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateX(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateX(0);
+  }
+}
+
+/* Güneş & Yüksek Kontrast Modunda Sürüş Butonları */
+.sunlight-mode-active .gmaps-tool-btn,
+.sunlight-mode-active .gmaps-speedo-card,
+.sunlight-mode-active .gmaps-report-pill {
+  background: #000000 !important;
+  border: 2px solid #facc15 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 15px rgba(250, 204, 21, 0.5) !important;
 }
 
 /* HUD Mirror Mode (Head-Up Display Reflection on Windshield) */
@@ -1140,6 +1176,7 @@ html, body {
   }
 
   /* Üst Dönüş Kartı: Sol Üste Taşınır */
+  #live-nav-top-panel,
   #live-nav-overlay > .hud-interactive:first-child {
     position: absolute !important;
     left: max(0.75rem, env(safe-area-inset-left)) !important;
@@ -1165,7 +1202,7 @@ html, body {
   }
 
   /* Alt Kokpit Çekmecesi: Sol Alta Taşınır */
-  #live-nav-overlay > .hud-interactive:last-child {
+  #live-nav-bottom-cockpit-container {
     position: absolute !important;
     left: max(0.75rem, env(safe-area-inset-left)) !important;
     bottom: max(0.4rem, env(safe-area-inset-bottom)) !important;
@@ -1187,7 +1224,7 @@ html, body {
   }
 
   /* Hız Göstergesi: Kokpitin Hemen Yanına (Orta Alta) */
-  #live-nav-overlay > .hud-interactive:nth-child(3) {
+  #live-nav-speedo-cluster {
     position: absolute !important;
     left: calc(max(0.75rem, env(safe-area-inset-left)) + min(325px, 38vw) + 0.5rem) !important;
     bottom: max(0.4rem, env(safe-area-inset-bottom)) !important;
@@ -1196,10 +1233,23 @@ html, body {
   }
 
   /* Sağ Araç Çubuğu: Sağ dikey kenara */
-  #live-nav-overlay > .hud-interactive:nth-child(2) {
+  #live-nav-right-toolbar {
+    position: absolute !important;
     right: max(0.75rem, env(safe-area-inset-right)) !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
+    margin: 0 !important;
+    z-index: 35 !important;
+  }
+
+  /* Yatay Modda Araçlar Popover'ı */
+  #live-nav-tools-popover {
+    position: absolute !important;
+    right: 3.75rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    max-height: 85vh !important;
+    overflow-y: auto !important;
   }
 
   /* Bildirim Kapsülleri: Üst Ortada Kompakt */

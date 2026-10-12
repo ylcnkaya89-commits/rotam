@@ -585,13 +585,21 @@ function toggleMobileLayersPopover() {
   }
 }
 
-// Click outside to dismiss layers popover
+// Click outside to dismiss layers popover or live-nav tools popover
 document.addEventListener('click', (e) => {
   const popover = document.getElementById('mobile-layers-popover');
   const fabStack = document.getElementById('mobile-floating-fabs');
   if (popover && !popover.classList.contains('hidden') && fabStack) {
     if (!fabStack.contains(e.target)) {
       popover.classList.add('hidden');
+    }
+  }
+
+  const navToolsPopover = document.getElementById('live-nav-tools-popover');
+  const navToolsBtn = document.getElementById('live-nav-btn-tools');
+  if (navToolsPopover && !navToolsPopover.classList.contains('hidden')) {
+    if (!navToolsPopover.contains(e.target) && !navToolsBtn?.contains(e.target)) {
+      navToolsPopover.classList.add('hidden');
     }
   }
 });
@@ -6396,6 +6404,21 @@ const LiveNavigation = {
     }
   },
 
+  toggleToolsPopover(show) {
+    const popover = document.getElementById('live-nav-tools-popover');
+    if (!popover) return;
+    if (show === undefined) {
+      popover.classList.toggle('hidden');
+    } else if (show) {
+      popover.classList.remove('hidden');
+    } else {
+      popover.classList.add('hidden');
+    }
+    if (!popover.classList.contains('hidden') && typeof initIcons === 'function') {
+      initIcons();
+    }
+  },
+
   toggleHudMirror() {
     this.isHudMirrored = !this.isHudMirrored;
     const overlay = document.getElementById('live-nav-overlay');
@@ -6520,6 +6543,7 @@ const LiveNavigation = {
       map.on('dragstart', () => {
         if (this.isActive) {
           this.autoCenter = false;
+          this.toggleToolsPopover(false);
           const recenterPill = document.getElementById('live-nav-recenter-pill-box');
           if (recenterPill) recenterPill.classList.remove('hidden');
         }
@@ -6647,6 +6671,7 @@ const LiveNavigation = {
       map.on('dragstart', () => {
         if (this.isActive) {
           this.autoCenter = false;
+          this.toggleToolsPopover(false);
           const recenterPill = document.getElementById('live-nav-recenter-pill-box');
           if (recenterPill) recenterPill.classList.remove('hidden');
         }
@@ -6715,6 +6740,7 @@ const LiveNavigation = {
     }
     this.dismissAlertBanner();
     this.dismissFuelBanner();
+    this.toggleToolsPopover(false);
     document.getElementById('live-nav-hazard-banner')?.classList.add('hidden');
 
     // Remove incident markers
@@ -7113,8 +7139,10 @@ const LiveNavigation = {
 
     // Overspeed Danger Glow & Audio Warning
     const speedoBox = document.getElementById('live-nav-speedo-box');
+    const limitBadge = document.getElementById('live-nav-speed-limit-badge');
     if (this.speedKmH > (this.currentSpeedLimit || 90) + 5) {
       if (speedoBox) speedoBox.classList.add('overspeed');
+      if (limitBadge) limitBadge.classList.add('overspeed');
       const now = Date.now();
       if (now - (this.lastOverspeedWarningTime || 0) > 30000) {
         this.lastOverspeedWarningTime = now;
@@ -7126,6 +7154,7 @@ const LiveNavigation = {
       }
     } else {
       if (speedoBox) speedoBox.classList.remove('overspeed');
+      if (limitBadge) limitBadge.classList.remove('overspeed');
     }
 
     // Update Google Maps Compass Needle rotation

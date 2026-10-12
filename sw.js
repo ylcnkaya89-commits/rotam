@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v21 (Offline Maps & Tile Cache Engine)
-const CACHE_NAME = 'rotam-cache-v21';
+// Rotam PWA Service Worker - v22 (Optimized Motorcycle Riding HUD Cockpit)
+const CACHE_NAME = 'rotam-cache-v22';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
