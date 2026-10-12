@@ -4835,17 +4835,9 @@ function isAdminAuthenticated() {
   }
 }
 
-let _logoTapCount = 0;
-let _logoTapTimer = null;
 function handleLogoAdminClick(e) {
   if (e && e.stopPropagation) e.stopPropagation();
-  _logoTapCount++;
-  clearTimeout(_logoTapTimer);
-  _logoTapTimer = setTimeout(() => { _logoTapCount = 0; }, 1200);
-  if (_logoTapCount >= 3) {
-    _logoTapCount = 0;
-    openAdminModal();
-  }
+  openAdminModal();
 }
 window.handleLogoAdminClick = handleLogoAdminClick;
 
