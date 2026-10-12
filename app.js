@@ -204,12 +204,15 @@ function createTileLayers() {
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }),
-    voyager: L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
-      subdomains: 'abcd',
-      maxZoom: 19,
-      attribution: '&copy; CARTO, &copy; OpenStreetMap'
-    }),
     osm: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }),
+    day: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }),
+    voyager: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }),
@@ -231,6 +234,36 @@ function createTileLayers() {
   });
 
   return layers;
+}
+
+// Patch Leaflet Draggable to compensate for CSS rotated & scaled map container in LiveNavigation
+function patchLeafletDraggableForRotation() {
+  if (typeof L === 'undefined' || !L.Draggable || L.Draggable._rotamPatched) return;
+  L.Draggable._rotamPatched = true;
+
+  const origAdjustAndSetPosition = L.Draggable.prototype._adjustAndSetPosition;
+  L.Draggable.prototype._adjustAndSetPosition = function (offset) {
+    if (
+      typeof LiveNavigation !== 'undefined' &&
+      LiveNavigation.isActive &&
+      LiveNavigation.currentMapRotation
+    ) {
+      // Rotation angle in radians
+      const deg = LiveNavigation.currentMapRotation;
+      const rad = (deg * Math.PI) / 180;
+      const cos = Math.cos(rad);
+      const sin = Math.sin(rad);
+      const scale = 1.55; // CSS scale factor in live-nav-rotating
+
+      // Transform raw screen delta into element's rotated coordinate frame
+      const adjX = (offset.x * cos + offset.y * sin) / scale;
+      const adjY = (-offset.x * sin + offset.y * cos) / scale;
+
+      const adjOffset = new L.Point(adjX, adjY);
+      return origAdjustAndSetPosition.call(this, adjOffset);
+    }
+    return origAdjustAndSetPosition.call(this, offset);
+  };
 }
 
 // Leaflet Map Initialization with automatic retry & size stabilization
@@ -256,6 +289,8 @@ function initMap() {
 
   // Ensure dark-map filter is active for dark mode
   mapEl.classList.add('dark-map');
+
+  patchLeafletDraggableForRotation();
 
   tileLayers = createTileLayers();
   const defaultTile = tileLayers.dark || tileLayers.osm;
@@ -441,13 +476,16 @@ function switchTile(tileKey) {
   if (!map) return;
 
   const mapEl = document.getElementById('map');
-  if (tileKey === 'dark') {
+  const isDark = (tileKey === 'dark');
+
+  if (isDark) {
     if (mapEl) mapEl.classList.add('dark-map');
+    document.body.classList.remove('sunlight-mode');
   } else {
     if (mapEl) mapEl.classList.remove('dark-map');
   }
 
-  const targetLayer = tileLayers[tileKey] || tileLayers.dark || tileLayers.osm;
+  const targetLayer = tileLayers[tileKey] || tileLayers.osm || tileLayers.dark;
   if (!targetLayer) return;
 
   Object.values(tileLayers).forEach(l => {
@@ -460,7 +498,7 @@ function switchTile(tileKey) {
     b.classList.remove('bg-slate-800', 'text-white');
     b.classList.add('text-slate-400');
   });
-  const activeBtn = document.getElementById(`tile-${tileKey}`);
+  const activeBtn = document.getElementById(`tile-${tileKey}`) || (tileKey === 'day' ? document.getElementById('tile-osm') : null);
   if (activeBtn) {
     activeBtn.classList.add('bg-slate-800', 'text-white');
     activeBtn.classList.remove('text-slate-400');
@@ -5905,20 +5943,20 @@ const RotamDisplay = {
     if (this.isSunlightMode) {
       document.body.classList.add('sunlight-mode');
       if (statusEl) {
-        statusEl.textContent = isEn ? 'ON' : 'Açık';
+        statusEl.textContent = isEn ? 'DAY' : 'Gündüz';
         statusEl.className = 'text-[10px] text-amber-400 font-bold';
       }
       if (hudSunBtn) {
         hudSunBtn.classList.add('bg-amber-500/30', 'border-amber-400');
       }
       if (typeof switchTile === 'function') {
-        switchTile('voyager');
+        switchTile('osm');
       }
-      showToast(isEn ? '☀️ Outdoor Sunlight Mode (High Contrast)' : '☀️ Açık Hava Güneş Modu (Yüksek Kontrast)', 'success');
+      showToast(isEn ? '☀️ Day / High Contrast Mode Active' : '☀️ Gündüz / Aydınlık Mod Aktif', 'success');
     } else {
       document.body.classList.remove('sunlight-mode');
       if (statusEl) {
-        statusEl.textContent = isEn ? 'OFF' : 'Kapalı';
+        statusEl.textContent = isEn ? 'NIGHT' : 'Gece';
         statusEl.className = 'text-[10px] text-slate-400 font-semibold';
       }
       if (hudSunBtn) {
@@ -5927,7 +5965,7 @@ const RotamDisplay = {
       if (typeof switchTile === 'function') {
         switchTile('dark');
       }
-      showToast(isEn ? '🌙 Dark Mode Restored' : '🌙 Koyu Gece Moduna Dönüldü', 'info');
+      showToast(isEn ? '🌙 Night / Dark Mode Restored' : '🌙 Gece / Koyu Mod Aktif', 'info');
     }
 
     if (typeof map !== 'undefined' && map) {
@@ -6480,7 +6518,11 @@ const LiveNavigation = {
 
     if (map) {
       map.on('dragstart', () => {
-        if (this.isActive) this.autoCenter = false;
+        if (this.isActive) {
+          this.autoCenter = false;
+          const recenterPill = document.getElementById('live-nav-recenter-pill-box');
+          if (recenterPill) recenterPill.classList.remove('hidden');
+        }
       });
     }
 
@@ -6603,7 +6645,11 @@ const LiveNavigation = {
     // Map drag listener to pause auto-center
     if (map) {
       map.on('dragstart', () => {
-        if (this.isActive) this.autoCenter = false;
+        if (this.isActive) {
+          this.autoCenter = false;
+          const recenterPill = document.getElementById('live-nav-recenter-pill-box');
+          if (recenterPill) recenterPill.classList.remove('hidden');
+        }
       });
     }
 
@@ -6691,6 +6737,7 @@ const LiveNavigation = {
     // Hide HUD overlay
     const overlay = document.getElementById('live-nav-overlay');
     if (overlay) overlay.classList.add('hidden');
+    document.getElementById('live-nav-recenter-pill-box')?.classList.add('hidden');
 
     // Restore floating controls and cards
     const bottomBar = document.getElementById('mobile-bottom-bar');
@@ -7406,10 +7453,15 @@ const LiveNavigation = {
 
   recenterMap() {
     this.autoCenter = true;
+    const recenterPill = document.getElementById('live-nav-recenter-pill-box');
+    if (recenterPill) recenterPill.classList.add('hidden');
     if (this.lastCoord && map) {
       map.flyTo(this.lastCoord, 18, { duration: 0.8 });
+      if (this.compassMode === 'heading') {
+        this.updateMapHeading(this.lastHeading || 0);
+      }
       const isEn = (window.state && window.state.lang === 'en');
-      showToast(isEn ? 'Camera centered & zoomed to road' : 'Harita yola yaklaştırıldı ve ortalandı', 'info');
+      showToast(isEn ? 'Camera centered & locked to road' : 'Harita sürücüye odaklandı ve kilitlendi', 'info');
     }
   },
 
@@ -7599,6 +7651,12 @@ const LiveNavigation = {
     const isEn = (window.state && window.state.lang === 'en');
     const overviewIcon = document.getElementById('live-nav-overview-icon');
 
+    // If user has panned away while riding, first tap re-centers the camera on the rider!
+    if (!this.autoCenter && !this.isOverviewMode) {
+      this.recenterMap();
+      return;
+    }
+
     if (!this.isOverviewMode) {
       this.isOverviewMode = true;
       this.autoCenter = false;
@@ -7644,6 +7702,317 @@ const LiveNavigation = {
     }
   }
 };
+
+// ==========================================
+// ROTAM OFFLINE MAP & CORRIDOR CACHE ENGINE
+// ==========================================
+const RotamOfflineMap = {
+  isDownloading: false,
+  cancelRequested: false,
+  CACHE_NAME: 'rotam-tiles-v1',
+
+  latLonToTile(lat, lon, zoom) {
+    const rad = (lat * Math.PI) / 180;
+    const n = Math.pow(2, zoom);
+    const x = Math.floor(((lon + 180) / 360) * n);
+    const y = Math.floor(
+      ((1 - Math.log(Math.tan(rad) + 1 / Math.cos(rad)) / Math.PI) / 2) * n
+    );
+    return {
+      x: Math.max(0, Math.min(n - 1, x)),
+      y: Math.max(0, Math.min(n - 1, y)),
+      z: zoom
+    };
+  },
+
+  async getStats() {
+    if (!('caches' in window)) return { count: 0, sizeMb: '0.0' };
+    try {
+      const cache = await caches.open(this.CACHE_NAME);
+      const keys = await cache.keys();
+      const count = keys.length;
+      const sizeMb = ((count * 18) / 1024).toFixed(1);
+      return { count, sizeMb };
+    } catch (e) {
+      return { count: 0, sizeMb: '0.0' };
+    }
+  },
+
+  async updateStatsUI() {
+    const stats = await this.getStats();
+    const countEl = document.getElementById('offline-stats-count');
+    const sizeEl = document.getElementById('offline-stats-size');
+    const badgeEl = document.getElementById('mobile-offline-badge');
+
+    if (countEl) countEl.textContent = `${stats.count.toLocaleString()} karo`;
+    if (sizeEl) sizeEl.textContent = `~${stats.sizeMb} MB`;
+    if (badgeEl) {
+      badgeEl.textContent = stats.count > 0 ? `${stats.sizeMb}MB` : 'İndir';
+    }
+  },
+
+  openModal() {
+    const modal = document.getElementById('modal-offline-maps');
+    if (modal) modal.classList.remove('hidden');
+    this.updateStatsUI();
+    this.updateRoutePreviewUI();
+    if (typeof initIcons === 'function') initIcons();
+  },
+
+  closeModal() {
+    if (this.isDownloading) {
+      const isEn = (window.state && window.state.lang === 'en');
+      const confirmCancel = confirm(
+        isEn
+          ? 'Download is in progress. Do you want to cancel?'
+          : 'Harita indirme işlemi devam ediyor. İptal etmek istiyor musunuz?'
+      );
+      if (confirmCancel) {
+        this.cancelRequested = true;
+      } else {
+        return;
+      }
+    }
+    const modal = document.getElementById('modal-offline-maps');
+    if (modal) modal.classList.add('hidden');
+  },
+
+  updateRoutePreviewUI() {
+    const routeBox = document.getElementById('offline-active-route-box');
+    const noRouteBox = document.getElementById('offline-no-route-box');
+    const routeInfoEl = document.getElementById('offline-route-info');
+    const isEn = (window.state && window.state.lang === 'en');
+
+    if (state.routeData && state.routeData.geometry && state.routeData.geometry.coordinates) {
+      if (routeBox) routeBox.classList.remove('hidden');
+      if (noRouteBox) noRouteBox.classList.add('hidden');
+      if (routeInfoEl) {
+        const km = (state.routeData.distance / 1000).toFixed(0);
+        routeInfoEl.textContent = isEn
+          ? `Active Route: ${km} km Corridor (Zoom 7-13)`
+          : `Aktif Rota: ${km} km Sürüş Koridoru (Zoom 7-13)`;
+      }
+    } else {
+      if (routeBox) routeBox.classList.add('hidden');
+      if (noRouteBox) noRouteBox.classList.remove('hidden');
+    }
+  },
+
+  async clearCache() {
+    const isEn = (window.state && window.state.lang === 'en');
+    const msg = isEn
+      ? 'Are you sure you want to delete all offline downloaded map tiles?'
+      : 'İndirilen tüm çevrimdışı harita karolarını silmek istediğinize emin misiniz?';
+    if (!confirm(msg)) return;
+
+    try {
+      if ('caches' in window) {
+        await caches.delete(this.CACHE_NAME);
+        await caches.open(this.CACHE_NAME);
+      }
+      showToast(isEn ? 'Offline tile cache cleared' : 'Çevrimdışı harita önbelleği temizlendi', 'info');
+      this.updateStatsUI();
+    } catch (e) {
+      console.warn('Clear cache error:', e);
+    }
+  },
+
+  async downloadCurrentRoute() {
+    if (!state.routeData || !state.routeData.geometry || !state.routeData.geometry.coordinates) {
+      const isEn = (window.state && window.state.lang === 'en');
+      showToast(
+        isEn
+          ? 'Please create a route first to download its offline corridor map.'
+          : 'Lütfen önce bir rota oluşturun.',
+        'info'
+      );
+      this.openModal();
+      return;
+    }
+
+    const coords = state.routeData.geometry.coordinates; // [lon, lat]
+    const tileSet = new Set();
+
+    // Sample route points (every ~1km or at least 150 points along the path)
+    const step = Math.max(1, Math.floor(coords.length / 200));
+    const sampled = [];
+    for (let i = 0; i < coords.length; i += step) {
+      sampled.push(coords[i]);
+    }
+    if (sampled[sampled.length - 1] !== coords[coords.length - 1]) {
+      sampled.push(coords[coords.length - 1]);
+    }
+
+    // Generate tiles for zoom levels 7 to 13 with corridor buffer
+    for (const [lon, lat] of sampled) {
+      for (let z = 7; z <= 13; z++) {
+        const t = this.latLonToTile(lat, lon, z);
+        tileSet.add(`${z}/${t.x}/${t.y}`);
+        if (z >= 11) {
+          tileSet.add(`${z}/${t.x + 1}/${t.y}`);
+          tileSet.add(`${z}/${t.x - 1}/${t.y}`);
+          tileSet.add(`${z}/${t.x}/${t.y + 1}`);
+          tileSet.add(`${z}/${t.x}/${t.y - 1}`);
+        }
+      }
+    }
+
+    const tilesArray = Array.from(tileSet).map((k) => {
+      const [z, x, y] = k.split('/');
+      return { z: parseInt(z), x: parseInt(x), y: parseInt(y) };
+    });
+
+    const isEn = (window.state && window.state.lang === 'en');
+    await this.executeTileBatchDownload(
+      tilesArray,
+      isEn ? 'Downloading Route Corridor Map' : 'Aktif Rota Koridoru İndiriliyor'
+    );
+  },
+
+  async downloadRegion(regionKey) {
+    const isEn = (window.state && window.state.lang === 'en');
+    let bounds = null;
+    let minZ = 7;
+    let maxZ = 11;
+    let title = '';
+
+    if (regionKey === 'turkey_overview') {
+      bounds = { minLat: 35.8, maxLat: 42.2, minLon: 25.8, maxLon: 44.6 };
+      minZ = 5;
+      maxZ = 7;
+      title = isEn ? 'Turkey Overview' : 'Türkiye Genel Bakış';
+    } else if (regionKey === 'aegean_med') {
+      bounds = { minLat: 36.2, maxLat: 38.8, minLon: 26.5, maxLon: 32.2 };
+      minZ = 7;
+      maxZ = 11;
+      title = isEn ? 'Aegean & Mediterranean' : 'Ege & Akdeniz Sahilleri';
+    } else if (regionKey === 'marmara') {
+      bounds = { minLat: 40.0, maxLat: 41.6, minLon: 26.8, maxLon: 30.2 };
+      minZ = 7;
+      maxZ = 11;
+      title = isEn ? 'Marmara Region' : 'Marmara & Boğazlar';
+    } else if (regionKey === 'blacksea') {
+      bounds = { minLat: 40.5, maxLat: 41.8, minLon: 36.5, maxLon: 41.8 };
+      minZ = 7;
+      maxZ = 11;
+      title = isEn ? 'Black Sea Highlands' : 'Karadeniz & Yaylalar';
+    }
+
+    if (!bounds) return;
+
+    const tileSet = new Set();
+    for (let z = minZ; z <= maxZ; z++) {
+      const tl = this.latLonToTile(bounds.maxLat, bounds.minLon, z);
+      const br = this.latLonToTile(bounds.minLat, bounds.maxLon, z);
+      for (let x = Math.min(tl.x, br.x); x <= Math.max(tl.x, br.x); x++) {
+        for (let y = Math.min(tl.y, br.y); y <= Math.max(tl.y, br.y); y++) {
+          tileSet.add(`${z}/${x}/${y}`);
+        }
+      }
+    }
+
+    const tilesArray = Array.from(tileSet).map((k) => {
+      const [z, x, y] = k.split('/');
+      return { z: parseInt(z), x: parseInt(x), y: parseInt(y) };
+    });
+
+    await this.executeTileBatchDownload(tilesArray, title);
+  },
+
+  async executeTileBatchDownload(tiles, label) {
+    if (this.isDownloading) return;
+    if (!('caches' in window)) {
+      showToast('Tarayıcınız CacheStorage API desteklemiyor.', 'error');
+      return;
+    }
+
+    this.isDownloading = true;
+    this.cancelRequested = false;
+
+    const progressBox = document.getElementById('offline-progress-box');
+    const progressBar = document.getElementById('offline-progress-bar');
+    const progressText = document.getElementById('offline-progress-text');
+    const progressLabel = document.getElementById('offline-progress-label');
+
+    if (progressBox) progressBox.classList.remove('hidden');
+    if (progressLabel) progressLabel.textContent = label;
+
+    const total = tiles.length;
+    let completed = 0;
+    const isEn = (window.state && window.state.lang === 'en');
+
+    try {
+      const cache = await caches.open(this.CACHE_NAME);
+      const concurrency = 6;
+
+      for (let i = 0; i < total; i += concurrency) {
+        if (this.cancelRequested) {
+          showToast(isEn ? 'Download cancelled' : 'İndirme iptal edildi', 'info');
+          break;
+        }
+
+        const chunk = tiles.slice(i, i + concurrency);
+        await Promise.all(
+          chunk.map(async ({ z, x, y }) => {
+            const url = `https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
+            try {
+              const match = await cache.match(url);
+              if (!match) {
+                const res = await fetch(url, { mode: 'cors' });
+                if (res.ok) {
+                  await cache.put(url, res);
+                }
+              }
+            } catch (err) {
+              // Ignore single tile fetch failures
+            }
+            completed++;
+          })
+        );
+
+        const pct = Math.min(100, Math.round((completed / total) * 100));
+        if (progressBar) progressBar.style.width = `${pct}%`;
+        if (progressText) {
+          progressText.textContent = `${completed} / ${total} (%${pct})`;
+        }
+      }
+
+      if (!this.cancelRequested) {
+        showToast(
+          isEn
+            ? `✅ Offline map ready (${completed} tiles saved)!`
+            : `✅ Çevrimdışı harita hazır (${completed} karo kaydedildi)!`,
+          'success'
+        );
+      }
+    } catch (err) {
+      console.warn('Tile batch download error:', err);
+      showToast(isEn ? 'Offline download error.' : 'İndirme sırasında bir hata oluştu.', 'error');
+    } finally {
+      this.isDownloading = false;
+      this.cancelRequested = false;
+      if (progressBox) progressBox.classList.add('hidden');
+      this.updateStatsUI();
+    }
+  }
+};
+
+window.RotamOfflineMap = RotamOfflineMap;
+
+// Global Online/Offline Event Listeners
+window.addEventListener('online', () => {
+  const isEn = (window.state && window.state.lang === 'en');
+  showToast(isEn ? '🌐 Internet connection restored' : '🌐 İnternet bağlantısı sağlandı', 'success');
+  const badge = document.getElementById('offline-network-badge');
+  if (badge) badge.classList.add('hidden');
+});
+
+window.addEventListener('offline', () => {
+  const isEn = (window.state && window.state.lang === 'en');
+  showToast(isEn ? '📡 Offline mode active (Saved maps ready)' : '📡 Çevrimdışı mod: İndirilen haritalar devrede', 'info');
+  const badge = document.getElementById('offline-network-badge');
+  if (badge) badge.classList.remove('hidden');
+});
 
 // ==========================================
 // ROTAM COMMUNITY LIVE HAZARD & INCIDENT NETWORK (WAZE STYLE REALTIME SYNC)

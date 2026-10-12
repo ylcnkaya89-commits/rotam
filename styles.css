@@ -143,6 +143,22 @@ main {
   -webkit-filter: invert(100%) hue-rotate(180deg) brightness(88%) contrast(108%);
 }
 
+/* ROTAM Crystal Clear Daytime Mode Map (Natural Colors, 100% Crisp & Visible) */
+#map:not(.dark-map) .leaflet-tile-pane,
+body.sunlight-mode #map .leaflet-tile-pane,
+body.sunlight-mode #map.dark-map .leaflet-tile-pane {
+  filter: none !important;
+  -webkit-filter: none !important;
+}
+
+#map:not(.dark-map),
+body.sunlight-mode #map,
+#map:not(.dark-map) .leaflet-container,
+body.sunlight-mode .leaflet-container {
+  background: #f8fafc !important;
+  background-color: #f8fafc !important;
+}
+
 .leaflet-container {
   width: 100% !important;
   height: 100% !important;
@@ -1225,8 +1241,10 @@ body.sunlight-mode {
   color: #0f172a !important;
 }
 
-body.sunlight-mode #map.dark-map {
+body.sunlight-mode #map .leaflet-tile-pane,
+body.sunlight-mode #map.dark-map .leaflet-tile-pane {
   filter: none !important;
+  -webkit-filter: none !important;
 }
 
 body.sunlight-mode .gmaps-maneuver-card {
@@ -1420,3 +1438,25 @@ body.sunlight-mode .gmaps-tool-btn {
   border-color: rgba(74, 222, 128, 0.4) !important;
   box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35);
 }
+
+/* 9. LIVE NAV RECENTER PILL & OFFLINE PROGRESS STYLES */
+#live-nav-recenter-pill-box {
+  animation: pulseSubtle 2s infinite ease-in-out;
+}
+
+@keyframes pulseSubtle {
+  0%, 100% { transform: translate(-50%, 0) scale(1); }
+  50% { transform: translate(-50%, -4px) scale(1.03); }
+}
+
+.offline-progress-bar-striped {
+  background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);
+  background-size: 1rem 1rem;
+  animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes progress-bar-stripes {
+  0% { background-position: 1rem 0; }
+  100% { background-position: 0 0; }
+}
+

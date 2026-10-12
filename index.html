@@ -70,7 +70,7 @@
   <meta name="theme-color" content="#090d16">
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="styles.css?v=3.8">
+  <link rel="stylesheet" href="styles.css?v=3.9">
 </head>
 <body class="h-full flex flex-col overflow-hidden font-sans selection:bg-brand-500 selection:text-white bg-slate-950">
 
@@ -183,6 +183,11 @@
       <button id="btn-export-gpx" disabled onclick="exportGPX()" class="hidden lg:flex disabled:opacity-40 disabled:cursor-not-allowed items-center space-x-1 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1.5 lg:px-2.5 rounded-lg text-xs font-medium border border-slate-700 transition-colors" title="GPX Olarak İndir">
         <i data-lucide="download" class="w-3.5 h-3.5 text-accent-400 shrink-0"></i>
         <span data-i18n="btn_export_gpx">GPX</span>
+      </button>
+
+      <button id="btn-offline-top" onclick="RotamOfflineMap.openModal()" class="hidden md:flex items-center space-x-1 bg-slate-800 hover:bg-slate-700 text-emerald-300 px-2 py-1.5 lg:px-2.5 rounded-lg text-xs font-semibold border border-emerald-500/30 transition-colors" title="Çevrimdışı Harita İndir & Yönet">
+        <i data-lucide="download-cloud" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>
+        <span>Çevrimdışı</span>
       </button>
 
       <button id="btn-import-gpx-trigger" onclick="openGpxImportModal()" class="hidden 2xl:flex items-center space-x-1 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1.5 lg:px-2.5 rounded-lg text-xs font-medium border border-slate-700 transition-colors" title="GPX Dosyası Yükle">
@@ -694,6 +699,10 @@
               <i data-lucide="download" class="w-3.5 h-3.5 text-accent-400"></i>
               <span data-i18n="btn_export_gpx">GPX İndir</span>
             </button>
+            <button type="button" onclick="RotamOfflineMap.downloadCurrentRoute()" class="col-span-2 py-2 px-3 bg-slate-800 hover:bg-slate-700 text-emerald-300 font-semibold rounded-xl text-xs border border-emerald-500/30 flex items-center justify-center space-x-1.5 transition-all" title="Bu rotanın çevrimdışı harita karolarını telefona indir">
+              <i data-lucide="download-cloud" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span>Çevrimdışı Haritayı İndir</span>
+            </button>
             <button type="button" onclick="openSaveRouteModal()" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl text-xs border border-slate-700 flex items-center justify-center space-x-1.5 transition-all">
               <i data-lucide="bookmark-plus" class="w-3.5 h-3.5 text-brand-400"></i>
               <span data-i18n="btn_save_route">Rotayı Kaydet</span>
@@ -1157,6 +1166,14 @@
           </div>
         </div>
 
+        <!-- FLOATING YENİDEN ORTALA BUTONU (KULLANICI HARİTADA GEZDİĞİNDE BELİRİR) -->
+        <div id="live-nav-recenter-pill-box" class="hidden absolute bottom-24 sm:bottom-28 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+          <button onclick="LiveNavigation.recenterMap()" class="flex items-center space-x-2 px-4 py-2.5 rounded-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shadow-2xl border border-cyan-400/50 backdrop-blur-md active:scale-95 transition-all cursor-pointer">
+            <i data-lucide="locate-fixed" class="w-4 h-4 text-cyan-200"></i>
+            <span data-i18n="live_nav_recenter">Yeniden Ortala</span>
+          </button>
+        </div>
+
       </div>
 
       <!-- HOMEPAGE HERO / QUICK PLANNER OVERLAY (İSTEĞE BAĞLI SİHİRBAZ MODAL) -->
@@ -1332,17 +1349,22 @@
       <!-- HARİTA ÜSTÜ FLOATING KONTROLLER (MASAÜSTÜ & TABLET) -->
       <div id="floating-map-controls" class="hidden sm:flex absolute top-4 right-4 z-20 flex-col space-y-2">
         <div class="glass-panel p-1 rounded-xl shadow-2xl flex items-center space-x-1 border border-slate-800">
-          <button id="tile-dark" onclick="switchTile('dark')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-white" title="Karanlık Mod">
-            🌙<span class="inline ml-1">Dark</span>
+          <button id="tile-dark" onclick="switchTile('dark')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-white" title="Koyu Gece Modu">
+            🌙<span class="inline ml-1">Gece</span>
+          </button>
+          <button id="tile-osm" onclick="switchTile('osm')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Aydınlık Gündüz Modu">
+            ☀️<span class="inline ml-1">Gündüz</span>
           </button>
           <button id="tile-topo" onclick="switchTile('topo')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Topografik Yükselti">
             ⛰️<span class="inline ml-1">Topo</span>
           </button>
-          <button id="tile-osm" onclick="switchTile('osm')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Sokak Haritası">
-            🗺️<span class="inline ml-1">Sokak</span>
-          </button>
           <button id="tile-sat" onclick="switchTile('sat')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Uydu">
             🛰️<span class="inline ml-1">Uydu</span>
+          </button>
+          <div class="h-4 w-px bg-slate-800 mx-0.5"></div>
+          <button id="btn-offline-maps" onclick="RotamOfflineMap.openModal()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 flex items-center space-x-1 transition-all active:scale-95" title="Çevrimdışı Harita İndir & Yönet">
+            <span>📥</span>
+            <span>Çevrimdışı</span>
           </button>
           <div class="h-4 w-px bg-slate-800 mx-0.5"></div>
           <button id="btn-floating-locate" onclick="flyToCurrentLocation()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 flex items-center space-x-1 transition-all active:scale-95" title="Mevcut Konumuma Yaklaş">
@@ -1372,18 +1394,25 @@
 
           <!-- Popover Menüsü -->
           <div id="mobile-layers-popover" class="hidden absolute top-0 right-12 z-30 w-44 glass-panel p-2 rounded-2xl shadow-2xl border border-slate-700/80 space-y-1 animate-slide-in">
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 pt-0.5">Harita Katmanı</p>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 pt-0.5">Harita Modu</p>
             <button onclick="switchTile('dark'); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-200 hover:bg-slate-800 flex items-center space-x-2">
-              <span>🌙</span> <span>Koyu Mod</span>
+              <span>🌙</span> <span>Gece Modu</span>
+            </button>
+            <button onclick="switchTile('osm'); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-200 hover:bg-slate-800 flex items-center space-x-2">
+              <span>☀️</span> <span>Gündüz Modu</span>
             </button>
             <button onclick="switchTile('topo'); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-200 hover:bg-slate-800 flex items-center space-x-2">
               <span>⛰️</span> <span>Topografik</span>
             </button>
-            <button onclick="switchTile('osm'); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-200 hover:bg-slate-800 flex items-center space-x-2">
-              <span>🗺️</span> <span>Sokak</span>
-            </button>
             <button onclick="switchTile('sat'); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-200 hover:bg-slate-800 flex items-center space-x-2">
               <span>🛰️</span> <span>Uydu</span>
+            </button>
+            <div class="h-px bg-slate-800 my-1"></div>
+            <button onclick="RotamOfflineMap.openModal(); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-bold text-emerald-400 hover:bg-emerald-500/10 flex items-center justify-between">
+              <span class="flex items-center space-x-1.5">
+                <span>📥</span> <span>Çevrimdışı Harita</span>
+              </span>
+              <span id="mobile-offline-badge" class="text-[10px] text-emerald-400 font-mono">Yönet</span>
             </button>
             <div class="h-px bg-slate-800 my-1"></div>
             <button onclick="RotamCommunity.toggleLayer(); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-bold text-amber-400 hover:bg-amber-500/10 flex items-center justify-between">
@@ -1404,7 +1433,7 @@
             <div class="h-px bg-slate-800 my-1"></div>
             <button onclick="RotamDisplay.toggleSunlightMode(); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-bold text-amber-300 hover:bg-amber-500/10 flex items-center justify-between">
               <span class="flex items-center space-x-1.5">
-                <span>☀️</span> <span>Güneş Modu</span>
+                <span>☀️</span> <span>Gündüz / Güneş</span>
               </span>
               <span id="mobile-sunlight-status" class="text-[10px] text-slate-400 font-semibold">Kapalı</span>
             </button>
@@ -2817,6 +2846,139 @@
     </div>
   </div>
 
+  <!-- FLOATING ÇEVRİMDİŞİ AĞ BİLDİRİMİ (OFFLINE NETWORK BADGE) -->
+  <div id="offline-network-badge" class="hidden fixed bottom-14 md:bottom-5 left-1/2 -translate-x-1/2 z-[800] bg-slate-900/95 border border-emerald-500/50 shadow-2xl px-3.5 py-1.5 rounded-full text-[11px] font-bold text-emerald-300 flex items-center space-x-2 backdrop-blur-md animate-fade-in pointer-events-none">
+    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+    <span>📡 Çevrimdışı Mod Aktif (İndirilen Harita Devrede)</span>
+  </div>
+
+  <!-- MODAL: ÇEVRİMDİŞİ HARİTA YÖNETİCİSİ (OFFLINE MAPS ENGINE) -->
+  <div id="modal-offline-maps" class="hidden fixed inset-0 z-[1000] bg-slate-950/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+    <div class="responsive-modal-card bg-slate-900 border border-slate-800 w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+      
+      <!-- Modal Başlığı -->
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="download-cloud" class="w-5 h-5 text-emerald-400"></i>
+          <div>
+            <h3 class="text-sm sm:text-base font-bold text-white">Çevrimdışı Harita İndir & Yönet</h3>
+            <p class="text-[10px] text-slate-400">İnternetsiz dağ ve orman yollarında kesintisiz sürüş</p>
+          </div>
+        </div>
+        <button onclick="RotamOfflineMap.closeModal()" class="p-1 rounded-lg text-slate-400 hover:text-white cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- İndirme İlerleme Çubuğu (Download Progress Box) -->
+      <div id="offline-progress-box" class="hidden p-3.5 rounded-xl bg-slate-950 border border-emerald-500/40 space-y-2">
+        <div class="flex items-center justify-between text-xs">
+          <span id="offline-progress-label" class="font-bold text-emerald-300">Harita Karoları İndiriliyor...</span>
+          <span id="offline-progress-text" class="font-mono text-slate-300">0 / 0 (%0)</span>
+        </div>
+        <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
+          <div id="offline-progress-bar" class="h-full bg-emerald-500 offline-progress-bar-striped transition-all duration-200" style="width: 0%"></div>
+        </div>
+        <div class="flex justify-end">
+          <button onclick="RotamOfflineMap.cancelRequested = true" class="text-[10px] text-red-400 hover:text-red-300 font-semibold underline cursor-pointer">
+            İndirmeyi Durdur
+          </button>
+        </div>
+      </div>
+
+      <!-- 1. Aktif Rota Haritası Kartı -->
+      <div id="offline-active-route-box" class="p-3.5 rounded-xl bg-slate-950/70 border border-cyan-500/40 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <span class="text-lg">🏍️</span>
+            <div>
+              <h4 class="text-xs font-bold text-white">Aktif Rota Sürüş Koridoru</h4>
+              <p id="offline-route-info" class="text-[10px] text-cyan-300">Aktif Rota Koridoru (Zoom 7-13)</p>
+            </div>
+          </div>
+          <span class="text-[9px] bg-cyan-400/20 text-cyan-300 px-2 py-0.5 rounded-full font-bold uppercase">Önerilen</span>
+        </div>
+        <p class="text-[11px] text-slate-300 leading-relaxed">
+          Oluşturduğunuz rotanın geçtiği tüm şehirler, virajlar ve dinlenme tesisleri koridorundaki harita karolarını telefonunuza kaydeder.
+        </p>
+        <button onclick="RotamOfflineMap.downloadCurrentRoute()" class="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30 active:scale-95 transition-all cursor-pointer">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span>Bu Rotanın Haritasını İndir (~6-15 MB)</span>
+        </button>
+      </div>
+
+      <!-- Henüz Rota Yokken Gösterilen Uyarı -->
+      <div id="offline-no-route-box" class="hidden p-3 rounded-xl bg-slate-950 border border-slate-800 text-center space-y-1 text-xs">
+        <p class="text-slate-300 font-medium">📍 Henüz aktif bir rota oluşturmadınız.</p>
+        <p class="text-[10px] text-slate-500">Rota çizdikten sonra bu butona basarak o rotanın sürüş koridorunu anında indirebilirsiniz.</p>
+      </div>
+
+      <!-- 2. Hızlı Bölge Paketleri -->
+      <div class="space-y-2">
+        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
+          <span>📦</span>
+          <span>Popüler Bölge Harita Paketleri</span>
+        </h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+          <!-- Paket 1 -->
+          <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+            <div>
+              <span class="font-bold text-white block">Türkiye Genel Bakış</span>
+              <span class="text-[10px] text-slate-400">Tüm anayollar (Zoom 5-7, ~2 MB)</span>
+            </div>
+            <button onclick="RotamOfflineMap.downloadRegion('turkey_overview')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-[11px] border border-slate-700 shrink-0 cursor-pointer">
+              İndir
+            </button>
+          </div>
+          <!-- Paket 2 -->
+          <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+            <div>
+              <span class="font-bold text-white block">Ege & Akdeniz Sahili</span>
+              <span class="text-[10px] text-slate-400">Çanakkale-Antalya (~7 MB)</span>
+            </div>
+            <button onclick="RotamOfflineMap.downloadRegion('aegean_med')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-[11px] border border-slate-700 shrink-0 cursor-pointer">
+              İndir
+            </button>
+          </div>
+          <!-- Paket 3 -->
+          <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+            <div>
+              <span class="font-bold text-white block">Marmara & Boğazlar</span>
+              <span class="text-[10px] text-slate-400">İstanbul, Bursa, Çanakkale (~6 MB)</span>
+            </div>
+            <button onclick="RotamOfflineMap.downloadRegion('marmara')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-[11px] border border-slate-700 shrink-0 cursor-pointer">
+              İndir
+            </button>
+          </div>
+          <!-- Paket 4 -->
+          <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+            <div>
+              <span class="font-bold text-white block">Karadeniz Yaylaları</span>
+              <span class="text-[10px] text-slate-400">Samsun-Artvin dağ yolları (~7 MB)</span>
+            </div>
+            <button onclick="RotamOfflineMap.downloadRegion('blacksea')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-[11px] border border-slate-700 shrink-0 cursor-pointer">
+              İndir
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Cihaz Depolama Durumu & Temizleme -->
+      <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between text-xs">
+        <div>
+          <span class="text-slate-400 block text-[10px]">Kayıtlı Çevrimdışı Harita:</span>
+          <span class="font-mono font-bold text-emerald-400">
+            <span id="offline-stats-count">0 karo</span> (<span id="offline-stats-size">~0 MB</span>)
+          </span>
+        </div>
+        <button onclick="RotamOfflineMap.clearCache()" class="px-2.5 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 font-semibold text-[11px] border border-red-500/30 transition-colors cursor-pointer">
+          Temizle
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- MOBİL ALT SABİT MENÜ (MOBILE BOTTOM NAV - 5 TEMEL SEÇENEK: ROTA, KEŞFET, SÜRÜŞÜ BAŞLAT, YAKINIMDA, ROTALARIM) -->
   <nav id="mobile-bottom-nav" class="md:hidden bg-slate-900/95 border-t border-slate-800/80 px-2 py-1 flex items-center justify-around z-30 shrink-0 backdrop-blur-xl w-full max-w-full">
     <button id="mobile-nav-btn-plan" onclick="handleMobileNavPlan()" class="flex-1 flex flex-col items-center justify-center p-1 text-brand-400 font-semibold text-[10px] active:scale-95 transition-all">
@@ -2850,6 +3012,6 @@
   <!-- Çoklu Dil ve Çeviri Motoru (TR / EN) -->
   <script src="translations.js?v=3.2"></script>
   <!-- V2 JavaScript Uygulama Mantığı -->
-  <script src="app.js?v=4.0"></script>
+  <script src="app.js?v=4.1"></script>
 </body>
 </html>
