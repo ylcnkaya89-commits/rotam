@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v24 (Camper Profiles, Trailer Safety & Slope Guard)
-const CACHE_NAME = 'rotam-cache-v24';
+// Rotam PWA Service Worker - v25 (Streamlined Homepage & Route-Reactive Stream Panel)
+const CACHE_NAME = 'rotam-cache-v25';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

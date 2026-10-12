@@ -136,7 +136,7 @@
         <span class="hidden lg:inline" data-i18n="nav_plan">Rota Planla</span>
         <span class="lg:hidden" data-i18n="mobile_nav_plan">Rota</span>
       </button>
-      <button id="nav-btn-stream" onclick="toggleRightPanel()" class="flex items-center space-x-1.5 px-2.5 lg:px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all cursor-pointer whitespace-nowrap" title="Rotadaki Keşifler ve Yolculuk Akışı">
+      <button id="nav-btn-stream" onclick="toggleRightPanel()" class="hidden items-center space-x-1.5 px-2.5 lg:px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all cursor-pointer whitespace-nowrap" title="Rotadaki Keşifler ve Yolculuk Akışı">
         <i data-lucide="compass" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
         <span class="hidden xl:inline" data-i18n="nav_stream">Keşif & Akış</span>
         <span class="xl:hidden">Akış</span>
@@ -1522,7 +1522,7 @@
       </div>
 
       <!-- SAĞ ÇEKMECE / PANEL TOGGLE (KEŞİF & ZAMAN ÇİZELGESİ) -->
-      <button id="btn-toggle-right-panel" onclick="toggleRightPanel()" class="hidden md:flex absolute top-14 right-3 sm:top-16 sm:right-4 z-[1030] glass-panel p-2.5 rounded-xl border border-slate-800 text-slate-300 hover:text-white hover:border-amber-500/40 shadow-xl items-center space-x-1.5 text-xs transition-all cursor-pointer">
+      <button id="btn-toggle-right-panel" onclick="toggleRightPanel()" class="hidden absolute top-14 right-3 sm:top-16 sm:right-4 z-[1030] glass-panel p-2.5 rounded-xl border border-slate-800 text-slate-300 hover:text-white hover:border-amber-500/40 shadow-xl items-center space-x-1.5 text-xs transition-all cursor-pointer">
         <i data-lucide="compass" class="w-4 h-4 text-amber-400"></i>
         <span data-i18n="nav_stream">Keşif & Akış</span>
         <span id="badge-right-panel-poi-count" class="hidden px-1.5 py-0.5 bg-amber-500/20 text-amber-300 rounded-full text-[10px] font-bold border border-amber-500/30">0</span>
@@ -1559,7 +1559,7 @@
             <p class="text-[11px] text-slate-400" data-i18n="corridor_desc">Seçili güzergah boyunca keşfedilecek tarihi, doğal ve gastronomik noktalar.</p>
 
             <!-- Kategori Filtre Butonları (Katlanabilir ve Kompakt) -->
-            <details id="sidebar-corridor-filters-details" class="group mt-2.5 border-t border-slate-800/80 pt-2 text-[11px]" open>
+            <details id="sidebar-corridor-filters-details" class="group mt-2.5 border-t border-slate-800/80 pt-2 text-[11px]">
               <summary class="flex items-center justify-between cursor-pointer py-1 text-slate-300 hover:text-white font-semibold select-none">
                 <span class="flex items-center space-x-1.5 text-xs text-slate-300">
                   <span>⚡</span>

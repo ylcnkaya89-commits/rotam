@@ -356,6 +356,10 @@ function initMap() {
   // Map Click Listener to add waypoints & auto-collapse filters on mobile
   map.on('click', async (e) => {
     dismissQuickPlacePreview();
+    const rightPanel = document.getElementById('right-panel');
+    if (rightPanel && !rightPanel.classList.contains('hidden') && window.innerWidth < 1024) {
+      closeRightPanel();
+    }
     if (window.innerWidth < 768) {
       const container = document.getElementById('map-filter-pills-container');
       if (container && !container.classList.contains('hidden')) {
@@ -569,9 +573,7 @@ function dismissSplashScreen() {
 
 // Homepage Hero Planner Toggle
 function showHomepagePlanner() {
-  if (window.innerWidth < 768) {
-    closeRightPanel();
-  }
+  closeRightPanel();
   const sidebar = document.getElementById('sidebar');
   if (window.innerWidth >= 768 && sidebar) {
     sidebar.classList.remove('hidden');
@@ -2146,6 +2148,20 @@ function clearRouteDisplay() {
   document.getElementById('mobile-home-prompt-card')?.classList.remove('hidden');
   document.getElementById('mobile-bottom-bar')?.classList.remove('hidden');
   document.getElementById('badge-right-panel-poi-count')?.classList.add('hidden');
+  document.getElementById('badge-header-poi-count')?.classList.add('hidden');
+
+  // Keşif & Akış paneli ve tetikleyicilerini anasayfada tamamen gizle
+  closeRightPanel();
+  const toggleBtn = document.getElementById('btn-toggle-right-panel');
+  if (toggleBtn) {
+    toggleBtn.classList.add('hidden');
+    toggleBtn.classList.remove('flex');
+  }
+  const navStreamBtn = document.getElementById('nav-btn-stream');
+  if (navStreamBtn) {
+    navStreamBtn.classList.add('hidden');
+    navStreamBtn.classList.remove('flex');
+  }
 
   dismissQuickPlacePreview();
   updatePoiCategoryFilterUI();
@@ -2386,6 +2402,18 @@ async function calculateRouteMain() {
     document.getElementById('btn-export-gpx')?.removeAttribute('disabled');
     document.getElementById('btn-open-gmaps')?.removeAttribute('disabled');
     document.getElementById('btn-save-route-modal')?.removeAttribute('disabled');
+
+    // Keşif & Akış Sekmeleri: Sadece rota oluşturulunca aktifleşir, anasayfada yer kaplamaz
+    const toggleBtn = document.getElementById('btn-toggle-right-panel');
+    if (toggleBtn && (!window.LiveNavigation || !window.LiveNavigation.isActive)) {
+      toggleBtn.classList.remove('hidden');
+      toggleBtn.classList.add('flex');
+    }
+    const navStreamBtn = document.getElementById('nav-btn-stream');
+    if (navStreamBtn) {
+      navStreamBtn.classList.remove('hidden');
+      navStreamBtn.classList.add('flex');
+    }
 
     // Mobile mini cockpit
     const bottomBar = document.getElementById('mobile-bottom-bar');
@@ -3705,12 +3733,22 @@ function closeRightPanel() {
 
   panel.classList.add('hidden');
   panel.classList.remove('flex');
-  if (toggleBtn && (!window.LiveNavigation || !window.LiveNavigation.isActive)) {
-    toggleBtn.classList.remove('hidden');
+  if (toggleBtn) {
+    if ((!window.LiveNavigation || !window.LiveNavigation.isActive) && state.routeData) {
+      toggleBtn.classList.remove('hidden');
+      toggleBtn.classList.add('flex');
+    } else {
+      toggleBtn.classList.add('hidden');
+      toggleBtn.classList.remove('flex');
+    }
   }
   if (navBtn) {
     navBtn.classList.remove('bg-slate-800', 'text-white', 'border', 'border-amber-500/40');
     navBtn.classList.add('text-slate-300');
+    if (!state.routeData) {
+      navBtn.classList.add('hidden');
+      navBtn.classList.remove('flex');
+    }
   }
   if (mapControls) {
     mapControls.classList.remove('shifted');
@@ -3742,6 +3780,16 @@ function switchRightTab(tab) {
     if (contentDiscover) contentDiscover.classList.add('hidden');
   }
 }
+
+// ESC tuşu ile açık olan sağ paneli kapatma
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const rightPanel = document.getElementById('right-panel');
+    if (rightPanel && !rightPanel.classList.contains('hidden')) {
+      closeRightPanel();
+    }
+  }
+});
 
 // Elevation Canvas & API Setup
 async function fetchAndDisplayElevation(coords) {
