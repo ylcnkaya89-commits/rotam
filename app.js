@@ -6016,7 +6016,7 @@ async function testAndSaveFirebaseEndpoint() {
   }
 
   try {
-    const testUrl = `${rawUrl}/incidents.json?limitToLast=1`;
+    const testUrl = `${rawUrl}/incidents.json`;
     const res = await fetch(testUrl, { method: 'GET', mode: 'cors' });
 
     if (res.ok) {
@@ -9492,7 +9492,7 @@ const RotamCommunity = {
     this.cleanExpired();
     const ep = this.getEndpoint();
     try {
-      const res = await fetch(`${ep}.json?limitToLast=50`, { method: 'GET' });
+      const res = await fetch(`${ep}.json`, { method: 'GET' });
       if (res.ok) {
         const data = await res.json();
         if (data && typeof data === 'object') {
