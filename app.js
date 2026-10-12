@@ -5974,9 +5974,9 @@ function initFirebaseAdminUI() {
   const msg = document.getElementById('firebase-sync-status-msg');
   if (!urlInp || !badge) return;
 
-  const currentEp = (typeof RotamCommunity !== 'undefined' && RotamCommunity.getRawEndpoint)
+  const currentEp = (typeof RotamCommunity !== 'undefined' && RotamCommunity.getRawEndpoint && RotamCommunity.getRawEndpoint())
     ? RotamCommunity.getRawEndpoint()
-    : (localStorage.getItem('rotam_firebase_endpoint') || '');
+    : (localStorage.getItem('rotam_firebase_endpoint') || 'https://rotam-live-default-rtdb.firebaseio.com');
 
   urlInp.value = currentEp;
 
@@ -9303,7 +9303,7 @@ const RotamCommunity = {
   dismissedHazardIds: new Set(),
   layerVisible: true,
   eventSource: null,
-  cloudEndpoint: 'https://rotam-community-live-default-rtdb.europe-west1.firebasedatabase.app/incidents',
+  cloudEndpoint: 'https://rotam-live-default-rtdb.firebaseio.com/incidents',
 
   // Pre-seeded realistic community hazards across Turkey routes
   seedDefaults: [
@@ -9409,11 +9409,10 @@ const RotamCommunity = {
       this.eventSource = null;
     }
 
-    const rawEp = this.getRawEndpoint();
-    if (!rawEp || rawEp.includes('rotam-community-live-default-rtdb')) return;
+    const ep = this.getEndpoint();
+    if (!ep || ep.includes('rotam-community-live-default-rtdb')) return;
 
     try {
-      const ep = this.getEndpoint();
       this.eventSource = new EventSource(`${ep}.json`);
 
       this.eventSource.addEventListener('put', (e) => {
