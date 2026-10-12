@@ -917,6 +917,8 @@ body.sunlight-mode .leaflet-container {
   color: #04443f;
   border-color: #ffffff;
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+}
+
 /* Camper (Karavan) Mode Styling */
 .camper-preset-btn.active {
   border-color: rgba(245, 158, 11, 0.8) !important;

@@ -32,40 +32,82 @@ const state = {
 };
 window.state = state;
 
-// Camper Profile Presets (Alkoven, Campervan, Çekme Karavan)
+// Camper Profile Presets (Alkoven, Campervan, Büyük Çekme, Kompakt O1, Tam Entegre)
 const CAMPER_PRESETS = {
   alcove: {
     type: 'alcove',
     title: 'Motokaravan (Alkovenli / Yarı Entegre)',
+    title_short: 'Motokaravan',
     height: 3.10,
     width: 2.35,
     length: 6.80,
     weight: 3.50,
     avoidLowBridges: true,
     preferWideRoads: true,
-    maxSlopeWarning: 8
+    maxSlopeWarning: 8,
+    speedLimitHighway: 110,
+    speedLimitDivided: 100,
+    speedLimitIntercity: 80
   },
   van: {
     type: 'van',
     title: 'Campervan (Panelvan / Motokaravan)',
+    title_short: 'Campervan',
     height: 2.65,
     width: 2.05,
     length: 5.99,
     weight: 3.20,
     avoidLowBridges: true,
     preferWideRoads: true,
-    maxSlopeWarning: 9
+    maxSlopeWarning: 9,
+    speedLimitHighway: 110,
+    speedLimitDivided: 100,
+    speedLimitIntercity: 80
   },
   trailer: {
     type: 'trailer',
-    title: 'Çekme Karavan (Araç + Karavan)',
+    title: 'Büyük Çekme Karavan (+750kg O2)',
+    title_short: 'Büyük Çekme Karavan',
     height: 2.60,
     width: 2.30,
     length: 11.50,
     weight: 4.20,
     avoidLowBridges: true,
     preferWideRoads: true,
-    maxSlopeWarning: 7
+    maxSlopeWarning: 7,
+    speedLimitHighway: 100, // KTK Madde 100 römork kuralı
+    speedLimitDivided: 90,
+    speedLimitIntercity: 70
+  },
+  compact_trailer: {
+    type: 'compact_trailer',
+    title: 'Kompakt Çekme Karavan (O1 / 750kg altı)',
+    title_short: 'Kompakt Karavan (O1)',
+    height: 2.20,
+    width: 2.05,
+    length: 8.50,
+    weight: 2.40,
+    avoidLowBridges: true,
+    preferWideRoads: false,
+    maxSlopeWarning: 9,
+    speedLimitHighway: 100, // KTK Madde 100 römork kuralı
+    speedLimitDivided: 90,
+    speedLimitIntercity: 70
+  },
+  integrated: {
+    type: 'integrated',
+    title: 'Tam Entegre Karavan (A-Class Liner)',
+    title_short: 'Tam Entegre Karavan',
+    height: 3.25,
+    width: 2.45,
+    length: 8.50,
+    weight: 4.50,
+    avoidLowBridges: true,
+    preferWideRoads: true,
+    maxSlopeWarning: 7,
+    speedLimitHighway: 110,
+    speedLimitDivided: 100,
+    speedLimitIntercity: 80
   }
 };
 
@@ -895,6 +937,7 @@ function syncCamperProfileUI() {
   const chkBridge = document.getElementById('camper-chk-lowbridge');
   const chkWide = document.getElementById('camper-chk-wideroads');
   const chkSlope = document.getElementById('camper-chk-slopelimit');
+  const slopeLabel = document.getElementById('camper-slope-chk-label');
 
   if (hInput) hInput.value = Number(p.height).toFixed(2);
   if (wInput) wInput.value = Number(p.width).toFixed(2);
@@ -903,6 +946,10 @@ function syncCamperProfileUI() {
   if (chkBridge) chkBridge.checked = p.avoidLowBridges !== false;
   if (chkWide) chkWide.checked = p.preferWideRoads !== false;
   if (chkSlope) chkSlope.checked = Boolean(p.maxSlopeWarning);
+  if (slopeLabel) {
+    const thresh = p.maxSlopeWarning || 8;
+    slopeLabel.textContent = `Dik Eğim Uyarısı (%${thresh} üzeri rampa)`;
+  }
 
   document.querySelectorAll('.camper-preset-btn').forEach(btn => btn.classList.remove('active'));
   if (p.type && document.getElementById(`camper-preset-${p.type}`)) {
@@ -961,11 +1008,14 @@ function onCamperOptionChange() {
   const chkWide = document.getElementById('camper-chk-wideroads')?.checked;
   const chkSlope = document.getElementById('camper-chk-slopelimit')?.checked;
 
+  const curType = state.camperProfile?.type;
+  const defaultWarn = (curType && CAMPER_PRESETS[curType]) ? CAMPER_PRESETS[curType].maxSlopeWarning : (state.camperProfile?.maxSlopeWarning || 8);
+
   state.camperProfile = {
     ...(state.camperProfile || CAMPER_PRESETS.alcove),
     avoidLowBridges: chkBridge !== false,
     preferWideRoads: chkWide !== false,
-    maxSlopeWarning: chkSlope ? 8 : 15
+    maxSlopeWarning: chkSlope ? defaultWarn : 15
   };
 
   try {
@@ -997,7 +1047,15 @@ function updateCamperSafetyUI(route) {
   const alertText = document.getElementById('camper-slope-alert-text');
 
   if (clearanceEl) clearanceEl.textContent = `${Number(p.height).toFixed(2)} m Korumalı`;
-  if (widthEl) widthEl.textContent = p.preferWideRoads ? 'Geniş Asfalt & Ana Arterler' : 'Standart Güzergah';
+  if (widthEl) {
+    if (p.type === 'trailer' || p.type === 'integrated') {
+      widthEl.textContent = 'Geniş Asfalt & Bölünmüş Yol Önceliği (Uzun Taşıt)';
+    } else if (p.preferWideRoads) {
+      widthEl.textContent = 'Geniş Asfalt & Ana Arterler';
+    } else {
+      widthEl.textContent = 'Standart Güzergah';
+    }
+  }
 
   const slope = state.camperSlopeAnalysis?.maxSlope || 0;
   if (slopeEl) {
@@ -1019,7 +1077,13 @@ function updateCamperSafetyUI(route) {
       statusBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30';
     }
     if (alertBox) alertBox.classList.remove('hidden');
-    if (alertText) alertText.textContent = `Bu güzergahta maksimum %${slope} eğimli dik rampa/geçit bulunmaktadır. Karavan ile inişlerde motor kompresyon freni kullanın, aşırı balata ısınmasından kaçının.`;
+    if (alertText) {
+      if (p.type === 'trailer' || p.type === 'compact_trailer') {
+        alertText.textContent = `Bu güzergahta maksimum %${slope} eğimli dik rampa/geçit bulunmaktadır. Çekme karavan ile inişlerde çeki demiri salınımına (snaking/balıklama) dikkat edin, motor kompresyon freni kullanıp römork fren balatalarını aşırı ısıtmayın.`;
+      } else {
+        alertText.textContent = `Bu güzergahta maksimum %${slope} eğimli dik rampa/geçit bulunmaktadır. Karavan ile inişlerde motor kompresyon freni kullanın, aşırı balata ısınmasından kaçının.`;
+      }
+    }
   } else {
     if (statusBadge) {
       statusBadge.textContent = '✅ Güvenli & Uygun';
@@ -2370,9 +2434,10 @@ async function fetchMultiRouteAlternatives(points) {
       const valCamper = await fetchValhallaRoute(points, 'camper');
       if (valCamper) {
         const cp = state.camperProfile || CAMPER_PRESETS.alcove;
+        const camperTitle = cp.title_short || 'Karavan';
         results.push({
           id: 'valhalla-camper-safe',
-          title: `🛡️ Karavan Güvenli (${cp.height}m Köprü/Geniş Yol)`,
+          title: `🛡️ ${camperTitle} Güvenli (${Number(cp.height).toFixed(2)}m Köprü / ${Number(cp.length).toFixed(1)}m Boy)`,
           type: 'camper-safe',
           distance: valCamper.distance,
           duration: valCamper.duration,
@@ -6212,13 +6277,27 @@ const LiveNavigation = {
     }
 
     if (vehicle === 'camper') {
-      // KARAVAN / KAMP TAŞITI (M1):
-      if (isYIDMotorway || isKGMMotorway) return 110;
-      if (isDividedRoad) return 100;
+      // KARAVAN / KAMP TAŞITI (M1 & Römorklu Araçlar):
+      // Karayolları Trafik Yönetmeliği Madde 100: Römork takmış araçların azami hızı 10 km/s daha düşüktür.
+      const cp = (window.state && window.state.camperProfile) || CAMPER_PRESETS.alcove;
+      const isTrailer = cp.type === 'trailer' || cp.type === 'compact_trailer';
+
+      if (isTrailer) {
+        if (isYIDMotorway || isKGMMotorway) return cp.speedLimitHighway || 100;
+        if (isDividedRoad) return cp.speedLimitDivided || 90;
+        if (isUrbanArtery) return 60;
+        if (isSchoolZone) return 30;
+        if (isUrban) return 50;
+        return cp.speedLimitIntercity || 70;
+      }
+
+      // Motokaravanlar (Alkoven, Campervan, Tam Entegre):
+      if (isYIDMotorway || isKGMMotorway) return cp.speedLimitHighway || 110;
+      if (isDividedRoad) return cp.speedLimitDivided || 100;
       if (isUrbanArtery) return 70;
       if (isSchoolZone) return 30;
       if (isUrban) return 50;
-      return 80; // Şehirlerarası iki yönlü yol varsayılan
+      return cp.speedLimitIntercity || 80;
     }
 
     if (vehicle === 'bicycle') {
@@ -6700,7 +6779,12 @@ const LiveNavigation = {
 
     // Taşıta özel serbest sürüş başlangıç hız limiti
     const v = (window.state && window.state.currentVehicle) || 'motorcycle';
-    this.currentSpeedLimit = (v === 'motorcycle') ? 90 : (v === 'camper' ? 90 : (v === 'bicycle' ? 45 : 110));
+    let defaultCamperLimit = 90;
+    if (v === 'camper') {
+      const cp = (window.state && window.state.camperProfile) || CAMPER_PRESETS.alcove;
+      defaultCamperLimit = (cp.type === 'trailer' || cp.type === 'compact_trailer') ? 80 : 90;
+    }
+    this.currentSpeedLimit = (v === 'motorcycle') ? 90 : (v === 'camper' ? defaultCamperLimit : (v === 'bicycle' ? 45 : 110));
     const limitEl = document.getElementById('live-nav-speed-limit-val');
     if (limitEl) limitEl.textContent = this.currentSpeedLimit;
 
