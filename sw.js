@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v22 (Optimized Motorcycle Riding HUD Cockpit)
-const CACHE_NAME = 'rotam-cache-v22';
+// Rotam PWA Service Worker - v23 (Official Speed Limits & KTK Article 100 Engine)
+const CACHE_NAME = 'rotam-cache-v23';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

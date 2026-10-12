@@ -7,7 +7,7 @@
 // Global Application State
 const state = {
   lang: localStorage.getItem('rotam_lang') || 'tr',
-  currentVehicle: 'car', // 'car' | 'motorcycle' | 'camper' | 'bicycle' | 'walk'
+  currentVehicle: localStorage.getItem('rotam_vehicle') || 'motorcycle', // 'motorcycle' | 'car' | 'camper' | 'bicycle' | 'walk'
   selectedPreferences: new Set(['fastest']), // 'fastest', 'scenic', 'historic', 'nature', 'photo', 'beach', 'gastro', 'twisty', 'discovery', 'best'
   waypoints: [
     { id: 'start', type: 'start', name: '', lat: null, lon: null, marker: null },
@@ -832,6 +832,9 @@ window.handleMobileNavRideStart = handleMobileNavRideStart;
 // Vehicle Selection (Car, Moto, Camper, Bicycle, Walk)
 function selectVehicle(vehicle) {
   state.currentVehicle = vehicle;
+  try {
+    localStorage.setItem('rotam_vehicle', vehicle);
+  } catch (e) {}
   document.querySelectorAll('.vehicle-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.vehicle === vehicle);
   });
@@ -6074,6 +6077,7 @@ const LiveNavigation = {
   isOverviewMode: false,
   incidentMarkers: [],
   currentSpeedLimit: 90,
+  manualSpeedLimit: null,
   lastOverspeedWarningTime: 0,
   offRouteCounter: 0,
   isRerouting: false,
@@ -6124,17 +6128,111 @@ const LiveNavigation = {
     }
   },
 
-  getSpeedLimitForStep(streetName = '') {
+  getSpeedLimitForStep(step, streetName = '') {
+    // Manuel olarak kullanıcı bir hız sınırı belirlediyse bunu koru
+    if (this.manualSpeedLimit !== null && this.manualSpeedLimit !== undefined) {
+      return this.manualSpeedLimit;
+    }
+
+    const vehicle = (window.state && window.state.currentVehicle) || 'motorcycle';
+
+    // Step nesnesinde doğrudan OSM/Valhalla/OSRM'den gelen hız sınırı var mı?
+    if (step && typeof step === 'object') {
+      if (step.speed_limit && typeof step.speed_limit === 'number' && step.speed_limit > 0) {
+        return step.speed_limit;
+      }
+      if (step.maxspeed && typeof step.maxspeed === 'number' && step.maxspeed > 0) {
+        return step.maxspeed;
+      }
+      if (!streetName && step.name) {
+        streetName = step.name;
+      }
+      if (step.ref) {
+        streetName = `${streetName || ''} ${step.ref}`;
+      }
+    }
+
     const s = (streetName || '').toLowerCase();
-    if (s.includes('otoyol') || s.includes('otoban') || s.includes('kuzey marmara') || s.includes('o-') || s.includes('motorway')) {
-      return 130;
+
+    // 1. Yap-İşlet-Devret (YİD) Otoyolları:
+    // O-7 (Kuzey Marmara), O-5 (İstanbul-İzmir / Osmangazi), O-6 (1915 Çanakkale), O-21 (Ankara-Niğde), O-33 (Menemen-Çandarlı)
+    const isYIDMotorway = /\b(o-?7|o-?5|o-?6|o-?21|o-?33)\b/i.test(s) ||
+      s.includes('kuzey marmara') || s.includes('osmangazi') || s.includes('çanakkale otoyol') || s.includes('canakkale otoyol');
+
+    // 2. KGM İşletmesindeki Standart Otoyollar:
+    // O-1, O-2, O-3, O-4 (Anadolu Otoyolu), O-20 (Ankara Çevre), O-30, O-31, O-32, O-51, O-52, O-53, O-54
+    const isKGMMotorway = /\b(o-?[0-9]{1,2})\b/i.test(s) ||
+      s.includes('otoyol') || s.includes('otoban') || s.includes('motorway') ||
+      s.includes('tem otoyolu') || s.includes('tem ') || s.includes('avrupa otoyolu') || s.includes('anadolu otoyolu');
+
+    // 3. Bölünmüş Yollar (Devlet Yolları, Çevre Yolları, Duble Yollar):
+    // D-100, D-010, D-200, D-300, D-400, D-550, D-650, D-750, çevre yolları vb.
+    const isDividedRoad = /\b(d-?[0-9]{3})\b/i.test(s) ||
+      s.includes('d100') || s.includes('d-100') || s.includes('d200') || s.includes('d-200') ||
+      s.includes('d300') || s.includes('d-300') || s.includes('d400') || s.includes('d-400') ||
+      s.includes('d550') || s.includes('d-550') || s.includes('d650') || s.includes('d-650') ||
+      s.includes('çevre yolu') || s.includes('cevre yolu') || s.includes('ring road') ||
+      s.includes('ekspres') || s.includes('expressway') || s.includes('bölünmüş yol');
+
+    // 4. Şehir İçi Ana Arter / Geniş Bulvar (UKOME Kararlı):
+    // E-5 şehir içi kesimi, Sahil Yolu, Büyükdere Caddesi, Bağdat Caddesi, Bulvarlar
+    const isUrbanArtery = s.includes('bulvar') || s.includes('blv') || s.includes('sahil yolu') ||
+      s.includes('kordon') || s.includes('e-5') || s.includes('e5') || s.includes('büyükdere') || s.includes('inönü cd');
+
+    // 5. Okul / Hastane / Yavaş Sürüş Bölgesi:
+    const isSchoolZone = s.includes('okul') || s.includes('hastane') || s.includes('living_street') ||
+      s.includes('yavaş') || s.includes('yavas') || s.includes('site içi');
+
+    // 6. Şehir İçi Standart Cadde & Sokaklar:
+    const isUrban = s.includes('cd') || s.includes('caddesi') || s.includes('sokak') ||
+      s.includes('sk') || s.includes('mahalle') || s.includes('avenue') || s.includes('street');
+
+    // Taşıt Cinsine Göre Resmi Türkiye Hız Sınırları (Karayolları Trafik Yönetmeliği Madde 100):
+    if (vehicle === 'motorcycle') {
+      // MOTOSİKLET:
+      // Otoyollarda KGM ve YİD azami yasal hız sınırı 100 km/s'dir!
+      if (isYIDMotorway || isKGMMotorway) return 100;
+      if (isDividedRoad) return 90;
+      if (isUrbanArtery) return 70;
+      if (isSchoolZone) return 30;
+      if (isUrban) return 50;
+      return 80; // Şehirlerarası iki yönlü yol varsayılan
     }
-    if (s.includes('çevre yolu') || s.includes('cevre yolu') || s.includes('d-') || s.includes('d100') || s.includes('d200') || s.includes('d300') || s.includes('d400') || s.includes('bulvar') || s.includes('blv') || s.includes('expressway')) {
-      return 90;
+
+    if (vehicle === 'car') {
+      // OTOMOBİL:
+      // 2022 KGM Düzenlemesi: YİD otoyollar 140, KGM otoyollar 130 km/s
+      if (isYIDMotorway) return 140;
+      if (isKGMMotorway) return 130;
+      if (isDividedRoad) return 110;
+      if (isUrbanArtery) return 82; // UKOME 82 (+ %10 tolerans ile 90)
+      if (isSchoolZone) return 30;
+      if (isUrban) return 50;
+      return 90; // Şehirlerarası iki yönlü yol varsayılan
     }
-    if (s.includes('cd') || s.includes('caddesi') || s.includes('sokak') || s.includes('sk') || s.includes('mahalle') || s.includes('avenue') || s.includes('street')) {
-      return 50;
+
+    if (vehicle === 'camper') {
+      // KARAVAN / KAMP TAŞITI (M1):
+      if (isYIDMotorway || isKGMMotorway) return 110;
+      if (isDividedRoad) return 100;
+      if (isUrbanArtery) return 70;
+      if (isSchoolZone) return 30;
+      if (isUrban) return 50;
+      return 80; // Şehirlerarası iki yönlü yol varsayılan
     }
+
+    if (vehicle === 'bicycle') {
+      // BİSİKLET:
+      if (isSchoolZone) return 20;
+      if (isUrban) return 30;
+      return 45;
+    }
+
+    if (vehicle === 'walk') {
+      return 5;
+    }
+
+    // Genel Güvenli Varsayılan
     return 80;
   },
 
@@ -6438,6 +6536,41 @@ const LiveNavigation = {
     }
   },
 
+  cycleSpeedLimit() {
+    const isEn = (window.state && window.state.lang === 'en');
+    const vehicle = (window.state && window.state.currentVehicle) || 'motorcycle';
+    const commonLimits = [30, 50, 70, 80, 82, 90, 100, 110, 120, 130, 140];
+
+    const cur = this.currentSpeedLimit || 90;
+    const curIdx = commonLimits.indexOf(cur);
+    let nextLimit;
+    if (curIdx === -1 || curIdx >= commonLimits.length - 1) {
+      nextLimit = commonLimits[0];
+    } else {
+      nextLimit = commonLimits[curIdx + 1];
+    }
+
+    this.manualSpeedLimit = nextLimit;
+    this.currentSpeedLimit = nextLimit;
+
+    const limitEl = document.getElementById('live-nav-speed-limit-val');
+    if (limitEl) limitEl.textContent = this.currentSpeedLimit;
+
+    const vehicleIcon = vehicle === 'motorcycle' ? '🏍️' : (vehicle === 'camper' ? '🚐' : (vehicle === 'bicycle' ? '🚲' : '🚗'));
+    showToast(isEn ? `${vehicleIcon} Speed Limit: ${nextLimit} km/h (Manual)` : `${vehicleIcon} Hız Sınırı: ${nextLimit} km/s (Manuel Ayarlandı)`, 'info');
+  },
+
+  resetSpeedLimitToAuto() {
+    this.manualSpeedLimit = null;
+    const curStep = this.steps[this.currentStepIndex];
+    const curInfo = this.getManeuverInfo(curStep);
+    this.currentSpeedLimit = this.getSpeedLimitForStep(curStep, curInfo.street);
+    const limitEl = document.getElementById('live-nav-speed-limit-val');
+    if (limitEl) limitEl.textContent = this.currentSpeedLimit;
+    const isEn = (window.state && window.state.lang === 'en');
+    showToast(isEn ? 'Speed Limit: Auto road detection restored' : 'Hız Sınırı: Otomatik yol tespitine dönüldü', 'info');
+  },
+
   updateManeuverUI(distMeters = 0) {
     const isEn = (window.state && window.state.lang === 'en');
     const curStep = this.steps[this.currentStepIndex];
@@ -6446,7 +6579,7 @@ const LiveNavigation = {
     const curInfo = this.getManeuverInfo(curStep);
 
     // Update Speed Limit Sign
-    this.currentSpeedLimit = this.getSpeedLimitForStep(curInfo.street);
+    this.currentSpeedLimit = this.getSpeedLimitForStep(curStep, curInfo.street);
     const limitEl = document.getElementById('live-nav-speed-limit-val');
     if (limitEl) limitEl.textContent = this.currentSpeedLimit;
 
@@ -6563,8 +6696,13 @@ const LiveNavigation = {
     if (distEl) distEl.textContent = 'LIVE';
     if (suffixEl) suffixEl.textContent = '';
     if (nameEl) nameEl.textContent = isEn ? 'Free Ride Mode' : 'Serbest Sürüş Modu';
-    if (subEl) subEl.textContent = isEn ? 'Speed & Road Tracking Active' : 'Yol & Hız Takibi Aktif';
     if (nextPill) nextPill.classList.add('hidden');
+
+    // Taşıta özel serbest sürüş başlangıç hız limiti
+    const v = (window.state && window.state.currentVehicle) || 'motorcycle';
+    this.currentSpeedLimit = (v === 'motorcycle') ? 90 : (v === 'camper' ? 90 : (v === 'bicycle' ? 45 : 110));
+    const limitEl = document.getElementById('live-nav-speed-limit-val');
+    if (limitEl) limitEl.textContent = this.currentSpeedLimit;
 
     let initialCoord = [41.0082, 28.9784];
     if (state.userLocation && state.userLocation.lat && state.userLocation.lon) {
@@ -6732,6 +6870,7 @@ const LiveNavigation = {
     this.isActive = false;
     this.isFreeRide = false;
     this.wasFreeRide = wasFree;
+    this.manualSpeedLimit = null;
     this.stopGPS();
     this.stopSimulation();
     this.releaseWakeLock();
@@ -7137,19 +7276,27 @@ const LiveNavigation = {
     const speedEl = document.getElementById('live-nav-speed-val');
     if (speedEl) speedEl.textContent = Math.round(this.speedKmH);
 
-    // Overspeed Danger Glow & Audio Warning
+    // Overspeed Danger Glow & Audio Warning (Yasal %10 Radar Toleransı)
     const speedoBox = document.getElementById('live-nav-speedo-box');
     const limitBadge = document.getElementById('live-nav-speed-limit-badge');
-    if (this.speedKmH > (this.currentSpeedLimit || 90) + 5) {
+    const limit = this.currentSpeedLimit || 90;
+    const toleranceFineSpeed = Math.floor(limit * 1.10); // Yasal %10 ceza eşiği (KTK Madde 51)
+
+    // Görsel ikaz: Hız sınırı + 2 km/s aşıldığında
+    if (this.speedKmH > limit + 2) {
       if (speedoBox) speedoBox.classList.add('overspeed');
       if (limitBadge) limitBadge.classList.add('overspeed');
-      const now = Date.now();
-      if (now - (this.lastOverspeedWarningTime || 0) > 30000) {
-        this.lastOverspeedWarningTime = now;
-        this.playNavSound('overspeed');
-        if (this.voiceEnabled) {
-          const isEn = (window.state && window.state.lang === 'en');
-          this.speak(isEn ? 'Speed limit exceeded!' : 'Hız sınırını aştınız!');
+
+      // Sesli ikaz: Yasal %10 ceza toleransı aşıldığında (radar riski)
+      if (this.speedKmH >= toleranceFineSpeed) {
+        const now = Date.now();
+        if (now - (this.lastOverspeedWarningTime || 0) > 30000) {
+          this.lastOverspeedWarningTime = now;
+          this.playNavSound('overspeed');
+          if (this.voiceEnabled) {
+            const isEn = (window.state && window.state.lang === 'en');
+            this.speak(isEn ? `Caution: Speed limit is ${limit}!` : `Dikkat: Hız sınırı ${limit}! Yasal toleransı aştınız.`);
+          }
         }
       }
     } else {

@@ -1169,7 +1169,7 @@
           </div>
 
           <!-- Resmi Hız Sınırı Tabelası (Türk & Avrupa Standartı Kırmızı Halka) -->
-          <div id="live-nav-speed-limit-badge" class="gmaps-speed-limit-sign rounded-full w-13 h-13 sm:w-14 sm:h-14 flex flex-col items-center justify-center shadow-2xl transition-all shrink-0" title="Yol Hız Sınırı">
+          <div id="live-nav-speed-limit-badge" onclick="LiveNavigation.cycleSpeedLimit()" class="gmaps-speed-limit-sign rounded-full w-13 h-13 sm:w-14 sm:h-14 flex flex-col items-center justify-center shadow-2xl transition-all shrink-0 cursor-pointer active:scale-95 select-none" title="Yol Hız Sınırı (Değiştirmek için dokunun)">
             <span id="live-nav-speed-limit-val" class="text-lg sm:text-xl font-black text-slate-900 leading-none">90</span>
             <span class="text-[7px] font-black text-slate-500 uppercase leading-none mt-0.5 tracking-tighter">LİMİT</span>
           </div>
