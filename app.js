@@ -10554,19 +10554,29 @@ const RotamTraffic = {
           apiKey: apiKey,
           maxZoom: 22,
           tileSize: 256,
-          opacity: 0.85,
+          opacity: 0.88,
           zIndex: 450,
+          pane: 'overlayPane',
           attribution: '&copy; <a href="https://www.tomtom.com" target="_blank" rel="noopener">TomTom Traffic</a>'
         }
       );
 
+      let tileErrorNotified = false;
       this.layer.on('tileerror', (e) => {
         console.warn('TomTom trafik katmanı karo hatası:', e);
+        if (!tileErrorNotified) {
+          tileErrorNotified = true;
+          showToast('⚠️ TomTom trafik karoları yüklenemedi. API anahtarınızı veya kotanızı kontrol edin.', 'warning');
+          setTimeout(() => { tileErrorNotified = false; }, 10000);
+        }
       });
     }
 
     if (!window.map.hasLayer(this.layer)) {
       window.map.addLayer(this.layer);
+      if (typeof this.layer.bringToFront === 'function') {
+        this.layer.bringToFront();
+      }
     }
 
     this.isVisible = true;
