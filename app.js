@@ -428,6 +428,11 @@ function initMap() {
   if (typeof RotamDisplay !== 'undefined') {
     RotamDisplay.init();
   }
+
+  // Initialize TomTom Real-time Traffic Flow Engine
+  if (typeof RotamTraffic !== 'undefined') {
+    RotamTraffic.init();
+  }
 }
 
 // Proactive user location cache warmer
@@ -4813,6 +4818,9 @@ function switchAdminTab(tab) {
     RotamTelemetry.renderAdminUI();
   } else if (tab === 'system') {
     checkStorageQuota();
+    if (typeof RotamTraffic !== 'undefined') {
+      RotamTraffic.renderAdminUI();
+    }
   }
   updateAdminStats();
   initIcons();
@@ -6253,6 +6261,27 @@ async function runApiHealthChecks() {
     }
   ];
 
+  if (typeof RotamTraffic !== 'undefined' && RotamTraffic.hasApiKey()) {
+    apis.push({
+      id: 'tomtom',
+      name: 'TomTom Canlı Trafik',
+      url: `https://api.tomtom.com/traffic/map/4/tile/flow/relative0/10/586/394.png?key=${encodeURIComponent(RotamTraffic.getApiKey())}&tileSize=256`,
+      dotId: 'api-dot-tomtom',
+      badgeId: 'api-status-tomtom',
+      pingId: 'api-ping-tomtom'
+    });
+  } else {
+    const tomtomBadge = document.getElementById('api-status-tomtom');
+    const tomtomDot = document.getElementById('api-dot-tomtom');
+    const tomtomPing = document.getElementById('api-ping-tomtom');
+    if (tomtomBadge) {
+      tomtomBadge.textContent = 'Key Eksik';
+      tomtomBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400';
+    }
+    if (tomtomDot) tomtomDot.className = 'w-2 h-2 rounded-full bg-slate-600';
+    if (tomtomPing) tomtomPing.textContent = 'Ayarlanmadı';
+  }
+
   for (const api of apis) {
     const dot = document.getElementById(api.dotId);
     const badge = document.getElementById(api.badgeId);
@@ -6814,6 +6843,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize real-time telemetry (#34)
   if (typeof RotamTelemetry !== 'undefined') {
     RotamTelemetry.init();
+  }
+
+  // Initialize TomTom Real-time Traffic Flow Engine
+  if (typeof RotamTraffic !== 'undefined') {
+    RotamTraffic.init();
   }
 
   // Restore personalized preferences (#27)
@@ -10446,6 +10480,282 @@ const RotamStoryGuide = {
 };
 
 window.RotamStoryGuide = RotamStoryGuide;
+
+// ==========================================
+// ROTAM TOMTOM REALTIME TRAFFIC FLOW OVERLAY ENGINE
+// ==========================================
+const RotamTraffic = {
+  layer: null,
+  isVisible: false,
+  storageKey: 'rotam_tomtom_api_key',
+  refreshTimer: null,
+  REFRESH_INTERVAL_MS: 3 * 60 * 1000, // 3 dakikada bir otomatik karo tazeleme
+
+  getApiKey() {
+    try {
+      return (localStorage.getItem(this.storageKey) || '').trim();
+    } catch (e) {
+      return '';
+    }
+  },
+
+  setApiKey(key) {
+    const cleaned = (key || '').trim();
+    if (!cleaned) {
+      localStorage.removeItem(this.storageKey);
+    } else {
+      localStorage.setItem(this.storageKey, cleaned);
+    }
+    this.renderAdminUI();
+    this.updateUI();
+    if (this.isVisible) {
+      this.rebuildLayer();
+    }
+  },
+
+  hasApiKey() {
+    const k = this.getApiKey();
+    return Boolean(k && k.length >= 10);
+  },
+
+  init() {
+    this.updateUI();
+    this.renderAdminUI();
+  },
+
+  toggle() {
+    if (this.isVisible) {
+      this.hide();
+    } else {
+      if (!this.hasApiKey()) {
+        this.openModal();
+        return;
+      }
+      this.show();
+    }
+  },
+
+  show() {
+    if (!window.map) {
+      showToast('Harita henüz hazır değil.', 'warning');
+      return;
+    }
+    const apiKey = this.getApiKey();
+    if (!apiKey || apiKey.length < 10) {
+      this.openModal();
+      return;
+    }
+
+    if (!this.layer) {
+      // TomTom Traffic Flow Raster Tile URL (relative0: free-flow transparent, delays color-coded)
+      this.layer = L.tileLayer(
+        'https://api.tomtom.com/traffic/map/4/tile/flow/relative0/{z}/{x}/{y}.png?key={apiKey}&tileSize=256',
+        {
+          apiKey: apiKey,
+          maxZoom: 22,
+          tileSize: 256,
+          opacity: 0.85,
+          zIndex: 450,
+          attribution: '&copy; <a href="https://www.tomtom.com" target="_blank" rel="noopener">TomTom Traffic</a>'
+        }
+      );
+
+      this.layer.on('tileerror', (e) => {
+        console.warn('TomTom trafik katmanı karo hatası:', e);
+      });
+    }
+
+    if (!window.map.hasLayer(this.layer)) {
+      window.map.addLayer(this.layer);
+    }
+
+    this.isVisible = true;
+    this.startRefreshTimer();
+    this.updateUI();
+    showToast('🚦 Canlı TomTom Trafik Yoğunluğu Katmanı Açıldı', 'success');
+  },
+
+  hide() {
+    if (this.layer && window.map && window.map.hasLayer(this.layer)) {
+      window.map.removeLayer(this.layer);
+    }
+    this.isVisible = false;
+    this.stopRefreshTimer();
+    this.updateUI();
+    showToast('🚦 Canlı Trafik Katmanı Kapatıldı', 'info');
+  },
+
+  rebuildLayer() {
+    const wasVisible = this.isVisible;
+    if (this.layer && window.map && window.map.hasLayer(this.layer)) {
+      window.map.removeLayer(this.layer);
+    }
+    this.layer = null;
+    if (wasVisible && this.hasApiKey()) {
+      this.show();
+    }
+  },
+
+  startRefreshTimer() {
+    this.stopRefreshTimer();
+    this.refreshTimer = setInterval(() => {
+      if (this.isVisible && this.layer && !document.hidden) {
+        try {
+          if (typeof this.layer.redraw === 'function') {
+            this.layer.redraw();
+          }
+        } catch (e) {}
+      }
+    }, this.REFRESH_INTERVAL_MS);
+  },
+
+  stopRefreshTimer() {
+    if (this.refreshTimer) {
+      clearInterval(this.refreshTimer);
+      this.refreshTimer = null;
+    }
+  },
+
+  openModal() {
+    const modal = document.getElementById('modal-traffic-setup');
+    const input = document.getElementById('traffic-modal-api-key');
+    if (input) {
+      input.value = this.getApiKey();
+    }
+    if (modal) {
+      modal.classList.remove('hidden');
+    }
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  },
+
+  closeModal() {
+    const modal = document.getElementById('modal-traffic-setup');
+    if (modal) modal.classList.add('hidden');
+  },
+
+  saveKeyAndActivate() {
+    const input = document.getElementById('traffic-modal-api-key');
+    const key = (input ? input.value : '').trim();
+    if (!key || key.length < 10) {
+      showToast('Lütfen geçerli bir TomTom API anahtarı girin.', 'warning');
+      return;
+    }
+    this.setApiKey(key);
+    this.closeModal();
+    this.show();
+  },
+
+  renderAdminUI() {
+    const input = document.getElementById('admin-tomtom-api-key');
+    const badge = document.getElementById('admin-traffic-badge');
+    const key = this.getApiKey();
+
+    if (input && !input.matches(':focus')) {
+      input.value = key;
+    }
+
+    if (badge) {
+      if (this.hasApiKey()) {
+        badge.textContent = 'Key Kayıtlı';
+        badge.className = 'text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono font-bold';
+      } else {
+        badge.textContent = 'Ayarlanmadı';
+        badge.className = 'text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full font-mono font-bold';
+      }
+    }
+  },
+
+  saveKeyFromAdmin() {
+    const input = document.getElementById('admin-tomtom-api-key');
+    const key = (input ? input.value : '').trim();
+    this.setApiKey(key);
+    if (key) {
+      showToast('TomTom API anahtarı kaydedildi 🚦', 'success');
+    } else {
+      showToast('TomTom API anahtarı kaldırıldı', 'info');
+    }
+  },
+
+  async testAdminKey() {
+    const input = document.getElementById('admin-tomtom-api-key');
+    const key = (input && input.value ? input.value.trim() : this.getApiKey());
+    if (!key || key.length < 10) {
+      showToast('Önce bir TomTom API anahtarı giriniz.', 'warning');
+      return;
+    }
+
+    showToast('TomTom API bağlantısı test ediliyor...', 'info');
+    const dot = document.getElementById('api-dot-tomtom');
+    const badge = document.getElementById('api-status-tomtom');
+    const ping = document.getElementById('api-ping-tomtom');
+
+    const testUrl = `https://api.tomtom.com/traffic/map/4/tile/flow/relative0/10/586/394.png?key=${encodeURIComponent(key)}&tileSize=256`;
+    const startTime = performance.now();
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const res = await fetch(testUrl, { signal: controller.signal, mode: 'cors' });
+      clearTimeout(timeoutId);
+      const elapsed = Math.round(performance.now() - startTime);
+
+      if (res.ok) {
+        if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+        if (badge) {
+          badge.textContent = 'Aktif (HTTP 200)';
+          badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+        }
+        if (ping) ping.textContent = `${elapsed} ms`;
+        showToast(`✅ TomTom API bağlantısı başarılı! (${elapsed} ms)`, 'success');
+      } else if (res.status === 403 || res.status === 401) {
+        if (dot) dot.className = 'w-2 h-2 rounded-full bg-rose-500';
+        if (badge) {
+          badge.textContent = `Yetkisiz (HTTP ${res.status})`;
+          badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30';
+        }
+        if (ping) ping.textContent = `${elapsed} ms`;
+        showToast('❌ TomTom API Anahtarı yetkisiz veya hatalı (HTTP ' + res.status + ')', 'error');
+      } else {
+        throw new Error('HTTP ' + res.status);
+      }
+    } catch (e) {
+      const elapsed = Math.round(performance.now() - startTime);
+      if (dot) dot.className = 'w-2 h-2 rounded-full bg-rose-500';
+      if (badge) {
+        badge.textContent = 'Hata';
+        badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30';
+      }
+      if (ping) ping.textContent = `${elapsed} ms`;
+      showToast('TomTom test hatası: ' + e.message, 'error');
+    }
+  },
+
+  updateUI() {
+    // 1. Desktop Floating Button (#btn-toggle-traffic)
+    const btnDesk = document.getElementById('btn-toggle-traffic');
+    if (btnDesk) {
+      if (this.isVisible) {
+        btnDesk.className = 'px-2.5 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white shadow-md shadow-rose-600/30 flex items-center space-x-1 transition-all active:scale-95';
+      } else {
+        btnDesk.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 flex items-center space-x-1 transition-all active:scale-95';
+      }
+    }
+
+    // 2. Mobile Popover (#mobile-traffic-status)
+    const mobStatus = document.getElementById('mobile-traffic-status');
+    if (mobStatus) {
+      if (this.isVisible) {
+        mobStatus.textContent = 'Açık';
+        mobStatus.className = 'text-[10px] text-emerald-400 font-bold';
+      } else {
+        mobStatus.textContent = 'Kapalı';
+        mobStatus.className = 'text-[10px] text-slate-400 font-mono';
+      }
+    }
+  }
+};
+
+window.RotamTraffic = RotamTraffic;
 
 // ==========================================
 // 8. ROTAM KAMPÇI ASİSTANI & DOĞA REHBERİ (OUTDOOR ASSISTANT)

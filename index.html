@@ -1431,6 +1431,11 @@
             <span>🚨</span>
             <span>Topluluk</span>
           </button>
+          <div class="h-4 w-px bg-slate-800 mx-0.5"></div>
+          <button id="btn-toggle-traffic" onclick="RotamTraffic.toggle()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 flex items-center space-x-1 transition-all active:scale-95" title="TomTom Canlı Trafik Yoğunluğu Katmanı">
+            <span>🚦</span>
+            <span>Trafik</span>
+          </button>
         </div>
       </div>
 
@@ -1475,6 +1480,12 @@
                 <span>🚨</span> <span>Topluluk</span>
               </span>
               <span id="mobile-community-status" class="text-[10px] text-emerald-400">Aktif</span>
+            </button>
+            <button id="btn-mobile-toggle-traffic" onclick="RotamTraffic.toggle(); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-bold text-rose-400 hover:bg-rose-500/10 flex items-center justify-between">
+              <span class="flex items-center space-x-1.5">
+                <span>🚦</span> <span>Canlı Trafik</span>
+              </span>
+              <span id="mobile-traffic-status" class="text-[10px] text-slate-400 font-mono">Kapalı</span>
             </button>
             <button onclick="RotamStoryGuide.toggleGuide(); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-bold text-amber-300 hover:bg-amber-500/10 flex items-center justify-between">
               <span class="flex items-center space-x-1.5">
@@ -2819,7 +2830,56 @@
                 <span id="api-status-photon" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Aktif</span>
                 <p id="api-ping-photon" class="text-[10px] text-slate-400 font-mono mt-0.5">-- ms</p>
               </div>
+            <!-- TomTom Traffic -->
+            <div class="p-3 rounded-xl bg-slate-950 border border-slate-800/80 flex items-center justify-between">
+              <div class="min-w-0">
+                <div class="flex items-center space-x-1.5">
+                  <span class="w-2 h-2 rounded-full bg-slate-600" id="api-dot-tomtom"></span>
+                  <span class="font-bold text-white text-xs">TomTom Canlı Trafik</span>
+                </div>
+                <p class="text-[10px] text-slate-500 truncate font-mono">api.tomtom.com</p>
+              </div>
+              <div class="text-right shrink-0">
+                <span id="api-status-tomtom" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">Bekleniyor</span>
+                <p id="api-ping-tomtom" class="text-[10px] text-slate-400 font-mono mt-0.5">-- ms</p>
+              </div>
             </div>
+          </div>
+        </div>
+
+        <!-- TomTom Canlı Trafik API Yapılandırması -->
+        <div class="glass-card p-4 rounded-2xl border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+            <div class="flex items-center space-x-2">
+              <span class="text-base">🚦</span>
+              <h4 class="font-bold text-white text-sm">TomTom Canlı Trafik (Traffic Flow)</h4>
+            </div>
+            <span id="admin-traffic-badge" class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full font-mono font-bold">Ayarlanmadı</span>
+          </div>
+          <p class="text-slate-400 text-xs leading-relaxed">
+            TomTom gerçek zamanlı trafik akış katmanını (yeşil, sarı, turuncu, kırmızı yoğunluk çizgileri) harita üzerine şeffaf bir katman olarak ekler. Ücretsiz TomTom Developer hesabıyla günlük 2.500 karo isteği yapabilirsiniz.
+          </p>
+
+          <div class="space-y-2">
+            <label class="text-[11px] font-bold text-slate-300 block">TomTom API Anahtarı (API Key):</label>
+            <div class="flex items-center space-x-2">
+              <input type="text" id="admin-tomtom-api-key" placeholder="Örn: 4Fkz918aBcDeFgHiJkLmNoPqRsTuVw" class="flex-1 bg-slate-950 border border-slate-800 focus:border-rose-500 rounded-xl px-3 py-2 text-xs text-white font-mono placeholder:text-slate-600 outline-none">
+              <button onclick="RotamTraffic.saveKeyFromAdmin()" class="px-3 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs shadow-md shadow-rose-600/30 transition-all flex items-center space-x-1 shrink-0">
+                <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                <span>Kaydet</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between pt-2 border-t border-slate-800/80 text-[11px] gap-2">
+            <a href="https://developer.tomtom.com" target="_blank" rel="noopener" class="text-cyan-400 hover:text-cyan-300 underline flex items-center space-x-1">
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+              <span>Ücretsiz TomTom API Key Al (developer.tomtom.com)</span>
+            </a>
+            <button onclick="RotamTraffic.testAdminKey()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-rose-300 rounded-lg font-semibold border border-slate-700 flex items-center space-x-1">
+              <i data-lucide="activity" class="w-3.5 h-3.5"></i>
+              <span>Bağlantıyı Test Et</span>
+            </button>
           </div>
         </div>
 
@@ -3524,6 +3584,89 @@
         </div>
         <button onclick="RotamOfflineMap.clearCache()" class="px-2.5 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 font-semibold text-[11px] border border-red-500/30 transition-colors cursor-pointer">
           Temizle
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: TOMTOM CANLI TRAFİK KURULUM VE API KEY -->
+  <div id="modal-traffic-setup" class="hidden fixed inset-0 z-[1100] bg-slate-950/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+    <div class="responsive-modal-card bg-slate-900 border border-slate-800 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+      
+      <!-- Modal Başlığı -->
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center space-x-2">
+          <span class="text-xl">🚦</span>
+          <div>
+            <h3 class="text-sm sm:text-base font-bold text-white">Canlı Trafik Yoğunluğu (TomTom)</h3>
+            <p class="text-[10px] text-slate-400">Gerçek zamanlı yol akışı ve yoğunluk renklendirmesi</p>
+          </div>
+        </div>
+        <button onclick="RotamTraffic.closeModal()" class="p-1 rounded-lg text-slate-400 hover:text-white cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Bilgi Kutusu -->
+      <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2 text-xs">
+        <p class="text-slate-300 leading-relaxed">
+          Rotam, canlı yol yoğunluğu akışını harita üzerinde göstermek için dünyanın en kapsamlı trafik motorlarından olan <strong class="text-white">TomTom Traffic Flow</strong> altyapısını kullanır.
+        </p>
+        <div class="grid grid-cols-2 gap-1.5 pt-1 text-[11px]">
+          <div class="flex items-center space-x-1.5 text-emerald-400">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
+            <span>Yeşil: Akıcı / Açık Yol</span>
+          </div>
+          <div class="flex items-center space-x-1.5 text-yellow-400">
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-500 shrink-0"></span>
+            <span>Sarı: Yavaşlama</span>
+          </div>
+          <div class="flex items-center space-x-1.5 text-orange-400">
+            <span class="w-2.5 h-2.5 rounded-full bg-orange-500 shrink-0"></span>
+            <span>Turuncu: Yoğun Trafik</span>
+          </div>
+          <div class="flex items-center space-x-1.5 text-rose-500">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-600 shrink-0"></span>
+            <span>Kırmızı: Dur-Kalk / Tıkalı</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nasıl Alınır Adımları -->
+      <div class="p-3 rounded-xl bg-rose-950/20 border border-rose-800/30 space-y-2 text-xs text-rose-200">
+        <div class="flex items-center space-x-1.5 font-bold text-rose-300">
+          <i data-lucide="info" class="w-4 h-4"></i>
+          <span>Ücretsiz API Key Nasıl Alınır? (2 Dakika)</span>
+        </div>
+        <ol class="list-decimal list-inside space-y-1 text-[11px] text-slate-300">
+          <li>Aşağıdaki butondan TomTom Developer sayfasına gidin.</li>
+          <li>Kredi kartı gerekmeden ücretsiz hesabınızı açın.</li>
+          <li>Panodaki <strong class="text-white">Keys</strong> sekmesinden hazır anahtarınızı kopyalayın.</li>
+          <li>Aşağıdaki kutuya yapıştırıp kaydedin (Günde 2.500 istek tamamen ücretsizdir).</li>
+        </ol>
+        <a href="https://developer.tomtom.com" target="_blank" rel="noopener" class="w-full mt-2 py-2 px-3 rounded-xl bg-rose-600/30 hover:bg-rose-600/50 border border-rose-500/50 text-rose-200 hover:text-white font-bold flex items-center justify-center space-x-2 text-xs transition-all">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          <span>TomTom Developer Sitesine Git</span>
+        </a>
+      </div>
+
+      <!-- Giriş Alanı -->
+      <div class="space-y-1.5">
+        <label for="traffic-modal-api-key" class="text-xs font-bold text-slate-200 block">TomTom API Anahtarınız:</label>
+        <div class="flex items-center space-x-2">
+          <input type="text" id="traffic-modal-api-key" placeholder="Örn: 4Fkz918aBcDeFgHiJkLmNoPqRsTuVw" class="flex-1 bg-slate-950 border border-slate-700 focus:border-rose-500 rounded-xl px-3 py-2.5 text-xs text-white font-mono placeholder:text-slate-500 outline-none">
+        </div>
+      </div>
+
+      <!-- Butonlar -->
+      <div class="flex items-center justify-between pt-2 border-t border-slate-800">
+        <button onclick="RotamTraffic.closeModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all">
+          Vazgeç
+        </button>
+        <button onclick="RotamTraffic.saveKeyAndActivate()" class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-lg shadow-rose-600/30 flex items-center space-x-1.5 transition-all">
+          <span>🚦</span>
+          <span>Kaydet ve Trafiği Aç</span>
         </button>
       </div>
 

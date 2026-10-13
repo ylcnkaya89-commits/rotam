@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v32 (5-Tap Discreet Logo Admin Trigger)
-const CACHE_NAME = 'rotam-cache-v32';
+// Rotam PWA Service Worker - v33 (TomTom Live Traffic Engine)
+const CACHE_NAME = 'rotam-cache-v33';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
