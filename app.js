@@ -633,6 +633,9 @@ function toggleMobileLayersPopover() {
         statusEl.textContent = RotamCommunity.layerVisible ? 'Aktif' : 'Kapalı';
         statusEl.className = RotamCommunity.layerVisible ? 'text-[10px] text-emerald-400' : 'text-[10px] text-slate-500';
       }
+      if (window.RotamTraffic) {
+        RotamTraffic.updateUI();
+      }
     }
   }
 }
@@ -10521,6 +10524,12 @@ const RotamTraffic = {
   init() {
     this.updateUI();
     this.renderAdminUI();
+    try {
+      const savedEnabled = localStorage.getItem('rotam_traffic_enabled');
+      if (savedEnabled === 'true' && this.hasApiKey() && window.map) {
+        this.show(true);
+      }
+    } catch (e) {}
   },
 
   toggle() {
@@ -10535,9 +10544,9 @@ const RotamTraffic = {
     }
   },
 
-  show() {
+  show(silent = false) {
     if (!window.map) {
-      showToast('Harita henüz hazır değil.', 'warning');
+      if (!silent) showToast('Harita henüz hazır değil.', 'warning');
       return;
     }
     const apiKey = this.getApiKey();
@@ -10579,16 +10588,20 @@ const RotamTraffic = {
       }
     }
 
+    try { localStorage.setItem('rotam_traffic_enabled', 'true'); } catch (e) {}
     this.isVisible = true;
     this.startRefreshTimer();
     this.updateUI();
-    showToast('🚦 Canlı TomTom Trafik Yoğunluğu Katmanı Açıldı', 'success');
+    if (!silent) {
+      showToast('🚦 Canlı TomTom Trafik Yoğunluğu Katmanı Açıldı', 'success');
+    }
   },
 
   hide() {
     if (this.layer && window.map && window.map.hasLayer(this.layer)) {
       window.map.removeLayer(this.layer);
     }
+    try { localStorage.setItem('rotam_traffic_enabled', 'false'); } catch (e) {}
     this.isVisible = false;
     this.stopRefreshTimer();
     this.updateUI();
@@ -10755,11 +10768,16 @@ const RotamTraffic = {
     const mobStatus = document.getElementById('mobile-traffic-status');
     if (mobStatus) {
       if (this.isVisible) {
-        mobStatus.textContent = 'Açık';
+        mobStatus.textContent = 'Açık 🟢';
         mobStatus.className = 'text-[10px] text-emerald-400 font-bold';
       } else {
-        mobStatus.textContent = 'Kapalı';
-        mobStatus.className = 'text-[10px] text-slate-400 font-mono';
+        if (!this.hasApiKey()) {
+          mobStatus.textContent = 'Key Gerekli 🔑';
+          mobStatus.className = 'text-[10px] text-amber-400 font-bold bg-amber-500/10 px-1.5 py-0.5 rounded-md';
+        } else {
+          mobStatus.textContent = 'Kapalı';
+          mobStatus.className = 'text-[10px] text-slate-400 font-mono';
+        }
       }
     }
   }

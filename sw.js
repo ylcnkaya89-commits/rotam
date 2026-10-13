@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v34 (TomTom Traffic Overlay & Error Resilience)
-const CACHE_NAME = 'rotam-cache-v34';
+// Rotam PWA Service Worker - v35 (Traffic Status UI & State Persistence)
+const CACHE_NAME = 'rotam-cache-v35';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
