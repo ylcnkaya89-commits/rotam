@@ -2153,8 +2153,7 @@ function clearRouteDisplay() {
   document.getElementById('elevation-panel')?.classList.add('hidden');
   document.getElementById('route-alternatives-container')?.classList.add('hidden');
   document.getElementById('mobile-mini-cockpit')?.classList.add('hidden');
-  document.getElementById('mobile-home-prompt-card')?.classList.remove('hidden');
-  document.getElementById('mobile-bottom-bar')?.classList.remove('hidden');
+  document.getElementById('mobile-bottom-bar')?.classList.add('hidden');
   document.getElementById('badge-right-panel-poi-count')?.classList.add('hidden');
   document.getElementById('badge-header-poi-count')?.classList.add('hidden');
 
@@ -2465,11 +2464,9 @@ async function calculateRouteMain() {
     const bottomBar = document.getElementById('mobile-bottom-bar');
     if (bottomBar) bottomBar.classList.remove('hidden');
     const mini = document.getElementById('mobile-mini-cockpit');
-    const promptCard = document.getElementById('mobile-home-prompt-card');
     const plannerBtn = document.getElementById('btn-mobile-open-planner');
     if (mini) {
       mini.classList.remove('hidden');
-      if (promptCard) promptCard.classList.add('hidden');
       if (plannerBtn) plannerBtn.classList.add('hidden');
       document.getElementById('mobile-mini-dist').textContent = (activeRoute.distance / 1000).toFixed(1) + ' km';
       const m = Math.floor(activeRoute.duration / 60);

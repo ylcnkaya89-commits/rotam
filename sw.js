@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v36 (Clean revert of traffic density)
-const CACHE_NAME = 'rotam-cache-v36';
+// Rotam PWA Service Worker - v37 (Remove home destination prompt card)
+const CACHE_NAME = 'rotam-cache-v37';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
