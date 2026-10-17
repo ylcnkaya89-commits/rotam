@@ -302,6 +302,8 @@ window.TRANSLATIONS = {
     live_nav_hud_desc: "Kaska veya ön cama ayna modu",
     live_nav_fullscreen: "Tam Ekran",
     live_nav_fullscreen_desc: "Sürüş ekranını genişlet",
+    live_nav_bg_audio: "Arka Plan & İnterkom",
+    live_nav_bg_audio_desc: "Ekran kapalıyken sesli rehber & kilit ekranı",
     live_nav_then: "Sonra",
     live_nav_towards: "yönüne doğru",
     incident_report_title: "Yol Durumu & Olay Bildir",
@@ -643,6 +645,8 @@ window.TRANSLATIONS = {
     live_nav_hud_desc: "Mirror display on windshield",
     live_nav_fullscreen: "Full Screen",
     live_nav_fullscreen_desc: "Immersive cockpit view",
+    live_nav_bg_audio: "Background & Intercom",
+    live_nav_bg_audio_desc: "Keep GPS & voice active when screen off",
     live_nav_then: "Then",
     live_nav_towards: "towards",
     incident_report_title: "Report Incident",
@@ -723,6 +727,8 @@ function t(key, fallback = '') {
     live_nav_hud_desc: lang === 'en' ? 'Mirror display on windshield' : 'Kaska veya ön cama ayna modu',
     live_nav_fullscreen: lang === 'en' ? 'Full Screen' : 'Tam Ekran',
     live_nav_fullscreen_desc: lang === 'en' ? 'Immersive cockpit view' : 'Sürüş ekranını genişlet',
+    live_nav_bg_audio: lang === 'en' ? 'Background & Intercom' : 'Arka Plan & İnterkom',
+    live_nav_bg_audio_desc: lang === 'en' ? 'Keep GPS & voice active when screen off' : 'Ekran kapalıyken sesli rehber & kilit ekranı',
     live_nav_then: lang === 'en' ? 'Then' : 'Sonra',
     live_nav_towards: lang === 'en' ? 'towards' : 'yönüne doğru'
   };

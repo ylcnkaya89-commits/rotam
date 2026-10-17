@@ -6813,6 +6813,11 @@ document.addEventListener('DOMContentLoaded', () => {
     RotamTelemetry.init();
   }
 
+  // Initialize background & intercom keep-alive engine
+  if (typeof RotamBackgroundEngine !== 'undefined') {
+    RotamBackgroundEngine.init();
+  }
+
   // Restore personalized preferences (#27)
   try {
     syncCamperProfileUI();
@@ -7288,6 +7293,257 @@ const RotamDisplay = {
 };
 
 window.RotamDisplay = RotamDisplay;
+
+// ==========================================
+// Rotam Background & Intercom Keep-Alive Engine
+// Enables background GPS tracking, audio intercom voice prompts, and
+// lock-screen media turn guidance when screen is locked/turned off.
+// ==========================================
+const RotamBackgroundEngine = {
+  audioEl: null,
+  isActive: false,
+  isFreeRide: false,
+  // 592-byte valid silent PCM WAV data URI (mono, 8000Hz, 8-bit)
+  silentAudioUri: 'data:audio/wav;base64,UklGRrQBAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YZABAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA=',
+  lastManeuverData: null,
+  keepAliveTimer: null,
+
+  init() {
+    this.setupAudioElement();
+    this.setupVisibilityListener();
+    this.setupMediaSession();
+    this.updateControlsUI();
+  },
+
+  setupAudioElement() {
+    if (this.audioEl) return;
+    try {
+      let audio = document.getElementById('rotam-bg-audio-engine');
+      if (!audio) {
+        audio = document.createElement('audio');
+        audio.id = 'rotam-bg-audio-engine';
+        audio.src = this.silentAudioUri;
+        audio.loop = true;
+        audio.preload = 'auto';
+        audio.setAttribute('playsinline', '');
+        audio.setAttribute('webkit-playsinline', '');
+        audio.volume = 0.001; // virtually silent, holds OS audio session
+        audio.style.display = 'none';
+        document.body.appendChild(audio);
+      }
+      this.audioEl = audio;
+    } catch (e) {
+      console.warn('RotamBackgroundEngine: audio element setup failed', e);
+    }
+  },
+
+  setupVisibilityListener() {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        // App returned to foreground, re-verify wake lock & map rendering
+        if (window.LiveNavigation && window.LiveNavigation.isActive) {
+          window.LiveNavigation.requestWakeLock();
+          if (window.map) {
+            setTimeout(() => window.map.invalidateSize(), 150);
+          }
+        }
+      } else if (document.visibilityState === 'hidden') {
+        // Phone screen locked or app backgrounded
+        // Ensure silent audio is actively looping to hold WebKit/Chrome geolocation execution
+        if (this.isActive && this.audioEl && this.audioEl.paused) {
+          this.audioEl.play().catch(() => {});
+        }
+      }
+    });
+  },
+
+  setupMediaSession() {
+    if (!('mediaSession' in navigator)) return;
+
+    try {
+      navigator.mediaSession.setActionHandler('play', () => {
+        if (this.audioEl && this.audioEl.paused) {
+          this.audioEl.play().catch(() => {});
+        }
+      });
+      navigator.mediaSession.setActionHandler('pause', () => {
+        // If rider presses pause on their helmet intercom, toggle voice guidance
+        if (window.LiveNavigation) {
+          window.LiveNavigation.toggleVoice();
+        }
+      });
+      navigator.mediaSession.setActionHandler('stop', () => {
+        this.stop();
+      });
+    } catch (e) {}
+  },
+
+  start(options = {}) {
+    this.isFreeRide = !!options.isFreeRide;
+    const pref = localStorage.getItem('rotam_bg_audio_enabled');
+    if (pref === 'false') return;
+
+    this.setupAudioElement();
+    if (this.audioEl) {
+      this.audioEl.play().then(() => {
+        this.isActive = true;
+        this.updateControlsUI();
+        const initialTitle = this.isFreeRide ? '🏍️ Serbest Sürüş Modu' : '🗺️ Canlı Rota Navigasyonu';
+        this.updateLockScreenNotification(initialTitle);
+      }).catch(err => {
+        console.warn('RotamBackgroundEngine play blocked:', err);
+      });
+    }
+
+    // Safety watchdog: periodically ensure audio loop didn't stall if tab hidden
+    if (this.keepAliveTimer) clearInterval(this.keepAliveTimer);
+    this.keepAliveTimer = setInterval(() => {
+      if (this.isActive && this.audioEl && this.audioEl.paused && window.LiveNavigation && window.LiveNavigation.isActive) {
+        this.audioEl.play().catch(() => {});
+      }
+    }, 15000);
+  },
+
+  stop() {
+    this.isActive = false;
+    if (this.keepAliveTimer) {
+      clearInterval(this.keepAliveTimer);
+      this.keepAliveTimer = null;
+    }
+    if (this.audioEl) {
+      try {
+        this.audioEl.pause();
+        this.audioEl.currentTime = 0;
+      } catch (e) {}
+    }
+    this.clearLockScreenNotification();
+    this.updateControlsUI();
+  },
+
+  toggle() {
+    const isEn = (window.state && window.state.lang === 'en');
+    const pref = localStorage.getItem('rotam_bg_audio_enabled');
+    const currentEnabled = pref !== 'false';
+
+    if (currentEnabled) {
+      localStorage.setItem('rotam_bg_audio_enabled', 'false');
+      this.stop();
+      showToast(isEn ? '🎧 Background Navigation Disabled' : '🎧 Arka Plan & Kilit Ekranı Kapatıldı', 'info');
+    } else {
+      localStorage.setItem('rotam_bg_audio_enabled', 'true');
+      if (window.LiveNavigation && window.LiveNavigation.isActive) {
+        this.start({ isFreeRide: window.LiveNavigation.isFreeRide });
+      }
+      showToast(isEn ? '🎧 Background & Intercom Keep-Alive Active' : '🎧 Arka Plan & İnterkom Aktif (Ekran Kapalı Çalışır)', 'success');
+    }
+    this.updateControlsUI();
+  },
+
+  updateManeuver(data) {
+    if (!data) return;
+    this.lastManeuverData = data;
+    if (!this.isActive) return;
+
+    const isEn = (window.state && window.state.lang === 'en');
+    let distStr = '';
+    const distMeters = data.distMeters || 0;
+    if (distMeters <= 0) {
+      distStr = '100m';
+    } else if (distMeters < 1000) {
+      distStr = `${Math.round(distMeters)}m`;
+    } else {
+      distStr = `${(distMeters / 1000).toFixed(1)}km`;
+    }
+
+    const arrow = data.arrow || '➡️';
+    const action = data.action || '';
+    const street = data.street || '';
+    const speed = (window.LiveNavigation && window.LiveNavigation.speedKmH) ? Math.round(window.LiveNavigation.speedKmH) : 0;
+
+    let title = '';
+    if (this.isFreeRide) {
+      title = `🏍️ ${isEn ? 'Free Ride' : 'Serbest Sürüş'}: ${speed} km/s`;
+    } else {
+      title = `${arrow} ${distStr} ${action}: ${street}`;
+    }
+
+    // Remaining info
+    const remDistEl = document.getElementById('live-nav-rem-dist');
+    const remTimeEl = document.getElementById('live-nav-rem-time');
+    const etaEl = document.getElementById('live-nav-eta-time');
+    const remDist = remDistEl ? remDistEl.textContent : '';
+    const remTime = remTimeEl ? remTimeEl.textContent : '';
+    const eta = etaEl ? etaEl.textContent : '';
+
+    let subText = '';
+    if (this.isFreeRide) {
+      subText = `Rotam • ${speed} km/s • GPS Canlı`;
+    } else if (remDist && remTime) {
+      subText = `Kalan: ${remDist} (${remTime}) • Varış: ${eta} • ${speed} km/s`;
+    } else {
+      subText = `Rotam Canlı Navigasyon • ${speed} km/s`;
+    }
+
+    this.updateLockScreenNotification(title, subText);
+  },
+
+  updateLockScreenNotification(title, subText = 'Rotam Canlı Navigasyon') {
+    if (!('mediaSession' in navigator)) return;
+
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: title || 'Rotam Navigasyon',
+        artist: 'Rotam Sürüş Asistanı',
+        album: subText,
+        artwork: [
+          { src: './rotam_logo.png', sizes: '192x192', type: 'image/png' },
+          { src: './rotam_logo.png', sizes: '512x512', type: 'image/png' }
+        ]
+      });
+      navigator.mediaSession.playbackState = this.isActive ? 'playing' : 'none';
+    } catch (e) {}
+  },
+
+  clearLockScreenNotification() {
+    if (!('mediaSession' in navigator)) return;
+    try {
+      navigator.mediaSession.playbackState = 'none';
+      navigator.mediaSession.metadata = null;
+    } catch (e) {}
+  },
+
+  updateControlsUI() {
+    const pref = localStorage.getItem('rotam_bg_audio_enabled');
+    const enabled = pref !== 'false';
+    const badge = document.getElementById('live-nav-bg-badge');
+    const iconWrap = document.getElementById('live-nav-bg-icon-wrap');
+
+    if (badge) {
+      if (!enabled) {
+        badge.textContent = 'KAPALI';
+        badge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-slate-700 text-slate-400 border border-slate-600';
+      } else if (this.isActive) {
+        badge.textContent = 'ÇALIŞIYOR';
+        badge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+      } else {
+        badge.textContent = 'AÇIK';
+        badge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30';
+      }
+    }
+
+    if (iconWrap) {
+      if (!enabled) {
+        iconWrap.className = 'w-8 h-8 rounded-lg bg-slate-800 text-slate-400 flex items-center justify-center shrink-0 border border-slate-700';
+      } else if (this.isActive) {
+        iconWrap.className = 'w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30 animate-pulse';
+      } else {
+        iconWrap.className = 'w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/30';
+      }
+    }
+  }
+};
+
+window.RotamBackgroundEngine = RotamBackgroundEngine;
 
 const LiveNavigation = {
   isActive: false,
@@ -7770,8 +8026,13 @@ const LiveNavigation = {
     } else {
       popover.classList.add('hidden');
     }
-    if (!popover.classList.contains('hidden') && typeof initIcons === 'function') {
-      initIcons();
+    if (!popover.classList.contains('hidden')) {
+      if (typeof RotamBackgroundEngine !== 'undefined') {
+        RotamBackgroundEngine.updateControlsUI();
+      }
+      if (typeof initIcons === 'function') {
+        initIcons();
+      }
     }
   },
 
@@ -7865,6 +8126,16 @@ const LiveNavigation = {
     }
     if (nameEl) nameEl.textContent = curInfo.street;
     if (subEl) subEl.textContent = curInfo.action;
+
+    // Update background engine & lock-screen notification
+    if (typeof RotamBackgroundEngine !== 'undefined') {
+      RotamBackgroundEngine.updateManeuver({
+        arrow: curInfo.arrow,
+        street: curInfo.street,
+        action: curInfo.action,
+        distMeters
+      });
+    }
 
     // Secondary next-step pill ("Sonra ↱")
     const nextPill = document.getElementById('live-nav-next-step-pill');
@@ -7988,6 +8259,9 @@ const LiveNavigation = {
     showToast(isEn ? '🏍️ Free Ride Mode Active' : '🏍️ Serbest Sürüş Modu Aktif', 'success');
 
     this.startGPS();
+    if (typeof RotamBackgroundEngine !== 'undefined') {
+      RotamBackgroundEngine.start({ isFreeRide: true });
+    }
     document.getElementById('live-nav-btn-compass')?.classList.add('compass-heading-active');
     this.updateControlsUI();
     if (typeof initIcons === 'function') initIcons();
@@ -8122,6 +8396,10 @@ const LiveNavigation = {
       this.startGPS();
     }
 
+    if (typeof RotamBackgroundEngine !== 'undefined') {
+      RotamBackgroundEngine.start({ isFreeRide: false });
+    }
+
     document.getElementById('live-nav-btn-compass')?.classList.add('compass-heading-active');
     this.updateControlsUI();
     if (typeof initIcons === 'function') initIcons();
@@ -8137,6 +8415,9 @@ const LiveNavigation = {
     this.stopGPS();
     this.stopSimulation();
     this.releaseWakeLock();
+    if (typeof RotamBackgroundEngine !== 'undefined') {
+      RotamBackgroundEngine.stop();
+    }
     if (document.fullscreenElement && typeof document.exitFullscreen === 'function') {
       try { document.exitFullscreen(); } catch (e) {}
     }
@@ -8611,6 +8892,15 @@ const LiveNavigation = {
       const hStr = String(now.getHours()).padStart(2, '0');
       const mStr = String(now.getMinutes()).padStart(2, '0');
       if (etaEl) etaEl.textContent = `${hStr}:${mStr}`;
+
+      if (typeof RotamBackgroundEngine !== 'undefined') {
+        RotamBackgroundEngine.updateManeuver({
+          arrow: '🏍️',
+          street: isEn ? 'Free Ride' : 'Serbest Sürüş',
+          action: isEn ? 'Active' : 'Aktif',
+          distMeters: this.distanceTraveledM || 0
+        });
+      }
       return;
     }
 

@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v37 (Remove home destination prompt card)
-const CACHE_NAME = 'rotam-cache-v37';
+// Rotam PWA Service Worker - v38 (Background GPS & Intercom audio keep-alive engine)
+const CACHE_NAME = 'rotam-cache-v38';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
