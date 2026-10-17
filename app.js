@@ -268,6 +268,15 @@ function createTileLayers() {
     })
   };
 
+  // Add Yandex layer if L.yandex plugin is available
+  if (typeof L.yandex === 'function') {
+    try {
+      layers.yandex = L.yandex('map');
+    } catch (e) {
+      console.warn('Yandex layer creation notice:', e);
+    }
+  }
+
   // Add error resilience
   Object.entries(layers).forEach(([name, l]) => {
     l.on('tileerror', (e) => {
@@ -532,6 +541,15 @@ function switchTile(tileKey) {
     document.body.classList.remove('sunlight-mode');
   } else {
     if (mapEl) mapEl.classList.remove('dark-map');
+  }
+
+  // Instantiate Yandex layer on-demand if needed
+  if (tileKey === 'yandex' && !tileLayers.yandex && typeof L.yandex === 'function') {
+    try {
+      tileLayers.yandex = L.yandex('map');
+    } catch (e) {
+      console.warn('Yandex on-demand init notice:', e);
+    }
   }
 
   const targetLayer = tileLayers[tileKey] || tileLayers.osm || tileLayers.dark;
@@ -3638,9 +3656,13 @@ function renderJourneyTimeline() {
         <i data-lucide="play" class="w-3.5 h-3.5 fill-white text-white"></i>
         <span>${(typeof t === 'function') ? t('btn_start_live_ride', 'CANLI SÜRÜŞÜ BAŞLAT') : 'CANLI SÜRÜŞÜ BAŞLAT'}</span>
       </button>
-      <button onclick="openInGoogleMaps()" class="col-span-2 py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold rounded-xl text-xs flex items-center justify-center space-x-1.5 active:scale-95 transition-all" title="Google Maps Navigasyonu Başlat">
+      <button onclick="openInGoogleMaps()" class="py-2 px-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold rounded-xl text-xs flex items-center justify-center space-x-1.5 active:scale-95 transition-all" title="Google Maps Navigasyonu Başlat">
         <i data-lucide="navigation" class="w-3.5 h-3.5 text-emerald-400"></i>
-        <span>${(typeof t === 'function') ? t('timeline_gmaps_btn', "Google Maps'e Gönder") : "Google Maps'e Gönder"}</span>
+        <span>Google Maps</span>
+      </button>
+      <button onclick="openInYandexNavi()" class="py-2 px-2.5 bg-red-600/90 hover:bg-red-500 text-white font-bold rounded-xl text-xs shadow-md shadow-red-600/20 flex items-center justify-center space-x-1.5 active:scale-95 transition-all" title="Yandex Navigasyon Başlat">
+        <span class="text-xs font-black bg-white text-red-600 px-1 rounded-sm leading-tight">Я</span>
+        <span>Yandex Navi</span>
       </button>
     </div>
   `;
@@ -6774,6 +6796,42 @@ function openInGoogleMaps() {
   const win = window.open(url, '_blank');
   if (!win || win.closed || typeof win.closed === 'undefined') {
     window.location.href = url;
+  }
+}
+
+// OPEN IN YANDEX NAVI & MAPS
+function openInYandexNavi() {
+  const valid = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
+  if (valid.length < 2) {
+    showToast('Yandex navigasyonunu başlatmak için önce başlangıç ve varış noktalarınızı belirleyip rota oluşturun.', 'info');
+    if (window.innerWidth < 768) {
+      openMobileSidebar();
+    }
+    return;
+  }
+
+  const start = valid[0];
+  const dest = valid[valid.length - 1];
+
+  // Yandex Maps web rtext parameter: lat1,lon1~lat2,lon2~...
+  const rtext = valid.map(w => `${w.lat},${w.lon}`).join('~');
+  const webUrl = `https://yandex.com.tr/harita/?rtext=${encodeURIComponent(rtext)}&rtt=auto`;
+
+  // On mobile devices, try Yandex Navi app deep-link first
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if (isMobile) {
+    showToast('Yandex Navigasyon başlatılıyor...', 'info');
+    const deepLink = `yandexnavi://build_route_on_map?lat_to=${dest.lat}&lon_to=${dest.lon}&lat_from=${start.lat}&lon_from=${start.lon}`;
+    window.location.href = deepLink;
+    setTimeout(() => {
+      window.open(webUrl, '_blank');
+    }, 1200);
+  } else {
+    showToast('Yandex Haritalar açılıyor...', 'info');
+    const win = window.open(webUrl, '_blank');
+    if (!win || win.closed || typeof win.closed === 'undefined') {
+      window.location.href = webUrl;
+    }
   }
 }
 

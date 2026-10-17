@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v38 (Background GPS & Intercom audio keep-alive engine)
-const CACHE_NAME = 'rotam-cache-v38';
+// Rotam PWA Service Worker - v39 (Yandex Maps & Navigation Integration)
+const CACHE_NAME = 'rotam-cache-v39';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
@@ -7,6 +7,7 @@ const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './app.js',
+  './yandex_leaflet.js',
   './styles.css',
   './places_data.js',
   './translations.js',

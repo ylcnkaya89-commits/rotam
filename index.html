@@ -52,6 +52,10 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
+  <!-- Yandex Maps API & Leaflet Integration -->
+  <script src="https://api-maps.yandex.ru/2.1/?lang=tr_TR" type="text/javascript"></script>
+  <script src="./yandex_leaflet.js"></script>
+
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 
@@ -699,10 +703,16 @@
               <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
               <span>Demo Test Sürüşü (Simülasyon)</span>
             </button>
-            <button type="button" onclick="openInGoogleMaps()" class="col-span-2 py-2 px-3 bg-emerald-600/90 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-md shadow-emerald-600/20 flex items-center justify-center space-x-2 active:scale-[0.99] transition-all" title="Rotayı Google Maps'te Aç ve Harici Navigasyonu Başlat">
-              <i data-lucide="navigation" class="w-3.5 h-3.5 text-white"></i>
-              <span data-i18n="timeline_gmaps_btn">Google Maps'e Gönder</span>
-            </button>
+            <div class="col-span-2 grid grid-cols-2 gap-2">
+              <button type="button" onclick="openInGoogleMaps()" class="py-2 px-2.5 bg-emerald-600/90 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-md shadow-emerald-600/20 flex items-center justify-center space-x-1.5 active:scale-[0.99] transition-all" title="Rotayı Google Maps'te Aç ve Harici Navigasyonu Başlat">
+                <i data-lucide="navigation" class="w-3.5 h-3.5 text-white"></i>
+                <span>Google Maps</span>
+              </button>
+              <button type="button" onclick="openInYandexNavi()" class="py-2 px-2.5 bg-red-600/90 hover:bg-red-500 text-white font-bold rounded-xl text-xs shadow-md shadow-red-600/20 flex items-center justify-center space-x-1.5 active:scale-[0.99] transition-all" title="Rotayı Yandex Navigasyon'da Aç">
+                <span class="text-xs font-black bg-white text-red-600 px-1 rounded-sm leading-tight">Я</span>
+                <span>Yandex Navi</span>
+              </button>
+            </div>
             <button type="button" onclick="exportGPX()" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl text-xs border border-slate-700 flex items-center justify-center space-x-1.5 transition-all">
               <i data-lucide="download" class="w-3.5 h-3.5 text-accent-400"></i>
               <span data-i18n="btn_export_gpx">GPX İndir</span>
@@ -1424,6 +1434,9 @@
           <button id="tile-osm" onclick="switchTile('osm')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Aydınlık Gündüz Modu">
             ☀️<span class="inline ml-1">Gündüz</span>
           </button>
+          <button id="tile-yandex" onclick="switchTile('yandex')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Yandex Harita Modu">
+            <span class="text-red-500 font-bold">Я</span><span class="inline ml-1">Yandex</span>
+          </button>
           <button id="tile-topo" onclick="switchTile('topo')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Topografik Yükselti">
             ⛰️<span class="inline ml-1">Topo</span>
           </button>
@@ -1469,6 +1482,9 @@
             </button>
             <button onclick="switchTile('osm'); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-200 hover:bg-slate-800 flex items-center space-x-2">
               <span>☀️</span> <span>Gündüz Modu</span>
+            </button>
+            <button onclick="switchTile('yandex'); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-medium text-red-400 hover:bg-slate-800 flex items-center space-x-2">
+              <span class="font-bold">Я</span> <span>Yandex Harita</span>
             </button>
             <button onclick="switchTile('topo'); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-200 hover:bg-slate-800 flex items-center space-x-2">
               <span>⛰️</span> <span>Topografik</span>
