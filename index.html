@@ -945,6 +945,39 @@
         </div>
       </div>
 
+      <!-- GOOGLE MAPS ALTERNATİF ROTA SEÇİCİ KARTI (#gmaps-route-selector-container) -->
+      <div id="gmaps-route-selector-container" class="hidden absolute bottom-4 left-3 right-3 sm:left-4 sm:right-auto sm:w-[460px] max-w-full z-[1040] pointer-events-auto transition-all duration-300 ease-out transform translate-y-6 opacity-0">
+        <div class="glass-card bg-slate-900/98 border border-slate-700/90 rounded-3xl p-3.5 sm:p-4 shadow-2xl backdrop-blur-2xl flex flex-col space-y-3">
+          <!-- Üst Bar: Başlık + Kapat -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+              <span id="gmaps-route-alt-count-title" class="text-xs font-black text-white uppercase tracking-wider">Alternatif Güzergahlar</span>
+            </div>
+            <button onclick="dismissGmapsRouteSelector()" class="p-1 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors" title="Kapat">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Yatay Kaydırılabilir Rota Kartları -->
+          <div id="gmaps-route-cards-list" class="flex items-center space-x-2 overflow-x-auto no-scrollbar py-0.5">
+            <!-- JS tarafından doldurulur -->
+          </div>
+
+          <!-- Alt Buton: Canlı Sürüşü Başlat -->
+          <div class="flex items-center space-x-2 pt-1 border-t border-slate-800/80">
+            <button onclick="startLiveRide()" class="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 hover:from-emerald-400 hover:to-cyan-500 text-white text-xs sm:text-sm font-black flex items-center justify-center space-x-2 shadow-xl shadow-emerald-600/35 active:scale-95 transition-all border border-emerald-400/40">
+              <i data-lucide="play" class="w-4 h-4 fill-white text-white"></i>
+              <span class="tracking-wider" data-i18n="btn_start_live_ride">SEÇİLİ ROTAYI BAŞLAT</span>
+            </button>
+            <button onclick="openInGoogleMaps()" class="py-3 px-3 bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-2xl text-xs font-bold border border-slate-700 flex items-center space-x-1 active:scale-95 transition-all shadow-md" title="Google Maps'e Aktar">
+              <i data-lucide="navigation" class="w-3.5 h-3.5 shrink-0"></i>
+              <span>Maps</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- CANLI SÜRÜŞ & NAVİGASYON MODU OVERLAY (#live-nav-overlay) - GOOGLE MAPS STYLE -->
       <div id="live-nav-overlay" class="hidden absolute inset-0 z-[2000] flex flex-col justify-between p-3 sm:p-5 pointer-events-none select-none transition-all duration-300">
         
@@ -1476,6 +1509,9 @@
           <button id="tile-sat" onclick="switchTile('sat')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Uydu">
             🛰️<span class="inline ml-1">Uydu</span>
           </button>
+          <button id="tile-auto" onclick="RotamAutoTheme.toggle()" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-bold text-amber-400 hover:text-white" title="Otomatik Gündüz / Gece Modu (Güneş Döngüsü)">
+            <span>🌓</span><span id="desktop-auto-theme-label" class="inline ml-1">Oto</span>
+          </button>
           <div class="h-4 w-px bg-slate-800 mx-0.5"></div>
           <button id="btn-offline-maps" onclick="RotamOfflineMap.openModal()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 flex items-center space-x-1 transition-all active:scale-95" title="Çevrimdışı Harita İndir & Yönet">
             <span>📥</span>
@@ -1508,8 +1544,15 @@
           </button>
 
           <!-- Popover Menüsü -->
-          <div id="mobile-layers-popover" class="hidden absolute bottom-12 right-0 z-30 w-44 glass-panel p-2 rounded-2xl shadow-2xl border border-slate-700/80 space-y-1 animate-slide-in">
+          <div id="mobile-layers-popover" class="hidden absolute bottom-12 right-0 z-30 w-48 glass-panel p-2 rounded-2xl shadow-2xl border border-slate-700/80 space-y-1 animate-slide-in">
             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 pt-0.5">Harita Modu</p>
+            <button onclick="RotamAutoTheme.toggle(); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-bold text-amber-400 hover:bg-amber-500/10 flex items-center justify-between">
+              <span class="flex items-center space-x-1.5">
+                <span>🌓</span> <span>Otomatik (Güneş)</span>
+              </span>
+              <span id="mobile-auto-theme-status" class="text-[10px] text-emerald-400">Aktif</span>
+            </button>
+            <div class="h-px bg-slate-800 my-0.5"></div>
             <button onclick="switchTile('dark'); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-200 hover:bg-slate-800 flex items-center space-x-2">
               <span>🌙</span> <span>Gece Modu</span>
             </button>

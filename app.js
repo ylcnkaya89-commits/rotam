@@ -123,6 +123,7 @@ let map = null;
 let routePolyline = null;
 let routeGlowPolyline = null;
 let ghostPolylines = [];
+let routeAlternativeMarkers = [];
 let tileLayers = {};
 let mapInitialized = false;
 
@@ -428,6 +429,11 @@ function initMap() {
     RotamStoryGuide.init();
   }
 
+  // Initialize Automatic Day/Night Solar Theme Engine
+  if (typeof RotamAutoTheme !== 'undefined') {
+    RotamAutoTheme.init();
+  }
+
   // Initialize Robust Voice & Audio Guidance Engine (Android & iOS Bridge)
   if (typeof RotamSpeech !== 'undefined') {
     RotamSpeech.init();
@@ -572,6 +578,106 @@ function switchTile(tileKey) {
   }
   setTimeout(() => { if (map) map.invalidateSize(); }, 50);
 }
+
+// ==========================================
+// Rotam Auto Day/Night Theme Engine (Solar Cycle & Sunset Detection)
+// Automatically shifts between bright daylight and dark night modes
+// based on astronomic sunrise/sunset times calculated from GPS.
+// ==========================================
+const RotamAutoTheme = {
+  mode: localStorage.getItem('rotam_theme_mode') || 'auto', // 'auto' | 'dark' | 'day' | 'manual'
+  timer: null,
+
+  init() {
+    this.apply();
+    if (this.timer) clearInterval(this.timer);
+    this.timer = setInterval(() => {
+      if (this.mode === 'auto') this.apply();
+    }, 4 * 60 * 1000); // Check every 4 minutes
+    this.updateUI();
+  },
+
+  isDaytime(lat = 39.0, lon = 35.0) {
+    const now = new Date();
+    const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+    // Solar declination approximation
+    const declination = 23.45 * Math.sin((Math.PI / 180) * (360 / 365) * (dayOfYear - 81));
+    const latRad = lat * (Math.PI / 180);
+    const decRad = declination * (Math.PI / 180);
+    const cosHourAngle = -Math.tan(latRad) * Math.tan(decRad);
+    const hourAngle = Math.acos(Math.max(-1, Math.min(1, cosHourAngle))) * (180 / Math.PI);
+
+    const tzOffsetHours = -now.getTimezoneOffset() / 60;
+    const solarNoon = 12.0 - (lon - (tzOffsetHours * 15)) / 15;
+    const sunriseHour = solarNoon - (hourAngle / 15);
+    const sunsetHour = solarNoon + (hourAngle / 15);
+
+    const currentDecimalHour = now.getHours() + now.getMinutes() / 60;
+    return currentDecimalHour >= sunriseHour && currentDecimalHour < sunsetHour;
+  },
+
+  apply() {
+    if (this.mode !== 'auto') return;
+    if (!map || !tileLayers || !tileLayers.osm) return;
+    const userLat = state.userLocation?.lat || 39.0;
+    const userLon = state.userLocation?.lon || 35.0;
+    const day = this.isDaytime(userLat, userLon);
+    const targetTile = day ? 'osm' : 'dark';
+    if (state.activeTileLayer !== targetTile) {
+      switchTile(targetTile);
+    }
+    this.updateUI();
+  },
+
+  toggle() {
+    const isEn = (window.state && window.state.lang === 'en');
+    if (this.mode === 'auto') {
+      const isDay = this.isDaytime();
+      this.mode = isDay ? 'dark' : 'day';
+      localStorage.setItem('rotam_theme_mode', this.mode);
+      switchTile(this.mode === 'dark' ? 'dark' : 'osm');
+      showToast(this.mode === 'dark' ? (isEn ? '🌙 Dark Mode' : '🌙 Koyu Gece Modu') : (isEn ? '☀️ Day Mode' : '☀️ Aydınlık Gündüz Modu'), 'info');
+    } else {
+      this.mode = 'auto';
+      localStorage.setItem('rotam_theme_mode', 'auto');
+      this.apply();
+      const isDay = this.isDaytime();
+      showToast(isEn ? `🌓 Auto Day/Night (${isDay ? 'Day' : 'Night'})` : `🌓 Otomatik Gündüz/Gece (${isDay ? 'Gündüz ☀️' : 'Gece 🌙'}) Aktif`, 'success');
+    }
+    this.updateUI();
+  },
+
+  updateUI() {
+    const mobileStatus = document.getElementById('mobile-auto-theme-status');
+    const desktopLabel = document.getElementById('desktop-auto-theme-label');
+    const desktopBtn = document.getElementById('tile-auto');
+    const isDay = this.isDaytime();
+
+    if (this.mode === 'auto') {
+      if (mobileStatus) {
+        mobileStatus.textContent = isDay ? 'Gündüz ☀️' : 'Gece 🌙';
+        mobileStatus.className = 'text-[10px] text-amber-400 font-bold';
+      }
+      if (desktopLabel) desktopLabel.textContent = isDay ? 'Oto ☀️' : 'Oto 🌙';
+      if (desktopBtn) {
+        desktopBtn.classList.add('bg-slate-800', 'text-amber-400');
+        desktopBtn.classList.remove('text-slate-400');
+      }
+    } else {
+      if (mobileStatus) {
+        mobileStatus.textContent = this.mode === 'dark' ? 'Gece (Sabit)' : 'Gündüz (Sabit)';
+        mobileStatus.className = 'text-[10px] text-slate-400';
+      }
+      if (desktopLabel) desktopLabel.textContent = 'Oto';
+      if (desktopBtn) {
+        desktopBtn.classList.remove('bg-slate-800', 'text-amber-400');
+        desktopBtn.classList.add('text-slate-400');
+      }
+    }
+  }
+};
+
+window.RotamAutoTheme = RotamAutoTheme;
 
 // Splash Screen Dismissal
 function dismissSplashScreen() {
@@ -2166,6 +2272,8 @@ function clearRouteDisplay() {
 
   ghostPolylines.forEach(p => { if (map) map.removeLayer(p); });
   ghostPolylines = [];
+  clearRouteAlternativeMarkers();
+  dismissGmapsRouteSelector();
 
   clearPoiMarkers();
   state.activePoiCategories.clear();
@@ -3192,57 +3300,136 @@ async function fetchWithTimeout(url, options = {}, ms = 20000) {
 
 // Draw Active Route and Ghost Alternatives
 function drawRoutesOnMap(routes, activeIdx) {
-  if (!map) return;
+  if (!map || !routes || routes.length === 0) return;
 
   if (routePolyline) map.removeLayer(routePolyline);
   if (routeGlowPolyline) map.removeLayer(routeGlowPolyline);
   ghostPolylines.forEach(p => map.removeLayer(p));
   ghostPolylines = [];
+  clearRouteAlternativeMarkers();
 
-  // Draw inactive ghost alternatives first
+  const isEn = (window.state && window.state.lang === 'en');
+  const safeIdx = (activeIdx >= 0 && activeIdx < routes.length) ? activeIdx : 0;
+  const activeRoute = routes[safeIdx];
+
+  // Draw inactive ghost alternatives first (solid slate polylines + interactive hover)
   routes.forEach((r, idx) => {
-    if (idx === activeIdx) return;
+    if (idx === safeIdx || !r.geometry || !r.geometry.coordinates) return;
     const latLngs = r.geometry.coordinates.map(c => [c[1], c[0]]);
     const ghost = L.polyline(latLngs, {
       color: '#64748b',
-      weight: 4,
-      opacity: 0.5,
-      dashArray: '6, 8',
-      lineCap: 'round'
+      weight: 5,
+      opacity: 0.75,
+      lineCap: 'round',
+      lineJoin: 'round'
     }).addTo(map);
 
+    ghost.on('mouseover', () => {
+      ghost.setStyle({ color: '#94a3b8', weight: 7, opacity: 0.95 });
+    });
+    ghost.on('mouseout', () => {
+      ghost.setStyle({ color: '#64748b', weight: 5, opacity: 0.75 });
+    });
     ghost.on('click', () => {
       selectAlternativeRoute(idx);
     });
     ghostPolylines.push(ghost);
+
+    // On-map interactive time badge pill for inactive route
+    if (r.geometry.coordinates.length > 5) {
+      const coords = r.geometry.coordinates;
+      const offsetRatio = [0.46, 0.54, 0.38, 0.62][idx % 4];
+      const midIdx = Math.floor(coords.length * offsetRatio);
+      const midCoord = coords[Math.min(coords.length - 1, Math.max(0, midIdx))];
+      const latLng = [midCoord[1], midCoord[0]];
+
+      const distKm = (r.distance / 1000).toFixed(1);
+      const diffMin = Math.round((r.duration - activeRoute.duration) / 60);
+      let diffText = '';
+      if (diffMin > 0) diffText = `+${diffMin} ${isEn ? 'min' : 'dk'}`;
+      else if (diffMin < 0) diffText = `${diffMin} ${isEn ? 'min' : 'dk'}`;
+      else diffText = isEn ? 'Same time' : 'Aynı süre';
+
+      const pillHtml = `
+        <div class="gmaps-route-time-pill" onclick="selectAlternativeRoute(${idx})" title="${r.title || ''}">
+          <span class="pill-diff">${diffText}</span>
+          <span class="pill-dist">${distKm} km</span>
+        </div>
+      `;
+
+      const pillMarker = L.marker(latLng, {
+        icon: L.divIcon({
+          className: 'gmaps-pill-marker-wrapper',
+          html: pillHtml,
+          iconSize: [0, 0],
+          iconAnchor: [0, 0]
+        }),
+        zIndexOffset: 600
+      }).addTo(map);
+      routeAlternativeMarkers.push(pillMarker);
+    }
   });
 
   // Draw active route with high-contrast dual glow
-  const activeRoute = routes[activeIdx];
   const activeLatLngs = activeRoute.geometry.coordinates.map(c => [c[1], c[0]]);
 
   routeGlowPolyline = L.polyline(activeLatLngs, {
-    color: '#f97316',
-    weight: 9,
-    opacity: 0.4,
+    color: '#0284c7',
+    weight: 10,
+    opacity: 0.45,
     lineCap: 'round',
     lineJoin: 'round'
   }).addTo(map);
 
   routePolyline = L.polyline(activeLatLngs, {
-    color: '#fed7aa',
-    weight: 4,
-    opacity: 0.95,
+    color: '#38bdf8',
+    weight: 5.5,
+    opacity: 0.98,
     lineCap: 'round',
     lineJoin: 'round'
   }).addTo(map);
+
+  // On-map interactive time badge pill for active route
+  if (activeRoute.geometry && activeRoute.geometry.coordinates && activeRoute.geometry.coordinates.length > 5) {
+    const coords = activeRoute.geometry.coordinates;
+    const midIdx = Math.floor(coords.length * 0.46);
+    const midCoord = coords[Math.min(coords.length - 1, Math.max(0, midIdx))];
+    const latLng = [midCoord[1], midCoord[0]];
+
+    const distKm = (activeRoute.distance / 1000).toFixed(1);
+    const m = Math.floor(activeRoute.duration / 60);
+    const hours = Math.floor(m / 60);
+    const mins = m % 60;
+    const durStr = (hours > 0 ? hours + (isEn ? ' h ' : ' sa ') : '') + mins + (isEn ? ' min' : ' dk');
+
+    const pillHtml = `
+      <div class="gmaps-route-time-pill active" onclick="selectAlternativeRoute(${safeIdx})" title="${activeRoute.title || ''}">
+        <span class="pill-diff">⚡ ${durStr}</span>
+        <span class="pill-dist">${distKm} km</span>
+      </div>
+    `;
+
+    const pillMarker = L.marker(latLng, {
+      icon: L.divIcon({
+        className: 'gmaps-pill-marker-wrapper',
+        html: pillHtml,
+        iconSize: [0, 0],
+        iconAnchor: [0, 0]
+      }),
+      zIndexOffset: 1200
+    }).addTo(map);
+    routeAlternativeMarkers.push(pillMarker);
+  }
+
+  // Update floating Google Maps alternative route selector cards at bottom of screen
+  renderGmapsRouteSelector(routes, safeIdx);
 
   map.fitBounds(routePolyline.getBounds(), { padding: [50, 50] });
 }
 
 // Select Alternate Route
 function selectAlternativeRoute(idx) {
-  if (!state.routeAlternatives[idx]) return;
+  if (!state.routeAlternatives || !state.routeAlternatives[idx]) return;
   state.activeRouteIndex = idx;
   const activeRoute = state.routeAlternatives[idx];
   state.routeData = activeRoute;
@@ -3250,12 +3437,118 @@ function selectAlternativeRoute(idx) {
   drawRoutesOnMap(state.routeAlternatives, idx);
   displayRouteStats(activeRoute);
   renderRouteAlternativesUI(state.routeAlternatives, idx);
+  renderGmapsRouteSelector(state.routeAlternatives, idx);
   analyzeRouteCorridor(activeRoute, 50000);
   fetchAndDisplayElevation(activeRoute.geometry.coordinates);
   generateSmartStopRecommendations(activeRoute);
   renderJourneyTimeline();
   if (typeof RotamCommunity !== 'undefined') {
     RotamCommunity.renderOnMap();
+  }
+}
+
+// Clear On-Map Alternative Route Time Pills
+function clearRouteAlternativeMarkers() {
+  if (routeAlternativeMarkers && routeAlternativeMarkers.length > 0) {
+    routeAlternativeMarkers.forEach(m => {
+      if (map) map.removeLayer(m);
+    });
+    routeAlternativeMarkers = [];
+  }
+}
+
+// Render Google Maps Style Floating Bottom Alternative Route Selector
+function renderGmapsRouteSelector(routes, activeIdx) {
+  const container = document.getElementById('gmaps-route-selector-container');
+  const list = document.getElementById('gmaps-route-cards-list');
+  const titleEl = document.getElementById('gmaps-route-alt-count-title');
+  if (!container || !list) return;
+
+  if (!routes || routes.length <= 1) {
+    dismissGmapsRouteSelector();
+    return;
+  }
+
+  const isEn = (window.state && window.state.lang === 'en');
+  if (titleEl) {
+    titleEl.textContent = isEn 
+      ? `${routes.length} Route Alternatives`
+      : `${routes.length} Alternatif Güzergah`;
+  }
+
+  list.innerHTML = '';
+  const fastestDuration = Math.min(...routes.map(r => r.duration));
+
+  routes.forEach((r, idx) => {
+    const isActive = idx === activeIdx;
+    const distKm = (r.distance / 1000).toFixed(1);
+    const m = Math.floor(r.duration / 60);
+    const hours = Math.floor(m / 60);
+    const mins = m % 60;
+    const durStr = (hours > 0 ? hours + (isEn ? ' h ' : ' sa ') : '') + mins + (isEn ? ' min' : ' dk');
+
+    const diffMin = Math.round((r.duration - fastestDuration) / 60);
+    let badgeText = '';
+    let badgeClass = '';
+    if (diffMin === 0) {
+      badgeText = isEn ? '⚡ Fastest' : '⚡ En Hızlı';
+      badgeClass = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+    } else {
+      badgeText = `+${diffMin} ${isEn ? 'min' : 'dk'}`;
+      badgeClass = 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+    }
+
+    const card = document.createElement('div');
+    card.className = `gmaps-route-card min-w-[145px] sm:min-w-[170px] p-2.5 sm:p-3 rounded-2xl border flex flex-col justify-between shrink-0 ${
+      isActive 
+        ? 'active bg-sky-950/40 border-sky-500 shadow-lg shadow-sky-500/20' 
+        : 'bg-slate-900/90 border-slate-700/80 hover:border-slate-600'
+    }`;
+    card.onclick = () => selectAlternativeRoute(idx);
+
+    card.innerHTML = `
+      <div class="flex items-center justify-between space-x-1 mb-1">
+        <span class="px-2 py-0.5 rounded-full text-[10px] font-black border ${badgeClass}">
+          ${badgeText}
+        </span>
+        ${isActive ? '<span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>' : ''}
+      </div>
+      <div>
+        <div class="text-sm sm:text-base font-black text-white tracking-tight">${durStr}</div>
+        <div class="text-[11px] font-semibold text-slate-400 flex items-center space-x-1 mt-0.5">
+          <span>${distKm} km</span>
+          <span>•</span>
+          <span class="truncate max-w-[80px]">${r.source === 'valhalla' ? (isEn ? 'Scenic' : 'Manzaralı') : (isEn ? 'Highway' : 'Otoyol')}</span>
+        </div>
+      </div>
+    `;
+
+    list.appendChild(card);
+  });
+
+  // Reveal container smoothly
+  container.classList.remove('hidden');
+  requestAnimationFrame(() => {
+    container.classList.remove('translate-y-6', 'opacity-0');
+    container.classList.add('translate-y-0', 'opacity-100');
+  });
+}
+
+function dismissGmapsRouteSelector() {
+  const container = document.getElementById('gmaps-route-selector-container');
+  if (!container || container.classList.contains('hidden')) return;
+  container.classList.remove('translate-y-0', 'opacity-100');
+  container.classList.add('translate-y-6', 'opacity-0');
+  setTimeout(() => {
+    container.classList.add('hidden');
+  }, 250);
+}
+
+function startLiveRide() {
+  dismissGmapsRouteSelector();
+  clearRouteAlternativeMarkers();
+  if (typeof LiveNavigation !== 'undefined') {
+    LiveNavigation.start(false);
   }
 }
 
@@ -8834,6 +9127,8 @@ const LiveNavigation = {
     document.getElementById('floating-map-controls')?.classList.add('hidden');
     document.getElementById('gmaps-top-container')?.classList.add('hidden');
     if (typeof closeGmapsPlaceSheet === 'function') closeGmapsPlaceSheet();
+    if (typeof dismissGmapsRouteSelector === 'function') dismissGmapsRouteSelector();
+    if (typeof clearRouteAlternativeMarkers === 'function') clearRouteAlternativeMarkers();
     document.getElementById('btn-toggle-right-panel')?.classList.add('hidden');
     document.getElementById('map-hint')?.classList.add('hidden');
     document.getElementById('elevation-panel')?.classList.add('hidden');
@@ -8989,6 +9284,11 @@ const LiveNavigation = {
       } catch (e) {
         // ignore
       }
+    }
+
+    // Restore alternative routes and Google Maps bottom selector if alternatives exist
+    if (state.routeAlternatives && state.routeAlternatives.length > 1) {
+      drawRoutesOnMap(state.routeAlternatives, state.activeRouteIndex || 0);
     }
 
     const isEn = (window.state && window.state.lang === 'en');

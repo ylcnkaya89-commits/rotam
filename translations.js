@@ -41,6 +41,15 @@ window.TRANSLATIONS = {
     gmaps_chip_photo: "Manzara",
     gmaps_chip_free_ride: "🏍️ Serbest Sürüş",
     gmaps_chip_plan: "Detaylı Rota",
+    gmaps_route_alt_title: "Alternatif Güzergahlar",
+    gmaps_route_fastest: "En Hızlı",
+    gmaps_route_scenic: "Manzaralı / Bölge Yolu",
+    gmaps_route_selected: "Seçili",
+    gmaps_route_same_time: "Aynı süre",
+    btn_start_live_ride: "SEÇİLİ ROTAYI BAŞLAT",
+    theme_auto_title: "Otomatik (Güneş Döngüsü)",
+    theme_day_title: "Aydınlık Gündüz",
+    theme_night_title: "Koyu Gece",
 
     // Mobile Bottom Nav
     mobile_nav_plan: "Rota",
@@ -398,6 +407,15 @@ window.TRANSLATIONS = {
     gmaps_chip_photo: "Scenic",
     gmaps_chip_free_ride: "🏍️ Free Ride",
     gmaps_chip_plan: "Route Planner",
+    gmaps_route_alt_title: "Alternative Routes",
+    gmaps_route_fastest: "Fastest",
+    gmaps_route_scenic: "Scenic / Backroad",
+    gmaps_route_selected: "Selected",
+    gmaps_route_same_time: "Same time",
+    btn_start_live_ride: "START SELECTED ROUTE",
+    theme_auto_title: "Auto (Solar Cycle)",
+    theme_day_title: "Day Mode",
+    theme_night_title: "Night Mode",
 
     // Mobile Bottom Nav
     mobile_nav_plan: "Route",
