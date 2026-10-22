@@ -366,6 +366,8 @@ function initMap() {
   // Map Click Listener to add waypoints & auto-collapse filters on mobile
   map.on('click', async (e) => {
     dismissQuickPlacePreview();
+    const gmapsDropdown = document.getElementById('gmaps-search-dropdown');
+    if (gmapsDropdown) gmapsDropdown.classList.add('hidden');
     const rightPanel = document.getElementById('right-panel');
     if (rightPanel && !rightPanel.classList.contains('hidden') && window.innerWidth < 1024) {
       closeRightPanel();
@@ -443,6 +445,17 @@ function initMap() {
   if (typeof RotamDisplay !== 'undefined') {
     RotamDisplay.init();
   }
+
+  // Close Google Maps search dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    const topContainer = document.getElementById('gmaps-top-container');
+    const dropdown = document.getElementById('gmaps-search-dropdown');
+    if (dropdown && !dropdown.classList.contains('hidden')) {
+      if (topContainer && !topContainer.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    }
+  });
 }
 
 // Proactive user location cache warmer
@@ -2377,6 +2390,22 @@ async function handleMapClick(lat, lon) {
     return;
   }
 
+  // Special Home / Work Map Picker Mode
+  if (window._rotamPickSpecialType) {
+    const type = window._rotamPickSpecialType;
+    window._rotamPickSpecialType = null;
+    const isEn = (window.state && window.state.lang === 'en');
+    const name = type === 'home' ? (isEn ? 'Home' : 'Evim') : (isEn ? 'Work' : 'İşim');
+    RotamFavorites.setSpecial(type, {
+      name,
+      lat,
+      lon,
+      region: friendlyName || (isEn ? 'Saved Map Point' : 'Haritadan Seçilen Nokta')
+    });
+    dropGmapsPin(lat, lon);
+    return;
+  }
+
   // GOOGLE MAPS EXPERIENCE: Map click drops pin and opens Google Maps Place Sheet with BAŞLAT
   handleGmapsMapClick(lat, lon, friendlyName);
 }
@@ -2532,6 +2561,12 @@ function showGmapsPlaceSheet(place) {
     }
   }
 
+  // 6. Update Star / Favorite Status
+  if (typeof RotamFavorites !== 'undefined') {
+    const isFav = RotamFavorites.isFavorite(place.lat, place.lon, place.name);
+    RotamFavorites.updateSheetStar(isFav);
+  }
+
   // Show sheet with smooth transition
   sheet.classList.remove('hidden');
   requestAnimationFrame(() => {
@@ -2554,6 +2589,13 @@ function closeGmapsPlaceSheet() {
   // Only remove drop pin if not currently locked on an active route
   if (!state.routeData) {
     removeGmapsPin();
+  }
+}
+
+function gmapsToggleFavoriteFromSheet() {
+  if (!activeGmapsSheetTarget) return;
+  if (typeof RotamFavorites !== 'undefined') {
+    RotamFavorites.toggle(activeGmapsSheetTarget);
   }
 }
 
@@ -2673,13 +2715,529 @@ function normalizeTurkishSearch(str) {
     .replace(/ç/g, 'c');
 }
 
+// ==========================================
+// Rotam Search History & Favorites Engine
+// ==========================================
+const RotamSearchHistory = {
+  key: 'rotam_recent_searches',
+
+  get() {
+    try {
+      const data = localStorage.getItem(this.key);
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  add(item) {
+    if (!item || !item.name || item.lat === undefined || item.lon === undefined) return;
+    try {
+      let list = this.get();
+      list = list.filter(x => {
+        if (x.name && x.name.toLowerCase() === item.name.toLowerCase()) return false;
+        if (Math.abs(x.lat - item.lat) < 0.001 && Math.abs(x.lon - item.lon) < 0.001) return false;
+        return true;
+      });
+
+      list.unshift({
+        id: item.id || `hist-${Date.now()}`,
+        name: item.name,
+        region: item.region || item.city || 'Türkiye',
+        lat: item.lat,
+        lon: item.lon,
+        emoji: item.emoji || '📍',
+        category: item.category || 'place',
+        timestamp: Date.now()
+      });
+
+      if (list.length > 12) list = list.slice(0, 12);
+      localStorage.setItem(this.key, JSON.stringify(list));
+    } catch (e) {
+      console.warn('RotamSearchHistory.add error:', e);
+    }
+  },
+
+  remove(idx, event) {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    try {
+      const list = this.get();
+      if (idx >= 0 && idx < list.length) {
+        list.splice(idx, 1);
+        localStorage.setItem(this.key, JSON.stringify(list));
+      }
+      renderGmapsSearchDefaultDropdown();
+    } catch (e) {
+      console.warn('RotamSearchHistory.remove error:', e);
+    }
+  },
+
+  clear(event) {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    localStorage.removeItem(this.key);
+    renderGmapsSearchDefaultDropdown();
+    const isEn = (window.state && window.state.lang === 'en');
+    showToast(isEn ? 'Search history cleared.' : 'Arama geçmişi temizlendi.', 'info');
+  }
+};
+
+const RotamFavorites = {
+  listKey: 'rotam_favorite_places',
+  homeKey: 'rotam_saved_home',
+  workKey: 'rotam_saved_work',
+  pendingSpecialType: null,
+
+  getList() {
+    try {
+      const data = localStorage.getItem(this.listKey);
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  isFavorite(lat, lon, name) {
+    const list = this.getList();
+    return list.some(x => {
+      if (name && x.name && x.name.toLowerCase() === name.toLowerCase()) return true;
+      return (Math.abs(x.lat - lat) < 0.001 && Math.abs(x.lon - lon) < 0.001);
+    });
+  },
+
+  toggle(item) {
+    if (!item || !item.name || item.lat === undefined || item.lon === undefined) return false;
+    let list = this.getList();
+    const exists = this.isFavorite(item.lat, item.lon, item.name);
+    const isEn = (window.state && window.state.lang === 'en');
+
+    if (exists) {
+      list = list.filter(x => !(x.name && x.name.toLowerCase() === item.name.toLowerCase()) &&
+        !(Math.abs(x.lat - item.lat) < 0.001 && Math.abs(x.lon - item.lon) < 0.001));
+      localStorage.setItem(this.listKey, JSON.stringify(list));
+      showToast(isEn ? 'Removed from favorites' : 'Favorilerden çıkarıldı', 'info');
+      this.updateSheetStar(false);
+      return false;
+    } else {
+      list.unshift({
+        id: item.id || `fav-${Date.now()}`,
+        name: item.name,
+        region: item.region || item.city || 'Türkiye',
+        lat: item.lat,
+        lon: item.lon,
+        emoji: item.emoji || '⭐',
+        category: item.category || 'favorite',
+        savedAt: Date.now()
+      });
+      localStorage.setItem(this.listKey, JSON.stringify(list));
+      showToast(isEn ? 'Added to favorites ⭐' : 'Favorilere eklendi ⭐', 'success');
+      this.updateSheetStar(true);
+      return true;
+    }
+  },
+
+  updateSheetStar(isFav) {
+    const icon = document.getElementById('gmaps-sheet-fav-icon');
+    const btn = document.getElementById('gmaps-sheet-btn-fav');
+    if (!icon || !btn) return;
+    if (isFav) {
+      icon.classList.add('fill-amber-400', 'text-amber-400');
+      icon.classList.remove('text-slate-400');
+      btn.classList.add('bg-amber-500/10', 'border-amber-500/40');
+    } else {
+      icon.classList.remove('fill-amber-400');
+      icon.classList.add('text-slate-400');
+      btn.classList.remove('bg-amber-500/10', 'border-amber-500/40');
+    }
+  },
+
+  getSpecial(type) {
+    try {
+      const data = localStorage.getItem(type === 'home' ? this.homeKey : this.workKey);
+      return data ? JSON.parse(data) : null;
+    } catch (e) {
+      return null;
+    }
+  },
+
+  setSpecial(type, data) {
+    if (!data) return;
+    const key = type === 'home' ? this.homeKey : this.workKey;
+    localStorage.setItem(key, JSON.stringify(data));
+    const isEn = (window.state && window.state.lang === 'en');
+    showToast(isEn ? `${type === 'home' ? 'Home' : 'Work'} location saved!` : `${type === 'home' ? 'Ev' : 'İş'} konumu kaydedildi! 🏠`, 'success');
+    this.closeSpecialModal();
+    renderGmapsSearchDefaultDropdown();
+  },
+
+  openSpecialModal(type) {
+    this.pendingSpecialType = type;
+    const modal = document.getElementById('rotam-set-special-modal');
+    const emojiEl = document.getElementById('set-special-emoji');
+    const titleEl = document.getElementById('set-special-title');
+    const descEl = document.getElementById('set-special-desc');
+    const isEn = (window.state && window.state.lang === 'en');
+
+    if (modal) {
+      if (type === 'home') {
+        if (emojiEl) emojiEl.textContent = '🏠';
+        if (titleEl) titleEl.textContent = isEn ? 'Set Home Location' : 'Ev Konumunu Belirle';
+        if (descEl) descEl.textContent = isEn ? 'Save your home location to start navigation in 1 tap anytime.' : 'Ev konumunuzu kaydederek tek tıkla rotanızı başlatabilir ve eve dönüş sürüşü planlayabilirsiniz.';
+      } else {
+        if (emojiEl) emojiEl.textContent = '🏢';
+        if (titleEl) titleEl.textContent = isEn ? 'Set Work Location' : 'İş Konumunu Belirle';
+        if (descEl) descEl.textContent = isEn ? 'Save your workplace location for easy 1-tap commuting.' : 'İş yeri konumunuzu kaydederek tek dokunuşla işe gidiş rotası oluşturabilirsiniz.';
+      }
+      modal.classList.remove('hidden');
+    }
+  },
+
+  closeSpecialModal() {
+    this.pendingSpecialType = null;
+    const modal = document.getElementById('rotam-set-special-modal');
+    if (modal) modal.classList.add('hidden');
+  },
+
+  setFromCurrentGPS() {
+    const type = this.pendingSpecialType || 'home';
+    const isEn = (window.state && window.state.lang === 'en');
+    if (state.userLocation && state.userLocation.lat) {
+      const name = type === 'home' ? (isEn ? 'Home' : 'Evim') : (isEn ? 'Work' : 'İşim');
+      this.setSpecial(type, {
+        name,
+        lat: state.userLocation.lat,
+        lon: state.userLocation.lon,
+        region: isEn ? 'My Location' : 'Mevcut Konumum'
+      });
+    } else {
+      showToast(isEn ? 'Acquiring GPS location... 🛰️' : 'Mevcut GPS konumunuz alınıyor... 🛰️', 'info');
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            state.userLocation = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+            const name = type === 'home' ? (isEn ? 'Home' : 'Evim') : (isEn ? 'Work' : 'İşim');
+            RotamFavorites.setSpecial(type, {
+              name,
+              lat: pos.coords.latitude,
+              lon: pos.coords.longitude,
+              region: isEn ? 'My Location' : 'Mevcut Konumum'
+            });
+          },
+          (err) => {
+            showToast(isEn ? 'Could not get GPS location.' : 'GPS konumu alınamadı.', 'warning');
+          },
+          { enableHighAccuracy: true, timeout: 6000 }
+        );
+      }
+    }
+  },
+
+  startMapPickSpecial() {
+    const type = this.pendingSpecialType || 'home';
+    this.closeSpecialModal();
+    const isEn = (window.state && window.state.lang === 'en');
+    showToast(isEn ? `Tap on the map to set your ${type === 'home' ? 'Home' : 'Work'} location 📍` : `Haritada ${type === 'home' ? 'Ev' : 'İş'} konumunuzu seçmek için bir noktaya dokunun 📍`, 'info');
+    window._rotamPickSpecialType = type;
+  }
+};
+
+window.RotamSearchHistory = RotamSearchHistory;
+window.RotamFavorites = RotamFavorites;
+
+// Render Google Maps Default Search Dropdown (Shortcuts + History + Favorites)
+function renderGmapsSearchDefaultDropdown() {
+  const dropdown = document.getElementById('gmaps-search-dropdown');
+  if (!dropdown) return;
+
+  const isEn = (window.state && window.state.lang === 'en');
+  const home = RotamFavorites.getSpecial('home');
+  const work = RotamFavorites.getSpecial('work');
+  const favList = RotamFavorites.getList();
+  const history = RotamSearchHistory.get();
+  const userLoc = state.userLocation;
+
+  let html = '';
+
+  // 1. TOP SHORTCUTS ROW: [ 🏠 Ev ], [ 🏢 İş ], [ ⭐ Favoriler ]
+  html += `
+    <div class="p-3 bg-slate-950/70 border-b border-slate-800/80">
+      <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar py-0.5">
+        <!-- Ev Kısayolu -->
+        <button onclick="${home ? `navigateToSpecial('home')` : `RotamFavorites.openSpecialModal('home')`}" 
+                class="gmaps-shortcut-pill shrink-0">
+          <span>🏠</span>
+          <span class="font-bold ${home ? 'text-white' : 'text-slate-400'}">${home ? escapeHtml(home.name || (isEn ? 'Home' : 'Evim')) : (isEn ? '+ Add Home' : '+ Ev Ekle')}</span>
+        </button>
+
+        <!-- İş Kısayolu -->
+        <button onclick="${work ? `navigateToSpecial('work')` : `RotamFavorites.openSpecialModal('work')`}" 
+                class="gmaps-shortcut-pill shrink-0">
+          <span>🏢</span>
+          <span class="font-bold ${work ? 'text-white' : 'text-slate-400'}">${work ? escapeHtml(work.name || (isEn ? 'Work' : 'İşim')) : (isEn ? '+ Add Work' : '+ İş Ekle')}</span>
+        </button>
+
+        <!-- Favoriler Kısayolu -->
+        <button onclick="showFavoritesListInDropdown()" 
+                class="gmaps-shortcut-pill shrink-0">
+          <span class="text-amber-400">⭐</span>
+          <span class="font-bold text-amber-300">${isEn ? 'Favorites' : 'Favoriler'} (${favList.length})</span>
+        </button>
+      </div>
+    </div>
+  `;
+
+  // 2. SON ARAMALAR (RECENT SEARCHES)
+  if (history && history.length > 0) {
+    html += `
+      <div>
+        <div class="px-3.5 pt-2.5 pb-1.5 flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+          <span class="flex items-center space-x-1.5">
+            <span>🕒</span>
+            <span>${isEn ? 'Recent Searches' : 'Son Aramalar'}</span>
+          </span>
+          <button onclick="RotamSearchHistory.clear(event)" class="text-[10px] text-cyan-400 hover:text-cyan-300 font-bold hover:underline transition-colors">
+            ${isEn ? 'Clear' : 'Temizle'}
+          </button>
+        </div>
+        <div class="divide-y divide-slate-800/60">
+    `;
+
+    history.slice(0, 8).forEach((item, idx) => {
+      let distBadge = '';
+      if (userLoc && userLoc.lat) {
+        const dKm = (haversineMeters(userLoc.lat, userLoc.lon, item.lat, item.lon) * 1.25 / 1000);
+        distBadge = `<span class="text-[10px] text-emerald-400 font-semibold mr-1.5 shrink-0">${dKm < 10 ? dKm.toFixed(1) : Math.round(dKm)} km</span>`;
+      }
+
+      html += `
+        <div class="gmaps-history-item px-3.5 py-2.5 flex items-center justify-between hover:bg-slate-800/80 active:bg-slate-750 cursor-pointer transition-colors"
+             onclick="selectRecentSearchItem(${idx})">
+          <div class="flex items-center space-x-2.5 min-w-0">
+            <span class="text-slate-400 text-sm shrink-0">🕒</span>
+            <div class="min-w-0">
+              <h4 class="text-xs sm:text-sm font-bold text-white truncate">${escapeHtml(item.name)}</h4>
+              <p class="text-[10px] text-slate-400 truncate">${escapeHtml(item.region || 'Türkiye')}</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-1 shrink-0">
+            ${distBadge}
+            <button onclick="RotamSearchHistory.remove(${idx}, event)" class="gmaps-history-delete-btn p-1 rounded-full text-slate-400 hover:text-red-400 transition-colors" title="Geçmişten Kaldır">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+        </div>
+      `;
+    });
+
+    html += `</div></div>`;
+  } else if (favList && favList.length > 0) {
+    // If no recent search, show favorites
+    html += `
+      <div>
+        <div class="px-3.5 pt-2.5 pb-1.5 text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center space-x-1.5">
+          <span>⭐</span>
+          <span>${isEn ? 'Starred Places' : 'Kayıtlı Favoriler'}</span>
+        </div>
+        <div class="divide-y divide-slate-800/60">
+    `;
+
+    favList.slice(0, 6).forEach((item, idx) => {
+      html += `
+        <div class="gmaps-history-item px-3.5 py-2.5 flex items-center justify-between hover:bg-slate-800/80 active:bg-slate-750 cursor-pointer transition-colors"
+             onclick="selectFavoriteItem(${idx})">
+          <div class="flex items-center space-x-2.5 min-w-0">
+            <span class="text-amber-400 text-sm shrink-0">⭐</span>
+            <div class="min-w-0">
+              <h4 class="text-xs sm:text-sm font-bold text-white truncate">${escapeHtml(item.name)}</h4>
+              <p class="text-[10px] text-slate-400 truncate">${escapeHtml(item.region || 'Türkiye')}</p>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    html += `</div></div>`;
+  } else {
+    // Empty state with quick suggestions
+    html += `
+      <div class="p-4 text-center">
+        <p class="text-xs text-slate-400 leading-relaxed mb-3">
+          ${isEn ? 'No recent searches yet. Search for cities, ancient ruins, beaches or scenic passes.' : 'Henüz arama geçmişiniz yok. Şehir, antik kent, sahil veya mola yeri arayabilirsiniz.'}
+        </p>
+        <div class="flex flex-wrap items-center justify-center gap-1.5">
+          <button onclick="handleQuickSearchPreset('Efes Antik Kenti')" class="px-2.5 py-1 rounded-full bg-slate-800/90 hover:bg-slate-700 text-[11px] font-semibold text-slate-200 border border-slate-700">
+            🏛️ Efes
+          </button>
+          <button onclick="handleQuickSearchPreset('Kaputaş Plajı')" class="px-2.5 py-1 rounded-full bg-slate-800/90 hover:bg-slate-700 text-[11px] font-semibold text-slate-200 border border-slate-700">
+            🏖️ Kaputaş
+          </button>
+          <button onclick="handleQuickSearchPreset('Ayder Yaylası')" class="px-2.5 py-1 rounded-full bg-slate-800/90 hover:bg-slate-700 text-[11px] font-semibold text-slate-200 border border-slate-700">
+            🌲 Ayder
+          </button>
+          <button onclick="handleQuickSearchPreset('Kapadokya')" class="px-2.5 py-1 rounded-full bg-slate-800/90 hover:bg-slate-700 text-[11px] font-semibold text-slate-200 border border-slate-700">
+            🎈 Kapadokya
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  dropdown.innerHTML = html;
+  dropdown.classList.remove('hidden');
+}
+
+function showFavoritesListInDropdown() {
+  const dropdown = document.getElementById('gmaps-search-dropdown');
+  if (!dropdown) return;
+  const isEn = (window.state && window.state.lang === 'en');
+  const favList = RotamFavorites.getList();
+
+  if (!favList || favList.length === 0) {
+    showToast(isEn ? 'No saved favorites yet. Tap the ⭐ button on any place card to save!' : 'Henüz favoriniz yok. Bir mekana tıkladığınızda ⭐ butonuna basarak kaydedebilirsiniz!', 'info');
+    return;
+  }
+
+  let html = `
+    <div class="p-3 bg-slate-950/70 border-b border-slate-800/80 flex items-center justify-between">
+      <div class="flex items-center space-x-1.5 text-xs font-bold text-amber-400">
+        <span>⭐</span>
+        <span>${isEn ? 'All Saved Favorites' : 'Kayıtlı Favorilerim'} (${favList.length})</span>
+      </div>
+      <button onclick="renderGmapsSearchDefaultDropdown()" class="text-[11px] text-slate-400 hover:text-white font-semibold">
+        ← ${isEn ? 'Back' : 'Geri'}
+      </button>
+    </div>
+    <div class="divide-y divide-slate-800/60 max-h-72 overflow-y-auto no-scrollbar">
+  `;
+
+  favList.forEach((item, idx) => {
+    html += `
+      <div class="gmaps-history-item px-3.5 py-2.5 flex items-center justify-between hover:bg-slate-800/80 active:bg-slate-750 cursor-pointer transition-colors"
+           onclick="selectFavoriteItem(${idx})">
+        <div class="flex items-center space-x-2.5 min-w-0">
+          <span class="text-amber-400 text-base shrink-0">${item.emoji || '⭐'}</span>
+          <div class="min-w-0">
+            <h4 class="text-xs sm:text-sm font-bold text-white truncate">${escapeHtml(item.name)}</h4>
+            <p class="text-[10px] text-slate-400 truncate">${escapeHtml(item.region || 'Türkiye')}</p>
+          </div>
+        </div>
+        <button onclick="deleteFavoriteItem(${idx}, event)" class="gmaps-history-delete-btn p-1.5 rounded-full text-slate-400 hover:text-red-400 transition-colors" title="Favorilerden Sil">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+  dropdown.innerHTML = html;
+  dropdown.classList.remove('hidden');
+}
+
+function navigateToSpecial(type) {
+  const special = RotamFavorites.getSpecial(type);
+  if (!special) {
+    RotamFavorites.openSpecialModal(type);
+    return;
+  }
+  const dropdown = document.getElementById('gmaps-search-dropdown');
+  if (dropdown) dropdown.classList.add('hidden');
+  const input = document.getElementById('gmaps-search-input');
+  if (input) input.value = special.name;
+
+  if (map) {
+    map.flyTo([special.lat, special.lon], 14, { duration: 1.0 });
+  }
+
+  dropGmapsPin(special.lat, special.lon);
+  showGmapsPlaceSheet({
+    name: special.name,
+    category: 'custom',
+    region: special.region || 'Kayıtlı Konum',
+    lat: special.lat,
+    lon: special.lon,
+    description: type === 'home' ? 'Kayıtlı ev konumunuz. Buraya hemen rota oluşturup navigasyon başlatabilirsiniz.' : 'Kayıtlı iş yeri konumunuz. Buraya hemen rota oluşturup navigasyon başlatabilirsiniz.'
+  });
+}
+
+function selectRecentSearchItem(idx) {
+  const history = RotamSearchHistory.get();
+  if (!history || !history[idx]) return;
+  const item = history[idx];
+
+  const input = document.getElementById('gmaps-search-input');
+  if (input) input.value = item.name;
+
+  const dropdown = document.getElementById('gmaps-search-dropdown');
+  if (dropdown) dropdown.classList.add('hidden');
+
+  RotamSearchHistory.add(item);
+
+  if (map) {
+    map.flyTo([item.lat, item.lon], 14, { duration: 1.0 });
+  }
+
+  dropGmapsPin(item.lat, item.lon);
+  showGmapsPlaceSheet(item);
+}
+
+function selectFavoriteItem(idx) {
+  const favList = RotamFavorites.getList();
+  if (!favList || !favList[idx]) return;
+  const item = favList[idx];
+
+  const input = document.getElementById('gmaps-search-input');
+  if (input) input.value = item.name;
+
+  const dropdown = document.getElementById('gmaps-search-dropdown');
+  if (dropdown) dropdown.classList.add('hidden');
+
+  RotamSearchHistory.add(item);
+
+  if (map) {
+    map.flyTo([item.lat, item.lon], 14, { duration: 1.0 });
+  }
+
+  dropGmapsPin(item.lat, item.lon);
+  showGmapsPlaceSheet(item);
+}
+
+function deleteFavoriteItem(idx, event) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+  const favList = RotamFavorites.getList();
+  if (idx >= 0 && idx < favList.length) {
+    const item = favList[idx];
+    favList.splice(idx, 1);
+    localStorage.setItem(RotamFavorites.listKey, JSON.stringify(favList));
+    showFavoritesListInDropdown();
+    if (activeGmapsSheetTarget && (activeGmapsSheetTarget.name === item.name || Math.abs(activeGmapsSheetTarget.lat - item.lat) < 0.001)) {
+      RotamFavorites.updateSheetStar(false);
+    }
+  }
+}
+
+function handleQuickSearchPreset(keyword) {
+  const input = document.getElementById('gmaps-search-input');
+  if (input) {
+    input.value = keyword;
+    handleGmapsSearchInput(keyword);
+  }
+}
+
 function handleGmapsSearchInput(query) {
   const clearBtn = document.getElementById('gmaps-search-clear-btn');
   const dropdown = document.getElementById('gmaps-search-dropdown');
 
   if (!query || query.trim().length === 0) {
     if (clearBtn) clearBtn.classList.add('hidden');
-    if (dropdown) dropdown.classList.add('hidden');
+    renderGmapsSearchDefaultDropdown();
     return;
   }
   if (clearBtn) clearBtn.classList.remove('hidden');
@@ -2687,7 +3245,24 @@ function handleGmapsSearchInput(query) {
   const normalized = normalizeTurkishSearch(query.trim());
   const results = [];
 
-  // 1. Search in TURKEY_GEO_DATABASE (Cities & Districts)
+  // 1. Search in Favorites & Recent Searches First (Quick match)
+  const favList = RotamFavorites.getList();
+  for (const f of favList) {
+    if (normalizeTurkishSearch(f.name).includes(normalized)) {
+      results.push({
+        type: 'favorite',
+        name: f.name,
+        region: f.region || '⭐ Favori',
+        lat: f.lat,
+        lon: f.lon,
+        emoji: '⭐',
+        place: f
+      });
+      if (results.length >= 3) break;
+    }
+  }
+
+  // 2. Search in TURKEY_GEO_DATABASE (Cities & Districts)
   if (window.TURKEY_GEO_DATABASE && Array.isArray(window.TURKEY_GEO_DATABASE)) {
     for (const city of window.TURKEY_GEO_DATABASE) {
       const cNorm = normalizeTurkishSearch(city.name);
@@ -2700,12 +3275,12 @@ function handleGmapsSearchInput(query) {
           lon: city.lon,
           emoji: '📍'
         });
-        if (results.length >= 4) break;
+        if (results.length >= 5) break;
       }
     }
   }
 
-  // 2. Search in state.allPlaces (915+ Historical, Natural, Food, Camp, Fuel)
+  // 3. Search in state.allPlaces (915+ Historical, Natural, Food, Camp, Fuel)
   const places = (state && state.allPlaces && Array.isArray(state.allPlaces)) ? state.allPlaces : (window.DEFAULT_HISTORIC_PLACES || []);
   for (const p of places) {
     const pName = normalizeTurkishSearch(p.name);
@@ -2724,7 +3299,7 @@ function handleGmapsSearchInput(query) {
         emoji: cfg.emoji || '🏛️',
         place: p
       });
-      if (results.length >= 8) break;
+      if (results.length >= 10) break;
     }
   }
 
@@ -2735,6 +3310,8 @@ function handleGmapsSearchFocus() {
   const input = document.getElementById('gmaps-search-input');
   if (input && input.value.trim().length > 0) {
     handleGmapsSearchInput(input.value);
+  } else {
+    renderGmapsSearchDefaultDropdown();
   }
 }
 
@@ -2764,7 +3341,6 @@ function renderGmapsSearchResults(results) {
     return;
   }
 
-  const isEn = (window.state && window.state.lang === 'en');
   const userLoc = state.userLocation;
 
   dropdown.innerHTML = results.map((item, idx) => {
@@ -2789,7 +3365,6 @@ function renderGmapsSearchResults(results) {
     `;
   }).join('');
 
-  // Cache current results for index click
   window._gmapsCachedResults = results;
   dropdown.classList.remove('hidden');
 }
@@ -2804,6 +3379,9 @@ function selectGmapsSearchResult(idx) {
 
   const dropdown = document.getElementById('gmaps-search-dropdown');
   if (dropdown) dropdown.classList.add('hidden');
+
+  // Persist to Recent Searches History
+  RotamSearchHistory.add(item);
 
   if (map) {
     map.flyTo([item.lat, item.lon], 14, { duration: 1.0 });

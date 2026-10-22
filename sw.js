@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v41 (Google Maps Alternatives & Solar Auto Theme)
-const CACHE_NAME = 'rotam-cache-v41';
+// Rotam PWA Service Worker - v42 (Google Maps Search History & Favorites)
+const CACHE_NAME = 'rotam-cache-v42';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

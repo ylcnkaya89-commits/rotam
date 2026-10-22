@@ -941,6 +941,11 @@
             <button id="gmaps-sheet-btn-details" onclick="gmapsOpenDetailsFromSheet()" class="hidden py-3 px-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold flex items-center justify-center active:scale-95 transition-all" title="Mekan Detayları & Tarihçe">
               <i data-lucide="info" class="w-4 h-4"></i>
             </button>
+
+            <!-- 5. "KAYDET / FAVORİ" BUTONU -->
+            <button id="gmaps-sheet-btn-fav" onclick="gmapsToggleFavoriteFromSheet()" class="py-3 px-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-amber-400 border border-slate-700 text-xs font-semibold flex items-center justify-center active:scale-95 transition-all shadow-md" title="Favorilere Ekle / Çıkar">
+              <i id="gmaps-sheet-fav-icon" data-lucide="star" class="w-4 h-4 text-slate-400 transition-colors"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -3616,6 +3621,34 @@
         </button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- EV / İŞ KONUMU BELİRLEME MODALI (#rotam-set-special-modal) -->
+  <div id="rotam-set-special-modal" class="hidden fixed inset-0 z-[2100] bg-black/75 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
+    <div class="glass-card bg-slate-900/98 border border-slate-700/90 rounded-3xl p-5 w-full max-w-sm shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <span id="set-special-emoji" class="text-2xl">🏠</span>
+          <h3 id="set-special-title" class="text-base font-black text-white">Ev Konumunu Belirle</h3>
+        </div>
+        <button onclick="RotamFavorites.closeSpecialModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <p id="set-special-desc" class="text-xs text-slate-400 leading-relaxed">
+        Ev konumunuzu kaydederek tek tıkla rotanızı başlatabilir ve eve dönüş sürüşü planlayabilirsiniz.
+      </p>
+      <div class="space-y-2 pt-1">
+        <button onclick="RotamFavorites.setFromCurrentGPS()" class="w-full py-3 px-3 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white text-xs font-bold flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30 active:scale-95 transition-all">
+          <i data-lucide="crosshair" class="w-4 h-4"></i>
+          <span>Mevcut GPS Konumumu Kullan</span>
+        </button>
+        <button onclick="RotamFavorites.startMapPickSpecial()" class="w-full py-3 px-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold flex items-center justify-center space-x-2 active:scale-95 transition-all">
+          <i data-lucide="map-pin" class="w-4 h-4 text-amber-400"></i>
+          <span>Haritada Dokunarak Seç</span>
+        </button>
+      </div>
     </div>
   </div>
 
