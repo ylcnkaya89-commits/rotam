@@ -557,9 +557,10 @@ function switchTile(tileKey) {
 
   if (isDark) {
     if (mapEl) mapEl.classList.add('dark-map');
-    document.body.classList.remove('sunlight-mode');
+    document.body.classList.remove('sunlight-mode', 'day-mode');
   } else {
     if (mapEl) mapEl.classList.remove('dark-map');
+    document.body.classList.add('day-mode');
   }
 
   // Instantiate Yandex layer on-demand if needed
@@ -630,15 +631,18 @@ const RotamAutoTheme = {
   },
 
   apply() {
-    if (this.mode !== 'auto') return;
     if (!map || !tileLayers || !tileLayers.osm) return;
-    const userLat = state.userLocation?.lat || 39.0;
-    const userLon = state.userLocation?.lon || 35.0;
-    const day = this.isDaytime(userLat, userLon);
-    const targetTile = day ? 'osm' : 'dark';
-    if (state.activeTileLayer !== targetTile) {
-      switchTile(targetTile);
+    let targetTile = 'dark';
+    if (this.mode === 'auto') {
+      const userLat = state.userLocation?.lat || 39.0;
+      const userLon = state.userLocation?.lon || 35.0;
+      targetTile = this.isDaytime(userLat, userLon) ? 'osm' : 'dark';
+    } else if (this.mode === 'day') {
+      targetTile = 'osm';
+    } else {
+      targetTile = 'dark';
     }
+    switchTile(targetTile);
     this.updateUI();
   },
 

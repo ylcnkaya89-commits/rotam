@@ -1776,4 +1776,346 @@ body.sunlight-mode .gmaps-tool-btn {
   color: #f87171;
 }
 
+/* ==========================================
+   13. GOOGLE MAPS DAY & HIGH-CONTRAST LIGHT MODE
+   Applied when body has .day-mode or .sunlight-mode
+   ========================================== */
+
+/* 1. Google Maps Top Search Box */
+body.day-mode .gmaps-search-box,
+body.sunlight-mode .gmaps-search-box {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+  color: #0f172a !important;
+}
+
+body.day-mode .gmaps-search-box:focus-within,
+body.sunlight-mode .gmaps-search-box:focus-within {
+  border-color: #0284c7 !important;
+  box-shadow: 0 12px 30px -5px rgba(2, 132, 199, 0.25), 0 0 0 2px rgba(2, 132, 199, 0.2) !important;
+}
+
+body.day-mode #gmaps-search-input,
+body.sunlight-mode #gmaps-search-input {
+  color: #0f172a !important;
+}
+
+body.day-mode #gmaps-search-input::placeholder,
+body.sunlight-mode #gmaps-search-input::placeholder {
+  color: #64748b !important;
+}
+
+body.day-mode #gmaps-search-clear-btn,
+body.sunlight-mode #gmaps-search-clear-btn {
+  color: #64748b !important;
+}
+
+body.day-mode #gmaps-search-clear-btn:hover,
+body.sunlight-mode #gmaps-search-clear-btn:hover {
+  color: #0f172a !important;
+  background: #f1f5f9 !important;
+}
+
+body.day-mode #gmaps-voice-search-btn,
+body.sunlight-mode #gmaps-voice-search-btn {
+  color: #475569 !important;
+}
+
+body.day-mode #gmaps-voice-search-btn:hover,
+body.sunlight-mode #gmaps-voice-search-btn:hover {
+  color: #0284c7 !important;
+  background: #f1f5f9 !important;
+}
+
+body.day-mode #gmaps-vehicle-badge,
+body.sunlight-mode #gmaps-vehicle-badge {
+  background: #f8fafc !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+body.day-mode #gmaps-vehicle-label,
+body.sunlight-mode #gmaps-vehicle-label {
+  color: #0284c7 !important;
+}
+
+body.day-mode .gmaps-search-box button,
+body.sunlight-mode .gmaps-search-box button {
+  color: #334155 !important;
+}
+
+body.day-mode .gmaps-search-box button:hover,
+body.sunlight-mode .gmaps-search-box button:hover {
+  color: #0f172a !important;
+  background: #f1f5f9 !important;
+}
+
+/* 2. Google Maps Autocomplete & History Dropdown */
+body.day-mode #gmaps-search-dropdown,
+body.sunlight-mode #gmaps-search-dropdown {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.22) !important;
+  color: #0f172a !important;
+}
+
+body.day-mode #gmaps-search-dropdown > div,
+body.sunlight-mode #gmaps-search-dropdown > div {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+body.day-mode .gmaps-search-item,
+body.sunlight-mode .gmaps-search-item,
+body.day-mode .gmaps-history-item,
+body.sunlight-mode .gmaps-history-item {
+  background: transparent !important;
+  color: #0f172a !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+body.day-mode .gmaps-search-item:hover,
+body.sunlight-mode .gmaps-search-item:hover,
+body.day-mode .gmaps-history-item:hover,
+body.sunlight-mode .gmaps-history-item:hover {
+  background: #f1f5f9 !important;
+}
+
+body.day-mode .gmaps-search-item h4,
+body.sunlight-mode .gmaps-search-item h4,
+body.day-mode .gmaps-history-item h4,
+body.sunlight-mode .gmaps-history-item h4 {
+  color: #0f172a !important;
+}
+
+body.day-mode .gmaps-search-item p,
+body.sunlight-mode .gmaps-search-item p,
+body.day-mode .gmaps-history-item p,
+body.sunlight-mode .gmaps-history-item p {
+  color: #64748b !important;
+}
+
+body.day-mode .gmaps-history-delete-btn,
+body.sunlight-mode .gmaps-history-delete-btn {
+  color: #94a3b8 !important;
+}
+
+body.day-mode .gmaps-history-delete-btn:hover,
+body.sunlight-mode .gmaps-history-delete-btn:hover {
+  color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.12) !important;
+}
+
+/* 3. Search Shortcut Pills (Home, Work, Favorites) */
+body.day-mode .gmaps-shortcut-pill,
+body.sunlight-mode .gmaps-shortcut-pill {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+
+body.day-mode .gmaps-shortcut-pill:hover,
+body.sunlight-mode .gmaps-shortcut-pill:hover {
+  background: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+}
+
+body.day-mode .gmaps-shortcut-pill span,
+body.sunlight-mode .gmaps-shortcut-pill span {
+  color: #0f172a !important;
+}
+
+/* 4. Category Filter Chips */
+body.day-mode .gmaps-chip,
+body.sunlight-mode .gmaps-chip {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #1e293b !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+body.day-mode .gmaps-chip:hover,
+body.sunlight-mode .gmaps-chip:hover {
+  background: #ffffff !important;
+  border-color: #0284c7 !important;
+  color: #0284c7 !important;
+}
+
+/* 5. Google Maps Bottom Place Sheet */
+body.day-mode #gmaps-place-sheet .glass-card,
+body.sunlight-mode #gmaps-place-sheet .glass-card {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.25) !important;
+  color: #0f172a !important;
+}
+
+body.day-mode #gmaps-sheet-title,
+body.sunlight-mode #gmaps-sheet-title {
+  color: #0f172a !important;
+}
+
+body.day-mode #gmaps-sheet-desc,
+body.sunlight-mode #gmaps-sheet-desc {
+  color: #475569 !important;
+}
+
+body.day-mode #gmaps-sheet-region,
+body.sunlight-mode #gmaps-sheet-region {
+  color: #64748b !important;
+}
+
+body.day-mode #gmaps-sheet-eta-box,
+body.sunlight-mode #gmaps-sheet-eta-box {
+  color: #334155 !important;
+}
+
+body.day-mode #gmaps-sheet-eta-box .text-slate-300,
+body.sunlight-mode #gmaps-sheet-eta-box .text-slate-300 {
+  color: #334155 !important;
+}
+
+body.day-mode #gmaps-sheet-btn-route,
+body.sunlight-mode #gmaps-sheet-btn-route,
+body.day-mode #gmaps-sheet-btn-add,
+body.sunlight-mode #gmaps-sheet-btn-add,
+body.day-mode #gmaps-sheet-btn-fav,
+body.sunlight-mode #gmaps-sheet-btn-fav,
+body.day-mode #gmaps-sheet-btn-details,
+body.sunlight-mode #gmaps-sheet-btn-details {
+  background: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #1e293b !important;
+}
+
+body.day-mode #gmaps-sheet-btn-route:hover,
+body.sunlight-mode #gmaps-sheet-btn-route:hover,
+body.day-mode #gmaps-sheet-btn-add:hover,
+body.sunlight-mode #gmaps-sheet-btn-add:hover,
+body.day-mode #gmaps-sheet-btn-fav:hover,
+body.sunlight-mode #gmaps-sheet-btn-fav:hover {
+  background: #e2e8f0 !important;
+}
+
+/* 6. Alternative Route Selector Container */
+body.day-mode #gmaps-route-selector-container .glass-card,
+body.sunlight-mode #gmaps-route-selector-container .glass-card {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.25) !important;
+  color: #0f172a !important;
+}
+
+body.day-mode #gmaps-route-alt-count-title,
+body.sunlight-mode #gmaps-route-alt-count-title {
+  color: #0f172a !important;
+}
+
+body.day-mode .gmaps-route-card,
+body.sunlight-mode .gmaps-route-card {
+  background: #f8fafc !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+body.day-mode .gmaps-route-card .text-white,
+body.sunlight-mode .gmaps-route-card .text-white {
+  color: #0f172a !important;
+}
+
+body.day-mode .gmaps-route-card .text-slate-400,
+body.sunlight-mode .gmaps-route-card .text-slate-400 {
+  color: #64748b !important;
+}
+
+body.day-mode .gmaps-route-card.active,
+body.sunlight-mode .gmaps-route-card.active {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(2, 132, 199, 0.22)) !important;
+  border-color: #0284c7 !important;
+  box-shadow: 0 8px 24px -4px rgba(2, 132, 199, 0.3) !important;
+}
+
+/* 7. Home/Work Setup Modal */
+body.day-mode #rotam-set-special-modal .glass-card,
+body.sunlight-mode #rotam-set-special-modal .glass-card {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+body.day-mode #set-special-title,
+body.sunlight-mode #set-special-title {
+  color: #0f172a !important;
+}
+
+body.day-mode #set-special-desc,
+body.sunlight-mode #set-special-desc {
+  color: #475569 !important;
+}
+
+/* 8. Floating Map Controls & Mobile Layers Popover */
+body.day-mode #floating-map-controls,
+body.sunlight-mode #floating-map-controls,
+body.day-mode #mobile-layers-popover,
+body.sunlight-mode #mobile-layers-popover {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+}
+
+body.day-mode .tile-btn,
+body.sunlight-mode .tile-btn,
+body.day-mode #mobile-layers-popover button,
+body.sunlight-mode #mobile-layers-popover button {
+  color: #334155 !important;
+}
+
+body.day-mode .tile-btn:hover,
+body.sunlight-mode .tile-btn:hover,
+body.day-mode #mobile-layers-popover button:hover,
+body.sunlight-mode #mobile-layers-popover button:hover {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+/* 9. Dropdown Inner Panels & Sub-elements */
+body.day-mode #gmaps-search-dropdown .bg-slate-950\/70,
+body.sunlight-mode #gmaps-search-dropdown .bg-slate-950\/70 {
+  background: #f8fafc !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+
+body.day-mode #gmaps-search-dropdown .text-amber-400,
+body.sunlight-mode #gmaps-search-dropdown .text-amber-400 {
+  color: #b45309 !important;
+}
+
+body.day-mode #gmaps-search-dropdown .text-amber-300,
+body.sunlight-mode #gmaps-search-dropdown .text-amber-300 {
+  color: #92400e !important;
+}
+
+body.day-mode #gmaps-search-dropdown .text-cyan-400,
+body.sunlight-mode #gmaps-search-dropdown .text-cyan-400 {
+  color: #0284c7 !important;
+}
+
+body.day-mode #gmaps-search-dropdown .text-slate-400,
+body.sunlight-mode #gmaps-search-dropdown .text-slate-400 {
+  color: #475569 !important;
+}
+
+body.day-mode #gmaps-search-dropdown .divide-slate-800\/60 > *,
+body.sunlight-mode #gmaps-search-dropdown .divide-slate-800\/60 > * {
+  border-color: #f1f5f9 !important;
+}
+
+body.day-mode #gmaps-search-dropdown .divide-slate-800\/80 > *,
+body.sunlight-mode #gmaps-search-dropdown .divide-slate-800\/80 > * {
+  border-color: #f1f5f9 !important;
+}
+
+
 

@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v42 (Google Maps Search History & Favorites)
-const CACHE_NAME = 'rotam-cache-v42';
+// Rotam PWA Service Worker - v43 (Google Maps Day Mode & Search Visibility Fix)
+const CACHE_NAME = 'rotam-cache-v43';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
