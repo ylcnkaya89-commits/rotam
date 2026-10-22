@@ -582,6 +582,12 @@ function dismissSplashScreen() {
     setTimeout(() => {
       splash.remove();
       initIcons();
+      if (typeof selectVehicle === 'function' && window.state) {
+        selectVehicle(window.state.currentVehicle || 'motorcycle');
+      }
+      if (typeof proactivelyWarmUserLocation === 'function') {
+        proactivelyWarmUserLocation();
+      }
       if (map) map.invalidateSize();
     }, 600);
   }
@@ -931,6 +937,14 @@ function selectVehicle(vehicle) {
   document.querySelectorAll('.hero-vehicle-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.v === vehicle);
   });
+
+  // Sync Google Maps Top Bar vehicle badge
+  const gmapsEmoji = document.getElementById('gmaps-vehicle-emoji');
+  const gmapsLabel = document.getElementById('gmaps-vehicle-label');
+  const gmapsEmojis = { motorcycle: '🏍️', car: '🚗', camper: '🚐', bicycle: '🚲', walk: '🚶' };
+  const gmapsShortLabels = { motorcycle: 'Moto', car: 'Oto', camper: 'Karavan', bicycle: 'Bisiklet', walk: 'Yaya' };
+  if (gmapsEmoji) gmapsEmoji.textContent = gmapsEmojis[vehicle] || '🏍️';
+  if (gmapsLabel) gmapsLabel.textContent = gmapsShortLabels[vehicle] || 'Moto';
 
   // Toggle Camper Profile & Safety Report Panels
   const camperPanel = document.getElementById('camper-profile-panel');
@@ -2255,78 +2269,552 @@ async function handleMapClick(lat, lon) {
     return;
   }
 
-  // 1. If start has no coordinates and no name entered yet
-  if (state.waypoints[0].lat === null && (!state.waypoints[0].name || state.waypoints[0].name.trim() === '')) {
-    state.waypoints[0].lat = lat;
-    state.waypoints[0].lon = lon;
-    state.waypoints[0].name = friendlyName;
-    const heroInp = document.getElementById('hero-start-input');
-    if (heroInp) heroInp.value = friendlyName;
-    updateWaypointsListUI();
-    updateWaypointMarkers();
-    showToast(`Başlangıç: ${friendlyName}`, 'success');
+  // GOOGLE MAPS EXPERIENCE: Map click drops pin and opens Google Maps Place Sheet with BAŞLAT
+  handleGmapsMapClick(lat, lon, friendlyName);
+}
+
+// ==========================================
+// GOOGLE MAPS FULL-SCREEN INTERACTIVE SUITE
+// ==========================================
+let gmapsPinMarker = null;
+let activeGmapsSheetTarget = null;
+let gmapsActiveCategory = null;
+
+// Drop or move the Google Maps animated red teardrop pin
+function dropGmapsPin(lat, lon) {
+  if (!map) return;
+  if (gmapsPinMarker) {
+    gmapsPinMarker.setLatLng([lat, lon]);
     return;
   }
 
-  // 2. If end has no coordinates and no name entered yet
-  const lastIdx = state.waypoints.length - 1;
-  if (state.waypoints[lastIdx].lat === null && (!state.waypoints[lastIdx].name || state.waypoints[lastIdx].name.trim() === '')) {
-    state.waypoints[lastIdx].lat = lat;
-    state.waypoints[lastIdx].lon = lon;
-    state.waypoints[lastIdx].name = friendlyName;
-    const heroInp = document.getElementById('hero-end-input');
-    if (heroInp) heroInp.value = friendlyName;
-    updateWaypointsListUI();
-    updateWaypointMarkers();
-    showToast(`Varış: ${friendlyName}`, 'success');
-    calculateRouteMain();
-    return;
-  }
+  const html = `
+    <div class="gmaps-drop-pin-wrapper">
+      <div class="gmaps-pin-shadow"></div>
+      <div class="gmaps-pin-body">
+        <div class="gmaps-pin-dot"></div>
+      </div>
+    </div>
+  `;
+  const icon = L.divIcon({
+    className: '',
+    html: html,
+    iconSize: [34, 46],
+    iconAnchor: [17, 46]
+  });
 
-  // 3. If start was typed but coordinate still missing
-  if (state.waypoints[0].lat === null) {
-    state.waypoints[0].lat = lat;
-    state.waypoints[0].lon = lon;
-    if (!state.waypoints[0].name) {
-      state.waypoints[0].name = friendlyName;
-      const heroInp = document.getElementById('hero-start-input');
-      if (heroInp) heroInp.value = friendlyName;
+  gmapsPinMarker = L.marker([lat, lon], { icon, zIndexOffset: 999 }).addTo(map);
+}
+
+function removeGmapsPin() {
+  if (gmapsPinMarker && map) {
+    map.removeLayer(gmapsPinMarker);
+    gmapsPinMarker = null;
+  }
+}
+
+// Handle Map Clicks Google Maps style
+function handleGmapsMapClick(lat, lon, friendlyName) {
+  dropGmapsPin(lat, lon);
+
+  // Check if a known POI is within 250m
+  let matchedPoi = null;
+  const places = (state && state.allPlaces && Array.isArray(state.allPlaces)) ? state.allPlaces : (window.DEFAULT_HISTORIC_PLACES || []);
+  let minD = Infinity;
+  for (const p of places) {
+    const d = haversineMeters(p.lat, p.lon, lat, lon);
+    if (d < 250 && d < minD) {
+      minD = d;
+      matchedPoi = p;
     }
-    updateWaypointsListUI();
-    updateWaypointMarkers();
-    return;
   }
 
-  // 4. If end was typed but coordinate still missing
-  if (state.waypoints[lastIdx].lat === null) {
-    state.waypoints[lastIdx].lat = lat;
-    state.waypoints[lastIdx].lon = lon;
-    if (!state.waypoints[lastIdx].name) {
-      state.waypoints[lastIdx].name = friendlyName;
-      const heroInp = document.getElementById('hero-end-input');
-      if (heroInp) heroInp.value = friendlyName;
-    }
-    updateWaypointsListUI();
-    updateWaypointMarkers();
-    calculateRouteMain();
-    return;
-  }
-
-  // 5. Otherwise, add intermediate waypoint
-  const newIndex = state.waypoints.length - 1;
-  const newWp = {
-    id: 'wp-' + Date.now(),
-    type: 'waypoint',
+  const isEn = (window.state && window.state.lang === 'en');
+  const targetPlace = matchedPoi || {
     name: friendlyName,
     lat: lat,
     lon: lon,
-    marker: null
+    category: 'custom',
+    city: friendlyName.includes('(') ? '' : friendlyName,
+    description: isEn
+      ? `Selected map location at ${lat.toFixed(4)}, ${lon.toFixed(4)}. Tap Start to begin live navigation.`
+      : `${lat.toFixed(4)}, ${lon.toFixed(4)} koordinatındaki nokta. Hemen canlı navigasyon başlatabilir veya rotanızı planlayabilirsiniz.`
   };
-  state.waypoints.splice(newIndex, 0, newWp);
+
+  showGmapsPlaceSheet(targetPlace);
+}
+
+// Show Google Maps Bottom Place Sheet
+function showGmapsPlaceSheet(place) {
+  if (!place) return;
+  activeGmapsSheetTarget = place;
+
+  const sheet = document.getElementById('gmaps-place-sheet');
+  if (!sheet) return;
+
+  const isEn = (window.state && window.state.lang === 'en');
+  const cfg = (CATEGORY_CONFIG && CATEGORY_CONFIG[place.category]) || { emoji: '📍', color: '#f97316' };
+
+  // 1. Emoji & Category Label
+  const emojiEl = document.getElementById('gmaps-sheet-emoji');
+  if (emojiEl) emojiEl.textContent = cfg.emoji || '📍';
+
+  const catTextEl = document.getElementById('gmaps-sheet-category-text');
+  if (catTextEl) {
+    catTextEl.textContent = (typeof getCategoryTitle === 'function' && place.category !== 'custom')
+      ? getCategoryTitle(place.category)
+      : (isEn ? 'Selected Point' : 'Seçilen Konum');
+  }
+
+  // 2. Region / City
+  const regionEl = document.getElementById('gmaps-sheet-region');
+  if (regionEl) {
+    regionEl.textContent = place.city || place.region || (isEn ? 'Turkey' : 'Türkiye');
+  }
+
+  // 3. Title & Description
+  const titleEl = document.getElementById('gmaps-sheet-title');
+  if (titleEl) titleEl.textContent = place.name;
+
+  const descEl = document.getElementById('gmaps-sheet-desc');
+  if (descEl) {
+    descEl.textContent = place.description || (isEn ? 'Tap Start for instant turn-by-turn live navigation.' : 'Tek tıkla canlı sürüş ve sesli navigasyon başlatın.');
+  }
+
+  // 4. Calculate Distance & Driving Time from Current Location
+  const distEl = document.getElementById('gmaps-sheet-dist');
+  const timeEl = document.getElementById('gmaps-sheet-time');
+  const origin = state.userLocation || (state.waypoints[0]?.lat ? state.waypoints[0] : null);
+
+  if (origin && origin.lat && origin.lon) {
+    const rawDistM = haversineMeters(origin.lat, origin.lon, place.lat, place.lon);
+    // Straight line * 1.25 road winding factor
+    const roadDistKm = Math.max(0.5, (rawDistM * 1.25) / 1000);
+
+    // Approximate speed by vehicle
+    const vehicleSpeeds = { motorcycle: 70, car: 70, camper: 60, bicycle: 18, walk: 5 };
+    const avgSpeed = vehicleSpeeds[state.currentVehicle] || 70;
+    const timeMinutes = Math.max(1, Math.round((roadDistKm / avgSpeed) * 60));
+
+    if (distEl) {
+      distEl.textContent = roadDistKm < 10 ? `${roadDistKm.toFixed(1)} km` : `${Math.round(roadDistKm)} km`;
+    }
+    if (timeEl) {
+      if (timeMinutes >= 60) {
+        const hrs = Math.floor(timeMinutes / 60);
+        const mins = timeMinutes % 60;
+        timeEl.textContent = isEn ? `~${hrs} hr ${mins} min` : `~${hrs} sa ${mins} dk`;
+      } else {
+        timeEl.textContent = isEn ? `~${timeMinutes} min` : `~${timeMinutes} dk`;
+      }
+    }
+  } else {
+    if (distEl) distEl.textContent = isEn ? 'Locating...' : 'Konum alınıyor...';
+    if (timeEl) timeEl.textContent = '~--';
+    proactivelyWarmUserLocation();
+  }
+
+  // 5. Details button for rich places
+  const detailsBtn = document.getElementById('gmaps-sheet-btn-details');
+  if (detailsBtn) {
+    if (place.id) {
+      detailsBtn.classList.remove('hidden');
+    } else {
+      detailsBtn.classList.add('hidden');
+    }
+  }
+
+  // Show sheet with smooth transition
+  sheet.classList.remove('hidden');
+  requestAnimationFrame(() => {
+    sheet.classList.add('sheet-open');
+  });
+
+  if (typeof initIcons === 'function') initIcons();
+}
+
+function closeGmapsPlaceSheet() {
+  const sheet = document.getElementById('gmaps-place-sheet');
+  if (sheet) {
+    sheet.classList.remove('sheet-open');
+    setTimeout(() => {
+      if (!sheet.classList.contains('sheet-open')) {
+        sheet.classList.add('hidden');
+      }
+    }, 280);
+  }
+  // Only remove drop pin if not currently locked on an active route
+  if (!state.routeData) {
+    removeGmapsPin();
+  }
+}
+
+// 1-TAP START: Google Maps "BAŞLAT" Navigation Button
+async function gmapsQuickStartFromSheet() {
+  if (!activeGmapsSheetTarget) return;
+  const target = activeGmapsSheetTarget;
+  const isEn = (window.state && window.state.lang === 'en');
+
+  // Check if current user GPS location is known
+  if (!state.userLocation || !state.userLocation.lat) {
+    showToast(isEn ? 'Acquiring GPS location... 🛰️' : 'Mevcut GPS konumunuz alınıyor... 🛰️', 'info');
+    if (typeof navigator !== 'undefined' && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          state.userLocation = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+          executeGmapsQuickStart(target);
+        },
+        (err) => {
+          console.warn('GPS location request failed:', err);
+          // Fallback to start waypoint if defined, else Istanbul default
+          const fallbackLat = state.waypoints[0]?.lat || 41.0082;
+          const fallbackLon = state.waypoints[0]?.lon || 28.9784;
+          state.userLocation = { lat: fallbackLat, lon: fallbackLon };
+          executeGmapsQuickStart(target);
+        },
+        { enableHighAccuracy: true, timeout: 7000 }
+      );
+      return;
+    }
+  }
+
+  executeGmapsQuickStart(target);
+}
+
+function executeGmapsQuickStart(target) {
+  const isEn = (window.state && window.state.lang === 'en');
+  const startLat = state.userLocation?.lat || 41.0082;
+  const startLon = state.userLocation?.lon || 28.9784;
+  const startName = isEn ? 'My Location' : 'Mevcut Konumum';
+
+  state.waypoints = [
+    { id: 'start', type: 'start', name: startName, lat: startLat, lon: startLon, marker: null },
+    { id: 'end', type: 'end', name: target.name, lat: target.lat, lon: target.lon, marker: null }
+  ];
+
   updateWaypointsListUI();
   updateWaypointMarkers();
-  showToast(`Ara durak: ${friendlyName}`, 'info');
+  closeGmapsPlaceSheet();
+  removeGmapsPin();
+
+  showToast(isEn ? `Starting ride to ${target.name}... 🚀` : `${target.name} sürüşü başlatılıyor... 🚀`, 'success');
+
+  state.routeData = null;
+  calculateRouteMain().then(() => {
+    if (state.routeData && typeof LiveNavigation !== 'undefined') {
+      LiveNavigation.start(false);
+    }
+  }).catch(err => {
+    console.error('Route calculation failed before quick start:', err);
+    showToast(isEn ? 'Route calculation failed.' : 'Rota hesaplanamadı.', 'error');
+  });
+}
+
+// "ROTA ÇİZ" Button (Preview route without immediately launching Live Nav)
+function gmapsPreviewRouteFromSheet() {
+  if (!activeGmapsSheetTarget) return;
+  const target = activeGmapsSheetTarget;
+  const isEn = (window.state && window.state.lang === 'en');
+
+  const startLat = state.userLocation?.lat || state.waypoints[0]?.lat || 41.0082;
+  const startLon = state.userLocation?.lon || state.waypoints[0]?.lon || 28.9784;
+  const startName = state.userLocation ? (isEn ? 'My Location' : 'Mevcut Konumum') : (state.waypoints[0]?.name || 'İstanbul');
+
+  state.waypoints = [
+    { id: 'start', type: 'start', name: startName, lat: startLat, lon: startLon, marker: null },
+    { id: 'end', type: 'end', name: target.name, lat: target.lat, lon: target.lon, marker: null }
+  ];
+
+  updateWaypointsListUI();
+  updateWaypointMarkers();
+  closeGmapsPlaceSheet();
+
+  showToast(isEn ? `Calculating route to ${target.name}...` : `${target.name} güzergahı hesaplanıyor...`, 'info');
   calculateRouteMain();
+}
+
+// "EKLE" Button (Add as intermediate waypoint)
+function gmapsAddStopFromSheet() {
+  if (!activeGmapsSheetTarget) return;
+  const target = activeGmapsSheetTarget;
+  addPoiToRoute(target.lat, target.lon, target.name);
+  closeGmapsPlaceSheet();
+}
+
+// "DETAY" Button (Open rich modal)
+function gmapsOpenDetailsFromSheet() {
+  if (activeGmapsSheetTarget && activeGmapsSheetTarget.id) {
+    openPlaceDetailById(activeGmapsSheetTarget.id);
+  }
+}
+
+// ==========================================
+// GOOGLE MAPS FLOATING SEARCH BAR & AUTOCOMPLETE
+// ==========================================
+function normalizeTurkishSearch(str) {
+  if (!str) return '';
+  return str
+    .toLowerCase()
+    .replace(/İ/g, 'i')
+    .replace(/I/g, 'ı')
+    .replace(/ı/g, 'i')
+    .replace(/ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/ş/g, 's')
+    .replace(/ö/g, 'o')
+    .replace(/ç/g, 'c');
+}
+
+function handleGmapsSearchInput(query) {
+  const clearBtn = document.getElementById('gmaps-search-clear-btn');
+  const dropdown = document.getElementById('gmaps-search-dropdown');
+
+  if (!query || query.trim().length === 0) {
+    if (clearBtn) clearBtn.classList.add('hidden');
+    if (dropdown) dropdown.classList.add('hidden');
+    return;
+  }
+  if (clearBtn) clearBtn.classList.remove('hidden');
+
+  const normalized = normalizeTurkishSearch(query.trim());
+  const results = [];
+
+  // 1. Search in TURKEY_GEO_DATABASE (Cities & Districts)
+  if (window.TURKEY_GEO_DATABASE && Array.isArray(window.TURKEY_GEO_DATABASE)) {
+    for (const city of window.TURKEY_GEO_DATABASE) {
+      const cNorm = normalizeTurkishSearch(city.name);
+      if (cNorm.includes(normalized)) {
+        results.push({
+          type: 'city',
+          name: city.name,
+          region: city.region || 'Şehir',
+          lat: city.lat,
+          lon: city.lon,
+          emoji: '📍'
+        });
+        if (results.length >= 4) break;
+      }
+    }
+  }
+
+  // 2. Search in state.allPlaces (915+ Historical, Natural, Food, Camp, Fuel)
+  const places = (state && state.allPlaces && Array.isArray(state.allPlaces)) ? state.allPlaces : (window.DEFAULT_HISTORIC_PLACES || []);
+  for (const p of places) {
+    const pName = normalizeTurkishSearch(p.name);
+    const pCity = normalizeTurkishSearch(p.city);
+    const pCat = normalizeTurkishSearch(p.category);
+    if (pName.includes(normalized) || pCity.includes(normalized) || pCat.includes(normalized)) {
+      const cfg = (CATEGORY_CONFIG && CATEGORY_CONFIG[p.category]) || { emoji: '🏛️' };
+      results.push({
+        type: 'place',
+        id: p.id,
+        name: p.name,
+        region: p.city || p.region || 'Türkiye',
+        category: p.category,
+        lat: p.lat,
+        lon: p.lon,
+        emoji: cfg.emoji || '🏛️',
+        place: p
+      });
+      if (results.length >= 8) break;
+    }
+  }
+
+  renderGmapsSearchResults(results);
+}
+
+function handleGmapsSearchFocus() {
+  const input = document.getElementById('gmaps-search-input');
+  if (input && input.value.trim().length > 0) {
+    handleGmapsSearchInput(input.value);
+  }
+}
+
+function handleGmapsSearchKeyDown(e) {
+  if (e.key === 'Enter') {
+    const dropdown = document.getElementById('gmaps-search-dropdown');
+    const firstItem = dropdown?.querySelector('.gmaps-search-item');
+    if (firstItem) {
+      firstItem.click();
+    }
+  } else if (e.key === 'Escape') {
+    clearGmapsSearch();
+  }
+}
+
+function renderGmapsSearchResults(results) {
+  const dropdown = document.getElementById('gmaps-search-dropdown');
+  if (!dropdown) return;
+
+  if (!results || results.length === 0) {
+    dropdown.innerHTML = `
+      <div class="px-4 py-3 text-xs text-slate-400 text-center">
+        Eşleşen konum veya rota bulunamadı.
+      </div>
+    `;
+    dropdown.classList.remove('hidden');
+    return;
+  }
+
+  const isEn = (window.state && window.state.lang === 'en');
+  const userLoc = state.userLocation;
+
+  dropdown.innerHTML = results.map((item, idx) => {
+    let distBadge = '';
+    if (userLoc && userLoc.lat) {
+      const dKm = (haversineMeters(userLoc.lat, userLoc.lon, item.lat, item.lon) * 1.25 / 1000);
+      distBadge = `<span class="text-[10px] text-emerald-400 font-bold shrink-0">${dKm < 10 ? dKm.toFixed(1) : Math.round(dKm)} km</span>`;
+    }
+
+    return `
+      <div class="gmaps-search-item px-3.5 py-2.5 flex items-center justify-between hover:bg-slate-800/80 active:bg-slate-750 cursor-pointer transition-colors"
+           onclick="selectGmapsSearchResult(${idx})">
+        <div class="flex items-center space-x-2.5 min-w-0">
+          <span class="text-base shrink-0">${item.emoji}</span>
+          <div class="min-w-0">
+            <h4 class="text-xs sm:text-sm font-bold text-white truncate">${escapeHtml(item.name)}</h4>
+            <p class="text-[10px] text-slate-400 truncate">${escapeHtml(item.region)}</p>
+          </div>
+        </div>
+        ${distBadge}
+      </div>
+    `;
+  }).join('');
+
+  // Cache current results for index click
+  window._gmapsCachedResults = results;
+  dropdown.classList.remove('hidden');
+}
+
+function selectGmapsSearchResult(idx) {
+  const results = window._gmapsCachedResults;
+  if (!results || !results[idx]) return;
+  const item = results[idx];
+
+  const input = document.getElementById('gmaps-search-input');
+  if (input) input.value = item.name;
+
+  const dropdown = document.getElementById('gmaps-search-dropdown');
+  if (dropdown) dropdown.classList.add('hidden');
+
+  if (map) {
+    map.flyTo([item.lat, item.lon], 14, { duration: 1.0 });
+  }
+
+  dropGmapsPin(item.lat, item.lon);
+  showGmapsPlaceSheet(item.place || item);
+}
+
+function clearGmapsSearch() {
+  const input = document.getElementById('gmaps-search-input');
+  if (input) input.value = '';
+  const clearBtn = document.getElementById('gmaps-search-clear-btn');
+  if (clearBtn) clearBtn.classList.add('hidden');
+  const dropdown = document.getElementById('gmaps-search-dropdown');
+  if (dropdown) dropdown.classList.add('hidden');
+}
+
+// Voice Search with Web Speech API
+function startGmapsVoiceSearch() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    showToast('Sesli arama bu tarayıcıda desteklenmiyor.', 'info');
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = (window.state && window.state.lang === 'en') ? 'en-US' : 'tr-TR';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  const voiceBtn = document.getElementById('gmaps-voice-search-btn');
+  if (voiceBtn) {
+    voiceBtn.classList.add('text-red-500', 'animate-pulse');
+  }
+  showToast('Dinleniyor... Nereye gitmek istiyorsunuz? 🎙️', 'info');
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    const input = document.getElementById('gmaps-search-input');
+    if (input) {
+      input.value = transcript;
+      handleGmapsSearchInput(transcript);
+      input.focus();
+    }
+    showToast(`"${transcript}" aranıyor...`, 'success');
+  };
+
+  recognition.onerror = (event) => {
+    console.warn('Speech recognition error:', event.error);
+    showToast('Ses anlaşılamadı, lütfen tekrar deneyin.', 'warning');
+  };
+
+  recognition.onend = () => {
+    if (voiceBtn) {
+      voiceBtn.classList.remove('text-red-500', 'animate-pulse');
+    }
+  };
+
+  try {
+    recognition.start();
+  } catch (err) {
+    console.error('Recognition start error:', err);
+  }
+}
+
+// Vehicle Quick Profile Switcher
+function cycleVehicleProfile() {
+  const list = ['motorcycle', 'car', 'camper', 'bicycle', 'walk'];
+  const cur = state.currentVehicle || 'motorcycle';
+  const nextIdx = (list.indexOf(cur) + 1) % list.length;
+  const nextVeh = list[nextIdx];
+  selectVehicle(nextVeh);
+
+  const labels = { motorcycle: '🏍️ Motosiklet', car: '🚗 Otomobil', camper: '🚐 Karavan', bicycle: '🚲 Bisiklet', walk: '🚶 Yaya' };
+  showToast(`${labels[nextVeh]} modu seçildi.`, 'info');
+}
+
+// Category Chips Filtering Google Maps Style
+function quickFilterCategory(cat) {
+  if (state.activePoiCategories.has(cat)) {
+    state.activePoiCategories.delete(cat);
+  } else {
+    state.activePoiCategories.add(cat);
+  }
+
+  // Update chip active class
+  const chips = {
+    fuel: 'gmaps-chip-fuel',
+    gastronomy: 'gmaps-chip-rest',
+    historic: 'gmaps-chip-historic',
+    camping: 'gmaps-chip-camp',
+    nature: 'gmaps-chip-nature',
+    photography: 'gmaps-chip-photo'
+  };
+
+  Object.entries(chips).forEach(([cKey, btnId]) => {
+    const btn = document.getElementById(btnId);
+    if (btn) {
+      btn.classList.toggle('active', state.activePoiCategories.has(cKey));
+    }
+  });
+
+  renderCorridorPoiMarkers();
+
+  // If user location is known and category turned ON, notify user
+  const isEn = (window.state && window.state.lang === 'en');
+  if (state.activePoiCategories.has(cat)) {
+    const title = getCategoryTitle(cat);
+    showToast(isEn ? `Showing ${title} spots on map 📍` : `${title} noktaları haritada gösteriliyor 📍`, 'info');
+  }
+}
+
+// Free Ride Live HUD direct trigger
+function startFreeRideHud() {
+  if (typeof LiveNavigation !== 'undefined') {
+    closeGmapsPlaceSheet();
+    LiveNavigation.startFreeRide();
+  }
 }
 
 function updateWaypointMarkers() {
@@ -3029,58 +3517,16 @@ let currentPreviewPlace = null;
 function showQuickPlacePreview(place) {
   if (!place) return;
   currentPreviewPlace = place;
-  const card = document.getElementById('quick-place-preview-card');
-  if (!card) return;
-
-  const cfg = CATEGORY_CONFIG[place.category] || CATEGORY_CONFIG.historic;
-  const isEn = window.state && window.state.lang === 'en';
-
-  const emojiEl = document.getElementById('quick-preview-emoji');
-  if (emojiEl) emojiEl.textContent = cfg.emoji;
-
-  const catEl = document.getElementById('quick-preview-category');
-  if (catEl) catEl.textContent = getCategoryTitle(place.category);
-
-  const badgeEl = document.getElementById('quick-preview-badge');
-  if (badgeEl) {
-    badgeEl.style.borderColor = `${cfg.color}60`;
-    badgeEl.style.color = cfg.color;
-  }
-
-  const distEl = document.getElementById('quick-preview-distance');
-  if (distEl) {
-    if (place.distKm !== undefined) {
-      distEl.textContent = isEn ? `Detour ${place.distKm} km` : `Rotadan ${place.distKm} km`;
-    } else {
-      distEl.textContent = place.city || place.region || (isEn ? 'Turkey' : 'Türkiye');
-    }
-  }
-
-  const titleEl = document.getElementById('quick-preview-title');
-  if (titleEl) titleEl.textContent = place.name;
-
-  const descEl = document.getElementById('quick-preview-desc');
-  if (descEl) {
-    descEl.textContent = place.description || (isEn ? 'Tap to view full details, photos and best travel season.' : 'Ayrıntılı bilgi, fotoğraflar ve en iyi ziyaret zamanı için dokunun.');
-  }
-
-  card.classList.remove('hidden');
-  requestAnimationFrame(() => {
-    card.classList.add('preview-visible');
-  });
-
-  if (typeof initIcons === 'function') initIcons();
+  showGmapsPlaceSheet(place);
 }
 
 function dismissQuickPlacePreview() {
+  closeGmapsPlaceSheet();
   const card = document.getElementById('quick-place-preview-card');
-  if (!card) return;
-  card.classList.remove('preview-visible');
-  setTimeout(() => {
-    if (!card.classList.contains('preview-visible')) {
-      card.classList.add('hidden');
-    }
-  }, 250);
+  if (card) {
+    card.classList.remove('preview-visible');
+    card.classList.add('hidden');
+  }
 }
 
 function openPlaceDetailFromQuickPreview() {
@@ -8245,6 +8691,8 @@ const LiveNavigation = {
     if (bottomBar) bottomBar.classList.add('hidden');
     document.getElementById('floating-map-controls')?.classList.add('hidden');
     document.getElementById('map-category-filter-bar')?.classList.add('hidden');
+    document.getElementById('gmaps-top-container')?.classList.add('hidden');
+    if (typeof closeGmapsPlaceSheet === 'function') closeGmapsPlaceSheet();
     dismissQuickPlacePreview();
     document.getElementById('btn-toggle-right-panel')?.classList.add('hidden');
     document.getElementById('map-hint')?.classList.add('hidden');
@@ -8384,6 +8832,8 @@ const LiveNavigation = {
     if (bottomBar) bottomBar.classList.add('hidden');
 
     document.getElementById('floating-map-controls')?.classList.add('hidden');
+    document.getElementById('gmaps-top-container')?.classList.add('hidden');
+    if (typeof closeGmapsPlaceSheet === 'function') closeGmapsPlaceSheet();
     document.getElementById('btn-toggle-right-panel')?.classList.add('hidden');
     document.getElementById('map-hint')?.classList.add('hidden');
     document.getElementById('elevation-panel')?.classList.add('hidden');
@@ -8512,6 +8962,7 @@ const LiveNavigation = {
 
     document.getElementById('floating-map-controls')?.classList.remove('hidden');
     document.getElementById('map-category-filter-bar')?.classList.remove('hidden');
+    document.getElementById('gmaps-top-container')?.classList.remove('hidden');
     document.getElementById('btn-toggle-right-panel')?.classList.remove('hidden');
 
     // Restore desktop sidebar

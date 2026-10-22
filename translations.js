@@ -27,6 +27,21 @@ window.TRANSLATIONS = {
     btn_gmaps: "Google Maps",
     btn_lang_toggle: "Dili Değiştir / Change Language",
 
+    // Google Maps Experience
+    gmaps_search_placeholder: "Mekan, şehir veya rota ara...",
+    gmaps_btn_start: "BAŞLAT",
+    gmaps_btn_preview: "Rota Çiz",
+    gmaps_btn_add_stop: "Ekle",
+    gmaps_from_your_loc: "(Mevcut konumunuzdan)",
+    gmaps_chip_fuel: "Benzin",
+    gmaps_chip_rest: "Mola",
+    gmaps_chip_historic: "Tarih",
+    gmaps_chip_food: "Lezzet",
+    gmaps_chip_camp: "Kamp",
+    gmaps_chip_photo: "Manzara",
+    gmaps_chip_free_ride: "🏍️ Serbest Sürüş",
+    gmaps_chip_plan: "Detaylı Rota",
+
     // Mobile Bottom Nav
     mobile_nav_plan: "Rota",
     mobile_nav_discover: "Keşfet",
@@ -368,6 +383,21 @@ window.TRANSLATIONS = {
     btn_import_gpx: "Import",
     btn_gmaps: "Google Maps",
     btn_lang_toggle: "Change Language / Dili Değiştir",
+
+    // Google Maps Experience
+    gmaps_search_placeholder: "Search places, cities or routes...",
+    gmaps_btn_start: "START",
+    gmaps_btn_preview: "Directions",
+    gmaps_btn_add_stop: "Add Stop",
+    gmaps_from_your_loc: "(From your location)",
+    gmaps_chip_fuel: "Fuel",
+    gmaps_chip_rest: "Rest",
+    gmaps_chip_historic: "Historic",
+    gmaps_chip_food: "Food",
+    gmaps_chip_camp: "Camping",
+    gmaps_chip_photo: "Scenic",
+    gmaps_chip_free_ride: "🏍️ Free Ride",
+    gmaps_chip_plan: "Route Planner",
 
     // Mobile Bottom Nav
     mobile_nav_plan: "Route",

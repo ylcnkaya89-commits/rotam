@@ -202,9 +202,9 @@
       </button>
 
       <!-- Tablet & Masaüstü Menüyü Daralt / Geniş Ekran Harita Butonu -->
-      <button id="btn-tablet-sidebar-toggle" onclick="RotamDisplay.toggleTabletSidebar()" class="hidden md:flex items-center space-x-1 sm:space-x-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-md border border-slate-700 active:scale-95 transition-all" title="Kenar Menüsünü Gizle / Tam Harita">
-        <i id="icon-tablet-sidebar" data-lucide="panel-left-close" class="w-3.5 h-3.5 text-brand-400 shrink-0"></i>
-        <span class="hidden xl:inline text-[11px]" id="text-tablet-sidebar">Geniş Harita</span>
+      <button id="btn-tablet-sidebar-toggle" onclick="toggleSidebar()" class="hidden md:flex items-center space-x-1 sm:space-x-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-md border border-slate-700 active:scale-95 transition-all" title="Rota Planlayıcı ve Duraklar">
+        <i id="icon-tablet-sidebar" data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-brand-400 shrink-0"></i>
+        <span class="hidden xl:inline text-[11px]" id="text-tablet-sidebar">Planlayıcı</span>
       </button>
 
       <!-- Mobil Menü Toggle Butonu -->
@@ -217,24 +217,24 @@
   <!-- MAIN APP CONTAINER -->
   <div class="flex-1 flex overflow-hidden relative min-h-0 min-w-0 w-full">
 
-    <!-- Mobil Alt Çekmece Karartma Katmanı (Backdrop) -->
-    <div id="sidebar-backdrop" onclick="closeMobileSidebar()" class="hidden md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity"></div>
+    <!-- Mobil & Masaüstü Çekmece Karartma Katmanı (Backdrop) -->
+    <div id="sidebar-backdrop" onclick="closeMobileSidebar()" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-35 transition-opacity"></div>
 
-    <!-- LEFT SIDEBAR: ROTA PLANLAMA, DURAKLAR & KOKPİT (Mobilde Modern Alt Çekmece) -->
-    <aside id="sidebar" class="hidden md:flex w-full md:w-[360px] lg:w-[390px] xl:w-[420px] bg-slate-900/95 border-r border-slate-800/90 flex-col z-35 transition-all duration-300 ease-in-out absolute md:relative inset-y-0 left-0 shadow-2xl backdrop-blur-xl shrink-0 min-h-0">
+    <!-- LEFT SIDEBAR: ROTA PLANLAMA, DURAKLAR & KOKPİT (Açılır Çekmece Drawer) -->
+    <aside id="sidebar" class="hidden w-full sm:w-[380px] lg:w-[420px] bg-slate-900/98 border-r border-slate-800/90 flex-col z-40 transition-all duration-300 ease-in-out absolute inset-y-0 left-0 shadow-2xl backdrop-blur-2xl shrink-0 min-h-0">
 
       <!-- Mobil Kaydırma Çubuğu (Swipe Pill) -->
       <div class="w-12 h-1.5 bg-slate-600/80 rounded-full mx-auto my-2.5 md:hidden cursor-pointer active:bg-slate-400 transition-colors" onclick="closeMobileSidebar()" title="Kapat"></div>
 
-      <!-- Mobil Üst Bar -->
-      <div class="flex md:hidden px-4 py-2 border-b border-slate-800 bg-slate-950/80 items-center justify-between shrink-0">
+      <!-- Çekmece Üst Bar -->
+      <div class="flex px-4 py-2.5 border-b border-slate-800 bg-slate-950/90 items-center justify-between shrink-0">
         <div class="flex items-center space-x-2">
           <i data-lucide="map-pin" class="w-4 h-4 text-brand-400"></i>
           <span class="text-xs font-bold text-white uppercase tracking-wider" data-i18n="sidebar_mobile_title">Rota ve Duraklar</span>
         </div>
-        <button onclick="closeMobileSidebar()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center space-x-1.5 border border-slate-700 active:scale-95 transition-all">
+        <button onclick="closeMobileSidebar()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center space-x-1.5 border border-slate-700 active:scale-95 transition-all" title="Haritayı Gör">
           <span data-i18n="sidebar_see_map">Haritayı Gör</span>
-          <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-brand-400"></i>
+          <i data-lucide="x" class="w-3.5 h-3.5 text-brand-400"></i>
         </button>
       </div>
 
@@ -774,139 +774,172 @@
       <!-- LEAFLET HARİTA DİVİ -->
       <div id="map" class="w-full h-full dark-map"></div>
 
-      <!-- HARİTA ÜSTÜ HIZLI KATEGORİ FİLTRE ÇUBUĞU (#map-category-filter-bar) - KOMPAKT & KATLANABİLİR -->
-      <div id="map-category-filter-bar" class="absolute top-3 left-3 sm:left-4 z-[950] pointer-events-none transition-all duration-300 max-w-[calc(100%-4.5rem)] sm:max-w-2xl">
-        <div class="pointer-events-auto flex items-center space-x-1.5">
+      <!-- GOOGLE MAPS FLOATING TOP SEARCH BAR & CATEGORY CHIPS (#gmaps-top-container) -->
+      <div id="gmaps-top-container" class="absolute top-3 left-3 right-3 sm:left-4 sm:right-auto sm:w-[460px] z-[950] pointer-events-none flex flex-col space-y-2">
+        <!-- Floating Google Maps Search Box -->
+        <div class="pointer-events-auto w-full gmaps-search-box rounded-2xl flex items-center px-3 py-2 space-x-2 text-white">
+          <!-- Hamburger Menu Button -->
+          <button onclick="toggleSidebar()" class="p-2 -ml-1 text-slate-300 hover:text-white rounded-xl hover:bg-slate-800/80 active:scale-95 transition-all shrink-0" title="Menü & Rota Planlayıcı">
+            <i data-lucide="menu" class="w-5 h-5 text-brand-400"></i>
+          </button>
           
-          <!-- Kompakt Filtre Tetikleyici / Özet Butonu (Expand/Collapse Pill) -->
-          <button id="map-filter-toggle-collapse-btn" onclick="toggleMapFilterBarCollapse()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-2xl glass-panel bg-slate-950/90 backdrop-blur-xl border border-slate-800/90 hover:border-amber-500/50 shadow-xl text-xs font-bold text-slate-200 transition-all active:scale-95 shrink-0" title="Kategori Filtrelerini Göster / Küçült">
-            <span class="text-xs">⚡</span>
-            <span id="map-filter-collapse-title">Filtreler</span>
-            <span id="map-filter-active-count-badge" class="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-slate-800 text-slate-400 font-bold border border-slate-700">Kapalı</span>
-            <i id="map-filter-collapse-chevron" data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200"></i>
+          <!-- Search Input -->
+          <div class="flex-1 min-w-0 relative">
+            <input id="gmaps-search-input" type="text" autocomplete="off"
+              placeholder="Mekan, şehir veya rota ara..."
+              data-i18n-placeholder="gmaps_search_placeholder"
+              oninput="handleGmapsSearchInput(this.value)"
+              onfocus="handleGmapsSearchFocus()"
+              onkeydown="handleGmapsSearchKeyDown(event)"
+              class="w-full bg-transparent text-xs sm:text-sm font-semibold text-white placeholder-slate-400 focus:outline-none" />
+          </div>
+
+          <!-- Clear Button (Hidden when empty) -->
+          <button id="gmaps-search-clear-btn" onclick="clearGmapsSearch()" class="hidden p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors shrink-0" title="Temizle">
+            <i data-lucide="x" class="w-4 h-4"></i>
           </button>
 
-          <!-- Genişleyen Kategori Pill Şeridi (#map-filter-pills-container) -->
-          <div id="map-filter-pills-container" class="hidden flex items-center space-x-1 overflow-x-auto no-scrollbar py-1 px-1.5 rounded-2xl glass-panel bg-slate-950/90 backdrop-blur-xl border border-slate-800/90 shadow-2xl transition-all duration-300">
-            
-            <!-- Tümü / Master Aç-Kapa Butonu -->
-            <button id="map-filter-toggle-all" onclick="toggleAllPoiCategories()" class="map-category-pill flex items-center space-x-1 px-2.5 py-1 rounded-xl text-[11px] font-bold shrink-0 transition-all active:scale-95 shadow-sm" title="Tüm Kategorileri Aç / Kapat">
-              <span class="text-xs">✨</span>
-              <span id="map-filter-all-label">Tümü</span>
-              <span id="map-filter-total-count" class="map-pill-count text-[9px] px-1 py-0.5 rounded-full font-mono bg-white/20">0</span>
-            </button>
+          <!-- Voice Search Mic Button -->
+          <button id="gmaps-voice-search-btn" onclick="startGmapsVoiceSearch()" class="p-1.5 text-slate-300 hover:text-brand-400 rounded-lg hover:bg-slate-800 transition-colors shrink-0" title="Sesle Ara">
+            <i data-lucide="mic" class="w-4 h-4"></i>
+          </button>
 
-            <div class="h-3.5 w-px bg-slate-800 shrink-0"></div>
+          <!-- Quick Vehicle Selector Badge -->
+          <button id="gmaps-vehicle-badge" onclick="cycleVehicleProfile()" class="px-2 py-1 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700/80 text-xs font-bold flex items-center space-x-1 shrink-0 transition-transform active:scale-95 shadow-sm" title="Araç Modunu Değiştir">
+            <span id="gmaps-vehicle-emoji">🏍️</span>
+            <span id="gmaps-vehicle-label" class="hidden sm:inline text-[10px] text-amber-400 font-bold uppercase">Moto</span>
+          </button>
+        </div>
 
-            <!-- 1. Tarihi Yerler & Antik Kentler -->
-            <button id="map-pill-historic" onclick="togglePoiCategoryFilter('historic')" class="map-category-pill flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold shrink-0 transition-all active:scale-95" title="Tarihi Yerler ve Antik Kentler">
-              <span>🏛️</span>
-              <span>Tarih</span>
-              <span id="map-count-historic" class="map-pill-count text-[9px] font-mono px-1 rounded-full">0</span>
-            </button>
+        <!-- Autocomplete Dropdown List -->
+        <div id="gmaps-search-dropdown" class="hidden pointer-events-auto w-full bg-slate-900/98 border border-slate-700/90 rounded-2xl shadow-2xl backdrop-blur-2xl max-h-80 overflow-y-auto no-scrollbar py-2 divide-y divide-slate-800/80">
+          <!-- Populated by JS -->
+        </div>
 
-            <!-- 2. Kamp & Çadır & Karavan Sahaları -->
-            <button id="map-pill-camping" onclick="togglePoiCategoryFilter('camping')" class="map-category-pill flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold shrink-0 transition-all active:scale-95" title="Kamp, Çadır ve Karavan Alanları">
-              <span>🏕️</span>
-              <span>Kamp</span>
-              <span id="map-count-camping" class="map-pill-count text-[9px] font-mono px-1 rounded-full">0</span>
-            </button>
+        <!-- Horizontal Scrollable Google Maps Category Chips -->
+        <div id="gmaps-category-chips" class="pointer-events-auto flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1 pr-2">
+          <!-- 1. Benzin & Şarj -->
+          <button onclick="quickFilterCategory('fuel')" id="gmaps-chip-fuel" class="gmaps-chip px-3 py-1.5 rounded-full text-xs font-semibold text-slate-200 flex items-center space-x-1.5 shrink-0 active:scale-95" title="Akaryakıt & EV Şarj">
+            <span>⛽</span>
+            <span data-i18n="gmaps_chip_fuel">Benzin</span>
+          </button>
 
-            <!-- 3. Doğa & Şelale & Kanyon -->
-            <button id="map-pill-nature" onclick="togglePoiCategoryFilter('nature')" class="map-category-pill flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold shrink-0 transition-all active:scale-95" title="Doğa, Kanyonlar ve Şelaleler">
-              <span>🌲</span>
-              <span>Doğa</span>
-              <span id="map-count-nature" class="map-pill-count text-[9px] font-mono px-1 rounded-full">0</span>
-            </button>
+          <!-- 2. Mola & Kafe -->
+          <button onclick="quickFilterCategory('gastronomy')" id="gmaps-chip-rest" class="gmaps-chip px-3 py-1.5 rounded-full text-xs font-semibold text-slate-200 flex items-center space-x-1.5 shrink-0 active:scale-95" title="Mola Yerleri & Kafe">
+            <span>☕</span>
+            <span data-i18n="gmaps_chip_rest">Mola</span>
+          </button>
 
-            <!-- 4. Fotoğraf & Seyir Tepeleri -->
-            <button id="map-pill-photography" onclick="togglePoiCategoryFilter('photography')" class="map-category-pill flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold shrink-0 transition-all active:scale-95" title="Fotoğraf ve Seyir Noktaları">
-              <span>📸</span>
-              <span>Fotoğraf</span>
-              <span id="map-count-photography" class="map-pill-count text-[9px] font-mono px-1 rounded-full">0</span>
-            </button>
+          <!-- 3. Tarihi Yerler & Antik Kent -->
+          <button onclick="quickFilterCategory('historic')" id="gmaps-chip-historic" class="gmaps-chip px-3 py-1.5 rounded-full text-xs font-semibold text-slate-200 flex items-center space-x-1.5 shrink-0 active:scale-95" title="Tarihi Yerler & Antik Kentler">
+            <span>🏛️</span>
+            <span data-i18n="gmaps_chip_historic">Tarih</span>
+          </button>
 
-            <!-- 5. Sahil & Plaj & Koy -->
-            <button id="map-pill-beach" onclick="togglePoiCategoryFilter('beach')" class="map-category-pill flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold shrink-0 transition-all active:scale-95" title="Plajlar ve Sahil Şeridi">
-              <span>🌊</span>
-              <span>Sahil</span>
-              <span id="map-count-beach" class="map-pill-count text-[9px] font-mono px-1 rounded-full">0</span>
-            </button>
+          <!-- 4. Lezzet Durakları -->
+          <button onclick="quickFilterCategory('gastronomy')" id="gmaps-chip-food" class="gmaps-chip px-3 py-1.5 rounded-full text-xs font-semibold text-slate-200 flex items-center space-x-1.5 shrink-0 active:scale-95" title="Yöresel Lezzetler">
+            <span>🍽️</span>
+            <span data-i18n="gmaps_chip_food">Lezzet</span>
+          </button>
 
-            <!-- 6. Gastronomi & Meşhur Lezzet -->
-            <button id="map-pill-gastronomy" onclick="togglePoiCategoryFilter('gastronomy')" class="map-category-pill flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold shrink-0 transition-all active:scale-95" title="Yöresel Lezzet ve Mola Yerleri">
-              <span>🍴</span>
-              <span>Lezzet</span>
-              <span id="map-count-gastronomy" class="map-pill-count text-[9px] font-mono px-1 rounded-full">0</span>
-            </button>
+          <!-- 5. Kamp & Karavan Sahaları -->
+          <button onclick="quickFilterCategory('camping')" id="gmaps-chip-camp" class="gmaps-chip px-3 py-1.5 rounded-full text-xs font-semibold text-slate-200 flex items-center space-x-1.5 shrink-0 active:scale-95" title="Kamp & Karavan Alanları">
+            <span>🏕️</span>
+            <span data-i18n="gmaps_chip_camp">Kamp</span>
+          </button>
 
-            <!-- 7. Akaryakıt & EV Şarj -->
-            <button id="map-pill-fuel" onclick="togglePoiCategoryFilter('fuel')" class="map-category-pill flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold shrink-0 transition-all active:scale-95" title="Akaryakıt İstasyonları ve EV Şarj">
-              <span>⛽</span>
-              <span>Yakıt</span>
-              <span id="map-count-fuel" class="map-pill-count text-[9px] font-mono px-1 rounded-full">0</span>
-            </button>
+          <!-- 6. Doğa & Manzara -->
+          <button onclick="quickFilterCategory('nature')" id="gmaps-chip-nature" class="gmaps-chip px-3 py-1.5 rounded-full text-xs font-semibold text-slate-200 flex items-center space-x-1.5 shrink-0 active:scale-95" title="Doğa & Kanyonlar">
+            <span>🌲</span>
+            <span>Doğa</span>
+          </button>
 
-            <div class="h-3.5 w-px bg-slate-800 shrink-0"></div>
+          <!-- 7. Fotoğraf & Seyir -->
+          <button onclick="quickFilterCategory('photography')" id="gmaps-chip-photo" class="gmaps-chip px-3 py-1.5 rounded-full text-xs font-semibold text-slate-200 flex items-center space-x-1.5 shrink-0 active:scale-95" title="Fotoğraf & Seyir Noktaları">
+            <span>📸</span>
+            <span data-i18n="gmaps_chip_photo">Manzara</span>
+          </button>
 
-            <!-- Kampçı Asistanı Hızlı Buton -->
-            <button onclick="openCampingAssistantModal()" class="flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-bold text-emerald-300 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 shrink-0 transition-all active:scale-95 shadow-sm" title="Kamp Rehberi">
-              <span>🎒</span>
-              <span>Rehber</span>
-            </button>
+          <!-- 8. Canlı Serbest Sürüş HUD -->
+          <button onclick="startFreeRideHud()" id="gmaps-chip-freeride" class="gmaps-chip px-3 py-1.5 rounded-full bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/50 text-xs font-bold text-cyan-300 flex items-center space-x-1.5 shrink-0 active:scale-95" title="Serbest Sürüş Modu">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+            <span data-i18n="gmaps_chip_free_ride">🏍️ Serbest Sürüş</span>
+          </button>
 
-            <!-- Kapat / Küçült Butonu -->
-            <button onclick="toggleMapFilterBarCollapse()" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors shrink-0" title="Filtreleri Gizle / Küçült">
-              <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
-            </button>
-
-          </div>
+          <!-- 9. Detaylı Rota Planlayıcı Çekmecesi -->
+          <button onclick="openMobileSidebar()" class="gmaps-chip px-3 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-amber-500/40 text-xs font-bold text-amber-300 flex items-center space-x-1.5 shrink-0 active:scale-95" title="Detaylı Rota ve Durak Planlama">
+            <span>📐</span>
+            <span data-i18n="gmaps_chip_plan">Detaylı Rota</span>
+          </button>
         </div>
       </div>
 
-      <!-- HARİTA NOKTASI HIZLI ÖNİZLEME & AYRINTI KARTI (#quick-place-preview-card) -->
-      <div id="quick-place-preview-card" class="hidden absolute bottom-24 sm:bottom-6 left-3 right-3 sm:left-6 sm:right-auto sm:w-[400px] max-w-full z-[1010] pointer-events-auto transition-all duration-300 ease-out transform translate-y-4 opacity-0">
-        <div class="glass-card bg-slate-900/95 border border-slate-700/90 rounded-3xl p-4 shadow-2xl backdrop-blur-2xl flex flex-col space-y-3">
-          <!-- Üst Satır: Kategori Rozeti + Kapat Butonu -->
+      <!-- GOOGLE MAPS BOTTOM PLACE SHEET (#gmaps-place-sheet) - HARİTAYA TIKLAYINCA AÇILAN KART -->
+      <div id="gmaps-place-sheet" class="hidden absolute bottom-4 left-3 right-3 sm:left-4 sm:right-auto sm:w-[440px] max-w-full z-[1050] pointer-events-auto transition-all duration-300 ease-out transform translate-y-6 opacity-0">
+        <div class="glass-card bg-slate-900/98 border border-slate-700/90 rounded-3xl p-4 sm:p-5 shadow-2xl backdrop-blur-2xl flex flex-col space-y-3.5">
+          
+          <!-- Üst Satır: Kategori Rozeti + Şehir + Kapat Butonu -->
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-2 min-w-0">
-              <span id="quick-preview-badge" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center space-x-1 shrink-0">
-                <span id="quick-preview-emoji">🏛️</span>
-                <span id="quick-preview-category">Tarihi Yer</span>
+              <span id="gmaps-sheet-category-badge" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center space-x-1.5 shrink-0">
+                <span id="gmaps-sheet-emoji">📍</span>
+                <span id="gmaps-sheet-category-text">Haritadan Seçilen Nokta</span>
               </span>
-              <span id="quick-preview-distance" class="text-[10px] font-semibold text-slate-300 bg-slate-800/80 px-2 py-0.5 rounded-full truncate">
+              <span id="gmaps-sheet-region" class="text-[11px] font-medium text-slate-400 truncate">
                 Türkiye
               </span>
             </div>
-            <button onclick="dismissQuickPlacePreview()" class="w-7 h-7 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors shrink-0 ml-2" title="Kapat">
+            <button onclick="closeGmapsPlaceSheet()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors shrink-0 ml-2" title="Kapat">
               <i data-lucide="x" class="w-4 h-4"></i>
             </button>
           </div>
 
-          <!-- Başlık ve Kısa Açıklama -->
+          <!-- Başlık ve Konumdan Mesafe/Süre (ETA) -->
           <div>
-            <h3 id="quick-preview-title" class="text-base sm:text-lg font-black text-white leading-snug">Mekan Adı</h3>
-            <p id="quick-preview-desc" class="text-xs text-slate-300 line-clamp-2 mt-1 leading-relaxed">Açıklama yükleniyor...</p>
+            <h2 id="gmaps-sheet-title" class="text-lg sm:text-xl font-black text-white leading-snug tracking-tight">Mekan Adı</h2>
+            
+            <!-- Mesafe & Tahmini Sürüş Süresi -->
+            <div id="gmaps-sheet-eta-box" class="flex items-center space-x-2 mt-1.5 text-xs sm:text-sm font-semibold">
+              <div class="flex items-center space-x-1 text-emerald-400 font-bold">
+                <i data-lucide="navigation" class="w-3.5 h-3.5 shrink-0"></i>
+                <span id="gmaps-sheet-dist">-- km</span>
+              </div>
+              <span class="text-slate-500">•</span>
+              <div class="flex items-center space-x-1 text-slate-300">
+                <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+                <span id="gmaps-sheet-time">~-- dk</span>
+              </div>
+              <span class="text-[10px] text-slate-400 font-normal hidden sm:inline" data-i18n="gmaps_from_your_loc">(Mevcut konumunuzdan)</span>
+            </div>
+
+            <p id="gmaps-sheet-desc" class="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">
+              Seçilen konuma hemen canlı navigasyon başlatabilir veya güzergahı harita üzerinde inceleyebilirsiniz.
+            </p>
           </div>
 
           <!-- Aksiyon Butonları -->
-          <div class="flex items-center space-x-2 pt-1 border-t border-slate-800">
-            <!-- 1. TÜM AYRINTILARI GÖR BUTONU -->
-            <button id="quick-preview-btn-details" onclick="openPlaceDetailFromQuickPreview()" class="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white text-xs font-bold flex items-center justify-center space-x-1.5 shadow-lg shadow-amber-500/25 active:scale-95 transition-all">
-              <i data-lucide="info" class="w-4 h-4"></i>
-              <span>Tüm Ayrıntıları Gör</span>
-            </button>
-            
-            <!-- 2. ROTAYA EKLE BUTONU -->
-            <button id="quick-preview-btn-add" onclick="addQuickPreviewToRoute()" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center justify-center space-x-1 active:scale-95 transition-all" title="Rotaya Durak Olarak Ekle">
-              <i data-lucide="plus" class="w-4 h-4"></i>
-              <span class="hidden sm:inline">Rotaya</span> Ekle
+          <div class="flex items-center space-x-2 pt-2 border-t border-slate-800">
+            <!-- 1. BÜYÜK "BAŞLAT" BUTONU (TEK TIKLA CANLI NAVİGASYON) -->
+            <button id="gmaps-sheet-btn-start" onclick="gmapsQuickStartFromSheet()" class="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 hover:from-emerald-400 hover:to-cyan-500 text-white text-sm font-black flex items-center justify-center space-x-2 shadow-xl shadow-emerald-600/35 active:scale-95 transition-all border border-emerald-400/40">
+              <i data-lucide="navigation" class="w-4 h-4 fill-white text-white"></i>
+              <span class="tracking-wider" data-i18n="gmaps_btn_start">BAŞLAT</span>
             </button>
 
-            <!-- 3. HEDEF YAP BUTONU -->
-            <button id="quick-preview-btn-dest" onclick="setQuickPreviewDestination()" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 text-xs font-bold flex items-center justify-center space-x-1 active:scale-95 transition-all" title="Varış Noktası Yap">
-              <i data-lucide="flag" class="w-4 h-4"></i>
-              <span>Hedef</span>
+            <!-- 2. "ROTA ÇİZ" BUTONU -->
+            <button id="gmaps-sheet-btn-route" onclick="gmapsPreviewRouteFromSheet()" class="py-3 px-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/40 text-xs font-bold flex items-center justify-center space-x-1.5 active:scale-95 transition-all shadow-md" title="Güzergahı Çiz ve İncele">
+              <i data-lucide="route" class="w-4 h-4 text-cyan-400"></i>
+              <span data-i18n="gmaps_btn_preview">Rota Çiz</span>
+            </button>
+
+            <!-- 3. "EKLE" BUTONU -->
+            <button id="gmaps-sheet-btn-add" onclick="gmapsAddStopFromSheet()" class="py-3 px-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/40 text-xs font-bold flex items-center justify-center space-x-1 active:scale-95 transition-all shadow-md" title="Rotaya Durak Olarak Ekle">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span class="hidden sm:inline" data-i18n="gmaps_btn_add_stop">Ekle</span>
+            </button>
+
+            <!-- 4. "DETAY" BUTONU -->
+            <button id="gmaps-sheet-btn-details" onclick="gmapsOpenDetailsFromSheet()" class="hidden py-3 px-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold flex items-center justify-center active:scale-95 transition-all" title="Mekan Detayları & Tarihçe">
+              <i data-lucide="info" class="w-4 h-4"></i>
             </button>
           </div>
         </div>
@@ -1462,7 +1495,7 @@
       </div>
 
       <!-- MOBİL İÇİN SADE VE ERGONOMİK FAB KONTROLLERİ (MOBİL SADELEŞTİRME) -->
-      <div id="mobile-floating-fabs" class="flex sm:hidden absolute top-3 right-3 z-20 flex-col space-y-2 items-end">
+      <div id="mobile-floating-fabs" class="flex sm:hidden absolute bottom-28 right-3 z-20 flex-col space-y-2 items-end">
         <!-- Konum FAB -->
         <button onclick="flyToCurrentLocation()" class="mobile-map-fab fab-locate" title="Mevcut Konumum">
           <i data-lucide="crosshair" class="w-5 h-5"></i>
@@ -1475,7 +1508,7 @@
           </button>
 
           <!-- Popover Menüsü -->
-          <div id="mobile-layers-popover" class="hidden absolute top-0 right-12 z-30 w-44 glass-panel p-2 rounded-2xl shadow-2xl border border-slate-700/80 space-y-1 animate-slide-in">
+          <div id="mobile-layers-popover" class="hidden absolute bottom-12 right-0 z-30 w-44 glass-panel p-2 rounded-2xl shadow-2xl border border-slate-700/80 space-y-1 animate-slide-in">
             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 pt-0.5">Harita Modu</p>
             <button onclick="switchTile('dark'); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-200 hover:bg-slate-800 flex items-center space-x-2">
               <span>🌙</span> <span>Gece Modu</span>
