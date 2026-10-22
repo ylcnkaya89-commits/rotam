@@ -63,6 +63,8 @@ window.TRANSLATIONS = {
     gmaps_fav_removed: "Favorilerden çıkarıldı",
     gmaps_set_special_success: "Konum kaydedildi!",
     gmaps_explore_suggestions: "Popüler Öneriler",
+    gmaps_searching_online: "Türkiye genelinde aranıyor...",
+    gmaps_searching_more: "Daha fazla sonuç taranıyor...",
 
     // Mobile Bottom Nav
     mobile_nav_plan: "Rota",
@@ -442,6 +444,8 @@ window.TRANSLATIONS = {
     gmaps_fav_removed: "Removed from favorites",
     gmaps_set_special_success: "Location saved!",
     gmaps_explore_suggestions: "Popular Suggestions",
+    gmaps_searching_online: "Searching across Turkey...",
+    gmaps_searching_more: "Fetching more results...",
 
     // Mobile Bottom Nav
     mobile_nav_plan: "Route",

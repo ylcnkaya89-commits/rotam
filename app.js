@@ -3235,25 +3235,158 @@ function handleQuickSearchPreset(keyword) {
   }
 }
 
+let gmapsSearchDebounceTimer = null;
+let gmapsLatestSearchQuery = '';
+
+// Asynchronous Online Geocoding Engine (Photon Komoot + OpenStreetMap Nominatim Fallback)
+async function fetchGmapsOnlineGeocoding(query) {
+  if (!query || query.trim().length < 2) return [];
+  const qClean = query.trim();
+
+  const userLat = state.userLocation?.lat || 39.0;
+  const userLon = state.userLocation?.lon || 35.0;
+
+  const results = [];
+  const seen = new Set();
+
+  // 1. Primary: Photon (Komoot) - High speed + Fuzzy Typo Tolerant + Geo-bias
+  try {
+    let photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(qClean)}&limit=10&lat=${userLat}&lon=${userLon}`;
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 3500);
+    const res = await fetch(photonUrl, { signal: ctrl.signal });
+    clearTimeout(t);
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.features) {
+        data.features.forEach(f => {
+          const p = f.properties || {};
+          const coords = f.geometry ? f.geometry.coordinates : null;
+          if (!coords || coords.length < 2) return;
+          const lon = coords[0];
+          const lat = coords[1];
+
+          // Filter bounds to Turkey region (lat 35-43.5, lon 25-45.5)
+          const inTurkey = (lat >= 35.0 && lat <= 43.5 && lon >= 25.0 && lon <= 45.5);
+          if (!inTurkey && p.countrycode !== 'TR' && p.country !== 'Türkiye') return;
+
+          const placeName = p.name || qClean;
+          const details = [];
+          if (p.district && p.district !== placeName) details.push(p.district);
+          if (p.city && p.city !== placeName && p.city !== p.district) details.push(p.city);
+          if (p.state && p.state !== placeName && p.state !== p.city) details.push(p.state);
+
+          const fullSubtitle = details.length > 0 ? details.join(', ') : (p.country || 'Türkiye');
+          const dedupeKey = `${placeName.toLowerCase()}|${fullSubtitle.toLowerCase()}`;
+          if (seen.has(dedupeKey)) return;
+          seen.add(dedupeKey);
+
+          let emoji = '📍';
+          const pType = (p.type || '').toLowerCase();
+          const pOsmVal = (p.osm_value || '').toLowerCase();
+          const nameLower = placeName.toLowerCase();
+
+          if (nameLower.includes('metro') || nameLower.includes('yht') || nameLower.includes('istasyon') || pOsmVal.includes('station')) emoji = '🚇';
+          else if (nameLower.includes('havalimanı') || nameLower.includes('havaalanı') || pOsmVal.includes('aerodrome')) emoji = '✈️';
+          else if (nameLower.includes('hastane') || pOsmVal.includes('hospital')) emoji = '🏥';
+          else if (nameLower.includes('avm') || nameLower.includes('mall') || pOsmVal.includes('mall')) emoji = '🛍️';
+          else if (nameLower.includes('park') || nameLower.includes('göl') || nameLower.includes('orman') || pOsmVal.includes('park')) emoji = '🌲';
+          else if (pType === 'city') emoji = '🏙️';
+          else if (pType === 'district' || pType === 'suburb' || pType === 'locality') emoji = '🏘️';
+
+          results.push({
+            type: 'online',
+            name: placeName,
+            region: fullSubtitle,
+            lat: lat,
+            lon: lon,
+            emoji: emoji
+          });
+        });
+      }
+    }
+  } catch (e) {
+    console.warn('Photon online geocode notice:', e);
+  }
+
+  // 2. Fallback to OpenStreetMap Nominatim if Photon returned < 3 results
+  if (results.length < 3) {
+    try {
+      const nomUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(qClean)}&format=json&addressdetails=1&limit=6&countrycodes=tr`;
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 3500);
+      const res = await fetch(nomUrl, {
+        headers: { 'Accept-Language': 'tr' },
+        signal: ctrl.signal
+      });
+      clearTimeout(t);
+
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          data.forEach(item => {
+            const lat = parseFloat(item.lat);
+            const lon = parseFloat(item.lon);
+            const addr = item.address || {};
+            const placeName = item.name || addr.suburb || addr.neighbourhood || addr.town || addr.city || qClean;
+            
+            const details = [];
+            if (addr.suburb && addr.suburb !== placeName) details.push(addr.suburb);
+            if (addr.district && addr.district !== placeName) details.push(addr.district);
+            if (addr.city && addr.city !== placeName) details.push(addr.city);
+            if (addr.province && !details.includes(addr.province) && addr.province !== placeName) details.push(addr.province);
+
+            const fullSubtitle = details.length > 0 ? details.join(', ') : 'Türkiye';
+            const dedupeKey = `${placeName.toLowerCase()}|${fullSubtitle.toLowerCase()}`;
+            if (seen.has(dedupeKey)) return;
+            seen.add(dedupeKey);
+
+            results.push({
+              type: 'online',
+              name: placeName,
+              region: fullSubtitle,
+              lat: lat,
+              lon: lon,
+              emoji: '📍'
+            });
+          });
+        }
+      }
+    } catch (e) {
+      console.warn('Nominatim online geocode notice:', e);
+    }
+  }
+
+  return results;
+}
+
 function handleGmapsSearchInput(query) {
   const clearBtn = document.getElementById('gmaps-search-clear-btn');
   const dropdown = document.getElementById('gmaps-search-dropdown');
 
   if (!query || query.trim().length === 0) {
     if (clearBtn) clearBtn.classList.add('hidden');
+    if (gmapsSearchDebounceTimer) clearTimeout(gmapsSearchDebounceTimer);
     renderGmapsSearchDefaultDropdown();
     return;
   }
   if (clearBtn) clearBtn.classList.remove('hidden');
 
   const normalized = normalizeTurkishSearch(query.trim());
-  const results = [];
+  gmapsLatestSearchQuery = query.trim();
+
+  // --- STAGE 1: Instant Local Results (0 ms) ---
+  const localResults = [];
+  const seenKeys = new Set();
 
   // 1. Search in Favorites & Recent Searches First (Quick match)
   const favList = RotamFavorites.getList();
   for (const f of favList) {
     if (normalizeTurkishSearch(f.name).includes(normalized)) {
-      results.push({
+      const key = `${f.name.toLowerCase()}|${(f.region || '').toLowerCase()}`;
+      seenKeys.add(key);
+      localResults.push({
         type: 'favorite',
         name: f.name,
         region: f.region || '⭐ Favori',
@@ -3262,7 +3395,7 @@ function handleGmapsSearchInput(query) {
         emoji: '⭐',
         place: f
       });
-      if (results.length >= 3) break;
+      if (localResults.length >= 3) break;
     }
   }
 
@@ -3271,15 +3404,19 @@ function handleGmapsSearchInput(query) {
     for (const city of window.TURKEY_GEO_DATABASE) {
       const cNorm = normalizeTurkishSearch(city.name);
       if (cNorm.includes(normalized)) {
-        results.push({
-          type: 'city',
-          name: city.name,
-          region: city.region || 'Şehir',
-          lat: city.lat,
-          lon: city.lon,
-          emoji: '📍'
-        });
-        if (results.length >= 5) break;
+        const key = `${city.name.toLowerCase()}|${(city.region || '').toLowerCase()}`;
+        if (!seenKeys.has(key)) {
+          seenKeys.add(key);
+          localResults.push({
+            type: 'city',
+            name: city.name,
+            region: city.region || 'Şehir',
+            lat: city.lat,
+            lon: city.lon,
+            emoji: '🏙️'
+          });
+          if (localResults.length >= 5) break;
+        }
       }
     }
   }
@@ -3291,23 +3428,56 @@ function handleGmapsSearchInput(query) {
     const pCity = normalizeTurkishSearch(p.city);
     const pCat = normalizeTurkishSearch(p.category);
     if (pName.includes(normalized) || pCity.includes(normalized) || pCat.includes(normalized)) {
-      const cfg = (CATEGORY_CONFIG && CATEGORY_CONFIG[p.category]) || { emoji: '🏛️' };
-      results.push({
-        type: 'place',
-        id: p.id,
-        name: p.name,
-        region: p.city || p.region || 'Türkiye',
-        category: p.category,
-        lat: p.lat,
-        lon: p.lon,
-        emoji: cfg.emoji || '🏛️',
-        place: p
-      });
-      if (results.length >= 10) break;
+      const key = `${p.name.toLowerCase()}|${(p.city || p.region || '').toLowerCase()}`;
+      if (!seenKeys.has(key)) {
+        seenKeys.add(key);
+        const cfg = (CATEGORY_CONFIG && CATEGORY_CONFIG[p.category]) || { emoji: '🏛️' };
+        localResults.push({
+          type: 'place',
+          id: p.id,
+          name: p.name,
+          region: p.city || p.region || 'Türkiye',
+          category: p.category,
+          lat: p.lat,
+          lon: p.lon,
+          emoji: cfg.emoji || '🏛️',
+          place: p
+        });
+        if (localResults.length >= 8) break;
+      }
     }
   }
 
-  renderGmapsSearchResults(results);
+  // Render instant local matches with loading flag if user typed >= 2 characters
+  const shouldFetchOnline = query.trim().length >= 2;
+  renderGmapsSearchResults(localResults, shouldFetchOnline);
+
+  // --- STAGE 2: Real-time Online Geocoding (Debounced ~180ms) ---
+  if (gmapsSearchDebounceTimer) clearTimeout(gmapsSearchDebounceTimer);
+  if (shouldFetchOnline) {
+    gmapsSearchDebounceTimer = setTimeout(async () => {
+      const qAtRun = gmapsLatestSearchQuery;
+      if (qAtRun.length < 2) return;
+
+      const onlineResults = await fetchGmapsOnlineGeocoding(qAtRun);
+      if (gmapsLatestSearchQuery !== qAtRun) return;
+
+      // Merge online results into local results with proximity deduplication
+      const merged = [...localResults];
+      for (const onl of onlineResults) {
+        const duplicate = merged.some(m => {
+          if (m.name.toLowerCase() === onl.name.toLowerCase() && Math.abs(m.lat - onl.lat) < 0.015) return true;
+          return false;
+        });
+        if (!duplicate) {
+          merged.push(onl);
+        }
+        if (merged.length >= 10) break;
+      }
+
+      renderGmapsSearchResults(merged, false);
+    }, 180);
+  }
 }
 
 function handleGmapsSearchFocus() {
@@ -3331,23 +3501,33 @@ function handleGmapsSearchKeyDown(e) {
   }
 }
 
-function renderGmapsSearchResults(results) {
+function renderGmapsSearchResults(results, isLoading = false) {
   const dropdown = document.getElementById('gmaps-search-dropdown');
   if (!dropdown) return;
 
+  const isEn = (window.state && window.state.lang === 'en');
+  const userLoc = state.userLocation;
+
   if (!results || results.length === 0) {
-    dropdown.innerHTML = `
-      <div class="px-4 py-3 text-xs text-slate-400 text-center">
-        Eşleşen konum veya rota bulunamadı.
-      </div>
-    `;
+    if (isLoading) {
+      dropdown.innerHTML = `
+        <div class="px-4 py-3.5 flex items-center justify-center space-x-2 text-xs font-semibold text-cyan-400">
+          <div class="w-4 h-4 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin"></div>
+          <span>${isEn ? 'Searching online across Turkey...' : 'Türkiye genelinde aranıyor...'}</span>
+        </div>
+      `;
+    } else {
+      dropdown.innerHTML = `
+        <div class="px-4 py-3.5 text-xs text-slate-400 text-center">
+          ${isEn ? 'No matching places found.' : 'Eşleşen konum veya rota bulunamadı.'}
+        </div>
+      `;
+    }
     dropdown.classList.remove('hidden');
     return;
   }
 
-  const userLoc = state.userLocation;
-
-  dropdown.innerHTML = results.map((item, idx) => {
+  let html = results.map((item, idx) => {
     let distBadge = '';
     if (userLoc && userLoc.lat) {
       const dKm = (haversineMeters(userLoc.lat, userLoc.lon, item.lat, item.lon) * 1.25 / 1000);
@@ -3369,6 +3549,16 @@ function renderGmapsSearchResults(results) {
     `;
   }).join('');
 
+  if (isLoading) {
+    html += `
+      <div class="px-3.5 py-1.5 flex items-center justify-center space-x-1.5 text-[10px] text-slate-400 bg-slate-950/40">
+        <div class="w-2.5 h-2.5 rounded-full border border-cyan-400 border-t-transparent animate-spin"></div>
+        <span>${isEn ? 'Fetching more results...' : 'Daha fazla sonuç aranıyor...'}</span>
+      </div>
+    `;
+  }
+
+  dropdown.innerHTML = html;
   window._gmapsCachedResults = results;
   dropdown.classList.remove('hidden');
 }
@@ -3392,7 +3582,15 @@ function selectGmapsSearchResult(idx) {
   }
 
   dropGmapsPin(item.lat, item.lon);
-  showGmapsPlaceSheet(item.place || item);
+  showGmapsPlaceSheet(item.place || {
+    name: item.name,
+    category: item.category || 'place',
+    city: item.region,
+    region: item.region,
+    lat: item.lat,
+    lon: item.lon,
+    description: `Seçilen konum: ${item.name}, ${item.region}. Canlı navigasyon başlatabilir veya rotaya ekleyebilirsiniz.`
+  });
 }
 
 function clearGmapsSearch() {
