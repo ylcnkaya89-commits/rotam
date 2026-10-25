@@ -2680,6 +2680,9 @@
           <button id="admin-tab-btn-backup" onclick="switchAdminTab('backup')" class="px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white" data-i18n="admin_tab_settings">
             Yedekleme & Dil
           </button>
+          <button id="admin-tab-btn-firebase" onclick="switchAdminTab('firebase')" class="px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white flex items-center space-x-1">
+            <span>🔥 Firebase & Bulut</span>
+          </button>
         </div>
       </div>
 
@@ -3378,6 +3381,131 @@
             <input type="file" id="admin-json-upload-input" accept=".json" onchange="importPlacesJsonBackup(event)" class="hidden">
           </label>
         </div>
+      </div>
+
+      <!-- SEKME 7: FIREBASE & BULUT VERİTABANI YÖNETİMİ -->
+      <div id="admin-tab-firebase" class="hidden flex-col flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 text-xs min-h-0">
+        
+        <!-- Üst Durum Kartı -->
+        <div class="glass-card p-4 rounded-2xl border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                <i data-lucide="flame" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-white text-sm">Google Firebase Bulut Entegrasyonu</h4>
+                <p class="text-[11px] text-slate-400">Üyelik kimlik doğrulaması (Auth) ve Firestore rota senkronizasyonu kontrol merkezi</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span id="admin-firebase-status-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-mono">Bağlantı Aktif</span>
+            </div>
+          </div>
+
+          <!-- Canlı Metrikler Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+            <div class="p-3 rounded-xl bg-slate-950 border border-slate-800/80">
+              <span class="text-[10px] text-slate-400 uppercase font-semibold">Aktif Proje ID</span>
+              <p id="admin-firebase-proj-id" class="text-sm font-bold text-amber-300 font-mono mt-0.5 truncate">rotam-motor</p>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-950 border border-slate-800/80">
+              <span class="text-[10px] text-slate-400 uppercase font-semibold">Authentication (Giriş)</span>
+              <p id="admin-firebase-auth-badge" class="text-sm font-bold text-cyan-300 font-mono mt-0.5">Aktif (Email & Google)</p>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-950 border border-slate-800/80">
+              <span class="text-[10px] text-slate-400 uppercase font-semibold">Cloud Firestore (Rotalar)</span>
+              <p id="admin-firebase-db-badge" class="text-sm font-bold text-emerald-300 font-mono mt-0.5">Aktif (users/{uid}/routes)</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Firebase Yapılandırma Düzenleme Formu -->
+        <div class="glass-card p-4 rounded-2xl border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="settings-2" class="w-4 h-4 text-cyan-400"></i>
+              <h4 class="font-bold text-white text-sm">Firebase Proje Yapılandırması (SDK Config)</h4>
+            </div>
+            <span class="text-[10px] text-slate-500 font-mono">firebaseConfig JSON</span>
+          </div>
+
+          <p class="text-slate-400 text-xs leading-relaxed">
+            Firebase konsolundan (<a href="https://console.firebase.google.com" target="_blank" class="text-cyan-400 underline font-semibold">console.firebase.google.com</a>) aldığınız 
+            <code class="text-amber-300 bg-slate-950 px-1 py-0.5 rounded font-mono">const firebaseConfig = { ... }</code> nesnesini buraya yapıştırıp projenizi anında güncelleyebilirsiniz.
+          </p>
+
+          <form onsubmit="saveAdminFirebaseConfig(event)" class="space-y-3">
+            <textarea id="admin-firebase-config-input" rows="8" placeholder='{\n  "apiKey": "AIzaSy...",\n  "authDomain": "rotam-motor.firebaseapp.com",\n  "projectId": "rotam-motor",\n  "storageBucket": "rotam-motor.firebasestorage.app",\n  "messagingSenderId": "424182078836",\n  "appId": "1:424182078836:web:...",\n  "measurementId": "G-..."\n}' class="w-full font-mono text-[11px] bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-500 resize-none shadow-inner"></textarea>
+
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+              <div class="flex items-center space-x-2">
+                <button type="button" onclick="testAdminFirebaseConnection()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 hover:text-white font-bold text-xs flex items-center space-x-1.5 border border-slate-700 transition-all">
+                  <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                  <span>Bağlantıyı Test Et</span>
+                </button>
+                <button type="button" onclick="resetAdminFirebaseConfig()" class="px-3 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-slate-200 font-semibold text-xs border border-slate-800 transition-all">
+                  <span>Varsayılana Sıfırla</span>
+                </button>
+              </div>
+
+              <button type="submit" class="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shadow-lg shadow-cyan-600/30 active:scale-95 transition-all flex items-center space-x-1.5">
+                <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                <span>Yapılandırmayı Kaydet & Başlat</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Firestore Güvenlik Kuralları & Yetkilendirme Rehberi -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <!-- Kural Kopyalama Kartı -->
+          <div class="glass-card p-4 rounded-2xl border border-slate-800 space-y-2.5">
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+              <div class="flex items-center space-x-2">
+                <i data-lucide="shield" class="w-4 h-4 text-emerald-400"></i>
+                <h5 class="font-bold text-white text-xs">Firestore Güvenlik Kuralı</h5>
+              </div>
+              <button type="button" onclick="copyAdminFirestoreRules()" class="px-2 py-1 rounded bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold transition-colors flex items-center space-x-1">
+                <i data-lucide="copy" class="w-3 h-3"></i>
+                <span>Kopyala</span>
+              </button>
+            </div>
+            <p class="text-[11px] text-slate-400">
+              Firebase Console &gt; Firestore &gt; Rules sekmesine yapıştırılacak kural (her sürücü sadece kendi rotalarını yönetir):
+            </p>
+            <pre class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 font-mono text-[10px] text-emerald-300 overflow-x-auto leading-relaxed select-all">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/routes/{routeId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}</pre>
+          </div>
+
+          <!-- Yetkili Alan Adları Kartı -->
+          <div class="glass-card p-4 rounded-2xl border border-slate-800 space-y-2.5">
+            <div class="flex items-center space-x-2 border-b border-slate-800/80 pb-2">
+              <i data-lucide="globe" class="w-4 h-4 text-cyan-400"></i>
+              <h5 class="font-bold text-white text-xs">Yetkili Alan Adları (Authorized Domains)</h5>
+            </div>
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+              Google ile girişin sorunsuz çalışması için Firebase Console &gt; Authentication &gt; Settings &gt; Authorized Domains altına eklenmesi gereken adresler:
+            </p>
+            <div class="space-y-1.5 pt-1 font-mono text-[11px]">
+              <div class="p-2 rounded-lg bg-slate-950 border border-slate-800 text-cyan-300 flex items-center justify-between">
+                <span>ylcnkaya89-commits.github.io</span>
+                <span class="text-[10px] text-slate-500">Canlı Site</span>
+              </div>
+              <div class="p-2 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 flex items-center justify-between">
+                <span>localhost</span>
+                <span class="text-[10px] text-slate-500">Yerel Test</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -4083,13 +4211,13 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <!-- Rotam Firebase Bulut & Üyelik Servisi -->
-  <script src="firebase-service.js?v=1.2"></script>
+  <script src="firebase-service.js?v=1.3"></script>
 
   <!-- Kapsamlı Mekan Veritabanı (915+ Yer) -->
   <script src="places_data.js?v=3.3"></script>
   <!-- Çoklu Dil ve Çeviri Motoru (TR / EN) -->
   <script src="translations.js?v=3.2"></script>
   <!-- V3 JavaScript Uygulama Mantığı -->
-  <script src="app.js?v=5.5"></script>
+  <script src="app.js?v=5.6"></script>
 </body>
 </html>

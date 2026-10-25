@@ -6804,7 +6804,7 @@ function deleteSavedRoute(index) {
 
 // MODAL: YÖNETİM & VERİ YÖNETİMİ PANELİ (ADMIN & JSON BACKUP)
 function switchAdminTab(tab) {
-  const tabs = ['places', 'presets', 'hazards', 'analytics', 'system', 'backup'];
+  const tabs = ['places', 'presets', 'hazards', 'analytics', 'system', 'backup', 'firebase'];
   tabs.forEach(tName => {
     const tabEl = document.getElementById(`admin-tab-${tName}`);
     const btnEl = document.getElementById(`admin-tab-btn-${tName}`);
@@ -6836,6 +6836,10 @@ function switchAdminTab(tab) {
     RotamTelemetry.renderAdminUI();
   } else if (tab === 'system') {
     checkStorageQuota();
+  } else if (tab === 'firebase') {
+    if (typeof populateAdminFirebaseTab === 'function') {
+      populateAdminFirebaseTab();
+    }
   }
   updateAdminStats();
   initIcons();

@@ -400,34 +400,93 @@ function handleUserPasswordReset() {
 }
 
 function handleFirebaseConfigSave(e) {
-  e.preventDefault();
-  const rawJson = document.getElementById('firebase-config-json-input')?.value.trim();
-  if (!rawJson) {
-    RotamCloud.showAuthError('Lütfen Firebase yapılandırma nesnesini (JSON) yapıştırın.');
+  saveAdminFirebaseConfig(e);
+}
+
+// ==========================================
+// YÖNETİCİ PANELİ (ADMIN) FIREBASE KONTROLCÜSÜ
+// ==========================================
+function populateAdminFirebaseTab() {
+  const input = document.getElementById('admin-firebase-config-input');
+  const projBadge = document.getElementById('admin-firebase-proj-id');
+  const statusBadge = document.getElementById('admin-firebase-status-badge');
+  const authBadge = document.getElementById('admin-firebase-auth-badge');
+  const dbBadge = document.getElementById('admin-firebase-db-badge');
+
+  const config = RotamCloud.getConfig();
+  if (input && config) {
+    input.value = JSON.stringify(config, null, 2);
+  }
+  if (projBadge) {
+    projBadge.textContent = config?.projectId || 'Yapılandırılmadı';
+  }
+  if (statusBadge) {
+    if (RotamCloud.isConfigured) {
+      statusBadge.textContent = 'Bağlantı Aktif';
+      statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-mono';
+    } else {
+      statusBadge.textContent = 'Bağlantı Yok';
+      statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 font-mono';
+    }
+  }
+  if (authBadge) {
+    authBadge.textContent = RotamCloud.auth ? 'Aktif (Email & Google)' : 'Pasif';
+  }
+  if (dbBadge) {
+    dbBadge.textContent = RotamCloud.db ? 'Aktif (users/{uid}/routes)' : 'Pasif';
+  }
+}
+
+function saveAdminFirebaseConfig(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const input = document.getElementById('admin-firebase-config-input');
+  const raw = input?.value?.trim();
+  if (!raw) {
+    showToast('Lütfen Firebase yapılandırma nesnesini girin.', 'warning');
     return;
   }
-
   try {
-    // Tolerant parser (allows JS object literal format or JSON)
     let parsed;
     try {
-      parsed = JSON.parse(rawJson);
+      parsed = JSON.parse(raw);
     } catch {
-      // If user pasted const firebaseConfig = { ... }
-      const cleaned = rawJson.replace(/^(const|var|let)\s+[a-zA-Z0-9_]+\s*=\s*/, '').replace(/;$/, '');
+      const cleaned = raw.replace(/^(const|var|let)\s+[a-zA-Z0-9_]+\s*=\s*/, '').replace(/;$/, '');
       parsed = Function(`"use strict"; return (${cleaned});`)();
     }
-
     if (!parsed || !parsed.apiKey || !parsed.projectId) {
-      throw new Error('Geçersiz nesne: "apiKey" ve "projectId" alanları bulunamadı.');
+      throw new Error('Geçersiz yapılandırma: apiKey ve projectId zorunludur.');
     }
-
     RotamCloud.saveConfig(parsed);
-    showToast('Firebase başarıyla bağlandı! Şimdi giriş yapabilirsiniz 🎉', 'success');
-    switchUserAuthTab('login');
+    showToast('Firebase yapılandırması güncellendi ve başlatıldı! 🎉', 'success');
+    populateAdminFirebaseTab();
   } catch (err) {
-    RotamCloud.showAuthError('Yapılandırma ayrıştırılamadı: ' + err.message);
+    showToast('Yapılandırma hatası: ' + err.message, 'error');
   }
+}
+
+function resetAdminFirebaseConfig() {
+  if (!confirm('Firebase ayarlarını varsayılan (rotam-motor) projesine sıfırlamak istiyor musunuz?')) return;
+  localStorage.removeItem('rotam_firebase_config');
+  RotamCloud.init();
+  showToast('Varsayılan Firebase (rotam-motor) projesine sıfırlandı.', 'info');
+  populateAdminFirebaseTab();
+}
+
+function testAdminFirebaseConnection() {
+  if (!RotamCloud.isConfigured || !RotamCloud.auth) {
+    showToast('Firebase henüz başlatılmamış!', 'error');
+    return;
+  }
+  showToast(`Bağlantı başarılı: ${RotamCloud.getConfig()?.projectId} aktif 🚀`, 'success');
+}
+
+function copyAdminFirestoreRules() {
+  const rules = `rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /users/{userId}/routes/{routeId} {\n      allow read, write: if request.auth != null && request.auth.uid == userId;\n    }\n  }\n}`;
+  navigator.clipboard.writeText(rules).then(() => {
+    showToast('Firestore güvenlik kuralları panoya kopyalandı! 📋', 'success');
+  }).catch(() => {
+    showToast('Panoya kopyalanamadı, lütfen manuel kopyalayın.', 'warning');
+  });
 }
 
 // Global scope bindings
@@ -438,6 +497,11 @@ window.handleUserLoginSubmit = handleUserLoginSubmit;
 window.handleUserRegisterSubmit = handleUserRegisterSubmit;
 window.handleUserPasswordReset = handleUserPasswordReset;
 window.handleFirebaseConfigSave = handleFirebaseConfigSave;
+window.populateAdminFirebaseTab = populateAdminFirebaseTab;
+window.saveAdminFirebaseConfig = saveAdminFirebaseConfig;
+window.resetAdminFirebaseConfig = resetAdminFirebaseConfig;
+window.testAdminFirebaseConnection = testAdminFirebaseConnection;
+window.copyAdminFirestoreRules = copyAdminFirestoreRules;
 
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
