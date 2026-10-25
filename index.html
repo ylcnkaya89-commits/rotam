@@ -155,7 +155,7 @@
         <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
         <span class="hidden xl:inline" data-i18n="nav_presets">Hazır Rotalar</span>
         <span class="xl:hidden">Hazır</span>
-        <span class="px-1.5 py-0.2 bg-amber-500/20 text-amber-300 rounded-full text-[10px] font-bold border border-amber-500/30">10</span>
+        <span class="px-1.5 py-0.2 bg-amber-500/20 text-amber-300 rounded-full text-[10px] font-bold border border-amber-500/30">14</span>
       </button>
       <button id="nav-btn-nearby" onclick="openNearbyModal()" class="flex items-center space-x-1.5 px-2.5 lg:px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all whitespace-nowrap">
         <i data-lucide="navigation" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>
@@ -1862,6 +1862,7 @@
         <div class="flex flex-wrap gap-1 text-[11px]" id="discover-category-filters">
           <button onclick="selectDiscoverCategory('all')" class="discover-cat-btn active px-3 py-1 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/40 font-medium" data-cat="all" data-i18n="cat_all">Tümü</button>
           <button onclick="selectDiscoverCategory('historic')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="historic" data-i18n="cat_historic">🏛️ Tarih</button>
+          <button onclick="selectDiscoverCategory('mountain_pass')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="mountain_pass" data-i18n="cat_mountain_pass">⛰️ Dağ Geçidi</button>
           <button onclick="selectDiscoverCategory('nature')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="nature" data-i18n="cat_nature">🌲 Doğa</button>
           <button onclick="selectDiscoverCategory('photography')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="photography" data-i18n="cat_photography">📸 Fotoğraf</button>
           <button onclick="selectDiscoverCategory('beach')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="beach" data-i18n="cat_beach">🌊 Sahil</button>
@@ -1879,6 +1880,7 @@
           <button onclick="selectDiscoverRegion('Marmara')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Marmara" data-i18n="region_marmara">Marmara</button>
           <button onclick="selectDiscoverRegion('Karadeniz')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Karadeniz" data-i18n="region_blacksea">Karadeniz</button>
           <button onclick="selectDiscoverRegion('Doğu & Güneydoğu')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Doğu & Güneydoğu" data-i18n="region_east">Doğu & GD</button>
+          <button onclick="selectDiscoverRegion('Yurtdışı')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white text-cyan-400 border border-cyan-500/30" data-reg="Yurtdışı" data-i18n="region_abroad">🌍 Yurtdışı & Avrupa</button>
         </div>
       </div>
 
@@ -1955,6 +1957,7 @@
           <button onclick="filterPresetsByCategory('history')" class="preset-filter-btn text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white shrink-0" data-tag="history" data-i18n="presets_filter_history">🏛️ Tarih</button>
           <button onclick="filterPresetsByCategory('nature')" class="preset-filter-btn text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white shrink-0" data-tag="nature" data-i18n="presets_filter_nature">🌲 Doğa</button>
           <button onclick="filterPresetsByCategory('coast')" class="preset-filter-btn text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white shrink-0" data-tag="coast" data-i18n="presets_filter_coast">🌊 Sahil</button>
+          <button onclick="filterPresetsByCategory('abroad')" class="preset-filter-btn text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-cyan-400 hover:text-white shrink-0 border border-cyan-500/30" data-tag="abroad" data-i18n="presets_filter_abroad">🌍 Yurtdışı</button>
         </div>
       </div>
 

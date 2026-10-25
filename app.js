@@ -1353,6 +1353,46 @@ function normalizeTurkish(str) {
     .replace(/ü/g, 'u');
 }
 
+// Transliterate Non-Latin Alphabets (Greek, Cyrillic, Georgian) to Latin Script
+function toLatinScript(str) {
+  if (!str || typeof str !== 'string') return str || '';
+  const greekMap = {
+    'Α':'A','Β':'V','Γ':'G','Δ':'D','Ε':'E','Ζ':'Z','Η':'I','Θ':'Th','Ι':'I','Κ':'K','Λ':'L','Μ':'M','Ν':'N','Ξ':'X','Ο':'O','Π':'P','Ρ':'R','Σ':'S','Τ':'T','Υ':'Y','Φ':'F','Χ':'Ch','Ψ':'Ps','Ω':'O',
+    'α':'a','β':'v','γ':'g','δ':'d','ε':'e','ζ':'z','η':'i','θ':'th','ι':'i','κ':'k','λ':'l','μ':'m','ν':'n','ξ':'x','ο':'o','π':'p','ρ':'r','σ':'s','ς':'s','τ':'t','υ':'y','φ':'f','χ':'ch','ψ':'ps','ω':'o',
+    'ά':'a','έ':'e','ή':'i','ί':'i','ό':'o','ύ':'y','ώ':'o','ϊ':'i','ϋ':'y','ΐ':'i','ΰ':'y',
+    'Ά':'A','Έ':'E','Ή':'I','Ί':'I','Ό':'O','Ύ':'Y','Ώ':'O'
+  };
+  const cyrillicMap = {
+    'А':'A','Б':'B','В':'V','Г':'G','Д':'D','Е':'E','Ё':'Yo','Ж':'Zh','З':'Z','И':'I','Й':'Y','К':'K','Л':'L','М':'M','Н':'N','О':'O','П':'P','Ρ':'R','С':'S','Т':'T','У':'U','Ф':'F','Х':'Kh','Ц':'Ts','Ч':'Ch','Ш':'Sh','Щ':'Sht','Ъ':'A','Ы':'Y','Ь':'','Э':'E','Ю':'Yu','Я':'Ya',
+    'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'yo','ж':'zh','з':'z','и':'i','й':'y','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'sht','ъ':'a','ы':'y','ь':'','э':'e','ю':'yu','я':'ya',
+    'Љ':'Lj','љ':'lj','Њ':'Nj','њ':'nj','Џ':'Dz','џ':'dz','Ђ':'Dj','ђ':'dj','Ћ':'C','ћ':'c','Ѓ':'Gj','ѓ':'gj','Ќ':'Kj','ќ':'kj','Ѕ':'Dz','ѕ':'dz','І':'I','і':'i','Ї':'Yi','ї':'yi','Є':'Ye','є':'ye'
+  };
+  const geoMap = {
+    'ა':'a','ბ':'b','გ':'g','დ':'d','ე':'e','ვ':'v','ზ':'z','თ':'t','ი':'i','კ':'k','ლ':'l','მ':'m','ნ':'n','ო':'o','პ':'p','ჟ':'zh','რ':'r','ს':'s','ტ':'t','უ':'u','ფ':'p','ქ':'k','ღ':'gh','ყ':'q','შ':'sh','ჩ':'ch','ც':'ts','ძ':'dz','წ':'ts','ჭ':'ch','ხ':'kh','ჯ':'j','ჰ':'h'
+  };
+
+  let res = str
+    .replace(/μπ/g, 'b').replace(/Μπ/g, 'B')
+    .replace(/ντ/g, 'd').replace(/Ντ/g, 'D')
+    .replace(/γκ/g, 'g').replace(/Γκ/g, 'G')
+    .replace(/ου/g, 'ou').replace(/Ου/g, 'Ou');
+
+  let out = '';
+  for (let i = 0; i < res.length; i++) {
+    const ch = res[i];
+    if (greekMap[ch] !== undefined) {
+      out += greekMap[ch];
+    } else if (cyrillicMap[ch] !== undefined) {
+      out += cyrillicMap[ch];
+    } else if (geoMap[ch] !== undefined) {
+      out += (i === 0 || res[i - 1] === ' ' ? geoMap[ch].toUpperCase() : geoMap[ch]);
+    } else {
+      out += ch;
+    }
+  }
+  return out;
+}
+
 // Instant Offline Local Search Engine for All 81 Provinces, Districts and 870+ Places
 function searchLocalGeo(query) {
   if (!query || typeof query !== 'string') return null;
@@ -1608,12 +1648,12 @@ async function geocodeLocation(query) {
     };
   }
 
-  // Tier 2: Photon Geocoder (Fast ~200ms)
+  // Tier 2: Photon Geocoder (Fast ~200ms) with Latin language preference
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 2000);
     const q = encodeURIComponent(qStr);
-    const res = await fetch(`https://photon.komoot.io/api/?q=${q}&limit=1`, { signal: controller.signal });
+    const res = await fetch(`https://photon.komoot.io/api/?q=${q}&limit=1&lang=en`, { signal: controller.signal });
     clearTimeout(timeoutId);
     if (res.ok) {
       const data = await res.json();
@@ -1622,23 +1662,25 @@ async function geocodeLocation(query) {
         const p = f.properties || {};
         const coords = f.geometry ? f.geometry.coordinates : null;
         if (coords && coords.length >= 2) {
+          const rawName = p.name || qStr;
           const sub = [p.district, p.city, p.state].filter(Boolean).join(', ');
+          const fullDisplayName = sub ? `${rawName}, ${sub}` : rawName;
           return {
             lat: coords[1],
             lon: coords[0],
-            displayName: sub ? `${p.name || qStr}, ${sub}` : (p.name || qStr)
+            displayName: toLatinScript(fullDisplayName)
           };
         }
       }
     }
   } catch (err) {}
 
-  // Tier 3: OpenStreetMap Nominatim with safe timeout
+  // Tier 3: OpenStreetMap Nominatim with Latin preference
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 2800);
     const q = encodeURIComponent(qStr);
-    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=1&accept-language=tr`, {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=1&accept-language=tr,en;q=0.9`, {
       signal: controller.signal
     });
     clearTimeout(timeoutId);
@@ -1648,7 +1690,7 @@ async function geocodeLocation(query) {
         return {
           lat: parseFloat(data[0].lat),
           lon: parseFloat(data[0].lon),
-          displayName: data[0].display_name
+          displayName: toLatinScript(data[0].display_name)
         };
       }
     }
@@ -1984,7 +2026,7 @@ const RotamSearchEngine = {
 
     try {
       const q = encodeURIComponent(query.trim());
-      let url = `https://photon.komoot.io/api/?q=${q}&limit=8`;
+      let url = `https://photon.komoot.io/api/?q=${q}&limit=8&lang=en`;
       const origin = state.userLocation || (state.waypoints[0] && state.waypoints[0].lat ? state.waypoints[0] : null);
       if (origin && origin.lat && origin.lon) {
         url += `&lat=${origin.lat}&lon=${origin.lon}`;
@@ -2008,17 +2050,18 @@ const RotamSearchEngine = {
         const lon = coords[0];
         const lat = coords[1];
 
-        const placeName = p.name || query;
+        const placeName = toLatinScript(p.name || query);
         const details = [];
-        if (p.district) details.push(p.district);
-        if (p.city && p.city !== p.district) details.push(p.city);
-        if (p.state && p.state !== p.city) details.push(p.state);
+        if (p.district) details.push(toLatinScript(p.district));
+        if (p.city && p.city !== p.district) details.push(toLatinScript(p.city));
+        if (p.state && p.state !== p.city) details.push(toLatinScript(p.state));
 
-        const country = p.country || (lat >= 35.0 && lat <= 43.5 && lon >= 25.0 && lon <= 45.5 ? 'Türkiye' : '');
+        const rawCountry = p.country || (lat >= 35.0 && lat <= 43.5 && lon >= 25.0 && lon <= 45.5 ? 'Türkiye' : '');
+        const country = toLatinScript(rawCountry);
         const fullSubtitle = details.length > 0
           ? (country ? `${details.join(', ')}, ${country}` : details.join(', '))
           : (country || 'Global');
-        const key = `${placeName}|${fullSubtitle}`;
+        const key = `${placeName.toLowerCase()}|${fullSubtitle.toLowerCase()}`;
         if (seen.has(key)) return;
         seen.add(key);
 
@@ -3306,9 +3349,9 @@ async function fetchGmapsOnlineGeocoding(query) {
   const results = [];
   const seen = new Set();
 
-  // 1. Primary: Photon (Komoot) - High speed + Fuzzy Typo Tolerant + Geo-bias
+  // 1. Primary: Photon (Komoot) - High speed + Fuzzy Typo Tolerant + Geo-bias + Latin script
   try {
-    let photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(qClean)}&limit=10&lat=${userLat}&lon=${userLon}`;
+    let photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(qClean)}&limit=10&lat=${userLat}&lon=${userLon}&lang=en`;
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 3500);
     const res = await fetch(photonUrl, { signal: ctrl.signal });
@@ -3325,13 +3368,14 @@ async function fetchGmapsOnlineGeocoding(query) {
           const lat = coords[1];
 
           const inTurkey = (lat >= 35.0 && lat <= 43.5 && lon >= 25.0 && lon <= 45.5);
-          const placeName = p.name || qClean;
+          const placeName = toLatinScript(p.name || qClean);
           const details = [];
-          if (p.district && p.district !== placeName) details.push(p.district);
-          if (p.city && p.city !== placeName && p.city !== p.district) details.push(p.city);
-          if (p.state && p.state !== placeName && p.state !== p.city) details.push(p.state);
+          if (p.district && p.district !== placeName) details.push(toLatinScript(p.district));
+          if (p.city && p.city !== placeName && p.city !== p.district) details.push(toLatinScript(p.city));
+          if (p.state && p.state !== placeName && p.state !== p.city) details.push(toLatinScript(p.state));
 
-          const countryName = p.country || (inTurkey ? 'Türkiye' : '');
+          const rawCountry = p.country || (inTurkey ? 'Türkiye' : '');
+          const countryName = toLatinScript(rawCountry);
           const fullSubtitle = details.length > 0
             ? (countryName ? `${details.join(', ')}, ${countryName}` : details.join(', '))
             : (countryName || 'Global');
@@ -3367,14 +3411,14 @@ async function fetchGmapsOnlineGeocoding(query) {
     console.warn('Photon online geocode notice:', e);
   }
 
-  // 2. Fallback to OpenStreetMap Nominatim if Photon returned < 3 results
+  // 2. Fallback to OpenStreetMap Nominatim with Latin preference if Photon returned < 3 results
   if (results.length < 3) {
     try {
-      const nomUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(qClean)}&format=json&addressdetails=1&limit=6`;
+      const nomUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(qClean)}&format=json&addressdetails=1&limit=6&accept-language=tr,en;q=0.9`;
       const ctrl = new AbortController();
       const t = setTimeout(() => ctrl.abort(), 3500);
       const res = await fetch(nomUrl, {
-        headers: { 'Accept-Language': 'tr' },
+        headers: { 'Accept-Language': 'tr, en;q=0.9' },
         signal: ctrl.signal
       });
       clearTimeout(t);
@@ -3386,15 +3430,16 @@ async function fetchGmapsOnlineGeocoding(query) {
             const lat = parseFloat(item.lat);
             const lon = parseFloat(item.lon);
             const addr = item.address || {};
-            const placeName = item.name || addr.suburb || addr.neighbourhood || addr.town || addr.city || qClean;
+            const placeName = toLatinScript(item.name || addr.suburb || addr.neighbourhood || addr.town || addr.city || qClean);
             
             const details = [];
-            if (addr.suburb && addr.suburb !== placeName) details.push(addr.suburb);
-            if (addr.district && addr.district !== placeName) details.push(addr.district);
-            if (addr.city && addr.city !== placeName) details.push(addr.city);
-            if (addr.province && !details.includes(addr.province) && addr.province !== placeName) details.push(addr.province);
+            if (addr.suburb && addr.suburb !== placeName) details.push(toLatinScript(addr.suburb));
+            if (addr.district && addr.district !== placeName) details.push(toLatinScript(addr.district));
+            if (addr.city && addr.city !== placeName) details.push(toLatinScript(addr.city));
+            if (addr.province && !details.includes(addr.province) && addr.province !== placeName) details.push(toLatinScript(addr.province));
 
-            const country = addr.country || (lat >= 35.0 && lat <= 43.5 && lon >= 25.0 && lon <= 45.5 ? 'Türkiye' : '');
+            const rawCountry = addr.country || (lat >= 35.0 && lat <= 43.5 && lon >= 25.0 && lon <= 45.5 ? 'Türkiye' : '');
+            const country = toLatinScript(rawCountry);
             const fullSubtitle = details.length > 0
               ? (country ? `${details.join(', ')}, ${country}` : details.join(', '))
               : (country || 'Global');
@@ -5888,7 +5933,15 @@ function filterDiscoverPlaces() {
 
   const filtered = state.allPlaces.filter(p => {
     if (discoverFilterCat !== 'all' && p.category !== discoverFilterCat) return false;
-    if (discoverFilterReg !== 'all' && (p.region || '') !== discoverFilterReg) return false;
+    if (discoverFilterReg !== 'all') {
+      if (discoverFilterReg === 'Yurtdışı') {
+        const abroadCountries = ['Yurtdışı', 'Yunanistan', 'Bulgaristan', 'Romanya', 'Kuzey Makedonya', 'İtalya', 'İtalya Alpleri', 'Avusturya', 'İsviçre', 'Gürcistan', 'Sırbistan', 'Bosna-Hersek', 'Almanya'];
+        const isAbroad = abroadCountries.includes(p.region) || abroadCountries.includes(p.city);
+        if (!isAbroad) return false;
+      } else if ((p.region || '') !== discoverFilterReg) {
+        return false;
+      }
+    }
     if (search) {
       const matchName = (p.name || '').toLowerCase().includes(search);
       const matchDesc = (p.description || '').toLowerCase().includes(search);
@@ -6270,6 +6323,78 @@ const PRESET_ROUTES = [
       { name: 'Fırtına Vadisi Taş Köprüler (Çamlıhemşin)', lat: 41.0442, lon: 40.9631 },
       { name: 'Zil Kale (Sarp Kaya Zirvesi)', lat: 40.9333, lon: 40.9639 },
       { name: 'Ayder Yaylası & Kaplıcalar', lat: 40.9567, lon: 41.0967 }
+    ]
+  },
+  {
+    id: 'ipsala-kavala-selanik',
+    title: 'Yunanistan Sahili: İpsala - Kavala - Selanik',
+    category: 'Ege & Balkan Sahil Sürüşü',
+    tag: 'abroad',
+    description: 'İpsala sınır kapısından başlayıp Egnatia Odos ve eski sahil virajlarıyla Dedeağaç feneri, Kavala kalesi ve Selanik Beyaz Kule\'ye uzanan klasik yurtdışı motorcu rotası.',
+    difficulty: 'Kolay / Orta',
+    twistiness: 82,
+    distanceKm: 335,
+    durationText: '3 saat 45 dk',
+    badgeClass: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+    points: [
+      { name: 'İpsala Sınır Kapısı', lat: 40.9167, lon: 26.3833 },
+      { name: 'Dedeağaç Tarihi Feneri (Alexandroupoli)', lat: 40.8436, lon: 25.8739 },
+      { name: 'Kavala Kalesi & Su Kemerleri', lat: 40.9328, lon: 24.4140 },
+      { name: 'Selanik Beyaz Kule & Kordon', lat: 40.6264, lon: 22.9484 }
+    ]
+  },
+  {
+    id: 'alpler-stelvio-dolomitler',
+    title: 'İtalya Alpleri: Stelvio Geçidi & Dolomitler',
+    category: 'Efsane Dağ Geçidi & Virajlar (2757m)',
+    tag: 'abroad',
+    description: 'Dünyanın en ünlü 48 saç tokası virajlı Passo dello Stelvio zirvesinden Dolomitler Tre Cime ve Sella Ronda Alp geçitlerine nefes kesen sürüş macerası.',
+    difficulty: 'İleri / Uzman',
+    twistiness: 99,
+    distanceKm: 215,
+    durationText: '4 saat 30 dk',
+    badgeClass: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+    points: [
+      { name: 'Bormio (Alp Kasabası)', lat: 46.4683, lon: 10.3725 },
+      { name: 'Passo dello Stelvio Zirvesi (2757m)', lat: 46.5286, lon: 10.4531 },
+      { name: 'Bolzano & Isarco Vadisi', lat: 46.4983, lon: 11.3548 },
+      { name: 'Tre Cime di Lavaredo (Dolomitler)', lat: 46.6186, lon: 12.3028 }
+    ]
+  },
+  {
+    id: 'romanya-transfagarasan-efsanesi',
+    title: 'Romanya Karpatlar: Transfăgărășan & Drakula Şatosu',
+    category: 'Karpat Alpleri & Virajlar (2042m)',
+    tag: 'abroad',
+    description: 'Top Gear tarafından "Dünyanın En İyi Sürüş Rotası" seçilen Bâlea Gölü zirvesi saç tokaları, Vidraru Kanyonu ve masalsı Bran Kalesi.',
+    difficulty: 'İleri',
+    twistiness: 98,
+    distanceKm: 185,
+    durationText: '3 saat 50 dk',
+    badgeClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+    points: [
+      { name: 'Curtea de Argeș', lat: 45.1436, lon: 24.6753 },
+      { name: 'Vidraru Barajı & Kanyon Seyir Noktası', lat: 45.3653, lon: 24.6300 },
+      { name: 'Transfăgărășan Bâlea Gölü Zirvesi (2042m)', lat: 45.6042, lon: 24.6167 },
+      { name: 'Bran Kalesi (Drakula Şatosu)', lat: 45.5152, lon: 25.3672 }
+    ]
+  },
+  {
+    id: 'gurcistan-askeri-yolu-kazbek',
+    title: 'Gürcistan: Tiflis & Kazbek Askeri Dağ Yolu',
+    category: 'Kafkas Dağları & Yüksek İrtifa (2379m)',
+    tag: 'abroad',
+    description: 'Tiflis Narikala Kalesi\'nden başlayıp Zhinvali Barajı, Ananuri Kalesi ve 5054 metrelik Kazbek Dağı zirvesindeki Gergeti Kilisesi\'ne uzanan tarihi Kafkas rotası.',
+    difficulty: 'Orta / İleri',
+    twistiness: 91,
+    distanceKm: 155,
+    durationText: '3 saat 15 dk',
+    badgeClass: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+    points: [
+      { name: 'Narikala Kalesi (Tiflis)', lat: 41.6881, lon: 44.8083 },
+      { name: 'Ananuri Kalesi & Zhinvali Barajı', lat: 42.1644, lon: 44.7033 },
+      { name: 'Gudauri Dostluk Anıtı & Geçit (2379m)', lat: 42.4925, lon: 44.4533 },
+      { name: 'Gergeti Teslis Kilisesi (Kazbek Dağı 2170m)', lat: 42.6625, lon: 44.6150 }
     ]
   }
 ];

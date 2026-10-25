@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v51 (Global & International Routing & Alps Topo Support)
-const CACHE_NAME = 'rotam-cache-v51';
+// Rotam PWA Service Worker - v52 (Latin Script Search & International Landmarks)
+const CACHE_NAME = 'rotam-cache-v52';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
