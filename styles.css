@@ -138,17 +138,27 @@ main {
 }
 
 /* ROTAM High-Contrast Dark Mode Map (Adblocker-Safe, Fast & 100% Reliable) */
-#map.dark-map .leaflet-tile-pane {
+#map.dark-map .leaflet-tile-pane,
+#map.dark-map .leaflet-yandex-container {
   filter: invert(100%) hue-rotate(180deg) brightness(88%) contrast(108%);
   -webkit-filter: invert(100%) hue-rotate(180deg) brightness(88%) contrast(108%);
 }
 
 /* ROTAM Crystal Clear Daytime Mode Map (Natural Colors, 100% Crisp & Visible) */
 #map:not(.dark-map) .leaflet-tile-pane,
+#map:not(.dark-map) .leaflet-yandex-container,
 body.sunlight-mode #map .leaflet-tile-pane,
-body.sunlight-mode #map.dark-map .leaflet-tile-pane {
+body.sunlight-mode #map .leaflet-yandex-container,
+body.sunlight-mode #map.dark-map .leaflet-tile-pane,
+body.sunlight-mode #map.dark-map .leaflet-yandex-container {
   filter: none !important;
   -webkit-filter: none !important;
+}
+
+/* Ensure Leaflet receives all pointer events (clicks, drags, touches) over Yandex container */
+.leaflet-yandex-container,
+.leaflet-yandex-container * {
+  pointer-events: none !important;
 }
 
 #map:not(.dark-map),

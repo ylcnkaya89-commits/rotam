@@ -238,51 +238,50 @@ function initPlacesDatabase() {
   }
 }
 
-// Map Tile Layers Setup
+// Map Tile Layers Setup - 100% Yandex Maps Provider
 function createTileLayers() {
   if (typeof L === 'undefined') return {};
-  const layers = {
-    // Ultra-reliable, adblocker-safe Dark Mode tile using OpenStreetMap + high-contrast CSS filter
-    dark: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }),
-    osm: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }),
-    day: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }),
-    voyager: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }),
-    topo: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-      maxZoom: 17,
-      attribution: '&copy; OpenTopoMap'
-    }),
-    sat: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom: 18,
-      attribution: '&copy; Esri'
-    })
-  };
+  const layers = {};
 
-  // Add Yandex layer if L.yandex plugin is available
+  // 1. Official Yandex Map Layers via Yandex Maps JS API
   if (typeof L.yandex === 'function') {
     try {
       layers.yandex = L.yandex('map');
+      layers.sat = L.yandex('satellite');
+      layers.hybrid = L.yandex('hybrid');
     } catch (e) {
       console.warn('Yandex layer creation notice:', e);
     }
   }
 
+  // 2. Direct Yandex High-Resolution Tiles Fallback
+  if (!layers.yandex) {
+    layers.yandex = L.tileLayer('https://core-renderer-tiles.maps.yandex.net/tiles?l=map&x={x}&y={y}&z={z}&scale=1&lang=tr_TR', {
+      maxZoom: 19,
+      subdomains: [],
+      attribution: '&copy; <a href="https://yandex.com.tr/harita" target="_blank">Yandex</a>'
+    });
+    layers.sat = L.tileLayer('https://core-renderer-tiles.maps.yandex.net/tiles?l=sat&x={x}&y={y}&z={z}&scale=1&lang=tr_TR', {
+      maxZoom: 18,
+      subdomains: [],
+      attribution: '&copy; <a href="https://yandex.com.tr/harita" target="_blank">Yandex</a>'
+    });
+    layers.hybrid = layers.sat;
+  }
+
+  // Yandex Gece Navigasyon Modu (High-Contrast Night Theme)
+  layers.dark = layers.yandex;
+  layers.day = layers.yandex;
+  layers.osm = layers.yandex;
+  layers.topo = layers.yandex;
+
   // Add error resilience
   Object.entries(layers).forEach(([name, l]) => {
-    l.on('tileerror', (e) => {
-      console.warn(`Harita katmanı (${name}) karosu yüklenirken uyarı:`, e);
-    });
+    if (l && typeof l.on === 'function') {
+      l.on('tileerror', (e) => {
+        console.warn(`Harita katmanı (${name}) karosu yüklenirken uyarı:`, e);
+      });
+    }
   });
 
   return layers;
@@ -319,134 +318,18 @@ function patchLeafletDraggableForRotation() {
 }
 
 // ==========================================
-// MapLibre GL JS 3D Vector Map Engine Initializer
+// Yandex Maps Sole Provider Engine Initialization
 // ==========================================
-function initMapLibre() {
-  const mapEl = document.getElementById('map');
-  if (!mapEl) {
-    setTimeout(initMap, 150);
-    return;
-  }
-
-  window.isMapLibre = true;
-  mapEl.classList.remove('dark-map');
-
-  const activeKey = state.activeTileLayer || 'dark';
-  const initialStyle = (typeof RotamMapEngine !== 'undefined' && RotamMapEngine.STYLES[activeKey])
-    ? RotamMapEngine.STYLES[activeKey]
-    : 'https://tiles.openfreemap.org/styles/dark';
-
-  // Center on Turkey: [lon, lat] in MapLibre!
-  map = new maplibregl.Map({
-    container: 'map',
-    style: initialStyle,
-    center: [35.2, 39.0],
-    zoom: 6,
-    pitch: 0,
-    bearing: 0,
-    attributionControl: false
-  });
-
-  wrapMapLibreInstance(map);
-  mapInitialized = true;
-
-  map.on('load', () => {
-    setup3DBuildingsLayer(map);
-    if (typeof RotamMapEngine !== 'undefined') {
-      RotamMapEngine.updateEngineUI();
-    }
-  });
-
-  // Map Click Listener to add waypoints & auto-collapse filters on mobile
-  map.on('click', async (e) => {
-    dismissQuickPlacePreview();
-    const gmapsDropdown = document.getElementById('gmaps-search-dropdown');
-    if (gmapsDropdown) gmapsDropdown.classList.add('hidden');
-    const rightPanel = document.getElementById('right-panel');
-    if (rightPanel && !rightPanel.classList.contains('hidden') && window.innerWidth < 1024) {
-      closeRightPanel();
-    }
-    if (window.innerWidth < 768) {
-      const container = document.getElementById('map-filter-pills-container');
-      if (container && !container.classList.contains('hidden')) {
-        toggleMapFilterBarCollapse();
-      }
-    }
-    const lat = e.latlng ? e.latlng.lat : e.lngLat.lat;
-    const lng = e.latlng ? e.latlng.lng : e.lngLat.lng;
-    handleMapClick(lat, lng);
-  });
-
-  map.on('movestart', () => {
-    const filterBar = document.getElementById('map-category-filter-bar');
-    if (filterBar) filterBar.classList.add('map-moving-dim');
-  });
-
-  map.on('moveend', () => {
-    const filterBar = document.getElementById('map-category-filter-bar');
-    if (filterBar) filterBar.classList.remove('map-moving-dim');
-    if (typeof RotamCommunity !== 'undefined' && RotamCommunity.layerVisible) {
-      RotamCommunity.renderOnMap();
-    }
-  });
-
-  setupElevationCanvas();
-
-  // ResizeObserver for map container
-  if (typeof ResizeObserver !== 'undefined' && mapEl) {
-    const mapResizeObserver = new ResizeObserver(() => {
-      if (map) map.invalidateSize();
-    });
-    mapResizeObserver.observe(mapEl);
-  }
-
-  setTimeout(() => { if (map) map.invalidateSize(); }, 60);
-  setTimeout(() => { if (map) map.invalidateSize(); }, 250);
-  setTimeout(() => { if (map) map.invalidateSize(); }, 700);
-
-  // Initialize POI category filters and map markers
-  clearHighlightMarkers();
-  updatePoiCategoryFilterUI();
-  renderCorridorPoiMarkers();
-  initMapFilterBarState();
-  proactivelyWarmUserLocation();
-
-  if (typeof RotamCommunity !== 'undefined') RotamCommunity.init();
-  if (typeof RotamStoryGuide !== 'undefined') RotamStoryGuide.init();
-  if (typeof RotamAutoTheme !== 'undefined') RotamAutoTheme.init();
-  if (typeof RotamSpeech !== 'undefined') RotamSpeech.init();
-  if (typeof RotamDisplay !== 'undefined') RotamDisplay.init();
-  if (typeof RotamMapEngine !== 'undefined') RotamMapEngine.updateEngineUI();
-
-  // Close Google Maps search dropdown when clicking outside
-  document.addEventListener('click', (e) => {
-    const topContainer = document.getElementById('gmaps-top-container');
-    const dropdown = document.getElementById('gmaps-search-dropdown');
-    if (dropdown && !dropdown.classList.contains('hidden')) {
-      if (topContainer && !topContainer.contains(e.target)) {
-        dropdown.classList.add('hidden');
-      }
-    }
-  });
-}
-
-// Map Engine Initialization (MapLibre 3D Vector by default, Leaflet 2D as fallback)
 let mapInitRetries = 0;
 function initMap() {
   if (mapInitialized) return;
-
-  // 1. Check if MapLibre 3D Vector Engine is preferred and supported
-  if (typeof RotamMapEngine !== 'undefined' && RotamMapEngine.shouldUseMapLibre()) {
-    initMapLibre();
-    return;
-  }
 
   if (typeof L === 'undefined') {
     mapInitRetries++;
     if (mapInitRetries < 40) {
       setTimeout(initMap, 150);
     } else {
-      console.error('Leaflet kütüphanesi yüklenemedi.');
+      console.error('Leaflet / Yandex harita kütüphanesi yüklenemedi.');
     }
     return;
   }
@@ -463,13 +346,13 @@ function initMap() {
   patchLeafletDraggableForRotation();
 
   tileLayers = createTileLayers();
-  const defaultTile = tileLayers.dark || tileLayers.osm;
+  const defaultTile = tileLayers.yandex || tileLayers.dark;
 
-  // Center on Turkey
+  // Center on Turkey with Yandex Maps
   map = L.map('map', {
     center: [39.0, 35.2],
     zoom: 6,
-    layers: [defaultTile],
+    layers: defaultTile ? [defaultTile] : [],
     zoomControl: false,
     tap: true,
     preferCanvas: true
@@ -478,7 +361,7 @@ function initMap() {
   // Custom Zoom Control placed bottom right
   L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-  state.activeTileLayer = 'dark';
+  state.activeTileLayer = 'yandex';
   mapInitialized = true;
 
   // Map Click Listener to add waypoints & auto-collapse filters on mobile
@@ -673,66 +556,49 @@ function switchTile(tileKey) {
   const mapEl = document.getElementById('map');
   const isDark = (tileKey === 'dark');
 
+  // Normalize tileKey: only 'yandex', 'dark', 'sat' exist
+  let canonicalKey = tileKey;
+  if (tileKey === 'osm' || tileKey === 'day' || tileKey === 'voyager' || tileKey === 'topo') {
+    canonicalKey = 'yandex';
+  }
+
+  // Handle dark mode / day mode classes
   if (isDark) {
-    if (mapEl && !window.isMapLibre) mapEl.classList.add('dark-map');
+    if (mapEl) mapEl.classList.add('dark-map');
     document.body.classList.remove('sunlight-mode', 'day-mode');
   } else {
     if (mapEl) mapEl.classList.remove('dark-map');
     document.body.classList.add('day-mode');
   }
 
-  // 1. MapLibre 3D Vector Engine Style Switcher
-  if (window.isMapLibre && typeof map.setStyle === 'function') {
-    state.activeTileLayer = tileKey;
-    const style = (typeof RotamMapEngine !== 'undefined' && RotamMapEngine.STYLES[tileKey])
-      ? RotamMapEngine.STYLES[tileKey]
-      : (tileKey === 'sat' ? RotamMapEngine.STYLES.sat : RotamMapEngine.STYLES.dark);
+  // Determine target layer: 'sat' uses tileLayers.sat/hybrid, otherwise tileLayers.yandex
+  const targetLayerName = (canonicalKey === 'sat') ? 'sat' : 'yandex';
+  const targetLayer = (tileLayers && tileLayers[targetLayerName]) ? tileLayers[targetLayerName] : (tileLayers ? (tileLayers.yandex || tileLayers.dark) : null);
 
-    map.setStyle(style);
-    map.once('style.load', () => {
-      setup3DBuildingsLayer(map);
-      if (state.routeAlternatives && state.routeAlternatives.length > 0) {
-        drawRoutesOnMap(state.routeAlternatives, state.activeRouteIndex || 0);
-      }
-    });
-
-    document.querySelectorAll('.tile-btn').forEach(b => {
-      b.classList.remove('bg-slate-800', 'text-white');
-      b.classList.add('text-slate-400');
-    });
-    const activeBtn = document.getElementById(`tile-${tileKey}`) || (tileKey === 'day' ? document.getElementById('tile-osm') : null);
-    if (activeBtn) {
-      activeBtn.classList.add('bg-slate-800', 'text-white');
-      activeBtn.classList.remove('text-slate-400');
+  if (targetLayer && map) {
+    if (tileLayers) {
+      Object.entries(tileLayers).forEach(([k, l]) => {
+        if (l && l !== targetLayer && map.hasLayer(l)) {
+          map.removeLayer(l);
+        }
+      });
     }
-    return;
-  }
-
-  // 2. Leaflet 2D Layer Switcher (Fallback)
-
-  // Instantiate Yandex layer on-demand if needed
-  if (tileKey === 'yandex' && !tileLayers.yandex && typeof L.yandex === 'function') {
-    try {
-      tileLayers.yandex = L.yandex('map');
-    } catch (e) {
-      console.warn('Yandex on-demand init notice:', e);
+    if (!map.hasLayer(targetLayer)) {
+      map.addLayer(targetLayer);
     }
   }
 
-  const targetLayer = tileLayers[tileKey] || tileLayers.osm || tileLayers.dark;
-  if (!targetLayer) return;
-
-  Object.values(tileLayers).forEach(l => {
-    if (map.hasLayer(l)) map.removeLayer(l);
-  });
-  map.addLayer(targetLayer);
   state.activeTileLayer = tileKey;
 
+  // Update floating controls and buttons
   document.querySelectorAll('.tile-btn').forEach(b => {
     b.classList.remove('bg-slate-800', 'text-white');
     b.classList.add('text-slate-400');
   });
-  const activeBtn = document.getElementById(`tile-${tileKey}`) || (tileKey === 'day' ? document.getElementById('tile-osm') : null);
+
+  const activeBtnId = (canonicalKey === 'dark') ? 'tile-dark'
+    : (canonicalKey === 'sat' ? 'tile-sat' : 'tile-yandex');
+  const activeBtn = document.getElementById(activeBtnId);
   if (activeBtn) {
     activeBtn.classList.add('bg-slate-800', 'text-white');
     activeBtn.classList.remove('text-slate-400');
@@ -778,14 +644,14 @@ const RotamAutoTheme = {
   },
 
   apply() {
-    if (!map || !tileLayers || !tileLayers.osm) return;
+    if (!map || !tileLayers || (!tileLayers.yandex && !tileLayers.dark)) return;
     let targetTile = 'dark';
     if (this.mode === 'auto') {
       const userLat = state.userLocation?.lat || 39.0;
       const userLon = state.userLocation?.lon || 35.0;
-      targetTile = this.isDaytime(userLat, userLon) ? 'osm' : 'dark';
+      targetTile = this.isDaytime(userLat, userLon) ? 'yandex' : 'dark';
     } else if (this.mode === 'day') {
-      targetTile = 'osm';
+      targetTile = 'yandex';
     } else {
       targetTile = 'dark';
     }
@@ -799,14 +665,14 @@ const RotamAutoTheme = {
       const isDay = this.isDaytime();
       this.mode = isDay ? 'dark' : 'day';
       localStorage.setItem('rotam_theme_mode', this.mode);
-      switchTile(this.mode === 'dark' ? 'dark' : 'osm');
-      showToast(this.mode === 'dark' ? (isEn ? '🌙 Dark Mode' : '🌙 Koyu Gece Modu') : (isEn ? '☀️ Day Mode' : '☀️ Aydınlık Gündüz Modu'), 'info');
+      switchTile(this.mode === 'dark' ? 'dark' : 'yandex');
+      showToast(this.mode === 'dark' ? (isEn ? '🌙 Yandex Gece Modu' : '🌙 Yandex Gece Modu') : (isEn ? '☀️ Yandex Gündüz Modu' : '☀️ Yandex Gündüz Modu'), 'info');
     } else {
       this.mode = 'auto';
       localStorage.setItem('rotam_theme_mode', 'auto');
       this.apply();
       const isDay = this.isDaytime();
-      showToast(isEn ? `🌓 Auto Day/Night (${isDay ? 'Day' : 'Night'})` : `🌓 Otomatik Gündüz/Gece (${isDay ? 'Gündüz ☀️' : 'Gece 🌙'}) Aktif`, 'success');
+      showToast(isEn ? `🌓 Otomatik Yandex Gündüz/Gece (${isDay ? 'Gündüz ☀️' : 'Gece 🌙'})` : `🌓 Otomatik Yandex Gündüz/Gece (${isDay ? 'Gündüz ☀️' : 'Gece 🌙'}) Aktif`, 'success');
     }
     this.updateUI();
   },
@@ -10328,9 +10194,6 @@ const LiveNavigation = {
     }
 
     // Reset Dönen Harita (Heading-Up) camera rotation back to 0deg (North-Up)
-    if (window.isMapLibre && map && typeof map.easeTo === 'function') {
-      map.easeTo({ pitch: 0, bearing: 0, duration: 500 });
-    }
     const mapEl = document.getElementById('map');
     if (mapEl) {
       mapEl.classList.remove('live-nav-rotating');
@@ -10601,20 +10464,6 @@ const LiveNavigation = {
   },
 
   updateMapHeading(heading) {
-    // 1. MapLibre 3D Vector Engine: Hardware-Accelerated 3D Cockpit Pitch & Bearing
-    if (window.isMapLibre && map && typeof map.easeTo === 'function') {
-      if (this.compassMode === 'north' || this.isOverviewMode || !this.isActive) {
-        map.easeTo({ bearing: 0, pitch: 0, duration: 400 });
-        this.currentMapRotation = 0;
-      } else {
-        // Smooth 60 FPS GPU camera rotation & genuine 60° 3D navigation road perspective!
-        map.easeTo({ bearing: heading, pitch: 60, duration: 350 });
-        this.currentMapRotation = heading;
-      }
-      return;
-    }
-
-    // 2. Leaflet 2D Engine: CSS scale & rotation fallback
     const mapEl = document.getElementById('map');
     if (!mapEl) return;
 
@@ -11095,19 +10944,9 @@ const LiveNavigation = {
     const recenterPill = document.getElementById('live-nav-recenter-pill-box');
     if (recenterPill) recenterPill.classList.add('hidden');
     if (this.lastCoord && map) {
-      if (window.isMapLibre && typeof map.easeTo === 'function') {
-        map.easeTo({
-          center: [this.lastCoord[1], this.lastCoord[0]],
-          zoom: 17.5,
-          pitch: (this.compassMode === 'heading' ? 60 : 0),
-          bearing: (this.compassMode === 'heading' ? (this.lastHeading || 0) : 0),
-          duration: 600
-        });
-      } else {
-        map.flyTo(this.lastCoord, 18, { duration: 0.8 });
-        if (this.compassMode === 'heading') {
-          this.updateMapHeading(this.lastHeading || 0);
-        }
+      map.flyTo(this.lastCoord, 18, { duration: 0.8 });
+      if (this.compassMode === 'heading') {
+        this.updateMapHeading(this.lastHeading || 0);
       }
       const isEn = (window.state && window.state.lang === 'en');
       showToast(isEn ? 'Camera centered & locked to road' : 'Harita sürücüye odaklandı ve kilitlendi', 'info');

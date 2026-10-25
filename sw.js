@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v46 (MapLibre 3D Vector Map & 60 FPS Camera Integration)
-const CACHE_NAME = 'rotam-cache-v46';
+// Rotam PWA Service Worker - v47 (Exclusive Yandex Maps Integration)
+const CACHE_NAME = 'rotam-cache-v47';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
@@ -7,7 +7,6 @@ const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './app.js',
-  './maplibre_adapter.js',
   './yandex_leaflet.js',
   './styles.css',
   './places_data.js',
@@ -49,8 +48,8 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
 
-  // 1. OPENSTREETMAP TILE CACHE (Offline Maps Engine)
-  if (url.hostname.includes('tile.openstreetmap.org')) {
+  // 1. HARİTA KARO ÖNBELLEĞİ (Yandex & OSM Tiles - Offline Map Engine)
+  if (url.hostname.includes('maps.yandex.net') || url.hostname.includes('tile.openstreetmap.org')) {
     event.respondWith(
       caches.open(TILE_CACHE_NAME).then(async (tileCache) => {
         const cached = await tileCache.match(event.request);
@@ -74,8 +73,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2. STATIC CDN ASSETS (Leaflet, Tailwind, Lucide - Cache First)
-  if (url.hostname.includes('unpkg.com') || url.hostname.includes('cdn.tailwindcss.com')) {
+  // 2. STATIC CDN ASSETS (Leaflet, Tailwind, Lucide, Yandex Maps API - Cache First)
+  if (url.hostname.includes('unpkg.com') || url.hostname.includes('cdn.tailwindcss.com') || url.hostname.includes('api-maps.yandex.ru')) {
     event.respondWith(
       caches.open(CDN_CACHE_NAME).then(async (cdnCache) => {
         const cached = await cdnCache.match(event.request);

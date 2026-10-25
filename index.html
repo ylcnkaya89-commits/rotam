@@ -48,16 +48,11 @@
     }
   </script>
 
-  <!-- Leaflet CSS & JS -->
+  <!-- Leaflet CSS & JS Engine -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-  <!-- MapLibre GL JS (Hardware-Accelerated 3D Vector Map Engine) -->
-  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
-  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
-  <script src="./maplibre_adapter.js"></script>
-
-  <!-- Yandex Maps API & Leaflet Integration -->
+  <!-- Yandex Maps Official API (Türkiye Harita Altyapısı) -->
   <script src="https://api-maps.yandex.ru/2.1/?lang=tr_TR" type="text/javascript"></script>
   <script src="./yandex_leaflet.js"></script>
 
@@ -1504,27 +1499,17 @@
       <!-- HARİTA ÜSTÜ FLOATING KONTROLLER (MASAÜSTÜ & TABLET) -->
       <div id="floating-map-controls" class="hidden sm:flex absolute top-4 right-4 z-20 flex-col space-y-2">
         <div class="glass-panel p-1 rounded-xl shadow-2xl flex items-center space-x-1 border border-slate-800">
-          <button id="tile-dark" onclick="switchTile('dark')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-white" title="Koyu Gece Modu">
+          <button id="tile-yandex" onclick="switchTile('yandex')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-white" title="Yandex Standart Harita">
+            <span class="text-red-500 font-bold mr-0.5">Я</span><span>Yandex</span>
+          </button>
+          <button id="tile-dark" onclick="switchTile('dark')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Yandex Gece Navigasyon Modu">
             🌙<span class="inline ml-1">Gece</span>
           </button>
-          <button id="tile-osm" onclick="switchTile('osm')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Aydınlık Gündüz Modu">
-            ☀️<span class="inline ml-1">Gündüz</span>
-          </button>
-          <button id="tile-yandex" onclick="switchTile('yandex')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Yandex Harita Modu">
-            <span class="text-red-500 font-bold">Я</span><span class="inline ml-1">Yandex</span>
-          </button>
-          <button id="tile-topo" onclick="switchTile('topo')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Topografik Yükselti">
-            ⛰️<span class="inline ml-1">Topo</span>
-          </button>
-          <button id="tile-sat" onclick="switchTile('sat')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Uydu">
+          <button id="tile-sat" onclick="switchTile('sat')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Yandex Uydu & Hibrit">
             🛰️<span class="inline ml-1">Uydu</span>
           </button>
           <button id="tile-auto" onclick="RotamAutoTheme.toggle()" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-bold text-amber-400 hover:text-white" title="Otomatik Gündüz / Gece Modu (Güneş Döngüsü)">
             <span>🌓</span><span id="desktop-auto-theme-label" class="inline ml-1">Oto</span>
-          </button>
-          <div class="h-4 w-px bg-slate-800 mx-0.5"></div>
-          <button id="btn-toggle-engine" onclick="RotamMapEngine.toggleEngine()" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/30 flex items-center space-x-1 transition-all active:scale-95" title="Harita Motoru: 3D MapLibre Vektör (Tıklayarak 2D Leaflet moduna geçebilirsiniz)">
-            <span>🚀</span><span id="map-engine-label" class="inline ml-1">3D Vektör</span>
           </button>
           <div class="h-4 w-px bg-slate-800 mx-0.5"></div>
           <button id="btn-offline-maps" onclick="RotamOfflineMap.openModal()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 flex items-center space-x-1 transition-all active:scale-95" title="Çevrimdışı Harita İndir & Yönet">
@@ -1567,20 +1552,14 @@
               <span id="mobile-auto-theme-status" class="text-[10px] text-emerald-400">Aktif</span>
             </button>
             <div class="h-px bg-slate-800 my-0.5"></div>
+            <button onclick="switchTile('yandex'); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-bold text-white bg-slate-800 flex items-center space-x-2">
+              <span class="text-red-500 font-bold">Я</span> <span>Yandex Harita (Gündüz)</span>
+            </button>
             <button onclick="switchTile('dark'); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-200 hover:bg-slate-800 flex items-center space-x-2">
-              <span>🌙</span> <span>Gece Modu</span>
-            </button>
-            <button onclick="switchTile('osm'); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-200 hover:bg-slate-800 flex items-center space-x-2">
-              <span>☀️</span> <span>Gündüz Modu</span>
-            </button>
-            <button onclick="switchTile('yandex'); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-medium text-red-400 hover:bg-slate-800 flex items-center space-x-2">
-              <span class="font-bold">Я</span> <span>Yandex Harita</span>
-            </button>
-            <button onclick="switchTile('topo'); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-200 hover:bg-slate-800 flex items-center space-x-2">
-              <span>⛰️</span> <span>Topografik</span>
+              <span>🌙</span> <span>Yandex Gece Modu</span>
             </button>
             <button onclick="switchTile('sat'); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-200 hover:bg-slate-800 flex items-center space-x-2">
-              <span>🛰️</span> <span>Uydu</span>
+              <span>🛰️</span> <span>Yandex Uydu</span>
             </button>
             <div class="h-px bg-slate-800 my-1"></div>
             <button onclick="RotamOfflineMap.openModal(); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-bold text-emerald-400 hover:bg-emerald-500/10 flex items-center justify-between">
