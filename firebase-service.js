@@ -67,6 +67,7 @@ const RotamCloud = {
         this.updateHeaderUI();
         if (user) {
           console.log('RotamCloud: Kullanıcı aktif:', user.email);
+          this.syncUserProfile(user);
           this.syncCloudRoutesToLocal();
         }
       });
@@ -241,6 +242,30 @@ const RotamCloud = {
       }
     } catch (err) {
       console.warn('RotamCloud eşitleme hatası:', err);
+    }
+  },
+
+  // Firestore: Kullanıcı Profilini Yedekle (Admin Panelinde listeleme için)
+  async syncUserProfile(user) {
+    if (!user || !this.db) return;
+    try {
+      const userRef = this.db.collection('users').doc(user.uid);
+      const doc = await userRef.get();
+      const now = new Date().toISOString();
+      const profileData = {
+        uid: user.uid,
+        email: user.email || '',
+        displayName: user.displayName || user.email?.split('@')[0] || 'Sürücü',
+        photoURL: user.photoURL || '',
+        provider: user.providerData?.[0]?.providerId || 'password',
+        lastLoginAt: now
+      };
+      if (!doc.exists) {
+        profileData.createdAt = now;
+      }
+      await userRef.set(profileData, { merge: true });
+    } catch (err) {
+      console.warn('RotamCloud profil senkronizasyon hatası:', err);
     }
   },
 
@@ -435,6 +460,94 @@ function populateAdminFirebaseTab() {
   if (dbBadge) {
     dbBadge.textContent = RotamCloud.db ? 'Aktif (users/{uid}/routes)' : 'Pasif';
   }
+
+  // Load user list
+  loadAdminUsersList();
+}
+
+async function loadAdminUsersList() {
+  if (!RotamCloud.db) return;
+  const container = document.getElementById('admin-firebase-users-list');
+  const countEl = document.getElementById('admin-firebase-user-count');
+  if (!container) return;
+
+  container.innerHTML = '<div class="text-center py-6 text-slate-500 text-xs flex items-center justify-center space-x-2"><i data-lucide="loader-2" class="w-4 h-4 animate-spin text-cyan-400"></i><span>Kullanıcı listesi yükleniyor...</span></div>';
+  if (typeof initIcons === 'function') initIcons();
+
+  try {
+    const snap = await RotamCloud.db.collection('users').get();
+    const users = [];
+    snap.forEach(doc => {
+      const data = doc.data();
+      if (data && (data.email || data.uid)) {
+        users.push(data);
+      }
+    });
+
+    if (countEl) countEl.textContent = users.length;
+
+    if (users.length === 0) {
+      container.innerHTML = `
+        <div class="text-center py-6 text-slate-500 text-xs border border-dashed border-slate-800 rounded-xl">
+          <p class="font-semibold text-slate-400">Henüz kayıtlı bulut sürücüsü bulunamadı.</p>
+          <p class="text-[10px] text-slate-600 mt-1">Kullanıcılar ilk giriş yaptıklarında profilleri otomatik olarak burada listelenecektir.</p>
+        </div>
+      `;
+      return;
+    }
+
+    // Sort by lastLoginAt or createdAt desc
+    users.sort((a, b) => new Date(b.lastLoginAt || b.createdAt || 0) - new Date(a.lastLoginAt || a.createdAt || 0));
+
+    container.innerHTML = users.map(u => {
+      const isGoogle = (u.provider || '').includes('google');
+      const providerBadge = isGoogle 
+        ? '<span class="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[10px] font-semibold">Google</span>'
+        : '<span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-semibold">E-Posta</span>';
+      
+      const createdStr = u.createdAt ? new Date(u.createdAt).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
+      const lastLoginStr = u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
+
+      return `
+        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-3 hover:border-slate-700 transition-all">
+          <div class="flex items-center space-x-3 min-w-0">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30 flex items-center justify-center text-sm font-bold text-amber-400 shrink-0 overflow-hidden">
+              ${u.photoURL ? `<img src="${u.photoURL}" class="w-full h-full object-cover" />` : (u.displayName ? u.displayName.charAt(0).toUpperCase() : '👤')}
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center space-x-2">
+                <h5 class="text-xs font-bold text-white truncate">${u.displayName || 'Sürücü'}</h5>
+                ${providerBadge}
+              </div>
+              <p class="text-[11px] text-slate-400 font-mono truncate">${u.email || 'E-posta yok'}</p>
+            </div>
+          </div>
+          <div class="text-right shrink-0 text-[10px] text-slate-500">
+            <div>Son Giriş: <span class="text-slate-300 font-mono">${lastLoginStr}</span></div>
+            <div class="mt-0.5 text-slate-600 font-mono">Kayıt: ${createdStr}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    if (typeof initIcons === 'function') initIcons();
+  } catch (err) {
+    console.warn('Kullanıcı listesi çekilemedi:', err);
+    container.innerHTML = `
+      <div class="p-3.5 rounded-xl bg-amber-950/30 border border-amber-500/30 text-amber-300 text-xs space-y-1">
+        <p class="font-bold flex items-center space-x-1.5">
+          <i data-lucide="info" class="w-4 h-4 text-amber-400"></i>
+          <span>Kullanıcıları Firebase Konsolundan Görüntüleyin</span>
+        </p>
+        <p class="text-[11px] text-slate-300 leading-relaxed">
+          Kayıt olan tüm kullanıcıları ve şifre sıfırlama işlemlerini doğrudan 
+          <a href="https://console.firebase.google.com" target="_blank" class="text-amber-400 underline font-semibold">Firebase Console &gt; Authentication &gt; Users</a> 
+          menüsünden tam yetkiyle görüntüleyebilirsiniz.
+        </p>
+      </div>
+    `;
+    if (typeof initIcons === 'function') initIcons();
+  }
 }
 
 function saveAdminFirebaseConfig(e) {
@@ -481,7 +594,7 @@ function testAdminFirebaseConnection() {
 }
 
 function copyAdminFirestoreRules() {
-  const rules = `rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /users/{userId}/routes/{routeId} {\n      allow read, write: if request.auth != null && request.auth.uid == userId;\n    }\n  }\n}`;
+  const rules = `rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /users/{userId} {\n      allow read, write: if request.auth != null;\n      match /routes/{routeId} {\n        allow read, write: if request.auth != null && request.auth.uid == userId;\n      }\n    }\n  }\n}`;
   navigator.clipboard.writeText(rules).then(() => {
     showToast('Firestore güvenlik kuralları panoya kopyalandı! 📋', 'success');
   }).catch(() => {
@@ -502,6 +615,7 @@ window.saveAdminFirebaseConfig = saveAdminFirebaseConfig;
 window.resetAdminFirebaseConfig = resetAdminFirebaseConfig;
 window.testAdminFirebaseConnection = testAdminFirebaseConnection;
 window.copyAdminFirestoreRules = copyAdminFirestoreRules;
+window.loadAdminUsersList = loadAdminUsersList;
 
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
