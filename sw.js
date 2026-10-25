@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v44 (Real-time Online Geocoding & Typo Tolerant Search)
-const CACHE_NAME = 'rotam-cache-v44';
+// Rotam PWA Service Worker - v45 (Optimized Background Navigation & Low CPU Audio Engine)
+const CACHE_NAME = 'rotam-cache-v45';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
