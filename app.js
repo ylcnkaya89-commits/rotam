@@ -621,6 +621,8 @@ function switchTile(tileKey) {
   document.querySelectorAll('.tile-btn').forEach(b => {
     b.classList.remove('bg-slate-800', 'text-white');
     b.classList.add('text-slate-400');
+    const check = b.querySelector('.active-check');
+    if (check) check.classList.add('hidden');
   });
 
   const activeBtnId = (canonicalKey === 'dark') ? 'tile-dark'
@@ -631,7 +633,23 @@ function switchTile(tileKey) {
   if (activeBtn) {
     activeBtn.classList.add('bg-slate-800', 'text-white');
     activeBtn.classList.remove('text-slate-400');
+    const check = activeBtn.querySelector('.active-check');
+    if (check) check.classList.remove('hidden');
   }
+
+  // Update active layer label on desktop accordion pill
+  const layerLabels = {
+    yandex: 'Я Yandex',
+    dark: '🌙 Gece',
+    sat: '🛰️ Uydu',
+    global: '🌍 Dünya',
+    topo: '⛰️ Topo'
+  };
+  const activeLabel = document.getElementById('desktop-active-layer-name');
+  if (activeLabel && layerLabels[canonicalKey]) {
+    activeLabel.textContent = layerLabels[canonicalKey];
+  }
+
   setTimeout(() => { if (map) map.invalidateSize(); }, 50);
 }
 
@@ -811,13 +829,62 @@ function toggleMobileLayersPopover() {
   }
 }
 
-// Click outside to dismiss layers popover or live-nav tools popover
+// Desktop Map Layers & Tools Accordion Controller
+function toggleDesktopLayersAccordion() {
+  const acc = document.getElementById('desktop-layers-accordion');
+  const chevron = document.getElementById('desktop-layers-chevron');
+  if (!acc) return;
+  const isHidden = acc.classList.contains('hidden');
+  if (isHidden) {
+    acc.classList.remove('hidden');
+    if (chevron) chevron.style.transform = 'rotate(180deg)';
+    initIcons();
+  } else {
+    acc.classList.add('hidden');
+    if (chevron) chevron.style.transform = 'rotate(0deg)';
+  }
+}
+
+function closeDesktopLayersAccordion() {
+  const acc = document.getElementById('desktop-layers-accordion');
+  const chevron = document.getElementById('desktop-layers-chevron');
+  if (acc && !acc.classList.contains('hidden')) {
+    acc.classList.add('hidden');
+    if (chevron) chevron.style.transform = 'rotate(0deg)';
+  }
+}
+
+function toggleAccordionSection(sectionId) {
+  const section = document.getElementById(sectionId);
+  const icon = document.getElementById('icon-' + sectionId);
+  if (!section) return;
+  const isHidden = section.classList.contains('hidden');
+  if (isHidden) {
+    section.classList.remove('hidden');
+    if (icon) icon.setAttribute('data-lucide', 'chevron-up');
+  } else {
+    section.classList.add('hidden');
+    if (icon) icon.setAttribute('data-lucide', 'chevron-down');
+  }
+  initIcons();
+}
+
+// Click outside to dismiss layers popover, desktop accordion or live-nav tools popover
 document.addEventListener('click', (e) => {
   const popover = document.getElementById('mobile-layers-popover');
   const fabStack = document.getElementById('mobile-floating-fabs');
   if (popover && !popover.classList.contains('hidden') && fabStack) {
     if (!fabStack.contains(e.target)) {
       popover.classList.add('hidden');
+    }
+  }
+
+  // Desktop Layers Accordion Click Outside
+  const desktopAcc = document.getElementById('desktop-layers-accordion');
+  const desktopToggle = document.getElementById('btn-desktop-layers-toggle');
+  if (desktopAcc && !desktopAcc.classList.contains('hidden')) {
+    if (!desktopAcc.contains(e.target) && !desktopToggle?.contains(e.target)) {
+      closeDesktopLayersAccordion();
     }
   }
 
@@ -12521,6 +12588,11 @@ const RotamCommunity = {
     if (mobileStatus) {
       mobileStatus.textContent = this.layerVisible ? 'Aktif' : 'Kapalı';
       mobileStatus.className = this.layerVisible ? 'text-[10px] text-emerald-400 font-bold' : 'text-[10px] text-slate-500 font-bold';
+    }
+    const desktopStatus = document.getElementById('desktop-community-status-badge');
+    if (desktopStatus) {
+      desktopStatus.textContent = this.layerVisible ? 'Aktif' : 'Kapalı';
+      desktopStatus.className = this.layerVisible ? 'text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400' : 'text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-800 text-slate-400';
     }
     const isEn = (window.state && window.state.lang === 'en');
     showToast(this.layerVisible ? '🚨 Canlı Topluluk Uyarıları Açık' : 'Topluluk Uyarıları Gizlendi', 'info');

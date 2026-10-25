@@ -1496,42 +1496,168 @@
         </div>
       </div>
 
-      <!-- HARİTA ÜSTÜ FLOATING KONTROLLER (MASAÜSTÜ & TABLET) -->
-      <div id="floating-map-controls" class="hidden sm:flex absolute top-4 right-4 z-20 flex-col space-y-2">
-        <div class="glass-panel p-1 rounded-xl shadow-2xl flex items-center space-x-1 border border-slate-800">
-          <button id="tile-yandex" onclick="switchTile('yandex')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-white" title="Yandex Standart Harita">
-            <span class="text-red-500 font-bold mr-0.5">Я</span><span>Yandex</span>
+      <!-- HARİTA ÜSTÜ FLOATING KONTROLLER & AKORDİYON MENÜ (MASAÜSTÜ & TABLET) -->
+      <div id="floating-map-controls" class="hidden sm:flex absolute top-4 right-4 z-[900] flex-col items-end">
+        <!-- Kompakt Cam Kapsül (Trigger Bar) -->
+        <div class="glass-panel p-1 rounded-2xl shadow-2xl flex items-center space-x-1 border border-slate-700/80 bg-slate-900/90 backdrop-blur-xl">
+          <!-- Hızlı Konum Butonu (1 Tıkla Konumuma Git) -->
+          <button id="btn-floating-locate" onclick="flyToCurrentLocation()" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 flex items-center space-x-1.5 transition-all active:scale-95" title="Mevcut Konumuma Yaklaş">
+            <i data-lucide="crosshair" class="w-3.5 h-3.5 text-cyan-400"></i>
+            <span class="hidden md:inline" data-i18n="btn_locate_me">Konumum</span>
           </button>
-          <button id="tile-dark" onclick="switchTile('dark')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Yandex Gece Navigasyon Modu">
-            🌙<span class="inline ml-1">Gece</span>
+
+          <div class="h-4 w-px bg-slate-700/60"></div>
+
+          <!-- Akordiyon Menü Tetikleyici Butonu (Aktif Katman + Ok İkonu) -->
+          <button id="btn-desktop-layers-toggle" onclick="toggleDesktopLayersAccordion()" class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-200 hover:text-white hover:bg-slate-800/90 flex items-center space-x-2 transition-all active:scale-95 group" title="Harita Katmanları & Akordiyon Menü">
+            <span class="flex items-center space-x-1.5">
+              <i data-lucide="layers" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span class="text-slate-400 font-medium hidden lg:inline">Katman:</span>
+              <span id="desktop-active-layer-name" class="text-white font-bold">Я Yandex</span>
+            </span>
+            <i id="desktop-layers-chevron" data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 group-hover:text-amber-400 transition-transform duration-200"></i>
           </button>
-          <button id="tile-sat" onclick="switchTile('sat')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Yandex Uydu & Hibrit">
-            🛰️<span class="inline ml-1">Uydu</span>
-          </button>
-          <button id="tile-global" onclick="switchTile('global')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Yurtdışı & Dünya Haritası (OpenStreetMap)">
-            🌍<span class="inline ml-1">Dünya</span>
-          </button>
-          <button id="tile-topo" onclick="switchTile('topo')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Topografik Harita & Alpler Geçitleri (OpenTopoMap)">
-            ⛰️<span class="inline ml-1">Topo</span>
-          </button>
-          <button id="tile-auto" onclick="RotamAutoTheme.toggle()" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-bold text-amber-400 hover:text-white" title="Otomatik Gündüz / Gece Modu (Güneş Döngüsü)">
-            <span>🌓</span><span id="desktop-auto-theme-label" class="inline ml-1">Oto</span>
-          </button>
-          <div class="h-4 w-px bg-slate-800 mx-0.5"></div>
-          <button id="btn-offline-maps" onclick="RotamOfflineMap.openModal()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 flex items-center space-x-1 transition-all active:scale-95" title="Çevrimdışı Harita İndir & Yönet">
-            <span>📥</span>
-            <span>Çevrimdışı</span>
-          </button>
-          <div class="h-4 w-px bg-slate-800 mx-0.5"></div>
-          <button id="btn-floating-locate" onclick="flyToCurrentLocation()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 flex items-center space-x-1 transition-all active:scale-95" title="Mevcut Konumuma Yaklaş">
-            <i data-lucide="crosshair" class="w-3.5 h-3.5"></i>
-            <span data-i18n="btn_locate_me">Konumum</span>
-          </button>
-          <div class="h-4 w-px bg-slate-800 mx-0.5"></div>
-          <button id="btn-toggle-community-hazards" onclick="RotamCommunity.toggleLayer()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 flex items-center space-x-1 transition-all active:scale-95" title="Canlı Topluluk Uyarıları (Radar, Kaza, Polis)">
-            <span>🚨</span>
-            <span>Topluluk</span>
-          </button>
+        </div>
+
+        <!-- Açılır Akordiyon Menü Paneli -->
+        <div id="desktop-layers-accordion" class="hidden mt-2 w-80 glass-panel p-2.5 rounded-2xl shadow-2xl border border-slate-700/80 bg-slate-900/95 backdrop-blur-2xl z-[910] space-y-2 animate-slide-in origin-top-right">
+          <!-- Üst Başlık & Kapat Butonu -->
+          <div class="flex items-center justify-between px-2 py-1 border-b border-slate-800/80">
+            <div class="flex items-center space-x-1.5">
+              <i data-lucide="sliders" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span class="text-[11px] font-bold text-slate-200 uppercase tracking-wider">Harita & Katman Ayarları</span>
+            </div>
+            <button onclick="closeDesktopLayersAccordion()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors" title="Kapat">
+              <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+
+          <!-- 1. Akordiyon Bölüm: Harita Katmanı (5 Seçenek) -->
+          <div class="accordion-section rounded-xl bg-slate-950/70 border border-slate-800/90 overflow-hidden">
+            <button onclick="toggleAccordionSection('acc-body-layers')" class="w-full px-3 py-2 flex items-center justify-between text-xs font-bold text-slate-200 hover:text-white hover:bg-slate-800/50 transition-colors">
+              <span class="flex items-center space-x-1.5">
+                <i data-lucide="map" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span>Harita Katmanı</span>
+                <span class="text-[10px] text-slate-400 font-normal">(5 Seçenek)</span>
+              </span>
+              <i id="icon-acc-body-layers" data-lucide="chevron-up" class="w-3.5 h-3.5 text-slate-400 transition-transform"></i>
+            </button>
+            <div id="acc-body-layers" class="p-2 pt-0 space-y-1">
+              <!-- Yandex -->
+              <button id="tile-yandex" onclick="switchTile('yandex')" class="tile-btn w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-white flex items-center justify-between hover:bg-slate-700/80 transition-all">
+                <span class="flex items-center space-x-2">
+                  <span class="text-red-500 font-bold">Я</span>
+                  <span>Yandex (Standart Gündüz)</span>
+                </span>
+                <span class="active-check text-amber-400 text-xs">✓</span>
+              </button>
+
+              <!-- Gece -->
+              <button id="tile-dark" onclick="switchTile('dark')" class="tile-btn w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 flex items-center justify-between transition-all">
+                <span class="flex items-center space-x-2">
+                  <span>🌙</span>
+                  <span>Gece Modu (Dark Nav)</span>
+                </span>
+                <span class="active-check hidden text-amber-400 text-xs">✓</span>
+              </button>
+
+              <!-- Uydu -->
+              <button id="tile-sat" onclick="switchTile('sat')" class="tile-btn w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 flex items-center justify-between transition-all">
+                <span class="flex items-center space-x-2">
+                  <span>🛰️</span>
+                  <span>Yandex Uydu & Hibrit</span>
+                </span>
+                <span class="active-check hidden text-amber-400 text-xs">✓</span>
+              </button>
+
+              <!-- Dünya (OSM) -->
+              <button id="tile-global" onclick="switchTile('global')" class="tile-btn w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 flex items-center justify-between transition-all">
+                <span class="flex items-center space-x-2">
+                  <span>🌍</span>
+                  <span>Dünya & Yurtdışı (OSM)</span>
+                </span>
+                <span class="active-check hidden text-amber-400 text-xs">✓</span>
+              </button>
+
+              <!-- Topo -->
+              <button id="tile-topo" onclick="switchTile('topo')" class="tile-btn w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 flex items-center justify-between transition-all">
+                <span class="flex items-center space-x-2">
+                  <span>⛰️</span>
+                  <span>Topografik (Geçitler & Eğim)</span>
+                </span>
+                <span class="active-check hidden text-amber-400 text-xs">✓</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Akordiyon Bölüm: Görünüm & Işık Modu -->
+          <div class="accordion-section rounded-xl bg-slate-950/70 border border-slate-800/90 overflow-hidden">
+            <button onclick="toggleAccordionSection('acc-body-theme')" class="w-full px-3 py-2 flex items-center justify-between text-xs font-bold text-slate-200 hover:text-white hover:bg-slate-800/50 transition-colors">
+              <span class="flex items-center space-x-1.5">
+                <i data-lucide="sun-moon" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span>Görünüm & Işık Modu</span>
+              </span>
+              <i id="icon-acc-body-theme" data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 transition-transform"></i>
+            </button>
+            <div id="acc-body-theme" class="hidden p-2.5 pt-0 space-y-1.5">
+              <button id="tile-auto" onclick="RotamAutoTheme.toggle()" class="w-full px-2.5 py-2 rounded-xl text-xs font-semibold text-amber-400 bg-slate-900 hover:bg-slate-800 flex items-center justify-between border border-amber-500/20 transition-all">
+                <span class="flex items-center space-x-2">
+                  <span>🌓</span>
+                  <span>Otomatik Güneş Döngüsü</span>
+                </span>
+                <span id="desktop-auto-theme-label" class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300">Oto ☀️</span>
+              </button>
+              <p class="text-[10px] text-slate-400 px-1 leading-relaxed">
+                Gündoğumu ve günbatımı saatlerine göre haritayı gündüz ve gece temasına otomatik geçirir.
+              </p>
+            </div>
+          </div>
+
+          <!-- 3. Akordiyon Bölüm: Canlı Topluluk & Güvenlik Radarı -->
+          <div class="accordion-section rounded-xl bg-slate-950/70 border border-slate-800/90 overflow-hidden">
+            <button onclick="toggleAccordionSection('acc-body-community')" class="w-full px-3 py-2 flex items-center justify-between text-xs font-bold text-slate-200 hover:text-white hover:bg-slate-800/50 transition-colors">
+              <span class="flex items-center space-x-1.5">
+                <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span>Canlı Topluluk & Radar</span>
+              </span>
+              <i id="icon-acc-body-community" data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 transition-transform"></i>
+            </button>
+            <div id="acc-body-community" class="hidden p-2.5 pt-0 space-y-1.5">
+              <button id="btn-toggle-community-hazards" onclick="RotamCommunity.toggleLayer()" class="w-full px-2.5 py-2 rounded-xl text-xs font-semibold text-amber-400 bg-slate-900 hover:bg-slate-800 flex items-center justify-between border border-amber-500/20 transition-all">
+                <span class="flex items-center space-x-2">
+                  <span>🚨</span>
+                  <span>Topluluk Tehlike Katmanı</span>
+                </span>
+                <span id="desktop-community-status-badge" class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400">Aktif</span>
+              </button>
+              <p class="text-[10px] text-slate-400 px-1 leading-relaxed">
+                Sürücülerin bildirdiği radar, kaza, yol çalışması ve tehlikeleri harita üzerinde canlı gösterir.
+              </p>
+            </div>
+          </div>
+
+          <!-- 4. Akordiyon Bölüm: Çevrimdışı Harita Yönetimi -->
+          <div class="accordion-section rounded-xl bg-slate-950/70 border border-slate-800/90 overflow-hidden">
+            <button onclick="toggleAccordionSection('acc-body-offline')" class="w-full px-3 py-2 flex items-center justify-between text-xs font-bold text-slate-200 hover:text-white hover:bg-slate-800/50 transition-colors">
+              <span class="flex items-center space-x-1.5">
+                <i data-lucide="download-cloud" class="w-3.5 h-3.5 text-emerald-400"></i>
+                <span>Çevrimdışı Haritalar</span>
+              </span>
+              <i id="icon-acc-body-offline" data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 transition-transform"></i>
+            </button>
+            <div id="acc-body-offline" class="hidden p-2.5 pt-0 space-y-1.5">
+              <button id="btn-offline-maps" onclick="RotamOfflineMap.openModal()" class="w-full px-2.5 py-2 rounded-xl text-xs font-semibold text-emerald-400 bg-emerald-950/40 hover:bg-emerald-900/60 flex items-center justify-between border border-emerald-500/30 transition-all">
+                <span class="flex items-center space-x-2">
+                  <span>📥</span>
+                  <span>Bölge İndir & Yönet</span>
+                </span>
+                <span class="text-[11px] font-bold text-emerald-300">Yönet →</span>
+              </button>
+              <p class="text-[10px] text-slate-400 px-1 leading-relaxed">
+                Hücresel internetin çekmediği dağ rotalarında haritayı internetsiz kullanmak için bölge karolarını indirin.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -3718,6 +3844,6 @@
   <!-- Çoklu Dil ve Çeviri Motoru (TR / EN) -->
   <script src="translations.js?v=3.2"></script>
   <!-- V3 JavaScript Uygulama Mantığı -->
-  <script src="app.js?v=5.1"></script>
+  <script src="app.js?v=5.2"></script>
 </body>
 </html>
