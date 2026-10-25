@@ -1601,7 +1601,7 @@ async function geocodeLocation(query) {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 2800);
-    const q = encodeURIComponent(qStr + ', Türkiye');
+    const q = encodeURIComponent(qStr);
     const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=1&accept-language=tr`, {
       signal: controller.signal
     });
@@ -3280,17 +3280,17 @@ async function fetchGmapsOnlineGeocoding(query) {
           const lon = coords[0];
           const lat = coords[1];
 
-          // Filter bounds to Turkey region (lat 35-43.5, lon 25-45.5)
           const inTurkey = (lat >= 35.0 && lat <= 43.5 && lon >= 25.0 && lon <= 45.5);
-          if (!inTurkey && p.countrycode !== 'TR' && p.country !== 'Türkiye') return;
-
           const placeName = p.name || qClean;
           const details = [];
           if (p.district && p.district !== placeName) details.push(p.district);
           if (p.city && p.city !== placeName && p.city !== p.district) details.push(p.city);
           if (p.state && p.state !== placeName && p.state !== p.city) details.push(p.state);
 
-          const fullSubtitle = details.length > 0 ? details.join(', ') : (p.country || 'Türkiye');
+          const countryName = p.country || (inTurkey ? 'Türkiye' : '');
+          const fullSubtitle = details.length > 0
+            ? (countryName ? `${details.join(', ')}, ${countryName}` : details.join(', '))
+            : (countryName || 'Global');
           const dedupeKey = `${placeName.toLowerCase()}|${fullSubtitle.toLowerCase()}`;
           if (seen.has(dedupeKey)) return;
           seen.add(dedupeKey);
@@ -3326,7 +3326,7 @@ async function fetchGmapsOnlineGeocoding(query) {
   // 2. Fallback to OpenStreetMap Nominatim if Photon returned < 3 results
   if (results.length < 3) {
     try {
-      const nomUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(qClean)}&format=json&addressdetails=1&limit=6&countrycodes=tr`;
+      const nomUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(qClean)}&format=json&addressdetails=1&limit=6`;
       const ctrl = new AbortController();
       const t = setTimeout(() => ctrl.abort(), 3500);
       const res = await fetch(nomUrl, {
