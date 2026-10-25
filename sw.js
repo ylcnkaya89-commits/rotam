@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v59 (Firebase Cloud Sync Edition)
-const CACHE_NAME = 'rotam-cache-v59';
+// Rotam PWA Service Worker - v60 (Clean Cloud Membership UI)
+const CACHE_NAME = 'rotam-cache-v60';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

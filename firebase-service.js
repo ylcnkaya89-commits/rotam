@@ -246,8 +246,7 @@ const RotamCloud = {
 
   checkConfig() {
     if (!this.isConfigured || !this.auth) {
-      this.openConfigTab();
-      this.showAuthError('Firebase henüz yapılandırılmamış. Lütfen proje anahtarlarınızı girin.');
+      this.showAuthError('Bulut servisine bağlanılamadı. Lütfen internet bağlantınızı kontrol edin.');
       return false;
     }
     return true;
@@ -296,7 +295,7 @@ const RotamCloud = {
   },
 
   openConfigTab() {
-    switchUserAuthTab('config');
+    switchUserAuthTab('login');
   }
 };
 
@@ -311,17 +310,8 @@ function openUserAuthModal() {
 
   if (RotamCloud.currentUser) {
     switchUserAuthTab('profile');
-  } else if (!RotamCloud.isConfigured) {
-    switchUserAuthTab('config');
   } else {
     switchUserAuthTab('login');
-  }
-
-  // Pre-fill existing config if available
-  const existingConfig = RotamCloud.getConfig();
-  const configInput = document.getElementById('firebase-config-json-input');
-  if (configInput && existingConfig) {
-    configInput.value = JSON.stringify(existingConfig, null, 2);
   }
 
   if (typeof initIcons === 'function') initIcons();
@@ -333,44 +323,41 @@ function closeUserAuthModal() {
 
 function switchUserAuthTab(tab) {
   RotamCloud.clearAuthError();
+  const tabsContainer = document.getElementById('auth-tabs-container');
   const tabLogin = document.getElementById('auth-tab-login');
   const tabRegister = document.getElementById('auth-tab-register');
-  const tabConfig = document.getElementById('auth-tab-config');
-  const tabProfile = document.getElementById('auth-tab-profile');
 
   const paneLogin = document.getElementById('auth-pane-login');
   const paneRegister = document.getElementById('auth-pane-register');
-  const paneConfig = document.getElementById('auth-pane-config');
   const paneProfile = document.getElementById('auth-pane-profile');
 
-  // Hide all
-  [paneLogin, paneRegister, paneConfig, paneProfile].forEach(p => p?.classList.add('hidden'));
+  // Hide all panes
+  [paneLogin, paneRegister, paneProfile].forEach(p => p?.classList.add('hidden'));
 
-  // Reset tab button styles
-  const btnClassInactive = 'px-3 py-1.5 rounded-xl font-semibold text-xs text-slate-400 hover:text-white transition-all';
-  const btnClassActive = 'px-3 py-1.5 rounded-xl font-bold text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40 transition-all';
+  // Tab button classes
+  const btnClassInactive = 'flex-1 py-1.5 rounded-lg font-semibold text-xs text-slate-400 hover:text-white transition-all text-center';
+  const btnClassActive = 'flex-1 py-1.5 rounded-lg font-bold text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40 transition-all text-center';
 
-  [tabLogin, tabRegister, tabConfig, tabProfile].forEach(t => {
-    if (t) t.className = btnClassInactive;
-  });
+  if (tabLogin) tabLogin.className = btnClassInactive;
+  if (tabRegister) tabRegister.className = btnClassInactive;
 
   if (tab === 'profile' && RotamCloud.currentUser) {
+    if (tabsContainer) tabsContainer.classList.add('hidden');
     paneProfile?.classList.remove('hidden');
-    if (tabProfile) tabProfile.className = btnClassActive;
 
     const nameEl = document.getElementById('user-profile-name');
     const emailEl = document.getElementById('user-profile-email');
     if (nameEl) nameEl.textContent = RotamCloud.currentUser.displayName || 'Sürücü';
     if (emailEl) emailEl.textContent = RotamCloud.currentUser.email || '';
-  } else if (tab === 'register') {
-    paneRegister?.classList.remove('hidden');
-    if (tabRegister) tabRegister.className = btnClassActive;
-  } else if (tab === 'config') {
-    paneConfig?.classList.remove('hidden');
-    if (tabConfig) tabConfig.className = btnClassActive;
   } else {
-    paneLogin?.classList.remove('hidden');
-    if (tabLogin) tabLogin.className = btnClassActive;
+    if (tabsContainer) tabsContainer.classList.remove('hidden');
+    if (tab === 'register') {
+      paneRegister?.classList.remove('hidden');
+      if (tabRegister) tabRegister.className = btnClassActive;
+    } else {
+      paneLogin?.classList.remove('hidden');
+      if (tabLogin) tabLogin.className = btnClassActive;
+    }
   }
 
   if (typeof initIcons === 'function') initIcons();
