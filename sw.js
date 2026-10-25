@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v48 (Comprehensive Station Database & Live Overpass Scanner)
-const CACHE_NAME = 'rotam-cache-v48';
+// Rotam PWA Service Worker - v49 (Seamless Queue-Based Speech Engine & Anti-Clipping Audio)
+const CACHE_NAME = 'rotam-cache-v49';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

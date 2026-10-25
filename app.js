@@ -8676,8 +8676,8 @@ function destinationPoint(lat, lon, distanceMeters, bearingDeg) {
 }
 
 // ==========================================
-// ROTAM SESLİ YÖNLENDİRME & ANLATIM MOTORU (ROTAM SPEECH ENGINE)
-// (Android Native TTS Bridge, iOS, PWA, Chrome & Web Audio Destekli)
+// ROTAM SESLİ YÖNLENDİRME & ANLATIM MOTORU (ROTAM SPEECH ENGINE v3)
+// (Kesintisiz Ses Kuyruğu, De-duplication, Chrome/Safari Keep-Alive, iOS & Android Bridge)
 // ==========================================
 const RotamSpeech = {
   isUnlocked: false,
@@ -8685,6 +8685,12 @@ const RotamSpeech = {
   cachedVoices: [],
   isNativeTtsAvailable: false,
   audioCtx: null,
+  queue: [],
+  isSpeaking: false,
+  lastSpokenText: '',
+  lastSpokenTime: 0,
+  keepAliveTimer: null,
+  watchdogTimer: null,
 
   init() {
     this.checkNativeBridge();
@@ -8733,6 +8739,9 @@ const RotamSpeech = {
     // 2. Prime Web Speech API (Chrome Android / Safari iOS için sessiz uyandırma)
     if ('speechSynthesis' in window) {
       try {
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
         const prime = new SpeechSynthesisUtterance(' ');
         prime.volume = 0.01;
         prime.rate = 1.0;
@@ -8785,6 +8794,29 @@ const RotamSpeech = {
     return voice;
   },
 
+  startKeepAlive() {
+    this.stopKeepAlive();
+    this.keepAliveTimer = setInterval(() => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+          window.speechSynthesis.pause();
+          window.speechSynthesis.resume();
+        }
+      }
+    }, 4000);
+  },
+
+  stopKeepAlive() {
+    if (this.keepAliveTimer) {
+      clearInterval(this.keepAliveTimer);
+      this.keepAliveTimer = null;
+    }
+    if (this.watchdogTimer) {
+      clearTimeout(this.watchdogTimer);
+      this.watchdogTimer = null;
+    }
+  },
+
   speak(text, options = {}) {
     if (!text || typeof text !== 'string') return;
     const cleanText = text.trim();
@@ -8794,15 +8826,66 @@ const RotamSpeech = {
       return;
     }
 
+    const now = Date.now();
+    // Ses kesilmesini ve tekrarı önleme: Aynı metin 3.5 saniye içinde tekrar çağrılırsa atla
+    if (cleanText === this.lastSpokenText && (now - this.lastSpokenTime < 3500)) {
+      return;
+    }
+
+    const item = { text: cleanText, options, timestamp: now };
+
+    if (options.urgent) {
+      this.queue.unshift(item);
+      if (this.isSpeaking) {
+        this.abortCurrentSpeech();
+      } else {
+        this.processQueue();
+      }
+      return;
+    }
+
+    // Normal bildirimler: Kuyruk 3'ten büyükse bayat olanları çıkar
+    if (this.queue.length >= 3) {
+      this.queue.shift();
+    }
+    this.queue.push(item);
+
+    if (!this.isSpeaking) {
+      this.processQueue();
+    }
+  },
+
+  processQueue() {
+    if (this.isSpeaking || this.queue.length === 0) return;
+
+    const nextItem = this.queue.shift();
+    if (!nextItem) return;
+
+    // 8 saniyeden eski kuyruk maddelerini atla (bayat navigasyon komutları)
+    if (Date.now() - nextItem.timestamp > 8000) {
+      this.processQueue();
+      return;
+    }
+
+    this.isSpeaking = true;
+    this.lastSpokenText = nextItem.text;
+    this.lastSpokenTime = Date.now();
+
     const isEn = (window.state && window.state.lang === 'en');
 
     // 1. iOS Native WebKit Bridge (AVSpeechSynthesizer - Kilit ekranı & arka planda %100 kesintisiz)
     if (typeof window !== 'undefined' && window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.nativeTTS) {
       try {
         window.webkit.messageHandlers.nativeTTS.postMessage({
-          text: cleanText,
-          lang: isEn ? 'en-US' : 'tr-TR'
+          text: nextItem.text,
+          lang: isEn ? 'en-US' : 'tr-TR',
+          urgent: Boolean(nextItem.options && nextItem.options.urgent)
         });
+        const estMs = Math.max(1600, nextItem.text.length * 85);
+        setTimeout(() => {
+          this.isSpeaking = false;
+          this.processQueue();
+        }, estMs);
         return;
       } catch (e) {
         console.warn('iOS Native TTS bridge error:', e);
@@ -8813,7 +8896,12 @@ const RotamSpeech = {
     this.checkNativeBridge();
     if (this.isNativeTtsAvailable) {
       try {
-        window.RotamNativeTTS.speak(cleanText);
+        window.RotamNativeTTS.speak(nextItem.text);
+        const estMs = Math.max(1600, nextItem.text.length * 85);
+        setTimeout(() => {
+          this.isSpeaking = false;
+          this.processQueue();
+        }, estMs);
         return;
       } catch (e) {
         console.warn('Native Android TTS error:', e);
@@ -8824,18 +8912,19 @@ const RotamSpeech = {
     if (!('speechSynthesis' in window)) {
       console.warn('SpeechSynthesis not available');
       this.playNavChime();
+      this.isSpeaking = false;
       return;
     }
 
     try {
-      if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.cancel();
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
       }
 
-      const utterance = new SpeechSynthesisUtterance(cleanText);
+      const utterance = new SpeechSynthesisUtterance(nextItem.text);
       utterance.lang = isEn ? 'en-US' : 'tr-TR';
-      utterance.rate = options.rate || (isEn ? 1.0 : 0.98);
-      utterance.pitch = options.pitch || 1.0;
+      utterance.rate = (nextItem.options && nextItem.options.rate) || (isEn ? 1.0 : 0.98);
+      utterance.pitch = (nextItem.options && nextItem.options.pitch) || 1.0;
       utterance.volume = 1.0;
 
       const voice = this.getBestVoice();
@@ -8843,51 +8932,80 @@ const RotamSpeech = {
         utterance.voice = voice;
       }
 
-      // Android Chrome Garbage Collection hatasını önlemek için referansı sabitle
+      // Android Chrome & Safari Garbage Collection hatasını önlemek için referansı sabitle
       this.activeUtterance = utterance;
-      window._rotamActiveUtterance = utterance;
+      if (!window._rotamUtterances) window._rotamUtterances = [];
+      window._rotamUtterances.push(utterance);
+      if (window._rotamUtterances.length > 8) window._rotamUtterances.shift();
 
-      utterance.onend = () => {
+      let finished = false;
+      const onDone = () => {
+        if (finished) return;
+        finished = true;
+        this.stopKeepAlive();
         this.activeUtterance = null;
-        window._rotamActiveUtterance = null;
+        this.isSpeaking = false;
+        // İki cümle arasında doğal bir nefes boşluğu bırak
+        setTimeout(() => {
+          this.processQueue();
+        }, 150);
       };
 
+      utterance.onend = onDone;
       utterance.onerror = (e) => {
-        console.warn('Utterance error or blocked in background:', e);
-        this.activeUtterance = null;
-        window._rotamActiveUtterance = null;
-        this.playNavChime();
+        console.warn('Utterance notice:', e);
+        onDone();
       };
 
-      setTimeout(() => {
-        try {
-          window.speechSynthesis.speak(utterance);
-        } catch (err) {
-          console.warn('SpeechSynthesis speak failed:', err);
-          this.playNavChime();
+      // Watchdog: Chrome/Safari konuşurken donarsa kuyruğun kilitlenmesini engelle
+      const maxMs = Math.max(3500, nextItem.text.length * 130);
+      this.watchdogTimer = setTimeout(() => {
+        if (!finished) {
+          console.debug('Speech watchdog timer unhung utterance');
+          onDone();
         }
-      }, 40);
+      }, maxMs);
+
+      this.startKeepAlive();
+      window.speechSynthesis.speak(utterance);
 
     } catch (e) {
       console.warn('RotamSpeech error:', e);
       this.playNavChime();
+      this.stopKeepAlive();
+      this.isSpeaking = false;
+      setTimeout(() => this.processQueue(), 200);
     }
   },
 
-  stop() {
-    this.checkNativeBridge();
-    if (this.isNativeTtsAvailable) {
-      try {
-        window.RotamNativeTTS.stop();
-      } catch (e) {}
-    }
-    if ('speechSynthesis' in window) {
+  abortCurrentSpeech() {
+    this.stopKeepAlive();
+    this.activeUtterance = null;
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       try {
         window.speechSynthesis.cancel();
       } catch (e) {}
     }
+    setTimeout(() => {
+      this.isSpeaking = false;
+      this.processQueue();
+    }, 120);
+  },
+
+  stop() {
+    this.queue = [];
+    this.isSpeaking = false;
+    this.stopKeepAlive();
     this.activeUtterance = null;
-    window._rotamActiveUtterance = null;
+    window._rotamUtterances = [];
+
+    this.checkNativeBridge();
+    if (this.isNativeTtsAvailable) {
+      try { window.RotamNativeTTS.stop(); } catch (e) {}
+    }
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+    }
   }
 };
 
@@ -11197,9 +11315,9 @@ const LiveNavigation = {
     showToast(msg, 'info');
   },
 
-  speak(text) {
+  speak(text, options = {}) {
     if (typeof RotamSpeech !== 'undefined') {
-      RotamSpeech.speak(text, { rate: 1.02 });
+      RotamSpeech.speak(text, { rate: 1.02, ...options });
       return;
     }
   },
