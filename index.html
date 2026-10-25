@@ -621,16 +621,16 @@
             </div>
           </div>
 
-          <!-- Yakıt & Mola Tahmini -->
+          <!-- Yakıt & Mola Tahmini (Tıklanabilir Hızlı Filtre) -->
           <div class="mt-2.5 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-            <span class="flex items-center space-x-1">
-              <i data-lucide="fuel" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span id="stat-fuel-stops">Tahmini Mola: 1 Durak</span>
-            </span>
-            <span class="flex items-center space-x-1">
-              <i data-lucide="coffee" class="w-3.5 h-3.5 text-sky-400"></i>
-              <span id="stat-coffee-breaks">Önerilen Dinlenme: 2</span>
-            </span>
+            <button type="button" onclick="filterToCorridorStations()" class="flex items-center space-x-1 hover:text-amber-300 text-slate-300 transition-colors cursor-pointer group active:scale-95" title="Güzergahtaki Akaryakıt ve Şarj İstasyonlarını Göster">
+              <i data-lucide="fuel" class="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform"></i>
+              <span id="stat-fuel-stops" class="underline decoration-slate-600 underline-offset-2">Tahmini Mola: 1 Durak</span>
+            </button>
+            <button type="button" onclick="filterToCorridorBreaks()" class="flex items-center space-x-1 hover:text-sky-300 text-slate-300 transition-colors cursor-pointer group active:scale-95" title="Güzergahtaki Dinlenme Tesisleri ve Mola Yerlerini Göster">
+              <i data-lucide="coffee" class="w-3.5 h-3.5 text-sky-400 group-hover:scale-110 transition-transform"></i>
+              <span id="stat-coffee-breaks" class="underline decoration-slate-600 underline-offset-2">Önerilen Dinlenme: 2</span>
+            </button>
           </div>
 
           <!-- KARAVAN GÜVENLİK RAPORU KARTI (SADECE KARAVAN MODUNDA AKTİF) -->

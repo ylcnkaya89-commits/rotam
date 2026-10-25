@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v47 (Exclusive Yandex Maps Integration)
-const CACHE_NAME = 'rotam-cache-v47';
+// Rotam PWA Service Worker - v48 (Comprehensive Station Database & Live Overpass Scanner)
+const CACHE_NAME = 'rotam-cache-v48';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

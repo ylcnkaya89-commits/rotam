@@ -4595,7 +4595,161 @@ function analyzeRouteCorridor(route, radiusMeters = 50000) {
   // Plot Markers on Map & Right List
   renderCorridorPoiMarkers();
   renderCorridorPoiList();
+
+  // Asenkron canlı istasyon tarayıcısını tetikle
+  fetchRouteCorridorLiveStations(route);
 }
+
+// DİNAMİK GÜZERGAH İSTASYON TARAYICISI (CANLI OVERPASS API ENTEGRASYONU)
+// Rota güzergahı boyunca bulunan gerçek zamanlı akaryakıt ve elektrikli araç şarj istasyonlarını çeker
+async function fetchRouteCorridorLiveStations(route) {
+  if (!route || !route.geometry || !route.geometry.coordinates || route.geometry.coordinates.length < 2) return;
+
+  const coords = route.geometry.coordinates; // [lon, lat]
+  const totalPoints = coords.length;
+
+  // Num of sample points (maximum 10 to keep query fast and responsive)
+  const sampleCount = Math.min(10, Math.max(3, Math.floor(totalPoints / 30)));
+  const step = Math.floor(totalPoints / (sampleCount + 1));
+  const sampledCoords = [];
+
+  for (let i = 1; i <= sampleCount; i++) {
+    const idx = Math.min(totalPoints - 1, i * step);
+    const p = coords[idx];
+    if (p && p.length >= 2) {
+      sampledCoords.push({ lat: p[1], lon: p[0] });
+    }
+  }
+
+  if (sampledCoords.length === 0) return;
+
+  // Build Overpass QL query around sampled points (radius 4000 meters)
+  const aroundQueries = sampledCoords.map(c => `
+    node["amenity"="fuel"](around:4000,${c.lat.toFixed(4)},${c.lon.toFixed(4)});
+    node["amenity"="charging_station"](around:4000,${c.lat.toFixed(4)},${c.lon.toFixed(4)});
+  `).join('\n');
+
+  const query = `
+    [out:json][timeout:10];
+    (
+      ${aroundQueries}
+    );
+    out center 40;
+  `;
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 7500); // 7.5s max timeout
+
+    const res = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      body: 'data=' + encodeURIComponent(query),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data || !Array.isArray(data.elements) || data.elements.length === 0) return;
+
+    let newlyAddedCount = 0;
+    data.elements.forEach(el => {
+      const elLat = el.lat || (el.center && el.center.lat);
+      const elLon = el.lon || (el.center && el.center.lon);
+      if (!elLat || !elLon) return;
+
+      const tags = el.tags || {};
+      const isCharging = tags.amenity === 'charging_station';
+      const brand = tags.brand || tags.operator || tags.name || (isCharging ? 'Elektrikli Şarj İstasyonu' : 'Akaryakıt İstasyonu');
+      const cleanName = tags.name || `${brand} İstasyonu`;
+
+      // Check if station already exists within 250m in corridorPois
+      const exists = state.corridorPois.some(cp => haversineMeters(elLat, elLon, cp.lat, cp.lon) < 250);
+      if (exists) return;
+
+      const distM = minDistanceToRoute(elLat, elLon, coords);
+      if (distM > 10000) return; // ignore stations farther than 10km from route
+
+      const distKm = parseFloat((distM / 1000).toFixed(1));
+      const category = isCharging ? 'ev_charge' : 'fuel';
+
+      const details = [];
+      if (tags['fuel:lpg'] === 'yes') details.push('LPG / Otogaz');
+      if (tags['fuel:diesel'] === 'yes') details.push('Dizel');
+      if (tags.opening_hours === '24/7') details.push('24 Saat Açık');
+      if (tags.shop) details.push('Market');
+      if (isCharging && tags.socket) details.push(`Soket: ${tags.socket}`);
+
+      const desc = details.length > 0 ? details.join(' • ') : (isCharging ? 'Elektrikli araç hızlı şarj noktası.' : 'Akaryakıt ve servis istasyonu.');
+
+      const newPoi = {
+        id: 500000 + el.id,
+        name: cleanName,
+        category: category,
+        lat: elLat,
+        lon: elLon,
+        description: desc,
+        rating: 4.8,
+        distKm: distKm,
+        isDynamic: true
+      };
+
+      state.corridorPois.push(newPoi);
+      newlyAddedCount++;
+    });
+
+    if (newlyAddedCount > 0) {
+      // Re-sort corridor pois by distance to route
+      state.corridorPois.sort((a, b) => a.distKm - b.distKm);
+
+      // Update badge counts and UI
+      const totalEl = document.getElementById('corridor-total-count');
+      if (totalEl) totalEl.textContent = `${state.corridorPois.length} Nokta`;
+      const rightPanelBadge = document.getElementById('badge-right-panel-poi-count');
+      if (rightPanelBadge) rightPanelBadge.textContent = state.corridorPois.length;
+
+      updatePoiCategoryFilterUI();
+      renderCorridorPoiMarkers();
+      renderCorridorPoiList();
+      console.log(`Rotam Güzergahı: Canlı haritadan ${newlyAddedCount} ek istasyon başarıyla keşfedildi.`);
+    }
+  } catch (err) {
+    // Graceful silent fallback to offline stations
+    console.debug('Canlı istasyon tarama bildirimi:', err);
+  }
+}
+
+// Güzergahtaki İstasyonları Filtrele ve Sağ Paneli Aç
+function filterToCorridorStations() {
+  if (typeof openRightPanel === 'function') openRightPanel();
+  if (typeof switchRightPanelTab === 'function') switchRightPanelTab('pois');
+  state.activePoiCategories.clear();
+  state.activePoiCategories.add('fuel');
+  state.activePoiCategories.add('ev_charge');
+  updatePoiCategoryFilterUI();
+  renderCorridorPoiMarkers();
+  renderCorridorPoiList();
+  const isEn = window.state && window.state.lang === 'en';
+  showToast(isEn ? 'Showing stations along the route' : 'Güzergah üzerindeki akaryakıt ve şarj istasyonları listelendi ⛽⚡', 'info');
+}
+
+// Güzergahtaki Mola Yerlerini Filtrele ve Sağ Paneli Aç
+function filterToCorridorBreaks() {
+  if (typeof openRightPanel === 'function') openRightPanel();
+  if (typeof switchRightPanelTab === 'function') switchRightPanelTab('pois');
+  state.activePoiCategories.clear();
+  state.activePoiCategories.add('cafe');
+  state.activePoiCategories.add('gastronomy');
+  updatePoiCategoryFilterUI();
+  renderCorridorPoiMarkers();
+  renderCorridorPoiList();
+  const isEn = window.state && window.state.lang === 'en';
+  showToast(isEn ? 'Showing rest areas & food stops' : 'Güzergahtaki mola yerleri ve dinlenme tesisleri listelendi ☕🍴', 'info');
+}
+
+window.filterToCorridorStations = filterToCorridorStations;
+window.filterToCorridorBreaks = filterToCorridorBreaks;
 
 // Quick Place Preview State
 let currentPreviewPlace = null;
@@ -10827,11 +10981,13 @@ const LiveNavigation = {
     const [lat, lon] = this.lastCoord;
     let pool = [];
 
+    const stationCategories = ['fuel', 'ev_charge', 'cafe', 'gastronomy'];
+
     if (Array.isArray(state.corridorPois) && state.corridorPois.length > 0) {
-      pool = state.corridorPois.filter(p => p.category === 'fuel' || p.category === 'cafe' || p.category === 'gastronomy');
+      pool = state.corridorPois.filter(p => stationCategories.includes(p.category));
     }
     if (pool.length === 0 && Array.isArray(state.allPlaces) && state.allPlaces.length > 0) {
-      pool = state.allPlaces.filter(p => p.category === 'fuel' || p.category === 'cafe' || p.category === 'gastronomy');
+      pool = state.allPlaces.filter(p => stationCategories.includes(p.category));
     }
 
     if (pool.length === 0) {
@@ -10865,8 +11021,10 @@ const LiveNavigation = {
 
     const distKm = (spot.distMeters / 1000).toFixed(1);
     const isEn = (window.state && window.state.lang === 'en');
-    let catLabel = spot.category === 'fuel' ? 'Akaryakıt İstasyonu' : 'Mola & Dinlenme';
-    if (isEn) catLabel = spot.category === 'fuel' ? 'Fuel Station' : 'Rest Stop & Cafe';
+    let catLabel = spot.category === 'fuel' ? '⛽ Akaryakıt İstasyonu'
+      : (spot.category === 'ev_charge' ? '⚡ Elektrikli Şarj İstasyonu' : '☕ Mola & Dinlenme');
+    if (isEn) catLabel = spot.category === 'fuel' ? '⛽ Fuel Station'
+      : (spot.category === 'ev_charge' ? '⚡ EV Charging Station' : '☕ Rest Stop & Cafe');
 
     nameEl.textContent = spot.name;
     if (distEl) distEl.textContent = `${distKm} km • ${catLabel}`;

@@ -10298,10 +10298,1889 @@ window.DEFAULT_HISTORIC_PLACES = [
     ],
     "id": 915,
     "created_at": "2026-10-11 21:50:00"
+  },
+  {
+    "id": 916,
+    "name": "Opet - Mehmetçik Vakfı TEM Kurtköy Tesisleri",
+    "category": "fuel",
+    "lat": 40.9182,
+    "lon": 29.3245,
+    "description": "İstanbul Pendik TEM Otoyolu; 24 saat akaryakıt, Mehmetçik Vakfı Tesisleri, market, restoran, oto yıkama ve lastik hava-su ünitesi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 917,
+    "name": "ZES Yüksek Hızlı DC Şarj İstasyonu (180 kW) - Kurtköy Mehmetçik Vakfı",
+    "category": "ev_charge",
+    "lat": 40.9185,
+    "lon": 29.3248,
+    "description": "İstanbul Kurtköy TEM Girişi; 180 kW çift soketli CCS2 ultra hızlı DC elektrikli araç şarj istasyonu, 24 saat dinlenme alanı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 918,
+    "name": "Shell - TEM Otoyolu Gebze Doğu Tesisleri",
+    "category": "fuel",
+    "lat": 40.8042,
+    "lon": 29.4751,
+    "description": "Kocaeli Gebze TEM Otoyolu; 24 saat açık Shell V-Power akaryakıt, Shell Select deli market, kahve barı ve mescit.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 919,
+    "name": "Petrol Ofisi - TEM Körfez Dinlenme Tesisleri",
+    "category": "fuel",
+    "lat": 40.7651,
+    "lon": 29.7423,
+    "description": "Kocaeli Körfez TEM Hattı; Maxima akaryakıt, market, dinlenme alanı ve geniş otopark.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 920,
+    "name": "Opet - TEM Derince Hizmet Alanı",
+    "category": "fuel",
+    "lat": 40.7612,
+    "lon": 29.8315,
+    "description": "Kocaeli Derince; 24 saat açık Opet akaryakıt, Ultra Temiz Tuvaletler, kahve ve atıştırmalık marketi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 921,
+    "name": "Shell - TEM Otoyolu Sapanca Kuzey Tesisleri",
+    "category": "fuel",
+    "lat": 40.7025,
+    "lon": 30.258,
+    "description": "Sakarya Sapanca TEM Otoyolu; Shell akaryakıt, geniş dinlenme tesisi, restoranlar, çay bahçesi ve mescit.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 922,
+    "name": "Trugo Yüksek Hızlı DC Şarj İstasyonu (180 kW) - Sapanca Tesisleri",
+    "category": "ev_charge",
+    "lat": 40.7028,
+    "lon": 30.2585,
+    "description": "Sakarya Sapanca O-4 TEM Tesisleri; Trugo 180 kW yüksek hızlı DC şarj istasyonu, tüm elektrikli araçlarla uyumlu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 923,
+    "name": "Petrol Ofisi - TEM Hendek Dinlenme Tesisleri",
+    "category": "fuel",
+    "lat": 40.7712,
+    "lon": 30.7385,
+    "description": "Sakarya Hendek TEM Otoyolu; Petrol Ofisi akaryakıt, yöresel ürünler, restoran, lastikçi ve dinlenme alanı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 924,
+    "name": "Eşarj Hızlı Şarj İstasyonu (120 kW) - Hendek Dinlenme Tesisleri",
+    "category": "ev_charge",
+    "lat": 40.7715,
+    "lon": 30.7388,
+    "description": "Sakarya Hendek TEM Tesisleri; Eşarj 120 kW CCS DC hızlı şarj ünitesi ve 24 saat açık dinlenme kafesi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 925,
+    "name": "Shell - Düzce Kaynaşlı Türker Tesisleri",
+    "category": "fuel",
+    "lat": 40.7812,
+    "lon": 31.3125,
+    "description": "Düzce Kaynaşlı TEM Girişi; 24 saat Shell akaryakıt, meşhur Bolu Dağı et lokantaları ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 926,
+    "name": "Opet - Bolu Dağı Highway Outlet Tesisleri",
+    "category": "fuel",
+    "lat": 40.7412,
+    "lon": 31.4312,
+    "description": "Bolu Dağı O-4 TEM Çıkışı; Türkiye'nin en büyük otoyol AVM'si, Opet akaryakıt, 100+ mağaza ve restoranlar.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 927,
+    "name": "ZES Ultra Hızlı DC Şarj İstasyonu (300 kW) - Bolu Highway Outlet",
+    "category": "ev_charge",
+    "lat": 40.7415,
+    "lon": 31.4318,
+    "description": "Bolu Dağı Highway AVM; ZES 300 kW Liquid-Cooled ultra hızlı şarj merkezi, 8 araç aynı anda şarj kapasitesi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 928,
+    "name": "Shell - Bolu Paşaköy Çevre Yolu İstasyonu",
+    "category": "fuel",
+    "lat": 40.7325,
+    "lon": 31.5912,
+    "description": "Bolu Merkez Paşaköy; 24 saat açık Shell yakıt, Select market, oto yıkama ve lastik hava kontrolü.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 929,
+    "name": "Opet - O-4 Yeniçağa Dinlenme Tesisleri",
+    "category": "fuel",
+    "lat": 40.7745,
+    "lon": 32.0125,
+    "description": "Bolu Yeniçağa Otoyol Çıkışı; Opet akaryakıt, 24 saat sıcak çorba ve dinlenme alanı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 930,
+    "name": "Shell - Dörtdivan Metro Dinlenme Tesisleri",
+    "category": "fuel",
+    "lat": 40.7612,
+    "lon": 32.1458,
+    "description": "Bolu Dörtdivan O-4 Hattı; Shell istasyonu, Metro dinlenme tesisi, açık büfe yemek ve geniş otopark.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 931,
+    "name": "Petrol Ofisi - Gerede Çamlıdere Geçit Tesisleri",
+    "category": "fuel",
+    "lat": 40.6812,
+    "lon": 32.3951,
+    "description": "Ankara Çamlıdere TEM Bölgesi; Petrol Ofisi akaryakıt, çam ormanı manzaralı mola yeri ve market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 932,
+    "name": "Opet - Çeltikçi Kızılcahamam Tesisleri",
+    "category": "fuel",
+    "lat": 40.4851,
+    "lon": 32.5412,
+    "description": "Ankara Kızılcahamam TEM Otoyolu; Opet akaryakıt, termal su molası, yöresel bazlama & gözleme salonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 933,
+    "name": "Trugo Hızlı DC Şarj İstasyonu (180 kW) - Çeltikçi Tesisleri",
+    "category": "ev_charge",
+    "lat": 40.4854,
+    "lon": 32.5415,
+    "description": "Ankara Çeltikçi O-4 TEM Otoyolu; Trugo 180 kW çift soketli yüksek hızlı DC elektrikli araç şarj istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 934,
+    "name": "Shell - O-4 Akıncı Gişeleri Dinlenme Tesisi",
+    "category": "fuel",
+    "lat": 40.0812,
+    "lon": 32.5612,
+    "description": "Ankara Kahramankazan Akıncı O-4 Girişi; Shell akaryakıt, geniş kamyon ve binek araç park alanı, 24 saat market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 935,
+    "name": "Shell - KMO Kınalı Hizmet Tesisleri",
+    "category": "fuel",
+    "lat": 41.1125,
+    "lon": 28.1812,
+    "description": "İstanbul Silivri KMO Batı Başlangıcı; Shell akaryakıt, Select market ve dinlenme alanı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 936,
+    "name": "Opet - KMO Çatalca Dinlenme Tesisi",
+    "category": "fuel",
+    "lat": 41.1712,
+    "lon": 28.4512,
+    "description": "İstanbul Çatalca KMO Hattı; Opet akaryakıt, 24 saat açık restoran ve geniş mola sahası.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 937,
+    "name": "Petrol Ofisi - KMO Tayakadın İGA Havalimanı Tesisleri",
+    "category": "fuel",
+    "lat": 41.2451,
+    "lon": 28.7125,
+    "description": "İstanbul Havalimanı KMO Bağlantısı; Petrol Ofisi akaryakıt, kafe, araç bakım alanı ve market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 938,
+    "name": "Trugo DC Hızlı Şarj (180 kW) - İGA Tayakadın Tesisleri",
+    "category": "ev_charge",
+    "lat": 41.2455,
+    "lon": 28.713,
+    "description": "İstanbul Havalimanı KMO Tayakadın; 180 kW Trugo DC ultra hızlı şarj istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 939,
+    "name": "Shell - KMO Fenertepe Başakşehir Tesisleri",
+    "category": "fuel",
+    "lat": 41.1612,
+    "lon": 28.8412,
+    "description": "İstanbul Başakşehir KMO Hattı; Shell akaryakıt, Select market, elektrikli araç şarjı ve oto bakım.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 940,
+    "name": "Opet - KMO Uskumruköy Sarıyer Tesisleri",
+    "category": "fuel",
+    "lat": 41.2212,
+    "lon": 29.0215,
+    "description": "İstanbul Sarıyer Yavuz Sultan Selim Köprüsü Batı Çıkışı; Opet akaryakıt, kahve dükkanı ve market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 941,
+    "name": "Petrol Ofisi - KMO Riva Beykoz Tesisleri",
+    "category": "fuel",
+    "lat": 41.1951,
+    "lon": 29.2152,
+    "description": "İstanbul Beykoz YSS Köprüsü Doğu Çıkışı; Petrol Ofisi akaryakıt, geniş dinlenme tesisi ve restoranlar.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 942,
+    "name": "ZES Hızlı DC Şarj İstasyonu (180 kW) - KMO Riva Tesisleri",
+    "category": "ev_charge",
+    "lat": 41.1955,
+    "lon": 29.2156,
+    "description": "İstanbul Beykoz KMO Riva Hizmet Alanı; ZES 180 kW DC yüksek hızlı şarj istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 943,
+    "name": "Shell - KMO Hüseyinli Çekmeköy Tesisleri",
+    "category": "fuel",
+    "lat": 41.1215,
+    "lon": 29.3512,
+    "description": "İstanbul Çekmeköy KMO Hattı; Shell akaryakıt, deli kafe ve 24 saat market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 944,
+    "name": "Opet - KMO Kurnaköy Pendik Tesisleri",
+    "category": "fuel",
+    "lat": 40.9412,
+    "lon": 29.4125,
+    "description": "İstanbul Pendik KMO Otoyolu; Opet akaryakıt, dinlenme alanı, kahve köşesi ve mescit.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 945,
+    "name": "TotalEnergies - KMO Mermerciler Dilovası Tesisleri",
+    "category": "fuel",
+    "lat": 40.8351,
+    "lon": 29.5612,
+    "description": "Kocaeli Dilovası KMO Otoyolu; TotalEnergies akaryakıt, Bonjour market ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 946,
+    "name": "Petrol Ofisi - KMO Sevindikli Körfez Tesisleri",
+    "category": "fuel",
+    "lat": 40.8412,
+    "lon": 29.7915,
+    "description": "Kocaeli Körfez KMO Hattı; Petrol Ofisi akaryakıt, dinlenme salonu ve oto bakım alanı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 947,
+    "name": "Shell - KMO Akmeşe İzmit Tesisleri",
+    "category": "fuel",
+    "lat": 40.8215,
+    "lon": 30.1412,
+    "description": "Kocaeli İzmit KMO Doğu Hattı; Shell akaryakıt, Select market ve mescit.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 948,
+    "name": "Opet - KMO Akyazı Bağlantı Tesisleri",
+    "category": "fuel",
+    "lat": 40.7312,
+    "lon": 30.5912,
+    "description": "Sakarya Akyazı KMO Bitişi; Opet akaryakıt, 24 saat açık dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 949,
+    "name": "Trugo DC Hızlı Şarj (180 kW) - KMO Akyazı Tesisleri",
+    "category": "ev_charge",
+    "lat": 40.7315,
+    "lon": 30.5916,
+    "description": "Sakarya Akyazı KMO Çıkışı; Trugo 180 kW DC yüksek hızlı elektrikli şarj istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 950,
+    "name": "Shell - O-21 Gölbaşı Haymana Kavşağı Tesisleri",
+    "category": "fuel",
+    "lat": 39.6912,
+    "lon": 32.8125,
+    "description": "Ankara Gölbaşı O-21 Otoyolu; Shell akaryakıt, 24 saat açık market, restoran ve mescit.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 951,
+    "name": "ZES Hızlı DC Şarj İstasyonu (180 kW) - O-21 Gölbaşı Tesisleri",
+    "category": "ev_charge",
+    "lat": 39.6915,
+    "lon": 32.8129,
+    "description": "Ankara Gölbaşı O-21 Otoyol Girişi; ZES 180 kW DC yüksek hızlı şarj ünitesi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 952,
+    "name": "Opet - O-21 Bala Servis Alanı",
+    "category": "fuel",
+    "lat": 39.5125,
+    "lon": 33.0912,
+    "description": "Ankara Bala O-21 Otoyolu; Opet akaryakıt, temiz tuvaletler, kahve ve atıştırmalık alanı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 953,
+    "name": "Petrol Ofisi - O-21 Kulu Dinlenme Tesisi",
+    "category": "fuel",
+    "lat": 39.1412,
+    "lon": 33.2512,
+    "description": "Konya Kulu O-21 Hattı; Petrol Ofisi akaryakıt, yöresel ürünler, restoran ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 954,
+    "name": "Shell - O-21 Şereflikoçhisar Tuz Gölü Tesisleri",
+    "category": "fuel",
+    "lat": 38.8912,
+    "lon": 33.4712,
+    "description": "Ankara Şereflikoçhisar O-21 Hattı; Shell istasyonu, Tuz Gölü seyir terası, market ve kafe.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 955,
+    "name": "Trugo Yüksek Hızlı DC Şarj (180 kW) - O-21 Tuz Gölü Tesisleri",
+    "category": "ev_charge",
+    "lat": 38.8916,
+    "lon": 33.4716,
+    "description": "Şereflikoçhisar Tuz Gölü O-21 Tesisleri; Trugo 180 kW DC ultra hızlı elektrikli araç şarj istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 956,
+    "name": "Opet - O-21 Ağaçören Servis Alanı",
+    "category": "fuel",
+    "lat": 38.7412,
+    "lon": 33.6812,
+    "description": "Aksaray Ağaçören O-21 Otoyolu; Opet akaryakıt, 24 saat açık market ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 957,
+    "name": "Petrol Ofisi - O-21 Alayhan Aksaray Tesisleri",
+    "category": "fuel",
+    "lat": 38.4812,
+    "lon": 34.0125,
+    "description": "Aksaray O-21 Otoyol Kavşağı; Petrol Ofisi akaryakıt, restoran, oto lastik servisi ve dinlenme alanı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 958,
+    "name": "Shell - O-21 Derinkuyu Niğde Kuzey Tesisleri",
+    "category": "fuel",
+    "lat": 38.1612,
+    "lon": 34.4912,
+    "description": "Niğde-Nevşehir O-21 Otoyolu; Shell akaryakıt, Kapadokya yol ayrımı, Select market ve mescit.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 959,
+    "name": "Opet - O-21 Niğde Güney Hizmet Alanı",
+    "category": "fuel",
+    "lat": 37.8912,
+    "lon": 34.6812,
+    "description": "Niğde Merkez O-21 Otoyolu; Opet akaryakıt, geniş dinlenme salonu ve sıcak yemek servisi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 960,
+    "name": "Petrol Ofisi - O-21 Ulukışla Toros Geçit Tesisleri",
+    "category": "fuel",
+    "lat": 37.5412,
+    "lon": 34.7812,
+    "description": "Niğde Ulukışla Toros Dağları Eteği; Petrol Ofisi akaryakıt, dağ manzaralı mola yeri ve oto bakım.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 961,
+    "name": "Shell - Pozantı Çamalan Toros Dinlenme Tesisleri",
+    "category": "fuel",
+    "lat": 37.3812,
+    "lon": 34.8912,
+    "description": "Adana Pozantı Otoyolu; Shell akaryakıt, meşhur Pozantı dinlenme tesisleri, sucuk-ekmek ve sıcak yemek.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 962,
+    "name": "ZES Hızlı DC Şarj İstasyonu (180 kW) - Pozantı Çamalan Tesisleri",
+    "category": "ev_charge",
+    "lat": 37.3815,
+    "lon": 34.8916,
+    "description": "Adana Pozantı Toros Geçidi; ZES 180 kW DC hızlı şarj ünitesi, 24 saat dinlenme kafesi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 963,
+    "name": "Opet - Tarsus Batı O-21 / O-51 Kavşağı Tesisleri",
+    "category": "fuel",
+    "lat": 36.9812,
+    "lon": 34.8712,
+    "description": "Mersin Tarsus Otoyol Ayrımı; Opet akaryakıt, Çukurova dinlenme alanı, market ve oto yıkama.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 964,
+    "name": "Shell - Eryaman D200 Çıkışı İstasyonu",
+    "category": "fuel",
+    "lat": 39.9754,
+    "lon": 32.6189,
+    "description": "Ankara Etimesgut Eryaman D200 Çıkışı; 24 saat Shell V-Power akaryakıt, Select deli market ve oto kuaför.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 965,
+    "name": "Opet - Etimesgut Zırhlı Birlikler D200 İstasyonu",
+    "category": "fuel",
+    "lat": 39.9482,
+    "lon": 32.6715,
+    "description": "Ankara Etimesgut D200 Karayolu; Opet akaryakıt, Ultra Temiz Tuvaletler ve 24 saat açık market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 966,
+    "name": "Trugo Yüksek Hızlı DC Şarj (180 kW) - Eryaman Göksu Park Yanı",
+    "category": "ev_charge",
+    "lat": 39.9881,
+    "lon": 32.6452,
+    "description": "Ankara Etimesgut Eryaman; Trugo 180 kW yüksek hızlı DC şarj ünitesi, alışveriş ve restoran alanlarına yürüme mesafesinde.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 967,
+    "name": "Petrol Ofisi - Polatlı Girişi Dinlenme Tesisleri",
+    "category": "fuel",
+    "lat": 39.5912,
+    "lon": 32.1812,
+    "description": "Ankara Polatlı D200 Karayolu; Petrol Ofisi akaryakıt, restoran, market ve lastik tamir atölyesi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 968,
+    "name": "Shell - Sivrihisar Başkent Dinlenme Tesisleri",
+    "category": "fuel",
+    "lat": 39.4512,
+    "lon": 31.5412,
+    "description": "Eskişehir Sivrihisar D200 Kavşağı; Shell akaryakıt, 24 saat açık açık büfe lokanta, mescit ve oto kuaför.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 969,
+    "name": "Opet - Sivrihisar Nasreddin Hoca Tesisleri",
+    "category": "fuel",
+    "lat": 39.4485,
+    "lon": 31.5215,
+    "description": "Eskişehir Sivrihisar D200 Yolu; Opet istasyonu, yöresel Sivrihisar lezzetleri ve hediyelik eşya alanı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 970,
+    "name": "ZES Hızlı DC Şarj İstasyonu (180 kW) - Sivrihisar Başkent Tesisleri",
+    "category": "ev_charge",
+    "lat": 39.4515,
+    "lon": 31.5416,
+    "description": "Eskişehir Sivrihisar D200 Kavşağı; ZES 180 kW DC ultra hızlı şarj ünitesi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 971,
+    "name": "Shell - Mahmudiye D200 Yol Üstü Tesisleri",
+    "category": "fuel",
+    "lat": 39.5125,
+    "lon": 30.9812,
+    "description": "Eskişehir Mahmudiye; Shell akaryakıt, market, dinlenme alanı ve lastik basınç istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 972,
+    "name": "Petrol Ofisi - Eskişehir Çevre Yolu Organize İstasyonu",
+    "category": "fuel",
+    "lat": 39.7812,
+    "lon": 30.6125,
+    "description": "Eskişehir Çevre Yolu OSB Girişi; Petrol Ofisi akaryakıt, 24 saat market, oto yıkama ve çay ocağı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 973,
+    "name": "Trugo DC Hızlı Şarj (180 kW) - Eskişehir Vega Outlet",
+    "category": "ev_charge",
+    "lat": 39.7712,
+    "lon": 30.5012,
+    "description": "Eskişehir Tepebaşı Çevre Yolu; Trugo 180 kW DC yüksek hızlı elektrikli araç şarj merkezi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 974,
+    "name": "Opet - Bozüyük Sarar Dinlenme Tesisleri",
+    "category": "fuel",
+    "lat": 39.9125,
+    "lon": 30.0512,
+    "description": "Bilecik Bozüyük D200 Karayolu; Opet akaryakıt, Sarar Outlet mağazası, restoranlar ve çocuk oyun alanı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 975,
+    "name": "Shell - Bozüyük Ömür Dinlenme Tesisleri",
+    "category": "fuel",
+    "lat": 39.9085,
+    "lon": 29.9812,
+    "description": "Bilecik Bozüyük Çıkışı; Shell akaryakıt, meşhur Ömür dinlenme tesisi, sıcak çorba ve dinlenme alanı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 976,
+    "name": "Eşarj Hızlı Şarj (120 kW) - Bozüyük Sarar Tesisleri",
+    "category": "ev_charge",
+    "lat": 39.9128,
+    "lon": 30.0516,
+    "description": "Bilecik Bozüyük D200 Yolu; Eşarj 120 kW DC hızlı elektrikli araç şarj istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 977,
+    "name": "Shell - İnegöl Köfteci Yusuf Tesisleri",
+    "category": "fuel",
+    "lat": 40.0712,
+    "lon": 29.4912,
+    "description": "Bursa İnegöl D200 Karayolu; Shell akaryakıt, Köfteci Yusuf restoranı, market ve geniş dinlenme alanı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 978,
+    "name": "Shell - Pamukova D650 Dinlenme Tesisleri",
+    "category": "fuel",
+    "lat": 40.5125,
+    "lon": 30.1612,
+    "description": "Sakarya Pamukova D650 Yolu; Shell akaryakıt, meyve hali ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 979,
+    "name": "Petrol Ofisi - Osmaneli Geçidi İstasyonu",
+    "category": "fuel",
+    "lat": 40.3612,
+    "lon": 30.0125,
+    "description": "Bilecik Osmaneli D650 Karayolu; Petrol Ofisi akaryakıt, Sakarya nehri manzaralı mola yeri.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 980,
+    "name": "Opet - Bilecik Pelitözü Çevre Yolu Tesisleri",
+    "category": "fuel",
+    "lat": 40.1812,
+    "lon": 29.9812,
+    "description": "Bilecik Merkez Çevre Yolu; Opet akaryakıt, Ultra Temiz Tuvaletler ve 24 saat açık market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 981,
+    "name": "Shell - Kütahya Porsuk Dinlenme Tesisleri",
+    "category": "fuel",
+    "lat": 39.4612,
+    "lon": 30.0125,
+    "description": "Kütahya Çevre Yolu Girişi; Shell akaryakıt, Kütahya porselen satış mağazası ve dinlenme kafesi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 982,
+    "name": "ZES Hızlı DC Şarj İstasyonu (180 kW) - Kütahya Sera AVM",
+    "category": "ev_charge",
+    "lat": 39.4251,
+    "lon": 29.9812,
+    "description": "Kütahya Merkez D650 Çevre Yolu; ZES 180 kW DC yüksek hızlı şarj istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 983,
+    "name": "Opet - İkbal Termal Dinlenme Tesisleri",
+    "category": "fuel",
+    "lat": 38.7812,
+    "lon": 30.4812,
+    "description": "Afyonkarahisar D650 / D300 Kavşağı; Opet akaryakıt, meşhur İkbal lokantası, Afyon sucuğu ve lokumu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 984,
+    "name": "Shell - Afyon Kolaylı Dinlenme Tesisleri",
+    "category": "fuel",
+    "lat": 38.7751,
+    "lon": 30.4651,
+    "description": "Afyonkarahisar Çevre Yolu; Shell akaryakıt, 24 saat açık açık büfe yemek salonu, mescit ve market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 985,
+    "name": "Trugo Ultra Hızlı DC Şarj (180 kW) - Afyon Kolaylı Tesisleri",
+    "category": "ev_charge",
+    "lat": 38.7755,
+    "lon": 30.4655,
+    "description": "Afyonkarahisar Kolaylı Tesisleri; Trugo 180 kW DC ultra hızlı elektrikli araç şarj merkezi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 986,
+    "name": "Petrol Ofisi - Sandıklı Hüdai Kaplıcaları Çıkışı",
+    "category": "fuel",
+    "lat": 38.4612,
+    "lon": 30.2712,
+    "description": "Afyon Sandıklı D650 Yolu; Petrol Ofisi akaryakıt, termal dinlenme alanı ve market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 987,
+    "name": "Shell - Dinar Dörtyol Kavşağı Tesisleri",
+    "category": "fuel",
+    "lat": 38.0712,
+    "lon": 30.1512,
+    "description": "Afyon Dinar D650 / Denizli Ayrımı; Shell akaryakıt, Dinar dinlenme tesisi ve oto bakım.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 988,
+    "name": "Opet - Keçiborlu Gülkent Tesisleri",
+    "category": "fuel",
+    "lat": 37.9412,
+    "lon": 30.2912,
+    "description": "Isparta Keçiborlu D650 Yolu; Opet akaryakıt, lavanta & gül ürünleri mağazası ve dinlenme kafesi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 989,
+    "name": "ZES Hızlı DC Şarj (120 kW) - Keçiborlu Tesisleri",
+    "category": "ev_charge",
+    "lat": 37.9415,
+    "lon": 30.2916,
+    "description": "Isparta Keçiborlu Kavşağı; ZES 120 kW DC hızlı şarj ünitesi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 990,
+    "name": "Shell - Burdur Çevre Yolu Göl Manzara İstasyonu",
+    "category": "fuel",
+    "lat": 37.7412,
+    "lon": 30.2712,
+    "description": "Burdur Merkez D650 Yolu; Shell akaryakıt, Burdur Gölü manzaralı teras ve 24 saat açık market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 991,
+    "name": "Petrol Ofisi - Bucak Toros Dinlenme Tesisleri",
+    "category": "fuel",
+    "lat": 37.4512,
+    "lon": 30.5812,
+    "description": "Burdur Bucak D650 Karayolu; Petrol Ofisi akaryakıt, Toros mola yeri, meşhur Bucak salebi ve restoran.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 992,
+    "name": "Opet - Dağbeli Geçidi Çubuk Beli Tesisleri",
+    "category": "fuel",
+    "lat": 37.1812,
+    "lon": 30.5612,
+    "description": "Antalya Çubuk Beli Geçit Zirvesi; Opet akaryakıt, çam ormanı içinde serin mola yeri.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 993,
+    "name": "Shell - Antalya Döşemealtı Kuzey Giriş Tesisleri",
+    "category": "fuel",
+    "lat": 37.0125,
+    "lon": 30.6125,
+    "description": "Antalya Girişi Döşemealtı; Shell akaryakıt, Select market, oto yıkama ve elektrikli araç şarjı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 994,
+    "name": "Shell - Gökova Dörtyol Kavşağı Tesisleri",
+    "category": "fuel",
+    "lat": 37.0451,
+    "lon": 28.3612,
+    "description": "Muğla Ula Gökova Dörtyol; Marmaris-Fethiye ayrımı, Shell akaryakıt, kafe ve market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 995,
+    "name": "Opet - Köyceğiz Gölü Giriş İstasyonu",
+    "category": "fuel",
+    "lat": 36.9612,
+    "lon": 28.6912,
+    "description": "Muğla Köyceğiz D400 Yolu; Opet akaryakıt, narenciye bahçeleri yanı dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 996,
+    "name": "Petrol Ofisi - Ortaca Dalaman Çevre Yolu",
+    "category": "fuel",
+    "lat": 36.8312,
+    "lon": 28.7712,
+    "description": "Muğla Ortaca D400 Karayolu; Petrol Ofisi akaryakıt, market ve araç temizlik alanı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 997,
+    "name": "Shell - Fethiye Çevre Yolu Erasta Yanı",
+    "category": "fuel",
+    "lat": 36.6312,
+    "lon": 29.1215,
+    "description": "Muğla Fethiye Merkez Girişi; Shell akaryakıt, Select market ve mescit.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 998,
+    "name": "Trugo DC Hızlı Şarj (180 kW) - Fethiye Girişi",
+    "category": "ev_charge",
+    "lat": 36.6316,
+    "lon": 29.122,
+    "description": "Muğla Fethiye D400 Karayolu; Trugo 180 kW DC ultra hızlı elektrikli araç şarj merkezi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 999,
+    "name": "Opet - Kalkan Kalamar Kavşağı",
+    "category": "fuel",
+    "lat": 36.2612,
+    "lon": 29.4125,
+    "description": "Antalya Kaş Kalkan D400 Yolu; Opet akaryakıt, deniz manzaralı mola yeri.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1000,
+    "name": "Petrol Ofisi - Kaş Andifli Giriş İstasyonu",
+    "category": "fuel",
+    "lat": 36.2112,
+    "lon": 29.6312,
+    "description": "Antalya Kaş Girişi; Petrol Ofisi akaryakıt, market ve motosiklet park alanı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1001,
+    "name": "Shell - Demre Noel Baba Caddesi Kavşağı",
+    "category": "fuel",
+    "lat": 36.2412,
+    "lon": 29.9812,
+    "description": "Antalya Demre D400 Yolu; Shell akaryakıt, portakal bahçeleri yanı dinlenme yeri.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1002,
+    "name": "Opet - Finike Liman Çıkışı İstasyonu",
+    "category": "fuel",
+    "lat": 36.2912,
+    "lon": 30.1412,
+    "description": "Antalya Finike Sahil Yolu; Opet akaryakıt, Ultra Temiz Tuvaletler ve market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1003,
+    "name": "Petrol Ofisi - Kumluca Çevre Yolu",
+    "category": "fuel",
+    "lat": 36.3612,
+    "lon": 30.2912,
+    "description": "Antalya Kumluca D400 Yolu; Petrol Ofisi akaryakıt, oto bakım ve market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1004,
+    "name": "Shell - Kemer Çamyuva Girişi",
+    "category": "fuel",
+    "lat": 36.5612,
+    "lon": 30.5512,
+    "description": "Antalya Kemer D400 Karayolu; Shell akaryakıt, Select market ve oto yıkama.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1005,
+    "name": "ZES Hızlı DC Şarj (180 kW) - Kemer Merkez",
+    "category": "ev_charge",
+    "lat": 36.6012,
+    "lon": 30.5612,
+    "description": "Antalya Kemer Girişi; ZES 180 kW DC yüksek hızlı şarj istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1006,
+    "name": "Shell - Manavgat Çevre Yolu Şelale Kavşağı",
+    "category": "fuel",
+    "lat": 36.7912,
+    "lon": 31.4412,
+    "description": "Antalya Manavgat D400 Hattı; Shell akaryakıt, 24 saat açık market ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1007,
+    "name": "Opet - Alanya Dinek Giriş Tesisleri",
+    "category": "fuel",
+    "lat": 36.5612,
+    "lon": 31.9712,
+    "description": "Antalya Alanya Batı Girişi Dinek; Opet akaryakıt, Kleopatra plajı manzarası ve market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1008,
+    "name": "Trugo DC Hızlı Şarj (180 kW) - Alanya Alanyum AVM",
+    "category": "ev_charge",
+    "lat": 36.5312,
+    "lon": 32.0312,
+    "description": "Antalya Alanya D400 Çevre Yolu; Trugo 180 kW yüksek hızlı DC şarj ünitesi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1009,
+    "name": "Petrol Ofisi - Gazipaşa Havalimanı Kavşağı",
+    "category": "fuel",
+    "lat": 36.2712,
+    "lon": 32.3125,
+    "description": "Antalya Gazipaşa D400 Karayolu; Petrol Ofisi akaryakıt, muz bahçeleri yanı dinlenme alanı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1010,
+    "name": "Shell - Anamur Muzkent Dinlenme Tesisleri",
+    "category": "fuel",
+    "lat": 36.0812,
+    "lon": 32.8412,
+    "description": "Mersin Anamur D400 Sahil Hattı; Shell akaryakıt, Anamur muzu ve çilek satış reyonu, kafe.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1011,
+    "name": "Opet - Aydıncık Liman Yanı İstasyonu",
+    "category": "fuel",
+    "lat": 36.1412,
+    "lon": 33.3212,
+    "description": "Mersin Aydıncık D400 Yolu; Opet akaryakıt, deniz manzaralı dinlenme yeri ve market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1012,
+    "name": "Petrol Ofisi - Silifke Çevre Yolu Göksu Tesisleri",
+    "category": "fuel",
+    "lat": 36.3812,
+    "lon": 33.9312,
+    "description": "Mersin Silifke D400 Karayolu; Petrol Ofisi akaryakıt, Göksu nehri kenarı dinlenme tesisi ve yöresel yoğurt.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1013,
+    "name": "Shell - Erdemli Kızkalesi Girişi Tesisleri",
+    "category": "fuel",
+    "lat": 36.4712,
+    "lon": 34.1412,
+    "description": "Mersin Erdemli Kızkalesi; Shell akaryakıt, deniz manzaralı mola yeri ve 24 saat açık market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1014,
+    "name": "ZES Hızlı DC Şarj (180 kW) - Mersin Forum AVM",
+    "category": "ev_charge",
+    "lat": 36.7812,
+    "lon": 34.5812,
+    "description": "Mersin Yenişehir D400 Hattı; ZES 180 kW DC yüksek hızlı şarj istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1015,
+    "name": "Opet - Adana Çukurova Çevre Yolu İstasyonu",
+    "category": "fuel",
+    "lat": 37.0412,
+    "lon": 35.2812,
+    "description": "Adana Çukurova Otoyol Bağlantısı; Opet akaryakıt, 24 saat açık market, kebap salonu ve oto kuaför.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1016,
+    "name": "Shell - Ceyhan Yumurtalık Serbest Bölge Kavşağı",
+    "category": "fuel",
+    "lat": 36.9912,
+    "lon": 35.8125,
+    "description": "Adana Ceyhan D400 Otoyolu; Shell akaryakıt, kamyon & tır dinlenme alanı ve market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1017,
+    "name": "Petrol Ofisi - Osmaniye Çevre Yolu İstasyonu",
+    "category": "fuel",
+    "lat": 37.0712,
+    "lon": 36.2412,
+    "description": "Osmaniye Merkez D400 Hattı; Petrol Ofisi akaryakıt, yer fıstığı satış mağazası ve dinlenme kafesi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1018,
+    "name": "Shell - Bahçe Ayran Geçidi Dinlenme Tesisleri",
+    "category": "fuel",
+    "lat": 37.1912,
+    "lon": 36.5812,
+    "description": "Osmaniye Bahçe Amanos Dağları Geçidi; Shell akaryakıt, dağ manzaralı mola yeri ve çorba salonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1019,
+    "name": "Opet - Gaziantep İpekyolu Çevre Yolu Tesisleri",
+    "category": "fuel",
+    "lat": 37.0612,
+    "lon": 37.3612,
+    "description": "Gaziantep Şehitkamil İpekyolu; Opet akaryakıt, meşhur baklava ve fıstık satış noktası, mescit.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1020,
+    "name": "Trugo DC Hızlı Şarj (180 kW) - Gaziantep M1 AVM",
+    "category": "ev_charge",
+    "lat": 37.0812,
+    "lon": 37.3312,
+    "description": "Gaziantep Şehitkamil; Trugo 180 kW DC yüksek hızlı şarj istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1021,
+    "name": "Petrol Ofisi - Nizip Fırat Köprüsü Girişi",
+    "category": "fuel",
+    "lat": 37.0112,
+    "lon": 37.7912,
+    "description": "Gaziantep Nizip O-52 Otoyolu; Petrol Ofisi akaryakıt, zeytin ve fıstık diyarı mola tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1022,
+    "name": "Shell - Birecik Fırat Kıyısı Tesisleri",
+    "category": "fuel",
+    "lat": 37.0312,
+    "lon": 37.9812,
+    "description": "Şanlıurfa Birecik Fırat Nehri Kenarı; Shell akaryakıt, meşhur patlıcan kebabı salonu ve dinlenme alanı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1023,
+    "name": "Opet - Şanlıurfa Karaköprü Giriş Tesisleri",
+    "category": "fuel",
+    "lat": 37.1912,
+    "lon": 38.7912,
+    "description": "Şanlıurfa Karaköprü Girişi; Opet akaryakıt, sıra gecesi ve yöresel lezzet salonu, mescit.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1024,
+    "name": "Trugo DC Hızlı Şarj (180 kW) - Şanlıurfa Piazza AVM",
+    "category": "ev_charge",
+    "lat": 37.1512,
+    "lon": 38.7812,
+    "description": "Şanlıurfa Eyyübiye; Trugo 180 kW DC yüksek hızlı şarj merkezi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1025,
+    "name": "Petrol Ofisi - Akçakoca Sahil Giriş İstasyonu",
+    "category": "fuel",
+    "lat": 41.0812,
+    "lon": 31.1215,
+    "description": "Düzce Akçakoca Karadeniz Sahil Yolu; Petrol Ofisi akaryakıt, fındık satış reyonu ve deniz manzarası.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1026,
+    "name": "Shell - Kdz. Ereğli Kepez Çevre Yolu",
+    "category": "fuel",
+    "lat": 41.2712,
+    "lon": 31.4412,
+    "description": "Zonguldak Ereğli D010 Yolu; Shell akaryakıt, Select market, oto bakım ve mescit.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1027,
+    "name": "Opet - Zonguldak Kozlu Sahil İstasyonu",
+    "category": "fuel",
+    "lat": 41.4412,
+    "lon": 31.7612,
+    "description": "Zonguldak Kozlu Sahil Yolu; Opet akaryakıt, 24 saat açık market ve deniz kenarı dinlenme yeri.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1028,
+    "name": "Petrol Ofisi - Bartın Çaycuma Kavşağı",
+    "category": "fuel",
+    "lat": 41.4212,
+    "lon": 32.0712,
+    "description": "Zonguldak-Bartın D010 Kavşağı; Petrol Ofisi akaryakıt, manda yoğurdu reyonu ve dinlenme alanı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1029,
+    "name": "Shell - Sinop Gerze Sahil Tesisleri",
+    "category": "fuel",
+    "lat": 41.8012,
+    "lon": 35.1912,
+    "description": "Sinop Gerze Karadeniz Sahil Yolu; Shell akaryakıt, sakin şehir Gerze dinlenme molası ve kafe.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1030,
+    "name": "Opet - Bafra Çevre Yolu Kızılırmak Tesisleri",
+    "category": "fuel",
+    "lat": 41.5612,
+    "lon": 35.9112,
+    "description": "Samsun Bafra D010 Karayolu; Opet akaryakıt, meşhur Bafra pidesi restoranı ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1031,
+    "name": "Shell - Samsun Atakum Batı Çevre Yolu",
+    "category": "fuel",
+    "lat": 41.3412,
+    "lon": 36.2712,
+    "description": "Samsun Atakum Sahil Hattı; Shell akaryakıt, 24 saat açık Select market, oto yıkama ve kahve alanı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1032,
+    "name": "Trugo Ultra Hızlı DC Şarj (180 kW) - Samsun Piazza AVM",
+    "category": "ev_charge",
+    "lat": 41.2812,
+    "lon": 36.3512,
+    "description": "Samsun Canik Sahil Yolu; Trugo 180 kW DC yüksek hızlı şarj istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1033,
+    "name": "Petrol Ofisi - Terme Ulusoy Dinlenme Tesisleri",
+    "category": "fuel",
+    "lat": 41.2012,
+    "lon": 36.9712,
+    "description": "Samsun Terme Karadeniz Sahil Yolu; Petrol Ofisi akaryakıt, Ulusoy dinlenme tesisi, açık büfe ve pide salonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1034,
+    "name": "Opet - Ünye Çevre Yolu Sahil İstasyonu",
+    "category": "fuel",
+    "lat": 41.1312,
+    "lon": 37.2812,
+    "description": "Ordu Ünye D010 Yolu; Opet akaryakıt, Karadeniz manzaralı mola yeri ve fındık mağazası.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1035,
+    "name": "Shell - Fatsa Yalı Çevre Yolu Tesisleri",
+    "category": "fuel",
+    "lat": 41.0312,
+    "lon": 37.5112,
+    "description": "Ordu Fatsa Sahil Yolu; Shell akaryakıt, balık restoranları yanı dinlenme alanı ve market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1036,
+    "name": "Petrol Ofisi - Ordu Boztepe Teleferik Yanı İstasyonu",
+    "category": "fuel",
+    "lat": 40.9812,
+    "lon": 37.8812,
+    "description": "Ordu Merkez Sahil Yolu; Petrol Ofisi akaryakıt, Boztepe teleferik istasyonu yanı ve 24 saat market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1037,
+    "name": "ZES Hızlı DC Şarj (180 kW) - Ordu Novada AVM",
+    "category": "ev_charge",
+    "lat": 40.9751,
+    "lon": 37.9112,
+    "description": "Ordu Altınordu Çevre Yolu; ZES 180 kW DC yüksek hızlı şarj ünitesi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1038,
+    "name": "Opet - Giresun Tirebolu Çaykur Tesisleri Yanı",
+    "category": "fuel",
+    "lat": 41.0112,
+    "lon": 38.8212,
+    "description": "Giresun Tirebolu Sahil Yolu; Opet akaryakıt, meşhur Tirebolu çay evi ve dinlenme alanı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1039,
+    "name": "Shell - Vakfıkebir Ekmeği Dinlenme Tesisleri",
+    "category": "fuel",
+    "lat": 41.0512,
+    "lon": 39.2812,
+    "description": "Trabzon Vakfıkebir Karadeniz Sahili; Shell akaryakıt, taş fırın Vakfıkebir ekmeği & tereyağı satış noktası.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1040,
+    "name": "Opet - Akçaabat Köfteciler Sahil Tesisleri",
+    "category": "fuel",
+    "lat": 41.0212,
+    "lon": 39.5712,
+    "description": "Trabzon Akçaabat Sahil Yolu; Opet akaryakıt, meşhur Akçaabat köftesi lokantaları yanı mola yeri.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1041,
+    "name": "Petrol Ofisi - Trabzon Kaşüstü Çevre Yolu",
+    "category": "fuel",
+    "lat": 40.9712,
+    "lon": 39.8112,
+    "description": "Trabzon Yomra Kaşüstü; Petrol Ofisi akaryakıt, Cevahir AVM karşısı, market ve oto yıkama.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1042,
+    "name": "Trugo DC Hızlı Şarj (180 kW) - Trabzon Forum AVM",
+    "category": "ev_charge",
+    "lat": 40.9912,
+    "lon": 39.7512,
+    "description": "Trabzon Ortahisar; Trugo 180 kW DC yüksek hızlı şarj merkezi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1043,
+    "name": "Shell - Of Çaykara Uzungöl Ayrımı Tesisleri",
+    "category": "fuel",
+    "lat": 40.9412,
+    "lon": 40.2612,
+    "description": "Trabzon Of Sahil Yolu; Shell akaryakıt, Uzungöl turistik yol ayrımı ve çay bahçesi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1044,
+    "name": "Opet - Rize İyidere Lojistik Liman Tesisleri",
+    "category": "fuel",
+    "lat": 41.0112,
+    "lon": 40.3512,
+    "description": "Rize İyidere D010 Yolu; Opet akaryakıt, Karadeniz çay fabrikası satış noktası ve dinlenme salonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1045,
+    "name": "ZES Hızlı DC Şarj (120 kW) - Rize Şimal AVM",
+    "category": "ev_charge",
+    "lat": 41.0251,
+    "lon": 40.5125,
+    "description": "Rize Merkez Sahil Yolu; ZES 120 kW DC hızlı şarj istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1046,
+    "name": "Shell - Ardeşen Çamlıhemşin Ayder Ayrımı",
+    "category": "fuel",
+    "lat": 41.1912,
+    "lon": 40.9812,
+    "description": "Rize Ardeşen D010 Sahil Yolu; Shell akaryakıt, Fırtına Vadisi ve Ayder Yaylası giriş kavşağı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1047,
+    "name": "Petrol Ofisi - Hopa Sarp Sınır Kapısı Tesisleri",
+    "category": "fuel",
+    "lat": 41.4012,
+    "lon": 41.4312,
+    "description": "Artvin Hopa Gürcistan Sınır Yolu; Petrol Ofisi akaryakıt, gümrük öncesi son büyük dinlenme alanı ve market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1048,
+    "name": "Shell - Kırıkkale Yahşihan Tüpraş Kavşağı",
+    "category": "fuel",
+    "lat": 39.8512,
+    "lon": 33.4512,
+    "description": "Kırıkkale D200 Karayolu; Shell akaryakıt, Rafineri çıkışı 24 saat açık market ve restoran.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1049,
+    "name": "Opet - Delice Çorum Kavşağı Tesisleri",
+    "category": "fuel",
+    "lat": 39.9512,
+    "lon": 34.0212,
+    "description": "Kırıkkale Delice D190 / D200 Kavşağı; Opet akaryakıt, doğal kaynak tuzu satış noktası ve mola tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1050,
+    "name": "Petrol Ofisi - Sungurlu Çorum Leblebisi Tesisleri",
+    "category": "fuel",
+    "lat": 40.1612,
+    "lon": 34.3712,
+    "description": "Çorum Sungurlu D010 Hattı; Petrol Ofisi akaryakıt, taze kavrulmuş Çorum leblebisi reyonları ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1051,
+    "name": "Shell - Çorum Çevre Yolu Hitit Tesisleri",
+    "category": "fuel",
+    "lat": 40.5412,
+    "lon": 34.9512,
+    "description": "Çorum Merkez D795 Çevre Yolu; Shell akaryakıt, Select market, oto yıkama ve mescit.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1052,
+    "name": "Trugo DC Hızlı Şarj (180 kW) - Çorum AHL Park AVM",
+    "category": "ev_charge",
+    "lat": 40.5512,
+    "lon": 34.9612,
+    "description": "Çorum Merkez; Trugo 180 kW DC yüksek hızlı şarj istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1053,
+    "name": "Opet - Merzifon Havalimanı Kavşağı Tesisleri",
+    "category": "fuel",
+    "lat": 40.8712,
+    "lon": 35.4612,
+    "description": "Amasya Merzifon D100 / Samsun Kavşağı; Opet akaryakıt, 24 saat açık sıcak çorba ve dinlenme alanı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1054,
+    "name": "Petrol Ofisi - Amasya Kralkaya Çevre Yolu",
+    "category": "fuel",
+    "lat": 40.6612,
+    "lon": 35.8412,
+    "description": "Amasya Çevre Yolu; Petrol Ofisi akaryakıt, meşhur Amasya elması satışı ve dinlenme yeri.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1055,
+    "name": "Shell - Yozgat Yerköy D200 Dinlenme Tesisleri",
+    "category": "fuel",
+    "lat": 39.6412,
+    "lon": 34.4612,
+    "description": "Yozgat Yerköy D200 Karayolu; Shell akaryakıt, test kebabı lokantası ve market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1056,
+    "name": "Opet - Yozgat Merkez Çevre Yolu İstasyonu",
+    "category": "fuel",
+    "lat": 39.8112,
+    "lon": 34.8112,
+    "description": "Yozgat Merkez; Opet akaryakıt, Ultra Temiz Tuvaletler ve 24 saat açık market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1057,
+    "name": "Shell - Sivas Çevre Yolu Kangal Kavşağı",
+    "category": "fuel",
+    "lat": 39.7412,
+    "lon": 37.0112,
+    "description": "Sivas Merkez D200 Karayolu; Shell akaryakıt, Sivas köftesi restoranı, market ve oto kuaför.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1058,
+    "name": "Trugo DC Hızlı Şarj (180 kW) - Sivas Primemall AVM",
+    "category": "ev_charge",
+    "lat": 39.7312,
+    "lon": 37.0412,
+    "description": "Sivas Merkez; Trugo 180 kW DC yüksek hızlı elektrikli araç şarj merkezi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1059,
+    "name": "Petrol Ofisi - Zara Çamlıbel Geçidi Tesisleri",
+    "category": "fuel",
+    "lat": 39.8912,
+    "lon": 37.7512,
+    "description": "Sivas Zara D200 Karayolu; Petrol Ofisi akaryakıt, bal ve yöresel ürünler satış mağazası.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1060,
+    "name": "Shell - Refahiye Sakaltutan Geçidi Tesisleri",
+    "category": "fuel",
+    "lat": 39.9012,
+    "lon": 38.7612,
+    "description": "Erzincan Refahiye Sakaltutan Zirvesi (2160m); Shell akaryakıt, kış şartlarına dayanıklı dinlenme tesisi ve oto zincir servisi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1061,
+    "name": "Opet - Erzincan Çevre Yolu İstasyonu",
+    "category": "fuel",
+    "lat": 39.7412,
+    "lon": 39.4912,
+    "description": "Erzincan Merkez D100 Yolu; Opet akaryakıt, tulum peyniri reyonu ve 24 saat dinlenme salonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1062,
+    "name": "Petrol Ofisi - Tercan Mama Hatun Dinlenme Tesisleri",
+    "category": "fuel",
+    "lat": 39.7812,
+    "lon": 40.3812,
+    "description": "Erzincan Tercan; Petrol Ofisi akaryakıt, tarihi kervansaray yanı mola tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1063,
+    "name": "Shell - Aşkale Çimento Kavşağı İstasyonu",
+    "category": "fuel",
+    "lat": 39.9212,
+    "lon": 40.6912,
+    "description": "Erzurum Aşkale D100 Yolu; Shell akaryakıt, sıcak çorba ve kışlık araç bakım alanı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1064,
+    "name": "Opet - Erzurum Dadaşkent Çevre Yolu Tesisleri",
+    "category": "fuel",
+    "lat": 39.9112,
+    "lon": 41.2212,
+    "description": "Erzurum Merkez Dadaşkent; Opet akaryakıt, meşhur Cağ kebabı lokantası, kadayıf dolması ve mescit.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1065,
+    "name": "Trugo DC Hızlı Şarj (180 kW) - Erzurum MNG AVM",
+    "category": "ev_charge",
+    "lat": 39.9051,
+    "lon": 41.2512,
+    "description": "Erzurum Yakutiye; Trugo 180 kW DC ultra hızlı elektrikli araç şarj istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1066,
+    "name": "Petrol Ofisi - Pasinler Termal Kavşağı",
+    "category": "fuel",
+    "lat": 39.9812,
+    "lon": 41.6712,
+    "description": "Erzurum Pasinler D100 Karayolu; Petrol Ofisi akaryakıt, kaplıca suyu yanı mola tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1067,
+    "name": "Shell - Horasan Ağrı-Kars Ayrımı Tesisleri",
+    "category": "fuel",
+    "lat": 40.0412,
+    "lon": 42.1712,
+    "description": "Erzurum Horasan İpekyolu; Shell akaryakıt, Kafkas ve İran transit hattı dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1068,
+    "name": "Opet - Sarıkamış Kayak Merkezi Giriş İstasyonu",
+    "category": "fuel",
+    "lat": 40.3312,
+    "lon": 42.5812,
+    "description": "Kars Sarıkamış D957 Yolu; Opet akaryakıt, sarıçam ormanları manzaralı kışlık mola yeri.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1069,
+    "name": "Petrol Ofisi - Kars Merkez Çevre Yolu",
+    "category": "fuel",
+    "lat": 40.6012,
+    "lon": 43.0912,
+    "description": "Kars Merkez; Petrol Ofisi akaryakıt, Kars kaşarı & gravyeri satış noktası ve 24 saat market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1070,
+    "name": "Shell - Ağrı Doğubayazıt İshak Paşa Yolu Tesisleri",
+    "category": "fuel",
+    "lat": 39.5412,
+    "lon": 44.0812,
+    "description": "Ağrı Doğubayazıt; Shell akaryakıt, Ağrı Dağı manzaralı mola yeri ve İran transit servisi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1071,
+    "name": "Opet - Van Edremit Sahil Yolu Tesisleri",
+    "category": "fuel",
+    "lat": 38.4212,
+    "lon": 43.2712,
+    "description": "Van Edremit Van Gölü Kıyısı; Opet akaryakıt, meşhur Van kahvaltı salonu ve göl manzaralı teras.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1072,
+    "name": "Trugo DC Hızlı Şarj (180 kW) - Van AVM",
+    "category": "ev_charge",
+    "lat": 38.4912,
+    "lon": 43.3812,
+    "description": "Van İpekyolu; Trugo 180 kW DC yüksek hızlı şarj istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1073,
+    "name": "Petrol Ofisi - Tatvan İskele Dinlenme Tesisleri",
+    "category": "fuel",
+    "lat": 38.5112,
+    "lon": 42.2812,
+    "description": "Bitlis Tatvan Van Gölü Feribot İskelesi; Petrol Ofisi akaryakıt, büryan kebabı ve market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1074,
+    "name": "Shell - Elazığ Malatya Çevre Yolu Tesisleri",
+    "category": "fuel",
+    "lat": 38.6512,
+    "lon": 39.1812,
+    "description": "Elazığ Merkez D300 Yolu; Shell akaryakıt, Harput dibek kahvesi ve 24 saat market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1075,
+    "name": "Opet - Malatya Çevre Yolu Kayısı Tesisleri",
+    "category": "fuel",
+    "lat": 38.3512,
+    "lon": 38.2912,
+    "description": "Malatya Yeşilyurt Çevre Yolu; Opet akaryakıt, taze Malatya kayısısı satış mağazası ve mescit.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1076,
+    "name": "Trugo DC Hızlı Şarj (180 kW) - Malatya Park AVM",
+    "category": "ev_charge",
+    "lat": 38.3481,
+    "lon": 38.3112,
+    "description": "Malatya Merkez; Trugo 180 kW DC yüksek hızlı elektrikli şarj istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1077,
+    "name": "Shell - Diyarbakır Şanlıurfa Yolu Mega Tesisleri",
+    "category": "fuel",
+    "lat": 37.9312,
+    "lon": 40.1812,
+    "description": "Diyarbakır Kayapınar; Shell akaryakıt, ciğer salonu, geniş dinlenme tesisi ve oto kuaför.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1078,
+    "name": "Trugo DC Hızlı Şarj (180 kW) - Diyarbakır Ceylan Karavil AVM",
+    "category": "ev_charge",
+    "lat": 37.9412,
+    "lon": 40.1712,
+    "description": "Diyarbakır Kayapınar; Trugo 180 kW DC yüksek hızlı elektrikli araç şarj merkezi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1079,
+    "name": "Petrol Ofisi - Batman Çevre Yolu Hasankeyf Ayrımı",
+    "category": "fuel",
+    "lat": 37.8812,
+    "lon": 41.1312,
+    "description": "Batman Merkez; Petrol Ofisi akaryakıt, Hasankeyf yolu başlangıcı ve 24 saat açık market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1080,
+    "name": "Opet - Mardin Kızıltepe İpekyolu Tesisleri",
+    "category": "fuel",
+    "lat": 37.1912,
+    "lon": 40.5812,
+    "description": "Mardin Kızıltepe Tarihi İpekyolu; Opet akaryakıt, 24 saat açık dinlenme tesisi ve market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1081,
+    "name": "Shell - Mardin Artuklu Yenişehir Tesisleri",
+    "category": "fuel",
+    "lat": 37.3112,
+    "lon": 40.7312,
+    "description": "Mardin Merkez Artuklu; Shell akaryakıt, taş konak manzaralı dinlenme noktası ve kafe.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1082,
+    "name": "Opet - Adıyaman Kahta Nemrut Dağı Kavşağı",
+    "category": "fuel",
+    "lat": 37.7612,
+    "lon": 38.2812,
+    "description": "Adıyaman Merkez; Opet akaryakıt, Nemrut Dağı turistik güzergahı başlangıcı ve 24 saat market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1083,
+    "name": "Shell - Bingöl Çevre Yolu Karlıova Ayrımı",
+    "category": "fuel",
+    "lat": 38.8912,
+    "lon": 40.5012,
+    "description": "Bingöl Merkez D300 Yolu; Shell akaryakıt, meşhur Bingöl balı reyonu ve dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1084,
+    "name": "Petrol Ofisi - Bitlis Rahva Geçidi Tesisleri",
+    "category": "fuel",
+    "lat": 38.4912,
+    "lon": 42.1215,
+    "description": "Bitlis-Tatvan Rahva Düzlüğü; Petrol Ofisi akaryakıt, kışlık araç bakım alanı ve sıcak mola salonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1085,
+    "name": "Opet - Çankırı Çevre Yolu Tuz Mağarası Girişi",
+    "category": "fuel",
+    "lat": 40.6012,
+    "lon": 33.6112,
+    "description": "Çankırı Merkez; Opet akaryakıt, kaya tuzu hediyelik eşya reyonu ve 24 saat açık market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1086,
+    "name": "Shell - Hakkari Yüksekova İpekyolu İstasyonu",
+    "category": "fuel",
+    "lat": 37.5712,
+    "lon": 44.2812,
+    "description": "Hakkari Yüksekova Havalimanı Yolu; Shell akaryakıt, İran-Esendere sınır transit mola yeri.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1087,
+    "name": "Petrol Ofisi - Isparta Süleyman Demirel Havalimanı Yanı",
+    "category": "fuel",
+    "lat": 37.8612,
+    "lon": 30.3712,
+    "description": "Isparta D685 Karayolu; Petrol Ofisi akaryakıt, gül ve lavanta bahçeleri yanı dinlenme tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1088,
+    "name": "Opet - Kırşehir Mucur Çevre Yolu Tesisleri",
+    "category": "fuel",
+    "lat": 39.1412,
+    "lon": 34.1612,
+    "description": "Kırşehir Merkez D260 Yolu; Opet akaryakıt, Ahi Evran diyarı dinlenme yeri ve market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1089,
+    "name": "Shell - Kahramanmaraş Dondurma Vadisi Tesisleri",
+    "category": "fuel",
+    "lat": 37.5812,
+    "lon": 36.9312,
+    "description": "Kahramanmaraş Çevre Yolu; Shell akaryakıt, meşhur dövme Maraş dondurması salonu ve mescit.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1090,
+    "name": "Petrol Ofisi - Muş Ovası Çevre Yolu İstasyonu",
+    "category": "fuel",
+    "lat": 38.7512,
+    "lon": 41.5112,
+    "description": "Muş Merkez D300 Yolu; Petrol Ofisi akaryakıt, Muş lalesi manzaralı dinlenme alanı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1091,
+    "name": "Opet - Nevşehir Kapadokya Göreme Kavşağı",
+    "category": "fuel",
+    "lat": 38.6412,
+    "lon": 34.7212,
+    "description": "Nevşehir Merkez; Opet akaryakıt, Peri Bacaları turizm kavşağı, balon seyir noktası yanı ve market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1092,
+    "name": "Trugo DC Hızlı Şarj (180 kW) - Nevşehir Nissara AVM",
+    "category": "ev_charge",
+    "lat": 38.6251,
+    "lon": 34.7152,
+    "description": "Nevşehir Merkez; Trugo 180 kW DC yüksek hızlı şarj istasyonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1093,
+    "name": "Shell - Siirt Çevre Yolu Kurtalan Ayrımı",
+    "category": "fuel",
+    "lat": 37.9412,
+    "lon": 41.9312,
+    "description": "Siirt Merkez; Shell akaryakıt, Siirt fıstığı & büryan kebabı dinlenme alanı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1094,
+    "name": "Petrol Ofisi - Tunceli Munzur Vadisi Giriş İstasyonu",
+    "category": "fuel",
+    "lat": 39.1112,
+    "lon": 39.5412,
+    "description": "Tunceli Merkez Munzur Çayı Yanı; Petrol Ofisi akaryakıt, doğa manzaralı mola yeri.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1095,
+    "name": "Opet - Bayburt Kop Dağı Geçidi Tesisleri",
+    "category": "fuel",
+    "lat": 40.2512,
+    "lon": 40.2212,
+    "description": "Bayburt-Erzurum Kop Dağı Zirvesi (2409m); Opet akaryakıt, kış dinlenme tesisi ve çorba salonu.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1096,
+    "name": "Shell - Karaman Çevre Yolu Konya Kavşağı",
+    "category": "fuel",
+    "lat": 37.1912,
+    "lon": 33.2212,
+    "description": "Karaman Merkez D715 Yolu; Shell akaryakıt, elma diyarı Karaman dinlenme alanı ve market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1097,
+    "name": "Petrol Ofisi - Şırnak Cizre Tarihi İpekyolu",
+    "category": "fuel",
+    "lat": 37.3312,
+    "lon": 42.1912,
+    "description": "Şırnak Cizre Habur Sınır Kapısı Güzergahı; Petrol Ofisi akaryakıt, 24 saat açık market ve tır parkı.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1098,
+    "name": "Opet - Bartın İnkumu Kavşağı Sahil Yolu",
+    "category": "fuel",
+    "lat": 41.6412,
+    "lon": 32.3312,
+    "description": "Bartın Merkez Çevre Yolu; Opet akaryakıt, İnkumu plajı kavşağı ve 24 saat market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1099,
+    "name": "Shell - Ardahan Çıldır Gölü Kavşağı",
+    "category": "fuel",
+    "lat": 41.1112,
+    "lon": 42.7012,
+    "description": "Ardahan Merkez; Shell akaryakıt, Çıldır Gölü sarıbalık ve kızak turu ayrımı dinlenme yeri.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1100,
+    "name": "Petrol Ofisi - Iğdır Tuzluca Ağrı Dağı Eteği",
+    "category": "fuel",
+    "lat": 39.9212,
+    "lon": 44.0412,
+    "description": "Iğdır Merkez; Petrol Ofisi akaryakıt, Nahçıvan ve Ermenistan sınır hattı mola tesisi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1101,
+    "name": "Opet - Kilis Çevre Yolu Öncüpınar İstasyonu",
+    "category": "fuel",
+    "lat": 36.7112,
+    "lon": 37.1112,
+    "description": "Kilis Merkez; Opet akaryakıt, zeytinyağı diyarı mola tesisi ve 24 saat market.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1102,
+    "name": "Shell - Yalova Çiftlikköy Sahil Yolu",
+    "category": "fuel",
+    "lat": 40.6612,
+    "lon": 29.3512,
+    "description": "Yalova Sahil Yolu Osmangazi Köprüsü Çıkışı; Shell akaryakıt, Select market ve oto yıkama.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
+  },
+  {
+    "id": 1103,
+    "name": "Petrol Ofisi - Karabük Safranbolu Giriş İstasyonu",
+    "category": "fuel",
+    "lat": 41.2212,
+    "lon": 32.6512,
+    "description": "Karabük Safranbolu Tarihi Konaklar Kavşağı; Petrol Ofisi akaryakıt, safran lokumu reyonu ve dinlenme kafesi.",
+    "rating": 5,
+    "created_at": "2026-10-25 13:00:00"
   }
 ];
 
-// Türkiye 81 İl ve Popüler Seyahat/Keşif Noktaları Resmi Koordinat Veritabanı
 window.TURKEY_GEO_DATABASE = [
   { name: 'Adana', lat: 37.0000, lon: 35.3213, region: 'Akdeniz', type: 'city' },
   { name: 'Adıyaman', lat: 37.7648, lon: 38.2786, region: 'Güneydoğu Anadolu', type: 'city' },
