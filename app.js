@@ -6261,6 +6261,11 @@ function handleSaveRouteSubmit(e) {
   savedList.unshift(newSaved);
   localStorage.setItem('rotam_saved_routes', JSON.stringify(savedList));
 
+  // Sync with Firebase Cloud if user is logged in
+  if (typeof RotamCloud !== 'undefined' && RotamCloud.currentUser) {
+    RotamCloud.saveCloudRoute(newSaved);
+  }
+
   closeSaveRouteModal();
   showToast('Rota başarıyla kaydedildi!', 'success');
 }
@@ -6697,6 +6702,11 @@ function openSavedRoutesModal() {
   if (!modal) return;
   modal.classList.remove('hidden');
 
+  // If user is logged into Firebase, sync latest cloud routes
+  if (typeof RotamCloud !== 'undefined' && RotamCloud.currentUser) {
+    RotamCloud.syncCloudRoutesToLocal();
+  }
+
   // Default to presets so user sees curated routes right away
   switchSavedModalTab('presets');
   initIcons();
@@ -6779,8 +6789,15 @@ function deleteSavedRoute(index) {
   try {
     const raw = localStorage.getItem('rotam_saved_routes');
     const list = JSON.parse(raw);
+    const deleted = list[index];
     list.splice(index, 1);
     localStorage.setItem('rotam_saved_routes', JSON.stringify(list));
+
+    // Sync deletion with Firebase Cloud if logged in
+    if (deleted && deleted.id && typeof RotamCloud !== 'undefined' && RotamCloud.currentUser) {
+      RotamCloud.deleteCloudRoute(deleted.id);
+    }
+
     openSavedRoutesModal();
   } catch (err) {}
 }
