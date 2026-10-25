@@ -1,12 +1,12 @@
 /**
- * ROTAM V2 - Internationalization (i18n) Engine & Translations
+ * ROTAM V3 - Internationalization (i18n) Engine & Translations
  * Supported Languages: Türkçe (tr), English (en)
  */
 
 window.TRANSLATIONS = {
   tr: {
     // Brand & Slogan
-    app_title: "Rotam | Profesyonel Seyahat, Rota ve Keşif Platformu",
+    app_title: "Rotam V3 | Profesyonel Seyahat, Rota ve Keşif Platformu",
     app_subtitle: "Seyahat, Rota & Keşif Platformu",
     slogan_title: "Yolculuğun sadece bir varış noktası değil.",
     slogan_desc: "Rotanı oluştur, keşfedilecek yerleri bul ve yolculuğunu unutulmaz hale getir.",
@@ -390,7 +390,7 @@ window.TRANSLATIONS = {
 
   en: {
     // Brand & Slogan
-    app_title: "Rotam | Professional Travel, Route & Discovery Platform",
+    app_title: "Rotam V3 | Professional Travel, Route & Discovery Platform",
     app_subtitle: "Travel, Route & Discovery Platform",
     slogan_title: "The journey is more than just a destination.",
     slogan_desc: "Create your route, discover hidden spots, and make your trip unforgettable.",

@@ -1,5 +1,5 @@
 /**
- * ROTAM V2 – Professional Travel, Route Planning & Destination Discovery Platform
+ * ROTAM V3 – Professional Travel, Route Planning & Destination Discovery Platform
  * 
  * Slogan: "Yolculuğun sadece bir varış noktası değil. Rotanı oluştur, keşfedilecek yerleri bul ve yolculuğunu unutulmaz hale getir."
  */
@@ -232,7 +232,7 @@ function initPlacesDatabase() {
   custom.forEach(p => mapById.set(p.id, p));
 
   state.allPlaces = Array.from(mapById.values());
-  console.log(`Rotam V2 Mekan Veritabanı Hazır: ${state.allPlaces.length} nokta.`);
+  console.log(`Rotam V3 Mekan Veritabanı Hazır: ${state.allPlaces.length} nokta.`);
   if (typeof populateCityDatalist === 'function') {
     populateCityDatalist();
   }
@@ -8590,7 +8590,7 @@ function exportGPX() {
   const validPoints = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
 
   let gpx = `<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="Rotam V2 Platform" xmlns="http://www.topografix.com/GPX/1/1">
+<gpx version="1.1" creator="Rotam V3 Platform" xmlns="http://www.topografix.com/GPX/1/1">
   <metadata>
     <name>Rotam Gezi Rotası</name>
     <time>${new Date().toISOString()}</time>
@@ -9349,7 +9349,7 @@ const RotamDisplay = {
 window.RotamDisplay = RotamDisplay;
 
 // ==========================================
-// Rotam Background & Intercom Keep-Alive Engine (Optimized v2)
+// Rotam Background & Intercom Keep-Alive Engine (Optimized v3)
 // Ultra-low CPU, battery-optimized background GPS tracking, audio intercom
 // voice prompts, and lock-screen media turn guidance.
 // ==========================================
