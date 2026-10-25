@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v45 (Optimized Background Navigation & Low CPU Audio Engine)
-const CACHE_NAME = 'rotam-cache-v45';
+// Rotam PWA Service Worker - v46 (MapLibre 3D Vector Map & 60 FPS Camera Integration)
+const CACHE_NAME = 'rotam-cache-v46';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
@@ -7,6 +7,7 @@ const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './app.js',
+  './maplibre_adapter.js',
   './yandex_leaflet.js',
   './styles.css',
   './places_data.js',

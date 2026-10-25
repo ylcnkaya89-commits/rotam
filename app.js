@@ -318,10 +318,128 @@ function patchLeafletDraggableForRotation() {
   };
 }
 
-// Leaflet Map Initialization with automatic retry & size stabilization
+// ==========================================
+// MapLibre GL JS 3D Vector Map Engine Initializer
+// ==========================================
+function initMapLibre() {
+  const mapEl = document.getElementById('map');
+  if (!mapEl) {
+    setTimeout(initMap, 150);
+    return;
+  }
+
+  window.isMapLibre = true;
+  mapEl.classList.remove('dark-map');
+
+  const activeKey = state.activeTileLayer || 'dark';
+  const initialStyle = (typeof RotamMapEngine !== 'undefined' && RotamMapEngine.STYLES[activeKey])
+    ? RotamMapEngine.STYLES[activeKey]
+    : 'https://tiles.openfreemap.org/styles/dark';
+
+  // Center on Turkey: [lon, lat] in MapLibre!
+  map = new maplibregl.Map({
+    container: 'map',
+    style: initialStyle,
+    center: [35.2, 39.0],
+    zoom: 6,
+    pitch: 0,
+    bearing: 0,
+    attributionControl: false
+  });
+
+  wrapMapLibreInstance(map);
+  mapInitialized = true;
+
+  map.on('load', () => {
+    setup3DBuildingsLayer(map);
+    if (typeof RotamMapEngine !== 'undefined') {
+      RotamMapEngine.updateEngineUI();
+    }
+  });
+
+  // Map Click Listener to add waypoints & auto-collapse filters on mobile
+  map.on('click', async (e) => {
+    dismissQuickPlacePreview();
+    const gmapsDropdown = document.getElementById('gmaps-search-dropdown');
+    if (gmapsDropdown) gmapsDropdown.classList.add('hidden');
+    const rightPanel = document.getElementById('right-panel');
+    if (rightPanel && !rightPanel.classList.contains('hidden') && window.innerWidth < 1024) {
+      closeRightPanel();
+    }
+    if (window.innerWidth < 768) {
+      const container = document.getElementById('map-filter-pills-container');
+      if (container && !container.classList.contains('hidden')) {
+        toggleMapFilterBarCollapse();
+      }
+    }
+    const lat = e.latlng ? e.latlng.lat : e.lngLat.lat;
+    const lng = e.latlng ? e.latlng.lng : e.lngLat.lng;
+    handleMapClick(lat, lng);
+  });
+
+  map.on('movestart', () => {
+    const filterBar = document.getElementById('map-category-filter-bar');
+    if (filterBar) filterBar.classList.add('map-moving-dim');
+  });
+
+  map.on('moveend', () => {
+    const filterBar = document.getElementById('map-category-filter-bar');
+    if (filterBar) filterBar.classList.remove('map-moving-dim');
+    if (typeof RotamCommunity !== 'undefined' && RotamCommunity.layerVisible) {
+      RotamCommunity.renderOnMap();
+    }
+  });
+
+  setupElevationCanvas();
+
+  // ResizeObserver for map container
+  if (typeof ResizeObserver !== 'undefined' && mapEl) {
+    const mapResizeObserver = new ResizeObserver(() => {
+      if (map) map.invalidateSize();
+    });
+    mapResizeObserver.observe(mapEl);
+  }
+
+  setTimeout(() => { if (map) map.invalidateSize(); }, 60);
+  setTimeout(() => { if (map) map.invalidateSize(); }, 250);
+  setTimeout(() => { if (map) map.invalidateSize(); }, 700);
+
+  // Initialize POI category filters and map markers
+  clearHighlightMarkers();
+  updatePoiCategoryFilterUI();
+  renderCorridorPoiMarkers();
+  initMapFilterBarState();
+  proactivelyWarmUserLocation();
+
+  if (typeof RotamCommunity !== 'undefined') RotamCommunity.init();
+  if (typeof RotamStoryGuide !== 'undefined') RotamStoryGuide.init();
+  if (typeof RotamAutoTheme !== 'undefined') RotamAutoTheme.init();
+  if (typeof RotamSpeech !== 'undefined') RotamSpeech.init();
+  if (typeof RotamDisplay !== 'undefined') RotamDisplay.init();
+  if (typeof RotamMapEngine !== 'undefined') RotamMapEngine.updateEngineUI();
+
+  // Close Google Maps search dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    const topContainer = document.getElementById('gmaps-top-container');
+    const dropdown = document.getElementById('gmaps-search-dropdown');
+    if (dropdown && !dropdown.classList.contains('hidden')) {
+      if (topContainer && !topContainer.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    }
+  });
+}
+
+// Map Engine Initialization (MapLibre 3D Vector by default, Leaflet 2D as fallback)
 let mapInitRetries = 0;
 function initMap() {
   if (mapInitialized) return;
+
+  // 1. Check if MapLibre 3D Vector Engine is preferred and supported
+  if (typeof RotamMapEngine !== 'undefined' && RotamMapEngine.shouldUseMapLibre()) {
+    initMapLibre();
+    return;
+  }
 
   if (typeof L === 'undefined') {
     mapInitRetries++;
@@ -556,12 +674,41 @@ function switchTile(tileKey) {
   const isDark = (tileKey === 'dark');
 
   if (isDark) {
-    if (mapEl) mapEl.classList.add('dark-map');
+    if (mapEl && !window.isMapLibre) mapEl.classList.add('dark-map');
     document.body.classList.remove('sunlight-mode', 'day-mode');
   } else {
     if (mapEl) mapEl.classList.remove('dark-map');
     document.body.classList.add('day-mode');
   }
+
+  // 1. MapLibre 3D Vector Engine Style Switcher
+  if (window.isMapLibre && typeof map.setStyle === 'function') {
+    state.activeTileLayer = tileKey;
+    const style = (typeof RotamMapEngine !== 'undefined' && RotamMapEngine.STYLES[tileKey])
+      ? RotamMapEngine.STYLES[tileKey]
+      : (tileKey === 'sat' ? RotamMapEngine.STYLES.sat : RotamMapEngine.STYLES.dark);
+
+    map.setStyle(style);
+    map.once('style.load', () => {
+      setup3DBuildingsLayer(map);
+      if (state.routeAlternatives && state.routeAlternatives.length > 0) {
+        drawRoutesOnMap(state.routeAlternatives, state.activeRouteIndex || 0);
+      }
+    });
+
+    document.querySelectorAll('.tile-btn').forEach(b => {
+      b.classList.remove('bg-slate-800', 'text-white');
+      b.classList.add('text-slate-400');
+    });
+    const activeBtn = document.getElementById(`tile-${tileKey}`) || (tileKey === 'day' ? document.getElementById('tile-osm') : null);
+    if (activeBtn) {
+      activeBtn.classList.add('bg-slate-800', 'text-white');
+      activeBtn.classList.remove('text-slate-400');
+    }
+    return;
+  }
+
+  // 2. Leaflet 2D Layer Switcher (Fallback)
 
   // Instantiate Yandex layer on-demand if needed
   if (tileKey === 'yandex' && !tileLayers.yandex && typeof L.yandex === 'function') {
@@ -10181,6 +10328,9 @@ const LiveNavigation = {
     }
 
     // Reset Dönen Harita (Heading-Up) camera rotation back to 0deg (North-Up)
+    if (window.isMapLibre && map && typeof map.easeTo === 'function') {
+      map.easeTo({ pitch: 0, bearing: 0, duration: 500 });
+    }
     const mapEl = document.getElementById('map');
     if (mapEl) {
       mapEl.classList.remove('live-nav-rotating');
@@ -10451,6 +10601,20 @@ const LiveNavigation = {
   },
 
   updateMapHeading(heading) {
+    // 1. MapLibre 3D Vector Engine: Hardware-Accelerated 3D Cockpit Pitch & Bearing
+    if (window.isMapLibre && map && typeof map.easeTo === 'function') {
+      if (this.compassMode === 'north' || this.isOverviewMode || !this.isActive) {
+        map.easeTo({ bearing: 0, pitch: 0, duration: 400 });
+        this.currentMapRotation = 0;
+      } else {
+        // Smooth 60 FPS GPU camera rotation & genuine 60° 3D navigation road perspective!
+        map.easeTo({ bearing: heading, pitch: 60, duration: 350 });
+        this.currentMapRotation = heading;
+      }
+      return;
+    }
+
+    // 2. Leaflet 2D Engine: CSS scale & rotation fallback
     const mapEl = document.getElementById('map');
     if (!mapEl) return;
 
@@ -10931,9 +11095,19 @@ const LiveNavigation = {
     const recenterPill = document.getElementById('live-nav-recenter-pill-box');
     if (recenterPill) recenterPill.classList.add('hidden');
     if (this.lastCoord && map) {
-      map.flyTo(this.lastCoord, 18, { duration: 0.8 });
-      if (this.compassMode === 'heading') {
-        this.updateMapHeading(this.lastHeading || 0);
+      if (window.isMapLibre && typeof map.easeTo === 'function') {
+        map.easeTo({
+          center: [this.lastCoord[1], this.lastCoord[0]],
+          zoom: 17.5,
+          pitch: (this.compassMode === 'heading' ? 60 : 0),
+          bearing: (this.compassMode === 'heading' ? (this.lastHeading || 0) : 0),
+          duration: 600
+        });
+      } else {
+        map.flyTo(this.lastCoord, 18, { duration: 0.8 });
+        if (this.compassMode === 'heading') {
+          this.updateMapHeading(this.lastHeading || 0);
+        }
       }
       const isEn = (window.state && window.state.lang === 'en');
       showToast(isEn ? 'Camera centered & locked to road' : 'Harita sürücüye odaklandı ve kilitlendi', 'info');
