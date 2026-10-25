@@ -888,6 +888,15 @@ document.addEventListener('click', (e) => {
     }
   }
 
+  // Google Maps Categories Accordion Click Outside
+  const catAcc = document.getElementById('gmaps-categories-accordion');
+  const catToggle = document.getElementById('btn-categories-accordion-toggle');
+  if (catAcc && !catAcc.classList.contains('hidden')) {
+    if (!catAcc.contains(e.target) && !catToggle?.contains(e.target)) {
+      closeCategoriesAccordion();
+    }
+  }
+
   const navToolsPopover = document.getElementById('live-nav-tools-popover');
   const navToolsBtn = document.getElementById('live-nav-btn-tools');
   if (navToolsPopover && !navToolsPopover.classList.contains('hidden')) {
@@ -3834,7 +3843,7 @@ function cycleVehicleProfile() {
   showToast(`${labels[nextVeh]} modu seçildi.`, 'info');
 }
 
-// Category Chips Filtering Google Maps Style
+// Category Chips Filtering Google Maps Style & Accordion
 function quickFilterCategory(cat) {
   if (state.activePoiCategories.has(cat)) {
     state.activePoiCategories.delete(cat);
@@ -3842,23 +3851,7 @@ function quickFilterCategory(cat) {
     state.activePoiCategories.add(cat);
   }
 
-  // Update chip active class
-  const chips = {
-    fuel: 'gmaps-chip-fuel',
-    gastronomy: 'gmaps-chip-rest',
-    historic: 'gmaps-chip-historic',
-    camping: 'gmaps-chip-camp',
-    nature: 'gmaps-chip-nature',
-    photography: 'gmaps-chip-photo'
-  };
-
-  Object.entries(chips).forEach(([cKey, btnId]) => {
-    const btn = document.getElementById(btnId);
-    if (btn) {
-      btn.classList.toggle('active', state.activePoiCategories.has(cKey));
-    }
-  });
-
+  updateCategoryChipsUI();
   renderCorridorPoiMarkers();
 
   // If user location is known and category turned ON, notify user
@@ -3866,6 +3859,75 @@ function quickFilterCategory(cat) {
   if (state.activePoiCategories.has(cat)) {
     const title = getCategoryTitle(cat);
     showToast(isEn ? `Showing ${title} spots on map 📍` : `${title} noktaları haritada gösteriliyor 📍`, 'info');
+  }
+}
+
+function updateCategoryChipsUI() {
+  const activeCount = state.activePoiCategories.size;
+
+  // 1. Update top chips active class
+  document.querySelectorAll('#gmaps-category-chips .gmaps-chip[data-cat]').forEach(chip => {
+    const cat = chip.getAttribute('data-cat');
+    chip.classList.toggle('active', state.activePoiCategories.has(cat));
+  });
+
+  // 2. Update accordion cards active class
+  document.querySelectorAll('#gmaps-categories-accordion .cat-acc-card[data-cat]').forEach(card => {
+    const cat = card.getAttribute('data-cat');
+    const isActive = state.activePoiCategories.has(cat);
+    card.classList.toggle('active', isActive);
+    const check = card.querySelector('.cat-check');
+    if (check) check.classList.toggle('hidden', !isActive);
+  });
+
+  // 3. Update active count badge on [📂 Keşfet ▾] button
+  const badge = document.getElementById('category-active-count-badge');
+  const clearBtn = document.getElementById('btn-clear-category-filters');
+  if (badge) {
+    if (activeCount > 0) {
+      badge.textContent = activeCount;
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+  }
+
+  // 4. Update clear button visibility
+  if (clearBtn) {
+    clearBtn.classList.toggle('hidden', activeCount === 0);
+  }
+}
+
+function clearAllCategoryFilters() {
+  state.activePoiCategories.clear();
+  updateCategoryChipsUI();
+  renderCorridorPoiMarkers();
+  if (typeof renderCorridorPoiList === 'function') renderCorridorPoiList();
+  const isEn = (window.state && window.state.lang === 'en');
+  showToast(isEn ? 'All category filters cleared' : 'Tüm keşif filtreleri temizlendi', 'info');
+}
+
+function toggleCategoriesAccordion() {
+  const acc = document.getElementById('gmaps-categories-accordion');
+  const chevron = document.getElementById('category-accordion-chevron');
+  if (!acc) return;
+  const isHidden = acc.classList.contains('hidden');
+  if (isHidden) {
+    acc.classList.remove('hidden');
+    if (chevron) chevron.style.transform = 'rotate(180deg)';
+    initIcons();
+  } else {
+    acc.classList.add('hidden');
+    if (chevron) chevron.style.transform = 'rotate(0deg)';
+  }
+}
+
+function closeCategoriesAccordion() {
+  const acc = document.getElementById('gmaps-categories-accordion');
+  const chevron = document.getElementById('category-accordion-chevron');
+  if (acc && !acc.classList.contains('hidden')) {
+    acc.classList.add('hidden');
+    if (chevron) chevron.style.transform = 'rotate(0deg)';
   }
 }
 
