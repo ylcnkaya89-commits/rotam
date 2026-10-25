@@ -9,6 +9,17 @@ const RotamCloud = {
   currentUser: null,
   isConfigured: false,
 
+  // Projenin Varsayılan Firebase Yapılandırması (rotam-motor)
+  DEFAULT_CONFIG: {
+    apiKey: "AIzaSyAIvYjl4x2Yq81kpE9RATMbi8-dK49k_p0",
+    authDomain: "rotam-motor.firebaseapp.com",
+    projectId: "rotam-motor",
+    storageBucket: "rotam-motor.firebasestorage.app",
+    messagingSenderId: "424182078836",
+    appId: "1:424182078836:web:14acdc23bf45ef1ec96021",
+    measurementId: "G-5JN6LPJ6PC"
+  },
+
   // Default / Stored Firebase Configuration
   getConfig() {
     try {
@@ -17,7 +28,7 @@ const RotamCloud = {
     } catch (e) {
       console.warn('RotamCloud config parse error:', e);
     }
-    return null;
+    return this.DEFAULT_CONFIG;
   },
 
   saveConfig(config) {

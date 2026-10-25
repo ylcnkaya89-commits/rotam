@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v53 (Rotam V3 Major Upgrade - Global & Outdoor Edition)
-const CACHE_NAME = 'rotam-cache-v58';
+// Rotam PWA Service Worker - v59 (Firebase Cloud Sync Edition)
+const CACHE_NAME = 'rotam-cache-v59';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
@@ -7,6 +7,7 @@ const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './app.js',
+  './firebase-service.js',
   './yandex_leaflet.js',
   './styles.css',
   './places_data.js',
