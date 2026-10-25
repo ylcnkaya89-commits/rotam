@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v50 (Global & International Routing Support)
-const CACHE_NAME = 'rotam-cache-v50';
+// Rotam PWA Service Worker - v51 (Global & International Routing & Alps Topo Support)
+const CACHE_NAME = 'rotam-cache-v51';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
@@ -48,8 +48,13 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
 
-  // 1. HARİTA KARO ÖNBELLEĞİ (Yandex & OSM Tiles - Offline Map Engine)
-  if (url.hostname.includes('maps.yandex.net') || url.hostname.includes('tile.openstreetmap.org')) {
+  // 1. HARİTA KARO ÖNBELLEĞİ (Yandex, OSM, OpenTopoMap & Carto - Offline Map Engine)
+  if (
+    url.hostname.includes('maps.yandex.net') ||
+    url.hostname.includes('tile.openstreetmap.org') ||
+    url.hostname.includes('opentopomap.org') ||
+    url.hostname.includes('basemaps.cartocdn.com')
+  ) {
     event.respondWith(
       caches.open(TILE_CACHE_NAME).then(async (tileCache) => {
         const cached = await tileCache.match(event.request);

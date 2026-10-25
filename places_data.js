@@ -12312,5 +12312,35 @@ window.TURKEY_GEO_DATABASE = [
   { name: 'Halfeti', lat: 37.2472, lon: 37.8686, region: 'Güneydoğu Anadolu', type: 'district' },
   { name: 'Nemrut Dağı', lat: 37.9808, lon: 38.7408, region: 'Güneydoğu Anadolu', type: 'destination' },
   { name: 'Sümela Manastırı', lat: 40.6903, lon: 39.6583, region: 'Karadeniz', type: 'destination' },
-  { name: 'Ihlara Vadisi', lat: 38.2389, lon: 34.3000, region: 'İç Anadolu', type: 'destination' }
+  { name: 'Ihlara Vadisi', lat: 38.2389, lon: 34.3000, region: 'İç Anadolu', type: 'destination' },
+
+  // Sınır Kapıları & Gümrük Noktaları (Yurtdışı Motosiklet Geçişleri)
+  { name: 'Kapıkule Sınır Kapısı', lat: 41.7167, lon: 26.3583, region: 'Edirne', type: 'border_gate' },
+  { name: 'İpsala Sınır Kapısı', lat: 40.9167, lon: 26.3833, region: 'Edirne', type: 'border_gate' },
+  { name: 'Hamzabeyli Sınır Kapısı', lat: 41.9667, lon: 26.6500, region: 'Edirne', type: 'border_gate' },
+  { name: 'Dereköy Sınır Kapısı', lat: 41.9333, lon: 27.3667, region: 'Kırklareli', type: 'border_gate' },
+  { name: 'Pazarkule Sınır Kapısı', lat: 41.6667, lon: 26.5333, region: 'Edirne', type: 'border_gate' },
+  { name: 'Sarp Sınır Kapısı', lat: 41.5217, lon: 41.5519, region: 'Artvin', type: 'border_gate' },
+  { name: 'Türkgözü Sınır Kapısı', lat: 41.5000, lon: 42.7333, region: 'Ardahan', type: 'border_gate' },
+  { name: 'Dilucu Sınır Kapısı', lat: 39.8000, lon: 44.8000, region: 'Iğdır', type: 'border_gate' },
+  { name: 'Gürbulak Sınır Kapısı', lat: 39.4167, lon: 44.4000, region: 'Ağrı', type: 'border_gate' },
+
+  // Popüler Yurtdışı Motosiklet Rota Merkezleri & Dağ Geçitleri
+  { name: 'Selanik', lat: 40.6401, lon: 22.9444, region: 'Yunanistan', type: 'international_city' },
+  { name: 'Atina', lat: 37.9838, lon: 23.7275, region: 'Yunanistan', type: 'international_city' },
+  { name: 'Kavala', lat: 40.9376, lon: 24.4129, region: 'Yunanistan', type: 'international_city' },
+  { name: 'Dedeağaç', lat: 40.8499, lon: 25.8764, region: 'Yunanistan', type: 'international_city' },
+  { name: 'Sofya', lat: 42.6977, lon: 23.3219, region: 'Bulgaristan', type: 'international_city' },
+  { name: 'Plovdiv', lat: 42.1354, lon: 24.7453, region: 'Bulgaristan', type: 'international_city' },
+  { name: 'Varna', lat: 43.2141, lon: 27.9147, region: 'Bulgaristan', type: 'international_city' },
+  { name: 'Burgaz', lat: 42.5048, lon: 27.4626, region: 'Bulgaristan', type: 'international_city' },
+  { name: 'Batum', lat: 41.6459, lon: 41.6416, region: 'Gürcistan', type: 'international_city' },
+  { name: 'Tiflis', lat: 41.7151, lon: 44.8271, region: 'Gürcistan', type: 'international_city' },
+  { name: 'Bükreş', lat: 44.4268, lon: 26.1025, region: 'Romanya', type: 'international_city' },
+  { name: 'Belgrad', lat: 44.7866, lon: 20.4489, region: 'Sırbistan', type: 'international_city' },
+  { name: 'Üsküp', lat: 41.9981, lon: 21.4254, region: 'Kuzey Makedonya', type: 'international_city' },
+  { name: 'Saraybosna', lat: 43.8563, lon: 18.4131, region: 'Bosna-Hersek', type: 'international_city' },
+  { name: 'Stelvio Geçidi', lat: 46.5286, lon: 10.4531, region: 'İtalya Alpleri', type: 'mountain_pass' },
+  { name: 'Transfăgărășan', lat: 45.5983, lon: 24.6186, region: 'Romanya Karpatları', type: 'mountain_pass' },
+  { name: 'Grossglockner', lat: 47.0742, lon: 12.8428, region: 'Avusturya Alpleri', type: 'mountain_pass' }
 ];

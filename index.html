@@ -1508,6 +1508,12 @@
           <button id="tile-sat" onclick="switchTile('sat')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Yandex Uydu & Hibrit">
             🛰️<span class="inline ml-1">Uydu</span>
           </button>
+          <button id="tile-global" onclick="switchTile('global')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Yurtdışı & Dünya Haritası (OpenStreetMap)">
+            🌍<span class="inline ml-1">Dünya</span>
+          </button>
+          <button id="tile-topo" onclick="switchTile('topo')" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" title="Topografik Harita & Alpler Geçitleri (OpenTopoMap)">
+            ⛰️<span class="inline ml-1">Topo</span>
+          </button>
           <button id="tile-auto" onclick="RotamAutoTheme.toggle()" class="tile-btn px-2.5 py-1.5 rounded-lg text-xs font-bold text-amber-400 hover:text-white" title="Otomatik Gündüz / Gece Modu (Güneş Döngüsü)">
             <span>🌓</span><span id="desktop-auto-theme-label" class="inline ml-1">Oto</span>
           </button>
@@ -1560,6 +1566,12 @@
             </button>
             <button onclick="switchTile('sat'); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-200 hover:bg-slate-800 flex items-center space-x-2">
               <span>🛰️</span> <span>Yandex Uydu</span>
+            </button>
+            <button onclick="switchTile('global'); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-medium text-cyan-300 hover:bg-slate-800 flex items-center space-x-2">
+              <span>🌍</span> <span>Yurtdışı & Dünya (OSM)</span>
+            </button>
+            <button onclick="switchTile('topo'); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-medium text-emerald-300 hover:bg-slate-800 flex items-center space-x-2">
+              <span>⛰️</span> <span>Topografik & Alpler Geçitleri</span>
             </button>
             <div class="h-px bg-slate-800 my-1"></div>
             <button onclick="RotamOfflineMap.openModal(); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-bold text-emerald-400 hover:bg-emerald-500/10 flex items-center justify-between">
@@ -3590,6 +3602,36 @@
               <span class="text-[10px] text-slate-400">Samsun-Artvin dağ yolları (~7 MB)</span>
             </div>
             <button onclick="RotamOfflineMap.downloadRegion('blacksea')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-[11px] border border-slate-700 shrink-0 cursor-pointer">
+              İndir
+            </button>
+          </div>
+          <!-- Paket 5: Balkanlar & Yunanistan -->
+          <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+            <div>
+              <span class="font-bold text-white block">🌍 Balkanlar & Yunanistan</span>
+              <span class="text-[10px] text-slate-400">Selanik, Atina, Sofya, Üsküp (~6 MB)</span>
+            </div>
+            <button onclick="RotamOfflineMap.downloadRegion('balkans')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-[11px] border border-slate-700 shrink-0 cursor-pointer">
+              İndir
+            </button>
+          </div>
+          <!-- Paket 6: Alpler & Dağ Geçitleri -->
+          <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+            <div>
+              <span class="font-bold text-white block">⛰️ Alpler & Dağ Geçitleri</span>
+              <span class="text-[10px] text-slate-400">Stelvio, Dolomitler, Grossglockner (~5 MB)</span>
+            </div>
+            <button onclick="RotamOfflineMap.downloadRegion('alps')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-[11px] border border-slate-700 shrink-0 cursor-pointer">
+              İndir
+            </button>
+          </div>
+          <!-- Paket 7: Gürcistan & Kafkaslar -->
+          <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+            <div>
+              <span class="font-bold text-white block">🏔️ Gürcistan & Kafkaslar</span>
+              <span class="text-[10px] text-slate-400">Batum, Tiflis, Kazbek Yolu (~4 MB)</span>
+            </div>
+            <button onclick="RotamOfflineMap.downloadRegion('caucasus')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-[11px] border border-slate-700 shrink-0 cursor-pointer">
               İndir
             </button>
           </div>

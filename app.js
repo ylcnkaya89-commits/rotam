@@ -238,7 +238,7 @@ function initPlacesDatabase() {
   }
 }
 
-// Map Tile Layers Setup - 100% Yandex Maps Provider
+// Map Tile Layers Setup - Multi-Layer Engine (Yandex, Global OSM, Topo Alps, Satellite)
 function createTileLayers() {
   if (typeof L === 'undefined') return {};
   const layers = {};
@@ -272,8 +272,21 @@ function createTileLayers() {
   // Yandex Gece Navigasyon Modu (High-Contrast Night Theme)
   layers.dark = layers.yandex;
   layers.day = layers.yandex;
-  layers.osm = layers.yandex;
-  layers.topo = layers.yandex;
+
+  // 3. Yurtdışı & Dünya Standart Haritası (OpenStreetMap Global)
+  layers.global = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
+  });
+  layers.osm = layers.global;
+  layers.voyager = layers.global;
+
+  // 4. Topografik & Alpler Dağ Geçitleri (OpenTopoMap)
+  layers.topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+    maxZoom: 17,
+    subdomains: ['a', 'b', 'c'],
+    attribution: '&copy; <a href="https://opentopomap.org" target="_blank">OpenTopoMap</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OSM</a>'
+  });
 
   // Add error resilience
   Object.entries(layers).forEach(([name, l]) => {
@@ -556,9 +569,11 @@ function switchTile(tileKey) {
   const mapEl = document.getElementById('map');
   const isDark = (tileKey === 'dark');
 
-  // Normalize tileKey: only 'yandex', 'dark', 'sat' exist
+  // Normalize tileKey: 'yandex', 'dark', 'sat', 'global', 'topo'
   let canonicalKey = tileKey;
-  if (tileKey === 'osm' || tileKey === 'day' || tileKey === 'voyager' || tileKey === 'topo') {
+  if (tileKey === 'osm' || tileKey === 'voyager') {
+    canonicalKey = 'global';
+  } else if (tileKey === 'day') {
     canonicalKey = 'yandex';
   }
 
@@ -571,9 +586,21 @@ function switchTile(tileKey) {
     document.body.classList.add('day-mode');
   }
 
-  // Determine target layer: 'sat' uses tileLayers.sat/hybrid, otherwise tileLayers.yandex
-  const targetLayerName = (canonicalKey === 'sat') ? 'sat' : 'yandex';
-  const targetLayer = (tileLayers && tileLayers[targetLayerName]) ? tileLayers[targetLayerName] : (tileLayers ? (tileLayers.yandex || tileLayers.dark) : null);
+  // Determine target layer: 'global', 'topo', 'sat', 'dark', 'yandex'
+  let targetLayer = null;
+  if (tileLayers) {
+    if (canonicalKey === 'global') {
+      targetLayer = tileLayers.global || tileLayers.osm;
+    } else if (canonicalKey === 'topo') {
+      targetLayer = tileLayers.topo;
+    } else if (canonicalKey === 'sat') {
+      targetLayer = tileLayers.sat || tileLayers.hybrid;
+    } else if (canonicalKey === 'dark') {
+      targetLayer = tileLayers.dark || tileLayers.yandex;
+    } else {
+      targetLayer = tileLayers.yandex || tileLayers.day;
+    }
+  }
 
   if (targetLayer && map) {
     if (tileLayers) {
@@ -588,7 +615,7 @@ function switchTile(tileKey) {
     }
   }
 
-  state.activeTileLayer = tileKey;
+  state.activeTileLayer = canonicalKey;
 
   // Update floating controls and buttons
   document.querySelectorAll('.tile-btn').forEach(b => {
@@ -597,7 +624,9 @@ function switchTile(tileKey) {
   });
 
   const activeBtnId = (canonicalKey === 'dark') ? 'tile-dark'
-    : (canonicalKey === 'sat' ? 'tile-sat' : 'tile-yandex');
+    : (canonicalKey === 'sat' ? 'tile-sat'
+    : (canonicalKey === 'global' ? 'tile-global'
+    : (canonicalKey === 'topo' ? 'tile-topo' : 'tile-yandex')));
   const activeBtn = document.getElementById(activeBtnId);
   if (activeBtn) {
     activeBtn.classList.add('bg-slate-800', 'text-white');
@@ -1334,22 +1363,29 @@ function searchLocalGeo(query) {
   const geoDb = (window.TURKEY_GEO_DATABASE && Array.isArray(window.TURKEY_GEO_DATABASE)) ? window.TURKEY_GEO_DATABASE : [];
   const placesDb = (state && state.allPlaces && Array.isArray(state.allPlaces)) ? state.allPlaces : (window.DEFAULT_HISTORIC_PLACES || []);
 
-  // 1. Exact match in TURKEY_GEO_DATABASE (81 provinces + top 50 hubs)
+  const getGeoDisplayName = (item) => {
+    if (item.type === 'international_city' || item.type === 'mountain_pass' || item.type === 'border_gate') {
+      return `${item.name} (${item.region})`;
+    }
+    return `${item.name}, Türkiye`;
+  };
+
+  // 1. Exact match in TURKEY_GEO_DATABASE (81 provinces + top hubs + border gates)
   const exactGeo = geoDb.find(item => normalizeTurkish(item.name) === q);
   if (exactGeo) {
-    return { lat: exactGeo.lat, lon: exactGeo.lon, displayName: `${exactGeo.name}, Türkiye`, source: 'turkey_db' };
+    return { lat: exactGeo.lat, lon: exactGeo.lon, displayName: getGeoDisplayName(exactGeo), source: 'turkey_db' };
   }
 
   // 2. Starts-with match in TURKEY_GEO_DATABASE
   const startsGeo = geoDb.find(item => normalizeTurkish(item.name).startsWith(q));
   if (startsGeo) {
-    return { lat: startsGeo.lat, lon: startsGeo.lon, displayName: `${startsGeo.name}, Türkiye`, source: 'turkey_db' };
+    return { lat: startsGeo.lat, lon: startsGeo.lon, displayName: getGeoDisplayName(startsGeo), source: 'turkey_db' };
   }
 
   // 3. Substring match in TURKEY_GEO_DATABASE
   const subGeo = geoDb.find(item => normalizeTurkish(item.name).includes(q) || q.includes(normalizeTurkish(item.name)));
   if (subGeo) {
-    return { lat: subGeo.lat, lon: subGeo.lon, displayName: `${subGeo.name}, Türkiye`, source: 'turkey_db' };
+    return { lat: subGeo.lat, lon: subGeo.lon, displayName: getGeoDisplayName(subGeo), source: 'turkey_db' };
   }
 
   // 4. Exact match in 870+ Places Database
@@ -1891,12 +1927,17 @@ const RotamSearchEngine = {
         if (itemNorm.includes(qNorm) && !seen.has(item.name)) {
           seen.add(item.name);
           const dist = this.getDistanceFromUser(item.lat, item.lon);
+          const isAbroad = item.type === 'international_city' || item.type === 'mountain_pass';
+          const isBorder = item.type === 'border_gate';
+          const subtitle = isAbroad ? `${item.region}` : isBorder ? `${item.region} • Sınır Kapısı` : `${item.region || 'İl / İlçe'} Merkezi`;
+          const fullName = isAbroad ? `${item.name} (${item.region})` : isBorder ? `${item.name} (${item.region})` : `${item.name}, Türkiye`;
+          const icon = isBorder ? '🛂' : isAbroad ? (item.type === 'mountain_pass' ? '🏍️' : '🌍') : '🏙️';
           results.push({
             name: item.name,
-            fullName: `${item.name}, Türkiye`,
-            subtitle: `${item.region || 'İl / İlçe'} Merkezi`,
-            category: 'city',
-            icon: '🏙️',
+            fullName: fullName,
+            subtitle: subtitle,
+            category: isBorder ? 'border' : 'city',
+            icon: icon,
             lat: item.lat,
             lon: item.lon,
             distanceKm: dist,
@@ -1973,7 +2014,10 @@ const RotamSearchEngine = {
         if (p.city && p.city !== p.district) details.push(p.city);
         if (p.state && p.state !== p.city) details.push(p.state);
 
-        const fullSubtitle = details.length > 0 ? details.join(', ') : (p.country || 'Türkiye');
+        const country = p.country || (lat >= 35.0 && lat <= 43.5 && lon >= 25.0 && lon <= 45.5 ? 'Türkiye' : '');
+        const fullSubtitle = details.length > 0
+          ? (country ? `${details.join(', ')}, ${country}` : details.join(', '))
+          : (country || 'Global');
         const key = `${placeName}|${fullSubtitle}`;
         if (seen.has(key)) return;
         seen.add(key);
@@ -3350,7 +3394,10 @@ async function fetchGmapsOnlineGeocoding(query) {
             if (addr.city && addr.city !== placeName) details.push(addr.city);
             if (addr.province && !details.includes(addr.province) && addr.province !== placeName) details.push(addr.province);
 
-            const fullSubtitle = details.length > 0 ? details.join(', ') : 'Türkiye';
+            const country = addr.country || (lat >= 35.0 && lat <= 43.5 && lon >= 25.0 && lon <= 45.5 ? 'Türkiye' : '');
+            const fullSubtitle = details.length > 0
+              ? (country ? `${details.join(', ')}, ${country}` : details.join(', '))
+              : (country || 'Global');
             const dedupeKey = `${placeName.toLowerCase()}|${fullSubtitle.toLowerCase()}`;
             if (seen.has(dedupeKey)) return;
             seen.add(dedupeKey);
@@ -3420,13 +3467,18 @@ function handleGmapsSearchInput(query) {
         const key = `${city.name.toLowerCase()}|${(city.region || '').toLowerCase()}`;
         if (!seenKeys.has(key)) {
           seenKeys.add(key);
+          const isBorder = city.type === 'border_gate';
+          const isPass = city.type === 'mountain_pass';
+          const isAbroad = city.type === 'international_city';
+          const emoji = isBorder ? '🛂' : isPass ? '🏍️' : isAbroad ? '🌍' : '🏙️';
+          const regionLabel = isBorder ? `${city.region} • Sınır Kapısı` : (city.region || 'Şehir');
           localResults.push({
             type: 'city',
             name: city.name,
-            region: city.region || 'Şehir',
+            region: regionLabel,
             lat: city.lat,
             lon: city.lon,
-            emoji: '🏙️'
+            emoji: emoji
           });
           if (localResults.length >= 5) break;
         }
@@ -11660,6 +11712,21 @@ const RotamOfflineMap = {
       minZ = 7;
       maxZ = 11;
       title = isEn ? 'Black Sea Highlands' : 'Karadeniz & Yaylalar';
+    } else if (regionKey === 'balkans') {
+      bounds = { minLat: 38.0, maxLat: 43.5, minLon: 20.0, maxLon: 26.5 };
+      minZ = 7;
+      maxZ = 10;
+      title = isEn ? 'Balkans & Greece' : 'Balkanlar & Yunanistan (Selanik, Atina, Sofya)';
+    } else if (regionKey === 'alps') {
+      bounds = { minLat: 45.5, maxLat: 47.8, minLon: 8.5, maxLon: 13.5 };
+      minZ = 7;
+      maxZ = 10;
+      title = isEn ? 'Alps & Passes' : 'Alpler & Dağ Geçitleri (Stelvio, Dolomitler)';
+    } else if (regionKey === 'caucasus') {
+      bounds = { minLat: 41.2, maxLat: 43.5, minLon: 41.2, maxLon: 45.2 };
+      minZ = 7;
+      maxZ = 10;
+      title = isEn ? 'Georgia & Caucasus' : 'Gürcistan & Kafkaslar (Batum, Tiflis)';
     }
 
     if (!bounds) return;
@@ -11776,6 +11843,10 @@ window.addEventListener('offline', () => {
   showToast(isEn ? '📡 Offline mode active (Saved maps ready)' : '📡 Çevrimdışı mod: İndirilen haritalar devrede', 'info');
   const badge = document.getElementById('offline-network-badge');
   if (badge) badge.classList.remove('hidden');
+  // İnternet kesildiğinde indirilen karoların görünmesi için otomatik olarak Dünya/OSM katmanına geç
+  if (state.activeTileLayer === 'yandex' && tileLayers && tileLayers.global) {
+    switchTile('global');
+  }
 });
 
 // ==========================================
