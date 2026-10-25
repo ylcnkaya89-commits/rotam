@@ -1,5 +1,5 @@
 // Rotam PWA Service Worker - v53 (Rotam V3 Major Upgrade - Global & Outdoor Edition)
-const CACHE_NAME = 'rotam-cache-v53';
+const CACHE_NAME = 'rotam-cache-v54';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

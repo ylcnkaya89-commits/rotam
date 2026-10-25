@@ -767,19 +767,11 @@ function dismissSplashScreen() {
 function showHomepagePlanner() {
   closeRightPanel();
   const sidebar = document.getElementById('sidebar');
-  if (window.innerWidth >= 768 && sidebar) {
-    sidebar.classList.remove('hidden');
-    sidebar.classList.add('flex');
+  if (sidebar) {
+    openMobileSidebar();
     sidebar.scrollTo({ top: 0, behavior: 'smooth' });
     const startInp = document.querySelector('#waypoints-container input');
     if (startInp) startInp.focus();
-    return;
-  }
-  if (sidebar) {
-    sidebar.classList.remove('hidden');
-    sidebar.classList.add('flex');
-    initIcons();
-    if (map) setTimeout(() => map.invalidateSize(), 200);
   }
 }
 
@@ -799,8 +791,6 @@ function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   if (!sidebar) return;
   if (!sidebar.classList.contains('hidden') && sidebar.classList.contains('mobile-sheet-open')) {
-    closeMobileSidebar();
-  } else if (!sidebar.classList.contains('hidden') && window.innerWidth >= 768) {
     closeMobileSidebar();
   } else {
     openMobileSidebar();
@@ -846,14 +836,17 @@ function openMobileSidebar(focusTarget = null) {
   if (sidebar) {
     sidebar.classList.remove('hidden');
     sidebar.classList.add('flex');
-    if (window.innerWidth < 768) {
-      requestAnimationFrame(() => {
-        sidebar.classList.add('mobile-sheet-open');
-      });
-    }
+    requestAnimationFrame(() => {
+      sidebar.classList.add('mobile-sheet-open');
+    });
     initIcons();
     if (map) setTimeout(() => map.invalidateSize(), 150);
   }
+
+  // Hide top search bar while planner drawer is open to prevent overlap
+  const topSearch = document.getElementById('gmaps-top-container');
+  if (topSearch) topSearch.classList.add('hidden');
+
   if (backdrop && window.innerWidth < 768) {
     backdrop.classList.remove('hidden');
     requestAnimationFrame(() => backdrop.classList.add('active'));
@@ -884,17 +877,12 @@ function closeMobileSidebar() {
   const backdrop = document.getElementById('sidebar-backdrop');
   if (sidebar) {
     sidebar.classList.remove('mobile-sheet-open');
-    if (window.innerWidth < 768) {
-      setTimeout(() => {
-        if (!sidebar.classList.contains('mobile-sheet-open')) {
-          sidebar.classList.add('hidden');
-          sidebar.classList.remove('flex');
-        }
-      }, 300);
-    } else {
-      sidebar.classList.add('hidden');
-      sidebar.classList.remove('flex');
-    }
+    setTimeout(() => {
+      if (!sidebar.classList.contains('mobile-sheet-open')) {
+        sidebar.classList.add('hidden');
+        sidebar.classList.remove('flex');
+      }
+    }, 300);
     if (map) {
       setTimeout(() => map.invalidateSize(), 100);
       setTimeout(() => map.invalidateSize(), 320);
@@ -907,6 +895,13 @@ function closeMobileSidebar() {
   if (typeof closeWaypointAutocomplete === 'function') {
     closeWaypointAutocomplete();
   }
+
+  // Restore top search container if not in Live HUD
+  const topSearch = document.getElementById('gmaps-top-container');
+  if (topSearch && (!window.LiveNavigation || !window.LiveNavigation.isActive)) {
+    topSearch.classList.remove('hidden');
+  }
+
   // On mobile, restore bottom floating bar
   if (window.innerWidth < 768) {
     const bottomBar = document.getElementById('mobile-bottom-bar');
