@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v62 (Admin Registered Users Dashboard)
-const CACHE_NAME = 'rotam-cache-v62';
+// Rotam PWA Service Worker - v63 (Helmet Intercom Voice & Crosswind Radar)
+const CACHE_NAME = 'rotam-cache-v63';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

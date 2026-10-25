@@ -74,7 +74,7 @@
   <meta name="theme-color" content="#090d16">
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="styles.css?v=3.9">
+  <link rel="stylesheet" href="styles.css?v=5.7">
 </head>
 <body class="h-full flex flex-col overflow-hidden font-sans selection:bg-brand-500 selection:text-white bg-slate-950">
 
@@ -710,6 +710,10 @@
               <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
               <span>Demo Test Sürüşü (Simülasyon)</span>
             </button>
+            <button type="button" onclick="RotamIntercom.testHelmetAudio()" class="col-span-2 py-2 px-3 bg-slate-900/90 hover:bg-slate-800 text-cyan-300 font-bold rounded-xl text-xs border border-cyan-500/30 flex items-center justify-center space-x-1.5 active:scale-[0.99] transition-all" title="Kask Intercom / Bluetooth Sesini Test Et">
+              <i data-lucide="headphones" class="w-3.5 h-3.5 text-cyan-400"></i>
+              <span>Kask & Intercom Ses Testi</span>
+            </button>
             <div class="col-span-2 grid grid-cols-2 gap-2">
               <button type="button" onclick="openInGoogleMaps()" class="py-2 px-2.5 bg-emerald-600/90 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-md shadow-emerald-600/20 flex items-center justify-center space-x-1.5 active:scale-[0.99] transition-all" title="Rotayı Google Maps'te Aç ve Harici Navigasyonu Başlat">
                 <i data-lucide="navigation" class="w-3.5 h-3.5 text-white"></i>
@@ -735,28 +739,53 @@
           </div>
         </div>
 
-        <!-- 5. HAVA DURUMU KARTI -->
-        <div id="weather-panel" class="hidden glass-card rounded-2xl p-4 border border-slate-800/80 animate-slide-in">
-          <div class="flex items-center justify-between mb-2">
+        <!-- 5. HAVA DURUMU & YAN RÜZGAR RADARI KARTI -->
+        <div id="weather-panel" class="hidden glass-card rounded-2xl p-3.5 sm:p-4 border border-slate-800/80 animate-slide-in space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800/60 pb-2">
             <div class="flex items-center space-x-2">
-              <i data-lucide="cloud-sun" class="w-4 h-4 text-sky-400"></i>
-              <h3 class="text-sm font-semibold text-slate-200">Güzergah Hava & Rüzgar</h3>
+              <div class="w-7 h-7 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center shrink-0">
+                <i data-lucide="cloud-sun" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h3 class="text-xs sm:text-sm font-bold text-white">Güzergah Hava & Yan Rüzgar Radarı</h3>
+                <p class="text-[10px] text-slate-400">Yol boyu 5 kontrol noktası analizi</p>
+              </div>
             </div>
-            <span id="weather-status-badge" class="text-[10px] text-slate-400 font-medium">Canlı Veri</span>
+            <div class="flex items-center space-x-1.5">
+              <button type="button" onclick="RotamWeather.toggleMapWindMarkers()" id="btn-toggle-wind-markers" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 text-[10px] font-bold flex items-center space-x-1 border border-slate-700/60 transition-all" title="Haritada Rüzgar Oklarını Aç/Kapat">
+                <i data-lucide="wind" class="w-3 h-3"></i>
+                <span id="btn-wind-markers-label">Haritada Göster</span>
+              </button>
+            </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-2 text-xs">
-            <div id="weather-start" class="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800">
-              <p class="text-[10px] text-slate-400 font-semibold truncate uppercase">Başlangıç</p>
-              <div class="flex items-center justify-between mt-1">
-                <span id="weather-start-temp" class="text-sm font-bold text-white">Yükleniyor...</span>
+          <!-- Yan Rüzgar Kritik Uyarı Kutusu (Gerektiğinde görünür) -->
+          <div id="weather-crosswind-alert" class="hidden p-2.5 rounded-xl bg-amber-950/80 border border-amber-500/40 text-amber-200 text-xs flex items-center space-x-2 animate-pulse">
+            <span class="text-base shrink-0">⚠️</span>
+            <div class="min-w-0">
+              <span id="weather-crosswind-alert-text" class="text-[11px] font-bold block">Dağ Geçidi Bölgesinde 42 km/s Yan Rüzgar Riski!</span>
+              <span class="text-[10px] text-amber-300/80 block">Motosiklet dengesi için hızınızı düşürün, köprü ve viyadük geçişlerine dikkat edin.</span>
+            </div>
+          </div>
+
+          <!-- İstasyon Kartları Timeline (Yatay Kaydırılabilir) -->
+          <div id="weather-stations-timeline" class="flex space-x-2 overflow-x-auto pb-1 no-scrollbar text-xs">
+            <!-- JS tarafından 5 kontrol noktası kartı doldurulur -->
+          </div>
+
+          <!-- Başlangıç / Varış Hızlı İkili Görünüm (Eski uyumluluk) -->
+          <div id="weather-mini-summary" class="hidden grid-cols-2 gap-2 text-xs">
+            <div id="weather-start" class="bg-slate-950/70 p-2 rounded-xl border border-slate-800/80">
+              <p class="text-[9px] text-slate-400 font-bold uppercase">Başlangıç</p>
+              <div class="flex items-center justify-between mt-0.5">
+                <span id="weather-start-temp" class="text-xs font-bold text-white">--</span>
                 <span id="weather-start-wind" class="text-[10px] text-slate-400"></span>
               </div>
             </div>
-            <div id="weather-end" class="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800">
-              <p class="text-[10px] text-slate-400 font-semibold truncate uppercase">Varış</p>
-              <div class="flex items-center justify-between mt-1">
-                <span id="weather-end-temp" class="text-sm font-bold text-white">Yükleniyor...</span>
+            <div id="weather-end" class="bg-slate-950/70 p-2 rounded-xl border border-slate-800/80">
+              <p class="text-[9px] text-slate-400 font-bold uppercase">Varış</p>
+              <div class="flex items-center justify-between mt-0.5">
+                <span id="weather-end-temp" class="text-xs font-bold text-white">--</span>
                 <span id="weather-end-wind" class="text-[10px] text-slate-400"></span>
               </div>
             </div>
@@ -1191,6 +1220,22 @@
             </div>
           </div>
 
+          <!-- CANLI YAN RÜZGAR & FIRTINA UYARISI (#live-nav-wind-banner) -->
+          <div id="live-nav-wind-banner" class="hidden glass-card bg-amber-950/95 border-2 border-amber-500 rounded-2xl p-3 shadow-2xl backdrop-blur-xl flex items-center justify-between animate-pulse text-white self-center w-full max-w-lg">
+            <div class="flex items-center space-x-2.5 min-w-0">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 text-2xl border border-amber-500/40">
+                💨
+              </div>
+              <div class="truncate">
+                <span id="live-wind-title" class="text-xs font-black text-amber-200 block truncate">⚠️ Şiddetli Yan Rüzgar Uyarısı!</span>
+                <p id="live-wind-sub" class="text-[10px] text-slate-300 truncate">Bölgede 42 km/s yan rüzgar tespit edildi</p>
+              </div>
+            </div>
+            <button onclick="document.getElementById('live-nav-wind-banner').classList.add('hidden')" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 shrink-0">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+
           <!-- ROTAM AKILLI KÜLTÜR & TARİH FISILTISI (#live-nav-story-banner - SMART STORY GUIDE) -->
           <div id="live-nav-story-banner" class="hidden glass-card bg-gradient-to-r from-amber-950/95 via-slate-900/95 to-slate-950/95 border-2 border-amber-500/80 rounded-2xl p-3 sm:p-3.5 shadow-2xl backdrop-blur-xl flex flex-col space-y-1.5 animate-slide-in text-white self-center w-full max-w-lg">
             <div class="flex items-center justify-between">
@@ -1333,6 +1378,17 @@
                 <div class="flex-1 min-w-0">
                   <span class="text-xs font-bold text-white block" data-i18n="live_nav_story">Kültür Rehberi</span>
                   <span class="text-[10px] text-slate-400 block truncate" data-i18n="live_nav_story_desc">Tarihi yer sesli anlatımı</span>
+                </div>
+              </button>
+
+              <!-- Kask & Intercom Ses Testi -->
+              <button onclick="RotamIntercom.testHelmetAudio(); LiveNavigation.toggleToolsPopover(false);" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-800/90 active:bg-slate-750 text-left transition-all">
+                <div class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0 border border-cyan-500/30">
+                  <i data-lucide="headphones" class="w-4 h-4"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <span class="text-xs font-bold text-white block">Kask Ses Testi</span>
+                  <span class="text-[10px] text-slate-400 block truncate">Bluetooth / Intercom ses kontrolü</span>
                 </div>
               </button>
 
@@ -4248,6 +4304,6 @@ service cloud.firestore {
   <!-- Çoklu Dil ve Çeviri Motoru (TR / EN) -->
   <script src="translations.js?v=3.2"></script>
   <!-- V3 JavaScript Uygulama Mantığı -->
-  <script src="app.js?v=5.6"></script>
+  <script src="app.js?v=5.7"></script>
 </body>
 </html>

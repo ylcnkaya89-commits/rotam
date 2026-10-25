@@ -4055,9 +4055,13 @@ async function calculateRouteMain() {
     displayRouteStats(activeRoute);
     renderRouteAlternativesUI(alternatives, 0);
 
-    // Stage 3: Fetch Weather
-    showLoadingBanner(true, '3. Güzergah hava durumu kontrol ediliyor...');
-    fetchWeatherForRoute(validPoints[0], validPoints[validPoints.length - 1]);
+    // Stage 3: Fetch Weather & Crosswind Analysis
+    showLoadingBanner(true, '3. Güzergah hava durumu ve yan rüzgar analizi yapılıyor...');
+    if (typeof RotamWeather !== 'undefined') {
+      RotamWeather.analyzeRoute(activeRoute);
+    } else {
+      fetchWeatherForRoute(validPoints[0], validPoints[validPoints.length - 1]);
+    }
 
     // Stage 4: 50 km Corridor POI Analysis
     showLoadingBanner(true, '4. 50 km çevredeki yerler keşfediliyor...');
@@ -5954,39 +5958,375 @@ function toggleElevationPanelVisibility() {
   if (panel) panel.classList.toggle('hidden');
 }
 
-// Weather Integration (Open-Meteo) with Honest "Veri Alınamadı" States
-async function fetchWeatherForRoute(startWp, endWp) {
-  const startTemp = document.getElementById('weather-start-temp');
-  const startWind = document.getElementById('weather-start-wind');
-  const endTemp = document.getElementById('weather-end-temp');
-  const endWind = document.getElementById('weather-end-wind');
+// ==========================================
+// ROTAM HAVA DURUMU & YAN RÜZGAR RADARI (OPEN-METEO ENGINE v3)
+// Yol boyu 5 kontrol noktası analizi, Yan Rüzgar (Crosswind) hesaplama ve harita işaretçileri
+// ==========================================
+const RotamWeather = {
+  activeMarkers: [],
+  showOnMap: false,
+  lastAnalysis: null,
+  lastWindWarningTime: 0,
 
-  try {
-    const [startRes, endRes] = await Promise.all([
-      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${startWp.lat}&longitude=${startWp.lon}&current=temperature_2m,wind_speed_10m`),
-      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${endWp.lat}&longitude=${endWp.lon}&current=temperature_2m,wind_speed_10m`)
-    ]);
+  // Open-Meteo WMO Code translation
+  getWeatherDesc(code) {
+    if (code === 0) return { label: 'Açık / Güneşli', icon: '☀️', simple: 'Açık' };
+    if (code === 1 || code === 2) return { label: 'Parçalı Bulutlu', icon: '🌤️', simple: 'Parçalı' };
+    if (code === 3) return { label: 'Bulutlu', icon: '☁️', simple: 'Bulutlu' };
+    if (code === 45 || code === 48) return { label: 'Sisli / Puslu', icon: '🌫️', simple: 'Sisli' };
+    if (code >= 51 && code <= 55) return { label: 'Hafif Çisenti', icon: '🌦️', simple: 'Çisenti' };
+    if (code >= 61 && code <= 65) return { label: 'Yağmurlu', icon: '🌧️', simple: 'Yağmurlu' };
+    if (code >= 71 && code <= 77) return { label: 'Karlı', icon: '❄️', simple: 'Karlı' };
+    if (code >= 80 && code <= 82) return { label: 'Sağanak Yağış', icon: '🌧️', simple: 'Sağanak' };
+    if (code >= 95 && code <= 99) return { label: 'Fırtına / Yıldırım', icon: '⛈️', simple: 'Fırtına' };
+    return { label: 'Bulutlu', icon: '⛅', simple: 'Bulutlu' };
+  },
 
-    if (startRes.ok) {
-      const sData = await startRes.json();
-      startTemp.textContent = `${Math.round(sData.current.temperature_2m)}°C`;
-      startWind.textContent = `${Math.round(sData.current.wind_speed_10m)} km/s rüzgar`;
-    } else {
-      startTemp.textContent = 'Veri alınamadı';
+  // Degrees to Compass Direction
+  getCompassDir(deg) {
+    const dirs = ['K', 'KKD', 'KD', 'DKD', 'D', 'DGD', 'GD', 'GGD', 'G', 'GGB', 'GB', 'BGB', 'B', 'BKB', 'KB', 'KKB'];
+    const idx = Math.round((deg % 360) / 22.5) % 16;
+    return dirs[idx];
+  },
+
+  // Calculate Crosswind Component
+  calcCrosswind(windSpeed, windDir, roadBearing) {
+    const diff = Math.abs((roadBearing - windDir) % 360);
+    const rad = (diff * Math.PI) / 180;
+    const crossSpeed = Math.round(windSpeed * Math.abs(Math.sin(rad)));
+    const headTailSpeed = Math.round(windSpeed * Math.cos(rad));
+    return {
+      crossSpeed,
+      headTailSpeed,
+      isHighRisk: crossSpeed >= 35,
+      isModerate: crossSpeed >= 20 && crossSpeed < 35
+    };
+  },
+
+  // Sample 5 Checkpoints along route coordinates
+  async analyzeRoute(activeRoute) {
+    const coords = activeRoute?.geometry?.coordinates;
+    if (!coords || coords.length < 2) return null;
+
+    const panel = document.getElementById('weather-panel');
+    if (panel) panel.classList.remove('hidden');
+
+    const timeline = document.getElementById('weather-stations-timeline');
+    if (timeline) {
+      timeline.innerHTML = '<div class="text-slate-400 text-xs py-3 px-2 flex items-center space-x-2"><div class="w-3.5 h-3.5 border-2 border-sky-400 border-t-transparent rounded-full animate-spin"></div><span>5 kontrol noktasında hava ve yan rüzgar taranıyor...</span></div>';
     }
 
-    if (endRes.ok) {
-      const eData = await endRes.json();
-      endTemp.textContent = `${Math.round(eData.current.temperature_2m)}°C`;
-      endWind.textContent = `${Math.round(eData.current.wind_speed_10m)} km/s rüzgar`;
-    } else {
-      endTemp.textContent = 'Veri alınamadı';
+    // Pick 5 sampling indices: 0%, 25%, 50%, 75%, 100%
+    const sampleIndices = [
+      0,
+      Math.floor(coords.length * 0.25),
+      Math.floor(coords.length * 0.50),
+      Math.floor(coords.length * 0.75),
+      coords.length - 1
+    ];
+
+    const samplePoints = sampleIndices.map((idx, stepIdx) => {
+      const pt = coords[idx];
+      const nextPt = coords[Math.min(idx + 5, coords.length - 1)];
+      const bearing = calculateBearing(pt[1], pt[0], nextPt[1], nextPt[0]);
+      
+      let label = 'Güzergah';
+      if (stepIdx === 0) label = 'Başlangıç';
+      else if (stepIdx === 1) label = '1. Bölge';
+      else if (stepIdx === 2) label = 'Orta / Geçit';
+      else if (stepIdx === 3) label = '2. Bölge';
+      else if (stepIdx === 4) label = 'Varış';
+
+      const progressRatio = stepIdx / 4;
+      const etaSeconds = Math.round((activeRoute.duration || 3600) * progressRatio);
+
+      return {
+        lat: pt[1],
+        lon: pt[0],
+        bearing,
+        label,
+        progressRatio,
+        etaSeconds
+      };
+    });
+
+    const lats = samplePoints.map(p => p.lat.toFixed(4)).join(',');
+    const lons = samplePoints.map(p => p.lon.toFixed(4)).join(',');
+
+    try {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m&timezone=auto`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Open-Meteo API hatası');
+
+      let json = await res.json();
+      const rawList = Array.isArray(json) ? json : [json];
+
+      const now = new Date();
+      const stations = samplePoints.map((pt, i) => {
+        const cur = rawList[i]?.current || {};
+        const temp = Math.round(cur.temperature_2m ?? 20);
+        const windSpeed = Math.round(cur.wind_speed_10m ?? 10);
+        const windDir = Math.round(cur.wind_direction_10m ?? 0);
+        const windGusts = Math.round(cur.wind_gusts_10m ?? windSpeed);
+        const weatherCode = cur.weather_code ?? 0;
+        const wInfo = this.getWeatherDesc(weatherCode);
+        const cross = this.calcCrosswind(windSpeed, windDir, pt.bearing);
+
+        const etaDate = new Date(now.getTime() + pt.etaSeconds * 1000);
+        const etaStr = etaDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+
+        return {
+          ...pt,
+          temp,
+          windSpeed,
+          windDir,
+          windGusts,
+          compassDir: this.getCompassDir(windDir),
+          weatherCode,
+          wInfo,
+          cross,
+          etaStr
+        };
+      });
+
+      this.lastAnalysis = stations;
+      this.renderUI(stations);
+
+      // Check for voice warnings
+      const highWindStation = stations.find(s => s.cross.isHighRisk);
+      const rainStation = stations.find(s => s.weatherCode >= 51 && s.weatherCode <= 99);
+
+      if (highWindStation) {
+        const speechMsg = `Dikkat: Rota üzerinde ${highWindStation.label} bölgesinde saatte ${highWindStation.cross.crossSpeed} kilometre şiddetli yan rüzgar riski var.`;
+        if (typeof RotamSpeech !== 'undefined' && RotamSpeech.speak) {
+          RotamSpeech.speak(speechMsg);
+        }
+      } else if (rainStation) {
+        const speechMsg = `Hava durumu uyarısı: Rota üzerinde ${rainStation.label} bölgesinde ${rainStation.wInfo.simple} bekleniyor.`;
+        if (typeof RotamSpeech !== 'undefined' && RotamSpeech.speak) {
+          RotamSpeech.speak(speechMsg);
+        }
+      }
+
+      if (this.showOnMap) {
+        this.renderMapMarkers(stations);
+      }
+
+      return stations;
+    } catch (err) {
+      console.warn('RotamWeather hatası:', err);
+      if (timeline) {
+        timeline.innerHTML = '<div class="text-slate-500 text-xs py-2 px-1">Canlı hava verisi alınamadı (Çevrimdışı mod).</div>';
+      }
+      return null;
     }
-  } catch (err) {
-    console.warn('Weather fetch error:', err);
-    startTemp.textContent = 'Veri alınamadı';
-    endTemp.textContent = 'Veri alınamadı';
+  },
+
+  renderUI(stations) {
+    const timeline = document.getElementById('weather-stations-timeline');
+    const alertBox = document.getElementById('weather-crosswind-alert');
+    const alertText = document.getElementById('weather-crosswind-alert-text');
+
+    if (!timeline) return;
+
+    // Check for alerts
+    const worstCrosswind = stations.reduce((max, s) => (s.cross.crossSpeed > max.cross.crossSpeed ? s : max), stations[0]);
+    if (worstCrosswind && worstCrosswind.cross.isHighRisk) {
+      if (alertBox && alertText) {
+        alertText.textContent = `${worstCrosswind.label} Bölgesinde ${worstCrosswind.cross.crossSpeed} km/s Şiddetli Yan Rüzgar!`;
+        alertBox.classList.remove('hidden');
+      }
+    } else if (alertBox) {
+      alertBox.classList.add('hidden');
+    }
+
+    timeline.innerHTML = stations.map((s) => {
+      let windBadgeClass = 'bg-slate-900 border-slate-800 text-slate-300';
+      let windBadgeLabel = `${s.windSpeed} km/s ${s.compassDir}`;
+
+      if (s.cross.isHighRisk) {
+        windBadgeClass = 'bg-rose-950/80 border-rose-500/60 text-rose-300 animate-pulse font-bold';
+        windBadgeLabel = `⚠️ ${s.cross.crossSpeed} km/s Yan`;
+      } else if (s.cross.isModerate) {
+        windBadgeClass = 'bg-amber-950/80 border-amber-500/50 text-amber-300 font-bold';
+        windBadgeLabel = `💨 ${s.cross.crossSpeed} km/s Yan`;
+      }
+
+      return `
+        <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 shrink-0 w-28 sm:w-32 flex flex-col justify-between hover:border-slate-700 transition-all">
+          <div>
+            <div class="flex items-center justify-between text-[10px] text-slate-400 font-semibold mb-1">
+              <span class="truncate">${s.label}</span>
+              <span class="text-cyan-400 font-mono">${s.etaStr}</span>
+            </div>
+            <div class="flex items-center space-x-1.5 my-1">
+              <span class="text-xl leading-none">${s.wInfo.icon}</span>
+              <span class="text-base font-bold text-white font-mono">${s.temp}°C</span>
+            </div>
+            <p class="text-[9px] text-slate-400 truncate">${s.wInfo.simple}</p>
+          </div>
+
+          <div class="mt-2 pt-1.5 border-t border-slate-900 flex flex-col space-y-0.5">
+            <span class="text-[9px] px-1.5 py-0.5 rounded-md border text-center font-mono ${windBadgeClass}">
+              ${windBadgeLabel}
+            </span>
+            <span class="text-[8px] text-slate-500 text-center font-mono truncate">Hamle: ${s.windGusts} km/s</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Also update legacy start & end elements if present
+    const sTemp = document.getElementById('weather-start-temp');
+    const sWind = document.getElementById('weather-start-wind');
+    const eTemp = document.getElementById('weather-end-temp');
+    const eWind = document.getElementById('weather-end-wind');
+
+    if (stations.length > 0) {
+      const st = stations[0];
+      const en = stations[stations.length - 1];
+      if (sTemp) sTemp.textContent = `${st.temp}°C ${st.wInfo.icon}`;
+      if (sWind) sWind.textContent = `${st.windSpeed} km/s (${st.compassDir})`;
+      if (eTemp) eTemp.textContent = `${en.temp}°C ${en.wInfo.icon}`;
+      if (eWind) eWind.textContent = `${en.windSpeed} km/s (${en.compassDir})`;
+    }
+
+    if (typeof initIcons === 'function') initIcons();
+  },
+
+  // Toggle Wind & Weather Markers on Leaflet Map
+  toggleMapWindMarkers() {
+    this.showOnMap = !this.showOnMap;
+    const btnLabel = document.getElementById('btn-wind-markers-label');
+    const btn = document.getElementById('btn-toggle-wind-markers');
+
+    if (this.showOnMap) {
+      if (btnLabel) btnLabel.textContent = 'Gizle';
+      if (btn) {
+        btn.classList.remove('bg-slate-800', 'text-cyan-300');
+        btn.classList.add('bg-cyan-600', 'text-white');
+      }
+      if (this.lastAnalysis) {
+        this.renderMapMarkers(this.lastAnalysis);
+      }
+      showToast('Haritada rüzgar ve hava durumu işaretçileri açıldı 💨', 'info');
+    } else {
+      if (btnLabel) btnLabel.textContent = 'Haritada Göster';
+      if (btn) {
+        btn.classList.remove('bg-cyan-600', 'text-white');
+        btn.classList.add('bg-slate-800', 'text-cyan-300');
+      }
+      this.clearMapMarkers();
+      showToast('Rüzgar işaretçileri gizlendi', 'info');
+    }
+  },
+
+  renderMapMarkers(stations) {
+    this.clearMapMarkers();
+    if (!map || !stations) return;
+
+    stations.forEach(s => {
+      const isRisk = s.cross.isHighRisk;
+      const isMod = s.cross.isModerate;
+      const arrowRotation = (s.windDir + 180) % 360;
+
+      let borderColor = 'rgba(56, 189, 248, 0.5)';
+      let bgColor = 'rgba(15, 23, 42, 0.95)';
+      let textColor = '#fff';
+
+      if (isRisk) {
+        borderColor = 'rgba(239, 68, 68, 0.9)';
+        bgColor = 'rgba(69, 10, 10, 0.95)';
+        textColor = '#fca5a5';
+      } else if (isMod) {
+        borderColor = 'rgba(245, 158, 11, 0.9)';
+        bgColor = 'rgba(69, 26, 3, 0.95)';
+        textColor = '#fef08a';
+      }
+
+      const html = `
+        <div class="weather-map-marker">
+          <div style="background:${bgColor}; border:1px solid ${borderColor}; color:${textColor}; box-shadow:0 4px 12px rgba(0,0,0,0.6); backdrop-filter:blur(6px);" class="rounded-xl px-2 py-1 flex items-center space-x-1.5 text-[11px] font-bold">
+            <span class="text-sm">${s.wInfo.icon}</span>
+            <span>${s.temp}°C</span>
+            <span style="display:inline-block; transform:rotate(${arrowRotation}deg); transform-origin:center;" class="text-cyan-400 font-black">↑</span>
+            <span class="font-mono text-[10px]">${s.windSpeed} km/s</span>
+            ${isRisk ? '<span class="text-rose-400 animate-pulse text-[10px]">⚠️ Yan</span>' : ''}
+          </div>
+        </div>
+      `;
+
+      const icon = L.divIcon({
+        className: '',
+        html,
+        iconSize: [110, 32],
+        iconAnchor: [55, 16]
+      });
+
+      const marker = L.marker([s.lat, s.lon], { icon, zIndexOffset: 800 }).addTo(map);
+      marker.bindPopup(`
+        <div class="p-2 text-xs space-y-1 font-sans">
+          <h4 class="font-bold text-white text-sm flex items-center space-x-1">
+            <span>${s.wInfo.icon}</span>
+            <span>${s.label} (${s.temp}°C)</span>
+          </h4>
+          <p class="text-slate-300">${s.wInfo.label}</p>
+          <div class="border-t border-slate-800 pt-1 mt-1 text-[11px] text-slate-400 font-mono">
+            <div>💨 Rüzgar Hızı: <strong class="text-white">${s.windSpeed} km/s</strong> (${s.compassDir})</div>
+            <div>🌪️ Hamle: <strong class="text-white">${s.windGusts} km/s</strong></div>
+            <div>⚠️ Yan Rüzgar: <strong class="${isRisk ? 'text-rose-400' : (isMod ? 'text-amber-400' : 'text-emerald-400')}">${s.cross.crossSpeed} km/s</strong></div>
+            <div>⏱️ Tahmini Geçiş: <strong class="text-cyan-300">${s.etaStr}</strong></div>
+          </div>
+        </div>
+      `);
+
+      this.activeMarkers.push(marker);
+    });
+  },
+
+  clearMapMarkers() {
+    if (this.activeMarkers && map) {
+      this.activeMarkers.forEach(m => map.removeLayer(m));
+    }
+    this.activeMarkers = [];
+  },
+
+  checkApproachingWindRisk(lat, lon) {
+    if (!this.lastAnalysis) return;
+    const now = Date.now();
+    if (now - this.lastWindWarningTime < 60000) return;
+
+    for (const st of this.lastAnalysis) {
+      if (st.cross && st.cross.isHighRisk) {
+        const d = haversineMeters(lat, lon, st.lat, st.lon);
+        if (d <= 1500 && d >= 100) {
+          this.lastWindWarningTime = now;
+          const banner = document.getElementById('live-nav-wind-banner');
+          const titleEl = document.getElementById('live-wind-title');
+          const subEl = document.getElementById('live-wind-sub');
+          if (banner) {
+            if (titleEl) titleEl.textContent = `⚠️ ${st.label}: ${st.cross.crossSpeed} km/s Yan Rüzgar!`;
+            if (subEl) subEl.textContent = `Motosiklet dengesi için hızınızı düşürün • Rüzgar Yönü: ${st.compassDir}`;
+            banner.classList.remove('hidden');
+          }
+          if (typeof RotamIntercom !== 'undefined') {
+            RotamIntercom.speak(`Dikkat: ${st.label} bölgesinde saatte ${st.cross.crossSpeed} kilometre şiddetli yan rüzgar riski var. Hızınızı kontrol edin.`, { urgent: true });
+          }
+          break;
+        }
+      }
+    }
   }
+};
+
+window.RotamWeather = RotamWeather;
+
+// Backward-compatible alias
+async function fetchWeatherForRoute(startWp, endWp) {
+  if (state.routeData) {
+    return RotamWeather.analyzeRoute(state.routeData);
+  }
+  return null;
 }
 
 // Distance Helper Functions
@@ -8883,6 +9223,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typeof RotamBackgroundEngine !== 'undefined') {
     RotamBackgroundEngine.init();
   }
+  if (typeof RotamIntercom !== 'undefined') {
+    RotamIntercom.init();
+  }
 
   // Restore personalized preferences (#27)
   try {
@@ -9332,6 +9675,103 @@ const RotamSpeech = {
 };
 
 window.RotamSpeech = RotamSpeech;
+
+// ==========================================
+// ROTAM INTERCOM & KASK SES MOTORU (HELMET AUDIO ENGINE)
+// Bluetooth Kask Uyandırma (Pre-wake chime), Radar & Tehlike Sesli Uyarıları, Kask Ses Testi
+// ==========================================
+const RotamIntercom = {
+  helmetModeEnabled: true,
+  lastHazardAlertTime: 0,
+  notifiedHazards: new Set(),
+
+  init() {
+    try {
+      const saved = localStorage.getItem('rotam_helmet_mode');
+      if (saved !== null) {
+        this.helmetModeEnabled = (saved === 'true');
+      }
+    } catch (e) {}
+  },
+
+  setHelmetMode(enabled) {
+    this.helmetModeEnabled = enabled;
+    try {
+      localStorage.setItem('rotam_helmet_mode', String(enabled));
+    } catch (e) {}
+    showToast(enabled ? 'Kask & Intercom Modu Açık 🏍️🔊' : 'Kask Modu Kapatıldı 🔇', 'info');
+  },
+
+  // Bluetooth kask kulaklığı uyku moduna geçmişse mikro çan sesiyle kanalı açar
+  wakeBluetoothAudio() {
+    try {
+      if (typeof RotamSpeech !== 'undefined' && RotamSpeech.playNavChime) {
+        RotamSpeech.playNavChime();
+      }
+    } catch (e) {}
+  },
+
+  speak(text, options = {}) {
+    if (!text) return;
+    if (typeof LiveNavigation !== 'undefined' && !LiveNavigation.voiceEnabled) return;
+
+    if (this.helmetModeEnabled) {
+      this.wakeBluetoothAudio();
+      setTimeout(() => {
+        if (typeof RotamSpeech !== 'undefined') {
+          RotamSpeech.speak(text, { urgent: options.urgent || false, rate: 1.04 });
+        }
+      }, 140);
+    } else {
+      if (typeof RotamSpeech !== 'undefined') {
+        RotamSpeech.speak(text, options);
+      }
+    }
+  },
+
+  // Sürüş öncesi kask kulaklığı ses seviyesi testi
+  testHelmetAudio() {
+    showToast('Kask ses seviyesi test ediliyor... 🔊', 'info');
+    this.wakeBluetoothAudio();
+    setTimeout(() => {
+      this.speak('Rotam kask sesli yönlendirme devrede. Ses seviyesi uygun, iyi yolculuklar!');
+    }, 180);
+  },
+
+  // Yol üzerindeki radar, polis, yağ döküntüsü ve tehlike yaklaşma kontrolü (500 metre)
+  checkHazardProximity(lat, lon) {
+    if (!lat || !lon || (typeof RotamCommunity === 'undefined')) return;
+    const hazards = RotamCommunity.hazards || [];
+    if (hazards.length === 0) return;
+
+    const now = Date.now();
+    if (now - this.lastHazardAlertTime < 15000) return; // 15 sn throttle
+
+    for (const h of hazards) {
+      if (this.notifiedHazards.has(h.id)) continue;
+
+      const distM = haversineMeters(lat, lon, h.lat, h.lon);
+      if (distM <= 500 && distM >= 60) {
+        this.notifiedHazards.add(h.id);
+        this.lastHazardAlertTime = now;
+
+        let title = 'yol tehlikesi';
+        if (h.type === 'radar') title = 'radar ve polis kontrolü';
+        else if (h.type === 'oil') title = 'kaygan zemin ve yağ döküntüsü';
+        else if (h.type === 'work') title = 'yol çalışması ve asfalt bozukluğu';
+        else if (h.type === 'crash') title = 'trafik kazası';
+        else if (h.type === 'hazard') title = 'yol engeli';
+
+        const distRound = Math.round(distM / 50) * 50;
+        const msg = `Dikkat: ${distRound} metre ileride ${title} bildirildi!`;
+        this.speak(msg, { urgent: true });
+        break;
+      }
+    }
+  }
+};
+
+window.RotamIntercom = RotamIntercom;
 
 // ==========================================
 // ROTAM DISPLAY & RESPONSIVE ENGINE (MOBILE, TABLET, GLOVE & COCKPIT)
@@ -11225,6 +11665,12 @@ const LiveNavigation = {
     if (typeof RotamStoryGuide !== 'undefined') {
       RotamStoryGuide.checkProximity(lat, lon);
     }
+    if (typeof RotamIntercom !== 'undefined') {
+      RotamIntercom.checkHazardProximity(lat, lon);
+    }
+    if (typeof RotamWeather !== 'undefined') {
+      RotamWeather.checkApproachingWindRisk(lat, lon);
+    }
   },
 
   updateRouteProgress(lat, lon) {
@@ -11638,6 +12084,10 @@ const LiveNavigation = {
   },
 
   speak(text, options = {}) {
+    if (typeof RotamIntercom !== 'undefined') {
+      RotamIntercom.speak(text, options);
+      return;
+    }
     if (typeof RotamSpeech !== 'undefined') {
       RotamSpeech.speak(text, { rate: 1.02, ...options });
       return;
