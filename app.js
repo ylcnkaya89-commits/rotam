@@ -10001,7 +10001,6 @@ const RotamBackgroundEngine = {
       if (!audio) {
         audio = document.createElement('audio');
         audio.id = 'rotam-bg-audio-engine';
-        audio.src = this.generateSilentWavBlobUrl();
         audio.loop = true;
         audio.preload = 'auto';
         audio.setAttribute('playsinline', '');
@@ -10009,6 +10008,9 @@ const RotamBackgroundEngine = {
         audio.volume = 0.05; // Audible to OS audio subsystem, but silent PCM wave produces 0 sound
         audio.style.display = 'none';
         document.body.appendChild(audio);
+      }
+      if (!audio.src) {
+        audio.src = this.generateSilentWavBlobUrl();
       }
       this.audioEl = audio;
 
@@ -10040,7 +10042,7 @@ const RotamBackgroundEngine = {
         this.webAudioCtx = new AudioCtx();
       }
       if (this.webAudioCtx.state === 'suspended') {
-        this.webAudioCtx.resume();
+        this.webAudioCtx.resume().catch(() => {});
       }
       if (!this.webAudioKeepAlive) {
         const osc = this.webAudioCtx.createOscillator();
@@ -10115,6 +10117,27 @@ const RotamBackgroundEngine = {
       navigator.mediaSession.setActionHandler('stop', () => {
         this.stop();
       });
+      navigator.mediaSession.setActionHandler('previoustrack', () => {
+        // Intercom button: repeat current maneuver
+        if (window.LiveNavigation && window.LiveNavigation.steps && window.LiveNavigation.currentStepIndex !== undefined) {
+          const step = window.LiveNavigation.steps[window.LiveNavigation.currentStepIndex];
+          if (step) {
+            const info = window.LiveNavigation.getManeuverInfo(step);
+            window.LiveNavigation.speak(`${info.street} ${info.action}`);
+          }
+        }
+      });
+      navigator.mediaSession.setActionHandler('nexttrack', () => {
+        // Intercom button: read next step
+        if (window.LiveNavigation && window.LiveNavigation.steps && window.LiveNavigation.currentStepIndex !== undefined) {
+          const nextIdx = window.LiveNavigation.currentStepIndex + 1;
+          const nextStep = window.LiveNavigation.steps[nextIdx];
+          if (nextStep) {
+            const info = window.LiveNavigation.getManeuverInfo(nextStep);
+            window.LiveNavigation.speak(`Sonraki adım: ${info.street} ${info.action}`);
+          }
+        }
+      });
     } catch (e) {}
   },
 
@@ -10123,17 +10146,21 @@ const RotamBackgroundEngine = {
     const pref = localStorage.getItem('rotam_bg_audio_enabled');
     if (pref === 'false') return;
 
+    this.isActive = true;
     this.setupAudioElement();
+    this.startWebAudioKeepAlive();
+    this.updateControlsUI();
+
+    const initialTitle = this.isFreeRide ? '🏍️ Serbest Sürüş Modu' : '🗺️ Canlı Rota Navigasyonu';
+    this.updateLockScreenNotification(initialTitle, 'Rotam Sürüş Asistanı • GPS Canlı', true);
+
     if (this.audioEl) {
-      this.audioEl.play().then(() => {
-        this.isActive = true;
-        this.startWebAudioKeepAlive();
-        this.updateControlsUI();
-        const initialTitle = this.isFreeRide ? '🏍️ Serbest Sürüş Modu' : '🗺️ Canlı Rota Navigasyonu';
-        this.updateLockScreenNotification(initialTitle, 'Rotam Sürüş Asistanı • GPS Canlı', true);
-      }).catch(err => {
-        console.warn('RotamBackgroundEngine play blocked:', err);
-      });
+      const playPromise = this.audioEl.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(err => {
+          console.warn('RotamBackgroundEngine audio play notice:', err);
+        });
+      }
     }
 
     // Safety watchdog: periodically ensure audio loop didn't stall if tab hidden
@@ -10142,7 +10169,7 @@ const RotamBackgroundEngine = {
       if (this.isActive && this.audioEl && this.audioEl.paused && window.LiveNavigation && window.LiveNavigation.isActive) {
         this.audioEl.play().catch(() => {});
       }
-    }, 12000);
+    }, 10000);
   },
 
   stop() {
