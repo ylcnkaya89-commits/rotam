@@ -238,42 +238,26 @@ function initPlacesDatabase() {
   }
 }
 
-// Map Tile Layers Setup - Multi-Layer Engine (Yandex, Global OSM, Topo Alps, Satellite)
+// Map Tile Layers Setup - Multi-Layer Engine (OpenStreetMap Dark & Daylight, Direct Yandex, Topo Alps, Satellite)
 function createTileLayers() {
   if (typeof L === 'undefined') return {};
   const layers = {};
 
-  // 1. Official Yandex Map Layers via Yandex Maps JS API
-  if (typeof L.yandex === 'function') {
-    try {
-      layers.yandex = L.yandex('map');
-      layers.sat = L.yandex('satellite');
-      layers.hybrid = L.yandex('hybrid');
-    } catch (e) {
-      console.warn('Yandex layer creation notice:', e);
-    }
-  }
+  // 1. ROTAM Gece / Kokpit Modu (Standard OSM + Dark Filter - Zero API Key, 100% Reliable)
+  layers.dark = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
+  });
 
-  // 2. Direct Yandex High-Resolution Tiles Fallback
-  if (!layers.yandex) {
-    layers.yandex = L.tileLayer('https://core-renderer-tiles.maps.yandex.net/tiles?l=map&x={x}&y={y}&z={z}&scale=1&lang=tr_TR', {
-      maxZoom: 19,
-      subdomains: [],
-      attribution: '&copy; <a href="https://yandex.com.tr/harita" target="_blank">Yandex</a>'
-    });
-    layers.sat = L.tileLayer('https://core-renderer-tiles.maps.yandex.net/tiles?l=sat&x={x}&y={y}&z={z}&scale=1&lang=tr_TR', {
-      maxZoom: 18,
-      subdomains: [],
-      attribution: '&copy; <a href="https://yandex.com.tr/harita" target="_blank">Yandex</a>'
-    });
-    layers.hybrid = layers.sat;
-  }
-
-  // Yandex Gece Navigasyon Modu (High-Contrast Night Theme)
-  layers.dark = layers.yandex;
+  // 2. Direct Yandex High-Resolution Tiles (Official Turkish Streets & Labels without JS API key requirement)
+  layers.yandex = L.tileLayer('https://core-renderer-tiles.maps.yandex.net/tiles?l=map&x={x}&y={y}&z={z}&scale=1&lang=tr_TR', {
+    maxZoom: 19,
+    subdomains: [],
+    attribution: '&copy; <a href="https://yandex.com.tr/harita" target="_blank">Yandex</a>'
+  });
   layers.day = layers.yandex;
 
-  // 3. Yurtdışı & Dünya Standart Haritası (OpenStreetMap Global)
+  // 3. Standart Dünya / OpenStreetMap
   layers.global = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
@@ -281,11 +265,18 @@ function createTileLayers() {
   layers.osm = layers.global;
   layers.voyager = layers.global;
 
-  // 4. Topografik & Alpler Dağ Geçitleri (OpenTopoMap)
+  // 4. High-Resolution Satellite (Esri World Imagery)
+  layers.sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 19,
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, USGS'
+  });
+  layers.hybrid = layers.sat;
+
+  // 5. Topografik & Alpler Dağ Geçitleri (OpenTopoMap)
   layers.topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
     maxZoom: 17,
     subdomains: ['a', 'b', 'c'],
-    attribution: '&copy; <a href="https://opentopomap.org" target="_blank">OpenTopoMap</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OSM</a>'
+    attribution: '&copy; <a href="https://opentopomap.org" target="_blank">OpenTopoMap</a>'
   });
 
   // Add error resilience
@@ -359,9 +350,9 @@ function initMap() {
   patchLeafletDraggableForRotation();
 
   tileLayers = createTileLayers();
-  const defaultTile = tileLayers.yandex || tileLayers.dark;
+  const defaultTile = tileLayers.dark || tileLayers.yandex;
 
-  // Center on Turkey with Yandex Maps
+  // Center on Turkey
   map = L.map('map', {
     center: [39.0, 35.2],
     zoom: 6,
@@ -374,7 +365,7 @@ function initMap() {
   // Custom Zoom Control placed bottom right
   L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-  state.activeTileLayer = 'yandex';
+  state.activeTileLayer = 'dark';
   mapInitialized = true;
 
   // Map Click Listener to add waypoints & auto-collapse filters on mobile
@@ -590,15 +581,15 @@ function switchTile(tileKey) {
   let targetLayer = null;
   if (tileLayers) {
     if (canonicalKey === 'global') {
-      targetLayer = tileLayers.global || tileLayers.osm;
+      targetLayer = tileLayers.global || tileLayers.osm || tileLayers.dark;
     } else if (canonicalKey === 'topo') {
-      targetLayer = tileLayers.topo;
+      targetLayer = tileLayers.topo || tileLayers.dark;
     } else if (canonicalKey === 'sat') {
-      targetLayer = tileLayers.sat || tileLayers.hybrid;
+      targetLayer = tileLayers.sat || tileLayers.dark;
     } else if (canonicalKey === 'dark') {
-      targetLayer = tileLayers.dark || tileLayers.yandex;
+      targetLayer = tileLayers.dark || tileLayers.global;
     } else {
-      targetLayer = tileLayers.yandex || tileLayers.day;
+      targetLayer = tileLayers.yandex || tileLayers.voyager || tileLayers.global;
     }
   }
 
@@ -9267,7 +9258,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // Standalone PWA & Dynamic Viewport Synchronizer (iOS 'Ana Ekrana Ekle' & Android PWA)
 function syncViewportHeight() {
   const isInputFocused = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA');
-  const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  const rawVh = (window.visualViewport && window.visualViewport.height > 50) ? window.visualViewport.height : window.innerHeight;
+  const vh = Math.max(320, rawVh || window.innerHeight || 600);
   // If user is actively typing, do not aggressively crush container height or invalidate map
   if (!isInputFocused) {
     document.documentElement.style.setProperty('--app-height', `${vh}px`);
@@ -9731,10 +9723,12 @@ const RotamIntercom = {
 
   // Sürüş öncesi kask kulaklığı ses seviyesi testi
   testHelmetAudio() {
-    showToast('Kask ses seviyesi test ediliyor... 🔊', 'info');
+    showToast('Kask & Intercom ses seviyesi test ediliyor... 🔊', 'info');
     this.wakeBluetoothAudio();
     setTimeout(() => {
-      this.speak('Rotam kask sesli yönlendirme devrede. Ses seviyesi uygun, iyi yolculuklar!');
+      if (typeof RotamSpeech !== 'undefined' && RotamSpeech.speak) {
+        RotamSpeech.speak('Rotam kask sesli yönlendirme devrede. Ses seviyesi uygun, iyi yolculuklar!', { urgent: true, rate: 1.02 });
+      }
     }, 180);
   },
 

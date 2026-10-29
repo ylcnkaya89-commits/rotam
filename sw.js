@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v63 (Helmet Intercom Voice & Crosswind Radar)
-const CACHE_NAME = 'rotam-cache-v63';
+// Rotam PWA Service Worker - v64 (Carto Dark Cockpit & Resilient Tiles)
+const CACHE_NAME = 'rotam-cache-v64';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
@@ -8,7 +8,6 @@ const ASSETS_TO_CACHE = [
   './index.html',
   './app.js',
   './firebase-service.js',
-  './yandex_leaflet.js',
   './styles.css',
   './places_data.js',
   './translations.js',

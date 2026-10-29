@@ -308,6 +308,10 @@ const RotamCloud = {
         return 'Geçerli bir e-posta adresi yazın.';
       case 'auth/popup-closed-by-user':
         return 'Google giriş penceresi kapatıldı.';
+      case 'auth/unauthorized-domain':
+        return 'Bu alan adı Firebase konsolunda yetkilendirilmemiş. Firebase Console > Authentication > Settings > Authorized domains bölümüne ylcnkaya89-commits.github.io alan adını ekleyin.';
+      case 'auth/operation-not-allowed':
+        return 'Bu giriş yöntemi Firebase Console üzerinde aktif değil. Authentication > Sign-in method sekmesinden aktifleştirin.';
       default:
         return err.message || 'Giriş işlemi başarısız oldu.';
     }

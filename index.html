@@ -52,10 +52,6 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-  <!-- Yandex Maps Official API (Türkiye Harita Altyapısı) -->
-  <script src="https://api-maps.yandex.ru/2.1/?lang=tr_TR" type="text/javascript"></script>
-  <script src="./yandex_leaflet.js"></script>
-
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 
@@ -69,12 +65,13 @@
 
   <!-- Apple iOS & iPadOS Web App Support -->
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Rotam">
   <meta name="theme-color" content="#090d16">
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="styles.css?v=5.7">
+  <link rel="stylesheet" href="styles.css?v=5.8">
 </head>
 <body class="h-full flex flex-col overflow-hidden font-sans selection:bg-brand-500 selection:text-white bg-slate-950">
 
@@ -4297,13 +4294,26 @@ service cloud.firestore {
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <!-- Rotam Firebase Bulut & Üyelik Servisi -->
-  <script src="firebase-service.js?v=1.4"></script>
+  <script src="firebase-service.js?v=1.5"></script>
 
   <!-- Kapsamlı Mekan Veritabanı (915+ Yer) -->
   <script src="places_data.js?v=3.3"></script>
   <!-- Çoklu Dil ve Çeviri Motoru (TR / EN) -->
   <script src="translations.js?v=3.2"></script>
   <!-- V3 JavaScript Uygulama Mantığı -->
-  <script src="app.js?v=5.7"></script>
+  <script src="app.js?v=5.8"></script>
+
+  <!-- PWA Service Worker Registration & Cache Auto-Update -->
+  <script>
+    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then((reg) => {
+          reg.update().catch(() => {});
+        }).catch((err) => {
+          console.warn('SW register notice:', err);
+        });
+      });
+    }
+  </script>
 </body>
 </html>
