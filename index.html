@@ -703,10 +703,6 @@
               <span data-i18n="btn_start_live_ride">CANLI SÜRÜŞÜ BAŞLAT</span>
               <span class="text-[10px] bg-cyan-400/20 text-cyan-200 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ml-1">HUD</span>
             </button>
-            <button type="button" onclick="startLiveRide(true)" class="col-span-2 py-2 px-3 bg-slate-800/90 hover:bg-slate-700 text-amber-300 font-bold rounded-xl text-xs border border-amber-500/30 flex items-center justify-center space-x-1.5 active:scale-[0.99] transition-all" title="Demo Simülasyonu Başlat (Test Sürüşü)">
-              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span>Demo Test Sürüşü (Simülasyon)</span>
-            </button>
             <button type="button" onclick="RotamIntercom.testHelmetAudio()" class="col-span-2 py-2 px-3 bg-slate-900/90 hover:bg-slate-800 text-cyan-300 font-bold rounded-xl text-xs border border-cyan-500/30 flex items-center justify-center space-x-1.5 active:scale-[0.99] transition-all" title="Kask Intercom / Bluetooth Sesini Test Et">
               <i data-lucide="headphones" class="w-3.5 h-3.5 text-cyan-400"></i>
               <span>Kask & Intercom Ses Testi</span>
@@ -1472,13 +1468,8 @@
                 </div>
               </div>
 
-              <!-- Sağ: Demo Asistan Butonu ve Kırmızı ÇIKIŞ Butonu -->
+              <!-- Sağ: Kırmızı ÇIKIŞ Butonu -->
               <div class="flex items-center space-x-2 shrink-0">
-                <!-- Simülasyon / Demo Butonu -->
-                <button id="live-nav-demo-btn" onclick="LiveNavigation.toggleSimulation()" class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-800/90 border border-slate-700 hover:bg-slate-700 text-amber-300 flex items-center justify-center active:scale-95 transition-all shadow-md" title="Demo Simülasyonu">
-                  <i data-lucide="sparkles" class="w-4 h-4 sm:w-5 sm:h-5 text-amber-400"></i>
-                </button>
-
                 <!-- Kırmızı Çıkış Butonu (Google Maps Red Exit Pill) -->
                 <button onclick="LiveNavigation.stop()" class="px-5 sm:px-6 py-2.5 sm:py-3 bg-red-600 hover:bg-red-500 active:scale-95 text-white font-black text-xs sm:text-sm rounded-full shadow-lg shadow-red-600/40 flex items-center space-x-1.5 transition-all cursor-pointer">
                   <i data-lucide="x" class="w-4 h-4 stroke-[3]"></i>
@@ -2075,15 +2066,11 @@
           </div>
 
           <!-- ANA EKRANDA BÜYÜK VE NET: SÜRÜŞÜ BAŞLAT BUTONU -->
-          <div class="flex items-center space-x-2">
-            <button onclick="startLiveRide()" class="flex-1 bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-black py-3 px-3 rounded-xl text-xs sm:text-sm shadow-xl shadow-cyan-600/35 flex items-center justify-center space-x-2 active:scale-[0.98] transition-all border border-cyan-400/40" title="Rotam Canlı GPS Sürüş Modunu Başlat">
+          <div>
+            <button onclick="startLiveRide()" class="w-full bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-black py-3 px-3 rounded-xl text-xs sm:text-sm shadow-xl shadow-cyan-600/35 flex items-center justify-center space-x-2 active:scale-[0.98] transition-all border border-cyan-400/40" title="Rotam Canlı GPS Sürüş Modunu Başlat">
               <i data-lucide="play" class="w-4 h-4 fill-white text-white"></i>
               <span class="tracking-wide" data-i18n="btn_start_live_ride">SÜRÜŞÜ BAŞLAT</span>
               <span class="text-[9px] bg-cyan-400/20 text-cyan-200 px-1.5 py-0.5 rounded font-bold uppercase ml-1">CANLI HUD</span>
-            </button>
-            <button onclick="startLiveRide(true)" class="py-3 px-3 bg-slate-800/90 hover:bg-slate-700 text-amber-300 font-bold rounded-xl text-xs border border-amber-500/30 flex items-center justify-center space-x-1 shrink-0 active:scale-[0.98] transition-all shadow-lg" title="Demo Simülasyon Testi">
-              <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
-              <span class="text-[10px] uppercase font-bold text-amber-300">Test</span>
             </button>
           </div>
 
@@ -4047,21 +4034,7 @@ service cloud.firestore {
           </div>
         </button>
 
-        <!-- 2. Demo / Örnek Rota Başlat -->
-        <button type="button" onclick="startDemoRouteFromModal()" class="w-full p-3.5 bg-slate-950/80 hover:bg-slate-800/80 border border-slate-800 rounded-xl flex items-center space-x-3 text-left transition-all active:scale-[0.99] group">
-          <div class="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 group-hover:scale-105 transition-transform shrink-0">
-            <i data-lucide="sparkles" class="w-6 h-6"></i>
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center space-x-2">
-              <span class="text-xs font-bold text-white" data-i18n="ride_choice_demo_title">Örnek Virajlı Rota</span>
-              <span class="text-[9px] bg-amber-400/20 text-amber-300 px-1.5 py-0.5 rounded font-bold uppercase" data-i18n="ride_choice_badge_test">Test Et</span>
-            </div>
-            <p class="text-[11px] text-slate-400 mt-0.5 leading-tight" data-i18n="ride_choice_demo_desc">İstanbul - Şile virajlı sahil rotasıyla canlı turn-by-turn navigasyonu deneyin.</p>
-          </div>
-        </button>
-
-        <!-- 3. Hedef Belirle -->
+        <!-- 2. Hedef Belirle -->
         <button type="button" onclick="selectDestinationFromModal()" class="w-full p-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl text-xs flex items-center justify-center space-x-2 transition-all active:scale-[0.99]">
           <i data-lucide="map-pin" class="w-4 h-4 text-brand-400"></i>
           <span data-i18n="ride_choice_select_dest">Varış Noktası Seç ve Rota Çiz</span>
@@ -4301,7 +4274,7 @@ service cloud.firestore {
   <!-- Çoklu Dil ve Çeviri Motoru (TR / EN) -->
   <script src="translations.js?v=3.2"></script>
   <!-- V3 JavaScript Uygulama Mantığı -->
-  <script src="app.js?v=6.0"></script>
+  <script src="app.js?v=6.1"></script>
 
   <!-- PWA Service Worker Registration & Cache Auto-Update -->
   <script>

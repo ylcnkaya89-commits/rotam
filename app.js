@@ -1009,23 +1009,7 @@ function startFreeRideFromModal() {
 
 function startDemoRouteFromModal() {
   closeStartRideChoiceModal();
-  const isEn = (window.state && window.state.lang === 'en');
-  showToast(isEn ? 'Loading scenic demo route...' : 'Örnek virajlı rota yükleniyor...', 'info');
-
-  state.waypoints = [
-    { id: 'start', type: 'start', lat: 40.9904, lon: 29.0254, name: isEn ? 'Kadikoy' : 'Kadıköy' },
-    { id: 'end', type: 'end', lat: 41.1744, lon: 29.6125, name: isEn ? 'Sile Coast' : 'Şile Sahili' }
-  ];
-  if (typeof updateWaypointsListUI === 'function') updateWaypointsListUI();
-  if (typeof updateWaypointMarkers === 'function') updateWaypointMarkers();
-
-  calculateRouteMain().then(() => {
-    if (state.routeData && typeof LiveNavigation !== 'undefined') {
-      LiveNavigation.start(true);
-    }
-  }).catch(e => {
-    console.error('Demo route calculation error:', e);
-  });
+  selectDestinationFromModal();
 }
 
 function selectDestinationFromModal() {
@@ -1094,7 +1078,7 @@ function handleMobileNavRideStart() {
           try {
             await calculateRouteMain();
             if (state.routeData && typeof LiveNavigation !== 'undefined') {
-              LiveNavigation.start(true);
+              LiveNavigation.start(false);
             }
           } catch (e2) {
             showToast(isEn ? 'Route calculation failed.' : 'Rota hesaplanamadı.', 'error');
@@ -11383,21 +11367,21 @@ const LiveNavigation = {
       },
       (err) => {
         console.warn('Geolocation in LiveNavigation:', err);
-        // Only drop to simulation on hard error if absolutely no coordinates ever existed
-        if (!gpsReceived && !this.lastCoord && this.isActive && !this.isSimulation) {
-          this.switchToSimulationWithMessage();
+        const isEn = (window.state && window.state.lang === 'en');
+        if (!gpsReceived && !this.lastCoord) {
+          showToast(isEn ? 'Waiting for GPS fix... 📡' : 'GPS sinyali aranıyor... 📡', 'warning');
         }
       },
       options
     );
 
-    // Fallback if no GPS fix after 18 seconds (desktop / indoor test)
+    // GPS sinyali beklenirken bilgilendirme (Demo simülasyonuna asla zorla geçilmez)
     setTimeout(() => {
-      // Never hijack into demo simulation if user already has a coordinate or started ride
-      if (this.isActive && !this.isSimulation && !gpsReceived && !this.lastCoord) {
-        this.switchToSimulationWithMessage();
+      if (this.isActive && !gpsReceived && !this.lastCoord) {
+        const isEn = (window.state && window.state.lang === 'en');
+        showToast(isEn ? 'Waiting for GPS signal... Ensure location is enabled. 📡' : 'GPS sinyali aranıyor... Lütfen konum izninizin açık olduğundan emin olun. 📡', 'info');
       }
-    }, 18000);
+    }, 15000);
   },
 
   stopGPS() {
@@ -11410,19 +11394,7 @@ const LiveNavigation = {
   switchToSimulationWithMessage() {
     if (!this.isActive) return;
     const isEn = (window.state && window.state.lang === 'en');
-    if (this.isFreeRide || !state.routeData) {
-      const msg = isEn
-        ? 'GPS fix is pending. Cruise test simulation active.'
-        : 'GPS sinyali bekleniyor. Serbest sürüş seyir simülasyonu devrede.';
-      showToast(msg, 'info');
-      this.startFreeRideSimulation();
-      return;
-    }
-    const msg = (typeof t === 'function')
-      ? t('live_nav_gps_error', 'GPS sinyali alınamadı. Demo simülasyon moduna geçiliyor.')
-      : 'GPS sinyali alınamadı. Demo simülasyon moduna geçiliyor.';
-    showToast(msg, 'info');
-    this.startSimulation();
+    showToast(isEn ? 'Waiting for GPS signal... 📡' : 'GPS sinyali aranıyor... 📡', 'warning');
   },
 
   startFreeRideSimulation() {

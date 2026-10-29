@@ -1,5 +1,5 @@
 // Rotam PWA Service Worker - v64 (Carto Dark Cockpit & Resilient Tiles)
-const CACHE_NAME = 'rotam-cache-v65';
+const CACHE_NAME = 'rotam-cache-v66';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
