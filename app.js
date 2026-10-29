@@ -9414,20 +9414,27 @@ const RotamSpeech = {
         this.audioCtx = new AudioCtx();
       }
       if (this.audioCtx) {
-        if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
-        const osc = this.audioCtx.createOscillator();
-        const gain = this.audioCtx.createGain();
+        if (this.audioCtx.state === 'suspended') {
+          this.audioCtx.resume().catch(() => {});
+        }
+        const ctx = this.audioCtx;
+        const now = ctx.currentTime || 0;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
         osc.connect(gain);
-        gain.connect(this.audioCtx.destination);
+        gain.connect(ctx.destination);
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(587.33, this.audioCtx.currentTime); // D5
-        osc.frequency.exponentialRampToValueAtTime(880, this.audioCtx.currentTime + 0.12); // A5
-        gain.gain.setValueAtTime(0.2, this.audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + 0.22);
-        osc.start();
-        osc.stop(this.audioCtx.currentTime + 0.25);
+        // Net, kask içinde rahat duyulan iki tonlu navigasyon çanı: D5 (587Hz) -> A5 (880Hz)
+        osc.frequency.setValueAtTime(587.33, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.12);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.26);
+        osc.start(now);
+        osc.stop(now + 0.28);
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn('playNavChime error:', e);
+    }
   },
 
   loadVoices() {
@@ -9479,22 +9486,23 @@ const RotamSpeech = {
     const cleanText = text.trim();
     if (!cleanText) return;
 
-    if (typeof LiveNavigation !== 'undefined' && !LiveNavigation.voiceEnabled) {
+    // Test modu haricinde eğer kullanıcı sesli yönlendirmeyi kapatmışsa sessiz kal
+    if (!options.isTest && typeof LiveNavigation !== 'undefined' && !LiveNavigation.voiceEnabled) {
       return;
     }
 
     const now = Date.now();
-    // Ses kesilmesini ve tekrarı önleme: Aynı metin 3.5 saniye içinde tekrar çağrılırsa atla
-    if (cleanText === this.lastSpokenText && (now - this.lastSpokenTime < 3500)) {
+    // Test haricinde: Aynı metin 3.5 saniye içinde tekrar çağrılırsa atla (test butonuna ardışık basılabilir)
+    if (!options.isTest && cleanText === this.lastSpokenText && (now - this.lastSpokenTime < 3500)) {
       return;
     }
 
     const item = { text: cleanText, options, timestamp: now };
 
-    if (options.urgent) {
+    if (options.urgent || options.isTest) {
       this.queue.unshift(item);
       if (this.isSpeaking) {
-        this.abortCurrentSpeech();
+        this.abortCurrentSpeech(true); // Eşzamanlı kesme (User activation kaybolmaz)
       } else {
         this.processQueue();
       }
@@ -9577,6 +9585,9 @@ const RotamSpeech = {
       if (window.speechSynthesis.paused) {
         window.speechSynthesis.resume();
       }
+      if (window.speechSynthesis.speaking && !this.activeUtterance) {
+        try { window.speechSynthesis.cancel(); } catch (_) {}
+      }
 
       const utterance = new SpeechSynthesisUtterance(nextItem.text);
       utterance.lang = isEn ? 'en-US' : 'tr-TR';
@@ -9611,6 +9622,9 @@ const RotamSpeech = {
       utterance.onend = onDone;
       utterance.onerror = (e) => {
         console.warn('Utterance notice:', e);
+        try {
+          this.playNavChime();
+        } catch (_) {}
         onDone();
       };
 
@@ -9635,7 +9649,7 @@ const RotamSpeech = {
     }
   },
 
-  abortCurrentSpeech() {
+  abortCurrentSpeech(synchronous = false) {
     this.stopKeepAlive();
     this.activeUtterance = null;
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -9643,10 +9657,14 @@ const RotamSpeech = {
         window.speechSynthesis.cancel();
       } catch (e) {}
     }
-    setTimeout(() => {
-      this.isSpeaking = false;
+    this.isSpeaking = false;
+    if (synchronous) {
       this.processQueue();
-    }, 120);
+    } else {
+      setTimeout(() => {
+        this.processQueue();
+      }, 80);
+    }
   },
 
   stop() {
@@ -9705,15 +9723,21 @@ const RotamIntercom = {
 
   speak(text, options = {}) {
     if (!text) return;
-    if (typeof LiveNavigation !== 'undefined' && !LiveNavigation.voiceEnabled) return;
+    if (!options.isTest && typeof LiveNavigation !== 'undefined' && !LiveNavigation.voiceEnabled) return;
 
     if (this.helmetModeEnabled) {
       this.wakeBluetoothAudio();
-      setTimeout(() => {
+      if (options.urgent || options.isTest) {
         if (typeof RotamSpeech !== 'undefined') {
-          RotamSpeech.speak(text, { urgent: options.urgent || false, rate: 1.04 });
+          RotamSpeech.speak(text, { ...options, rate: 1.04 });
         }
-      }, 140);
+      } else {
+        setTimeout(() => {
+          if (typeof RotamSpeech !== 'undefined') {
+            RotamSpeech.speak(text, { ...options, rate: 1.04 });
+          }
+        }, 120);
+      }
     } else {
       if (typeof RotamSpeech !== 'undefined') {
         RotamSpeech.speak(text, options);
@@ -9724,12 +9748,17 @@ const RotamIntercom = {
   // Sürüş öncesi kask kulaklığı ses seviyesi testi
   testHelmetAudio() {
     showToast('Kask & Intercom ses seviyesi test ediliyor... 🔊', 'info');
+    // 1. Web Audio ve Bluetooth intercom DAC kanalını anında uyandırmak için çift tonlu çan çal
     this.wakeBluetoothAudio();
-    setTimeout(() => {
-      if (typeof RotamSpeech !== 'undefined' && RotamSpeech.speak) {
-        RotamSpeech.speak('Rotam kask sesli yönlendirme devrede. Ses seviyesi uygun, iyi yolculuklar!', { urgent: true, rate: 1.02 });
-      }
-    }, 180);
+
+    // 2. Tarayıcı autoplay güvenlik engelini (not-allowed) aşmak için SpeechSynthesis'i doğrudan eşzamanlı başlat
+    if (typeof RotamSpeech !== 'undefined' && RotamSpeech.speak) {
+      RotamSpeech.speak('Rotam kask sesli yönlendirme devrede. Ses seviyesi uygun, iyi yolculuklar!', {
+        urgent: true,
+        isTest: true,
+        rate: 1.0
+      });
+    }
   },
 
   // Yol üzerindeki radar, polis, yağ döküntüsü ve tehlike yaklaşma kontrolü (500 metre)
