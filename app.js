@@ -164,8 +164,18 @@ function showToast(message, type = 'info') {
   if (!container) {
     container = document.createElement('div');
     container.id = 'toast-container';
-    container.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] flex flex-col items-center space-y-2 pointer-events-none px-4 w-full max-w-md';
     document.body.appendChild(container);
+  }
+
+  // Kokpit / Navigasyon açıkken toast'lar ekranın üstünde gösterilir ve alt kontrol butonlarını kapatmaz
+  const isLiveNav = (typeof LiveNavigation !== 'undefined' && LiveNavigation.isActive);
+  container.className = isLiveNav
+    ? 'fixed top-28 left-1/2 -translate-x-1/2 z-[9999] flex flex-col items-center space-y-2 pointer-events-none px-4 w-full max-w-md'
+    : 'fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] flex flex-col items-center space-y-2 pointer-events-none px-4 w-full max-w-md';
+
+  // Ekranda en fazla 2 bildirim tut, eskileri temizle
+  while (container.children.length >= 2) {
+    container.firstChild.remove();
   }
 
   const toast = document.createElement('div');
@@ -4172,6 +4182,7 @@ async function fetchMultiRouteAlternatives(points) {
           distance: valRoute.distance,
           duration: valRoute.duration,
           geometry: valRoute.geometry,
+          steps: valRoute.steps || [],
           source: 'valhalla'
         });
       }
@@ -4240,7 +4251,7 @@ async function fetchValhallaRoute(points, profile) {
     costing: costing,
     costing_options: costingOptions,
     units: 'kilometers',
-    directions_type: 'none'
+    directions_type: 'instructions'
   };
 
   const res = await fetchWithTimeout('https://valhalla1.openstreetmap.de/route', {
@@ -4254,15 +4265,42 @@ async function fetchValhallaRoute(points, profile) {
   if (!data.trip || !data.trip.legs) throw new Error('Valhalla trip empty');
 
   let coords = [];
+  let steps = [];
   data.trip.legs.forEach(leg => {
     const legCoords = decodePolyline6(leg.shape);
     coords = coords.length ? coords.concat(legCoords.slice(1)) : legCoords;
+    if (leg.maneuvers && Array.isArray(leg.maneuvers)) {
+      leg.maneuvers.forEach(m => {
+        const mCoord = (m.begin_shape_index !== undefined && coords[m.begin_shape_index]) ? coords[m.begin_shape_index] : [0, 0];
+        let type = 'turn';
+        let modifier = 'straight';
+        if (m.type === 1) { type = 'depart'; }
+        else if (m.type === 4 || m.type === 5 || m.type === 6) { type = 'arrive'; }
+        else if (m.type === 15) { modifier = 'left'; }
+        else if (m.type === 10) { modifier = 'right'; }
+        else if (m.type === 14) { modifier = 'slight left'; }
+        else if (m.type === 11) { modifier = 'slight right'; }
+
+        steps.push({
+          name: (m.street_names && m.street_names[0]) || m.instruction || '',
+          distance: (m.length || 0) * 1000,
+          duration: m.time || 0,
+          maneuver: {
+            type: type,
+            modifier: modifier,
+            instruction: m.instruction,
+            location: mCoord
+          }
+        });
+      });
+    }
   });
 
   return {
     distance: data.trip.summary.length * 1000,
     duration: data.trip.summary.time,
-    geometry: { type: 'LineString', coordinates: coords }
+    geometry: { type: 'LineString', coordinates: coords },
+    steps: steps
   };
 }
 
