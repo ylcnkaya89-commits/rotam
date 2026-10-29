@@ -9993,6 +9993,7 @@ const RotamBackgroundEngine = {
   webAudioKeepAlive: null,
   lastManeuverData: null,
   keepAliveTimer: null,
+  heartbeatTimer: null,   // GPS stale heartbeat zamanlayıcı
   lastMediaUpdateTime: 0,
   lastMediaTitle: '',
 
@@ -10122,9 +10123,31 @@ const RotamBackgroundEngine = {
     document.addEventListener('visibilitychange', () => {
       const isVisible = (document.visibilityState === 'visible');
       if (isVisible) {
-        // App returned to foreground: Immediately resynchronize UI, map, marker & wake lock
+        // ── ÖN PLANA DÖNÜş: Ekran açıldı / sekme aktif oldu ──────────────────
+
         if (window.LiveNavigation && window.LiveNavigation.isActive) {
+          // 1) WakeLock yeniden iste (sistem uykudan uyanınca serbest bırakılmış olabilir)
           window.LiveNavigation.requestWakeLock();
+
+          // 2) AudioContext askıya alınmışsa devam ettir (iOS Safari zorunluluğu)
+          if (window.LiveNavigation.audioCtx && window.LiveNavigation.audioCtx.state === 'suspended') {
+            window.LiveNavigation.audioCtx.resume().catch(() => {});
+          }
+          if (this.webAudioCtx && this.webAudioCtx.state === 'suspended') {
+            this.webAudioCtx.resume().catch(() => {});
+          }
+
+          // 3) Adım indeksini son bilinen konumla yeniden senkronize et
+          //    (arka planda geçirilen sürede birden fazla adım atlanmış olabilir)
+          if (window.LiveNavigation.lastCoord && !window.LiveNavigation.isSimulation) {
+            const [lat, lon] = window.LiveNavigation.lastCoord;
+            const resyncedIdx = window.LiveNavigation.findActiveStepIndex(lat, lon);
+            if (resyncedIdx > window.LiveNavigation.currentStepIndex) {
+              window.LiveNavigation.currentStepIndex = resyncedIdx;
+            }
+          }
+
+          // 4) Harita ve marker konumunu güncelle
           if (window.LiveNavigation.lastCoord) {
             const [lat, lon] = window.LiveNavigation.lastCoord;
             if (window.LiveNavigation.marker) {
@@ -10136,16 +10159,42 @@ const RotamBackgroundEngine = {
             }
             window.LiveNavigation.updateMapHeading(window.LiveNavigation.lastHeading || 0);
           }
+
+          // 5) Hız göstergesini güncelle
           const speedEl = document.getElementById('live-nav-speed-val');
           if (speedEl && window.LiveNavigation.speedKmH !== undefined) {
             speedEl.textContent = Math.round(window.LiveNavigation.speedKmH);
           }
+
+          // 6) GPS stale ise GPS'i yeniden başlat
+          if (!window.LiveNavigation.isSimulation) {
+            const gpsAge = window.LiveNavigation.lastGpsTime
+              ? Date.now() - window.LiveNavigation.lastGpsTime
+              : Infinity;
+            if (gpsAge > 12000) {
+              // GPS 12 saniyedir güncelleme yapmamış: watcher'ı yeniden başlat
+              window.LiveNavigation.stopGPS();
+              setTimeout(() => {
+                if (window.LiveNavigation.isActive && !window.LiveNavigation.isSimulation) {
+                  window.LiveNavigation.startGPS();
+                }
+              }, 300);
+            }
+          }
         }
       } else {
-        // Phone screen locked or app backgrounded:
-        // Ensure silent audio is actively playing so OS does not freeze JS Geolocation
+        // ── ARKA PLANA GEÇİş: Ekran kilitleniyor / sekme gizleniyor ─────────
+
+        // 1) Sessiz ses döngüsünün çalışmasını garantile (iOS GPS dondurma önlemi)
         if (this.isActive && this.audioEl && this.audioEl.paused) {
           this.audioEl.play().catch(() => {});
+        }
+
+        // 2) GPS yüksek doğruluk modunu kapat → pil tasarrufu
+        //    (watcher'ı yeniden başlatmak yerine sadece flag bırak, startGPS halleder)
+        if (window.LiveNavigation && window.LiveNavigation.isActive &&
+            !window.LiveNavigation.isSimulation) {
+          window.LiveNavigation._bgLowAccuracyMode = true;
         }
       }
     });
@@ -10224,6 +10273,28 @@ const RotamBackgroundEngine = {
         this.audioEl.play().catch(() => {});
       }
     }, 10000);
+
+    // GPS Stale Heartbeat: Eğer GPS 8 saniyeden fazla güncelleme yapmadıysa
+    // son bilinen koordinatla navigasyonu canlı tut (arka plan / tünel / köprü altı için)
+    if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
+    this.heartbeatTimer = setInterval(() => {
+      const nav = window.LiveNavigation;
+      if (!this.isActive || !nav || !nav.isActive || nav.isSimulation) return;
+      if (!nav.lastCoord || !nav.lastGpsTime) return;
+
+      const gpsAge = Date.now() - nav.lastGpsTime;
+      if (gpsAge > 8000) {
+        // GPS güncellemesi durdu: son konumla rota ilerlemesini güncelle
+        const [lat, lon] = nav.lastCoord;
+        if (typeof nav.updateRouteProgress === 'function') {
+          nav.updateRouteProgress(lat, lon);
+        }
+        // Kilit ekranı bildirimini de taze tut
+        if (nav.lastManeuverData) {
+          this.updateManeuver(nav.lastManeuverData);
+        }
+      }
+    }, 5000); // Her 5 saniyede bir kontrol
   },
 
   stop() {
@@ -10231,6 +10302,10 @@ const RotamBackgroundEngine = {
     if (this.keepAliveTimer) {
       clearInterval(this.keepAliveTimer);
       this.keepAliveTimer = null;
+    }
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = null;
     }
     if (this.audioEl) {
       try {
@@ -10414,6 +10489,8 @@ const LiveNavigation = {
   isRerouting: false,
   isHudMirrored: false,
   audioCtx: null,
+  lastGpsTime: null,         // GPS stale detection: son geolocation güncellemesinin zamanı
+  _bgLowAccuracyMode: false, // Arka planda pil tasarrufu için düşük doğruluk bayrağı
 
   playNavSound(type) {
     try {
@@ -11403,6 +11480,7 @@ const LiveNavigation = {
 
     this.isSimulation = false;
     this.updateModeBadge();
+    this._bgLowAccuracyMode = false; // Arka plan düşük doğruluk bayrağını sıfırla
 
     const options = {
       enableHighAccuracy: true,
@@ -11667,6 +11745,7 @@ const LiveNavigation = {
     this.speedKmH = speed;
     this.lastHeading = heading || 0;
     this.lastCoord = [lat, lon];
+    this.lastGpsTime = Date.now(); // GPS stale detection için timestamp
     state.userLocation = { lat, lon };
 
     // Telemetry distance & speed calculation
@@ -12265,8 +12344,18 @@ const LiveNavigation = {
     if ('wakeLock' in navigator) {
       try {
         this.wakeLock = await navigator.wakeLock.request('screen');
+        // WakeLock sistem tarafından serbest bırakıldığında (örn. ekran kilidi)
+        // navigasyon aktifse otomatik olarak yeniden iste
         this.wakeLock.addEventListener('release', () => {
           this.wakeLock = null;
+          if (this.isActive) {
+            // Kısa gecikme: visibility API'nin önce stabilize olmasını sağla
+            setTimeout(() => {
+              if (this.isActive && document.visibilityState === 'visible') {
+                this.requestWakeLock();
+              }
+            }, 500);
+          }
         });
       } catch (err) {
         console.warn('Wake Lock request error:', err);
@@ -13360,6 +13449,10 @@ window.LiveNavigation = LiveNavigation;
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && LiveNavigation.isActive) {
     LiveNavigation.requestWakeLock();
+    // AudioContext askıya alınmışsa devam ettir (RotamBackgroundEngine'deki handler ile çakışmaz)
+    if (LiveNavigation.audioCtx && LiveNavigation.audioCtx.state === 'suspended') {
+      LiveNavigation.audioCtx.resume().catch(() => {});
+    }
   }
 });
 
