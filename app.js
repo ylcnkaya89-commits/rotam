@@ -167,10 +167,10 @@ function showToast(message, type = 'info') {
     document.body.appendChild(container);
   }
 
-  // Kokpit / Navigasyon açıkken toast'lar ekranın üstünde gösterilir ve alt kontrol butonlarını kapatmaz
+  // Kokpit / Navigasyon açıkken toast'lar harita ortasında (bottom-32) gösterilir, üst dönüş kartını veya alt kontrol butonlarını kapatmaz
   const isLiveNav = (typeof LiveNavigation !== 'undefined' && LiveNavigation.isActive);
   container.className = isLiveNav
-    ? 'fixed top-28 left-1/2 -translate-x-1/2 z-[9999] flex flex-col items-center space-y-2 pointer-events-none px-4 w-full max-w-md'
+    ? 'fixed bottom-32 left-1/2 -translate-x-1/2 z-[9999] flex flex-col items-center space-y-2 pointer-events-none px-4 w-full max-w-md'
     : 'fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] flex flex-col items-center space-y-2 pointer-events-none px-4 w-full max-w-md';
 
   // Ekranda en fazla 2 bildirim tut, eskileri temizle
@@ -4130,6 +4130,7 @@ async function fetchMultiRouteAlternatives(points) {
           distance: valCamper.distance,
           duration: valCamper.duration,
           geometry: valCamper.geometry,
+          steps: valCamper.steps || [],
           source: 'valhalla'
         });
       }
@@ -10169,23 +10170,25 @@ const RotamBackgroundEngine = {
         this.stop();
       });
       navigator.mediaSession.setActionHandler('previoustrack', () => {
-        // Intercom button: repeat current maneuver
+        // Intercom button: repeat upcoming maneuver
         if (window.LiveNavigation && window.LiveNavigation.steps && window.LiveNavigation.currentStepIndex !== undefined) {
-          const step = window.LiveNavigation.steps[window.LiveNavigation.currentStepIndex];
+          const targetIdx = Math.min(window.LiveNavigation.currentStepIndex + 1, window.LiveNavigation.steps.length - 1);
+          const step = window.LiveNavigation.steps[targetIdx];
           if (step) {
             const info = window.LiveNavigation.getManeuverInfo(step);
-            window.LiveNavigation.speak(`${info.street} ${info.action}`);
+            window.LiveNavigation.speak(`${info.action}, ${info.street}`);
           }
         }
       });
       navigator.mediaSession.setActionHandler('nexttrack', () => {
-        // Intercom button: read next step
+        // Intercom button: read subsequent step
         if (window.LiveNavigation && window.LiveNavigation.steps && window.LiveNavigation.currentStepIndex !== undefined) {
-          const nextIdx = window.LiveNavigation.currentStepIndex + 1;
+          const targetIdx = Math.min(window.LiveNavigation.currentStepIndex + 1, window.LiveNavigation.steps.length - 1);
+          const nextIdx = targetIdx + 1;
           const nextStep = window.LiveNavigation.steps[nextIdx];
           if (nextStep) {
             const info = window.LiveNavigation.getManeuverInfo(nextStep);
-            window.LiveNavigation.speak(`Sonraki adım: ${info.street} ${info.action}`);
+            window.LiveNavigation.speak(`Sonraki adım: ${info.action}, ${info.street}`);
           }
         }
       });
@@ -10646,6 +10649,32 @@ const LiveNavigation = {
     }
   },
 
+  findActiveStepIndex(lat, lon) {
+    if (!this.steps || this.steps.length <= 1 || !lat || !lon) return 0;
+
+    let bestIdx = 0;
+    let minExcess = Infinity;
+
+    for (let i = 0; i < this.steps.length - 1; i++) {
+      const curLoc = this.steps[i]?.maneuver?.location;
+      const nextLoc = this.steps[i + 1]?.maneuver?.location;
+      if (!curLoc || !nextLoc) continue;
+
+      const dCur = haversineMeters(lat, lon, curLoc[1], curLoc[0]);
+      const dNext = haversineMeters(lat, lon, nextLoc[1], nextLoc[0]);
+      const segLen = haversineMeters(curLoc[1], curLoc[0], nextLoc[1], nextLoc[0]);
+
+      // Rider is between curLoc and nextLoc if dCur + dNext is close to segLen
+      const excess = (dCur + dNext) - segLen;
+      if (excess < minExcess && excess < 250 && dNext > 30) {
+        minExcess = excess;
+        bestIdx = i;
+      }
+    }
+
+    return bestIdx;
+  },
+
   getManeuverInfo(step) {
     const isEn = (window.state && window.state.lang === 'en');
     if (!step) {
@@ -10656,7 +10685,7 @@ const LiveNavigation = {
       };
     }
 
-    const name = step.name || (isEn ? 'Road' : 'Güzergah');
+    const name = step.name || (isEn ? 'Road' : 'İsimsiz Yol');
     const m = step.maneuver || {};
     const type = m.type || '';
     const mod = m.modifier || '';
@@ -10672,14 +10701,14 @@ const LiveNavigation = {
       action = isEn ? 'Depart and follow route' : 'Yola çıkın ve rotayı takip edin';
     } else if (type === 'roundabout' || type === 'rotary') {
       arrow = '🔄';
-      action = isEn ? 'Enter roundabout, take exit' : 'Dönel kavşaktan çıkın';
+      action = isEn ? 'Enter roundabout' : 'Dönel kavşaktan çıkın';
     } else if (type === 'fork') {
       if (mod.includes('left')) {
         arrow = '↖';
-        action = isEn ? 'Keep left at the fork' : 'Çatalda soldan devam edin';
+        action = isEn ? 'Keep left at the fork' : 'Soldaki çataldan devam edin';
       } else {
         arrow = '↗';
-        action = isEn ? 'Keep right at the fork' : 'Çatalda sağdan devam edin';
+        action = isEn ? 'Keep right at the fork' : 'Sağdaki çataldan devam edin';
       }
     } else if (type === 'off ramp' || type === 'on ramp') {
       if (mod.includes('left')) {
@@ -10691,36 +10720,36 @@ const LiveNavigation = {
       }
     } else if (mod === 'sharp left') {
       arrow = '⮌';
-      action = isEn ? `Sharp left onto ${name}` : `${name} yönüne keskin sola dönün`;
+      action = isEn ? 'Sharp left' : 'Keskin sola dönün';
     } else if (mod === 'left') {
       arrow = '↰';
-      action = isEn ? `Turn left onto ${name}` : `${name} yönüne sola dönün`;
+      action = isEn ? 'Turn left' : 'Sola dönün';
     } else if (mod === 'slight left') {
       arrow = '↖';
-      action = isEn ? `Slight left onto ${name}` : `${name} yönüne hafif sola dönün`;
+      action = isEn ? 'Slight left' : 'Hafif sola dönün';
     } else if (mod === 'sharp right') {
       arrow = '⮎';
-      action = isEn ? `Sharp right onto ${name}` : `${name} yönüne keskin sağa dönün`;
+      action = isEn ? 'Sharp right' : 'Keskin sağa dönün';
     } else if (mod === 'right') {
       arrow = '↱';
-      action = isEn ? `Turn right onto ${name}` : `${name} yönüne sağa dönün`;
+      action = isEn ? 'Turn right' : 'Sağa dönün';
     } else if (mod === 'slight right') {
       arrow = '↗';
-      action = isEn ? `Slight right onto ${name}` : `${name} yönüne hafif sağa dönün`;
+      action = isEn ? 'Slight right' : 'Hafif sağa dönün';
     } else if (mod === 'uturn') {
       arrow = '↩';
       action = isEn ? 'Make a U-turn' : 'U dönüşü yapın';
     } else if (type === 'turn') {
       if (mod.includes('left')) {
         arrow = '↰';
-        action = isEn ? `Turn left onto ${name}` : `${name} yönüne sola dönün`;
+        action = isEn ? 'Turn left' : 'Sola dönün';
       } else if (mod.includes('right')) {
         arrow = '↱';
-        action = isEn ? `Turn right onto ${name}` : `${name} yönüne sağa dönün`;
+        action = isEn ? 'Turn right' : 'Sağa dönün';
       }
     } else {
       arrow = '↑';
-      action = isEn ? `Continue on ${name}` : `${name} boyunca düz devam edin`;
+      action = isEn ? 'Continue straight' : 'Düz devam edin';
     }
 
     return { arrow, street: name, action };
@@ -10831,7 +10860,15 @@ const LiveNavigation = {
       if (state.routeData) {
         this.initRouteSteps();
         this.currentStepIndex = 0;
-        this.updateManeuverUI(0);
+        let initialDist = 100;
+        const targetIdx = Math.min(this.currentStepIndex + 1, this.steps.length - 1);
+        const targetStep = this.steps[targetIdx];
+        if (targetStep && targetStep.maneuver?.location) {
+          initialDist = haversineMeters(lat, lon, targetStep.maneuver.location[1], targetStep.maneuver.location[0]);
+        } else if (targetStep && typeof targetStep.distance === 'number') {
+          initialDist = targetStep.distance;
+        }
+        this.updateManeuverUI(initialDist);
         if (this.voiceEnabled) {
           this.speak(isEn ? 'New route ready.' : 'Yeni rota hazır.');
         }
@@ -10920,18 +10957,24 @@ const LiveNavigation = {
 
   updateManeuverUI(distMeters = 0) {
     const isEn = (window.state && window.state.lang === 'en');
-    const curStep = this.steps[this.currentStepIndex];
-    const nextStep = this.steps[this.currentStepIndex + 1];
+    if (!this.steps || this.steps.length === 0) return;
 
-    const curInfo = this.getManeuverInfo(curStep);
+    // Hedef dönüş: Sürücünün şu an yaklaştığı ve gerçekleştireceği ilk manevra
+    const targetIdx = Math.min(this.currentStepIndex + 1, this.steps.length - 1);
+    const targetStep = this.steps[targetIdx];
+    // Sonraki dönüş: Hedef dönüşten bir sonraki dönüş (Önizleme)
+    const subsequentStep = (targetIdx + 1 < this.steps.length) ? this.steps[targetIdx + 1] : null;
 
-    // Update Speed Limit Sign
-    this.currentSpeedLimit = this.getSpeedLimitForStep(curStep, curInfo.street);
+    const targetInfo = this.getManeuverInfo(targetStep);
+
+    // Hız limiti tabelasını güncelle (Şu an üzerinde bulunulan yolun limiti)
+    const curRoad = this.steps[this.currentStepIndex] || targetStep;
+    this.currentSpeedLimit = this.getSpeedLimitForStep(curRoad, curRoad.name || targetInfo.street);
     const limitEl = document.getElementById('live-nav-speed-limit-val');
     if (limitEl) limitEl.textContent = this.currentSpeedLimit;
 
-    // Update Lane Guidance
-    this.updateLaneGuidance(curStep, distMeters);
+    // Şerit asistanı
+    this.updateLaneGuidance(targetStep, distMeters);
 
     const iconEl = document.getElementById('live-nav-maneuver-icon');
     const distEl = document.getElementById('live-nav-maneuver-dist');
@@ -10939,7 +10982,7 @@ const LiveNavigation = {
     const nameEl = document.getElementById('live-nav-street-name');
     const subEl = document.getElementById('live-nav-street-sub');
 
-    if (iconEl) iconEl.textContent = curInfo.arrow;
+    if (iconEl) iconEl.textContent = targetInfo.arrow;
     if (distEl) {
       if (distMeters <= 0) {
         distEl.textContent = '100 m';
@@ -10952,32 +10995,33 @@ const LiveNavigation = {
     if (suffixEl) {
       suffixEl.textContent = isEn ? 'then' : 'sonra';
     }
-    if (nameEl) nameEl.textContent = curInfo.street;
-    if (subEl) subEl.textContent = curInfo.action;
+    if (nameEl) nameEl.textContent = targetInfo.street;
+    if (subEl) subEl.textContent = targetInfo.action;
 
-    // Update background engine & lock-screen notification
+    // Arka plan bildirimini ve kilit ekranını güncelle
     if (typeof RotamBackgroundEngine !== 'undefined') {
       RotamBackgroundEngine.updateManeuver({
-        arrow: curInfo.arrow,
-        street: curInfo.street,
-        action: curInfo.action,
+        arrow: targetInfo.arrow,
+        street: targetInfo.street,
+        action: targetInfo.action,
         distMeters
       });
     }
 
-    // Secondary next-step pill ("Sonra ↱")
+    // İkinci adım önizleme şeridi ("SONRA ↱ ... 500m")
     const nextPill = document.getElementById('live-nav-next-step-pill');
     const subArrow = document.getElementById('live-nav-sub-arrow');
     const subStreet = document.getElementById('live-nav-sub-street');
     const subDist = document.getElementById('live-nav-sub-dist');
 
-    if (nextStep) {
-      const nextInfo = this.getManeuverInfo(nextStep);
-      if (subArrow) subArrow.textContent = nextInfo.arrow;
-      if (subStreet) subStreet.textContent = nextInfo.street;
+    if (subsequentStep && targetStep.maneuver?.type !== 'arrive') {
+      const subInfo = this.getManeuverInfo(subsequentStep);
+      if (subArrow) subArrow.textContent = subInfo.arrow;
+      if (subStreet) subStreet.textContent = subInfo.street;
       if (subDist) {
-        const nextDist = nextStep.distance || 800;
-        subDist.textContent = (nextDist < 1000) ? `${Math.round(nextDist)} m` : `${(nextDist / 1000).toFixed(1)} km`;
+        // İki dönüş arasındaki sürüş mesafesi: hedef dönüşten sonraki yolun uzunluğu
+        const betweenDist = targetStep.distance || 500;
+        subDist.textContent = (betweenDist < 1000) ? `${Math.round(betweenDist)} m` : `${(betweenDist / 1000).toFixed(1)} km`;
       }
       if (nextPill) nextPill.classList.remove('hidden');
     } else {
@@ -11140,7 +11184,23 @@ const LiveNavigation = {
     this.compassMode = 'heading';
     this.isOverviewMode = false;
     this.initRouteSteps();
-    this.updateManeuverUI(0);
+
+    // Find active step if starting mid-route, otherwise start at 0
+    const startLat = (this.lastCoord && this.lastCoord[0]) || (state.waypoints && state.waypoints[0] && state.waypoints[0].lat);
+    const startLon = (this.lastCoord && this.lastCoord[1]) || (state.waypoints && state.waypoints[0] && state.waypoints[0].lon);
+    this.currentStepIndex = this.findActiveStepIndex(startLat, startLon);
+
+    let initialDist = 100;
+    const targetIdx = Math.min(this.currentStepIndex + 1, this.steps.length - 1);
+    const targetStep = this.steps[targetIdx];
+    if (targetStep && targetStep.maneuver?.location && startLat && startLon) {
+      initialDist = haversineMeters(startLat, startLon, targetStep.maneuver.location[1], targetStep.maneuver.location[0]);
+    } else if (targetStep && typeof targetStep.distance === 'number') {
+      initialDist = targetStep.distance;
+    } else if (this.steps[0]) {
+      initialDist = this.steps[0].distance || 100;
+    }
+    this.updateManeuverUI(initialDist);
 
     // Show Live HUD overlay
     const overlay = document.getElementById('live-nav-overlay');
@@ -11154,6 +11214,8 @@ const LiveNavigation = {
     // Hide all colliding floating controls and cards during Live HUD
     const bottomBar = document.getElementById('mobile-bottom-bar');
     if (bottomBar) bottomBar.classList.add('hidden');
+    const bottomNav = document.getElementById('mobile-bottom-nav');
+    if (bottomNav) bottomNav.classList.add('hidden');
 
     document.getElementById('floating-map-controls')?.classList.add('hidden');
     document.getElementById('gmaps-top-container')?.classList.add('hidden');
@@ -11285,6 +11347,8 @@ const LiveNavigation = {
     // Restore floating controls and cards
     const bottomBar = document.getElementById('mobile-bottom-bar');
     if (bottomBar) bottomBar.classList.remove('hidden');
+    const bottomNav = document.getElementById('mobile-bottom-nav');
+    if (bottomNav) bottomNav.classList.remove('hidden');
 
     document.getElementById('floating-map-controls')?.classList.remove('hidden');
     document.getElementById('map-category-filter-bar')?.classList.remove('hidden');
@@ -11766,37 +11830,80 @@ const LiveNavigation = {
     const valid = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
     if (valid.length < 2) return;
 
-    // 1. Maneuver Step Progress & Detection
-    if (this.steps && this.steps.length > 0 && this.currentStepIndex < this.steps.length) {
-      const curStep = this.steps[this.currentStepIndex];
-      let distToStep = 100;
-      if (curStep.maneuver && Array.isArray(curStep.maneuver.location)) {
-        const [mLocLon, mLocLat] = curStep.maneuver.location;
-        distToStep = haversineMeters(lat, lon, mLocLat, mLocLon);
+    // 1. Maneuver Step Progress & Turn-by-Turn Tracking
+    if (this.steps && this.steps.length > 0) {
+      let targetIdx = Math.min(this.currentStepIndex + 1, this.steps.length - 1);
+      let targetStep = this.steps[targetIdx];
+      const isDestination = (targetStep.maneuver?.type === 'arrive' || targetIdx === this.steps.length - 1);
+
+      let distToTurn = 100;
+      if (targetStep.maneuver && Array.isArray(targetStep.maneuver.location)) {
+        const [mLocLon, mLocLat] = targetStep.maneuver.location;
+        distToTurn = haversineMeters(lat, lon, mLocLat, mLocLon);
+      } else if (typeof targetStep.distance === 'number') {
+        distToTurn = targetStep.distance;
       }
 
-      // Approaching turn chime (when within 180m)
-      if (distToStep <= 180 && distToStep >= 70 && !this.hasChimedForCurrentStep) {
-        this.hasChimedForCurrentStep = true;
-        this.playNavSound('turn');
+      // Check if rider reached destination (within 30m of arrival point)
+      if (isDestination && distToTurn <= 30) {
+        this.onDestinationReached();
+        return;
       }
 
-      // Check if rider reached maneuver threshold (within 45 meters)
-      if (distToStep <= 45 && this.currentStepIndex < this.steps.length - 1) {
-        this.currentStepIndex++;
+      // Check if rider passed into the subsequent segment (e.g. GPS jump at highway speeds)
+      let passedIntoNext = false;
+      if (targetIdx + 1 < this.steps.length && targetStep.maneuver && Array.isArray(targetStep.maneuver.location)) {
+        const nextStep = this.steps[targetIdx + 1];
+        if (nextStep.maneuver && Array.isArray(nextStep.maneuver.location)) {
+          const [curLon, curLat] = targetStep.maneuver.location;
+          const [nextLon, nextLat] = nextStep.maneuver.location;
+          const turnToNext = haversineMeters(curLat, curLon, nextLat, nextLon);
+          const distToNext = haversineMeters(lat, lon, nextLat, nextLon);
+          if (turnToNext > 60 && distToNext < turnToNext * 0.85 && distToTurn > 40) {
+            passedIntoNext = true;
+          }
+        }
+      }
+
+      if ((distToTurn <= 35 || passedIntoNext) && !isDestination) {
+        this.currentStepIndex = targetIdx;
         this.hasChimedForCurrentStep = false;
-        const nextStep = this.steps[this.currentStepIndex];
-        const info = this.getManeuverInfo(nextStep);
+
+        targetIdx = Math.min(this.currentStepIndex + 1, this.steps.length - 1);
+        targetStep = this.steps[targetIdx];
+        if (targetStep.maneuver && Array.isArray(targetStep.maneuver.location)) {
+          const [nLon, nLat] = targetStep.maneuver.location;
+          distToTurn = haversineMeters(lat, lon, nLat, nLon);
+        } else {
+          distToTurn = targetStep.distance || 150;
+        }
+
+        const info = this.getManeuverInfo(targetStep);
         if (this.voiceEnabled) {
           const isEn = (window.state && window.state.lang === 'en');
+          const distStr = distToTurn < 1000 ? `${Math.round(distToTurn)} metre sonra` : `${(distToTurn / 1000).toFixed(1)} kilometre sonra`;
           const speech = isEn
-            ? `In 100 meters, ${info.action} ${info.street}`
-            : `${info.street} ${info.action}`;
+            ? `In ${Math.round(distToTurn)} meters, ${info.action} ${info.street}`
+            : `${distStr}, ${info.action}, ${info.street}`;
           this.speak(speech);
         }
-        this.updateManeuverUI(nextStep.distance || 150);
+        this.updateManeuverUI(distToTurn);
       } else {
-        this.updateManeuverUI(distToStep);
+        // Approaching turn chime & voice alert (within 180m and >= 50m)
+        if (distToTurn <= 180 && distToTurn >= 50 && !this.hasChimedForCurrentStep) {
+          this.hasChimedForCurrentStep = true;
+          this.playNavSound('turn');
+          if (this.voiceEnabled) {
+            const info = this.getManeuverInfo(targetStep);
+            const isEn = (window.state && window.state.lang === 'en');
+            const distStr = `${Math.round(distToTurn)} metre sonra`;
+            const speech = isEn
+              ? `In ${Math.round(distToTurn)} meters, ${info.action} ${info.street}`
+              : `${distStr}, ${info.action}, ${info.street}`;
+            this.speak(speech);
+          }
+        }
+        this.updateManeuverUI(distToTurn);
       }
     }
 
