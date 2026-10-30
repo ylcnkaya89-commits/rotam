@@ -1784,6 +1784,11 @@
             <span class="hidden md:inline" data-i18n="btn_locate_me">Konumum</span>
           </button>
 
+          <!-- Konum Doğrula & Düzelt Butonu (Hızlı Şehir & Haritadan Seçim) -->
+          <button onclick="openLocationPickerModal()" class="px-1.5 py-1.5 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/10 transition-all" title="Konumumu Doğrula / Şehir Değiştir">
+            <i data-lucide="edit-3" class="w-3 h-3 text-cyan-400"></i>
+          </button>
+
           <div class="h-4 w-px bg-slate-700/60"></div>
 
           <!-- Akordiyon Menü Tetikleyici Butonu (Aktif Katman + Ok İkonu) -->
@@ -1994,6 +1999,12 @@
                 <span>📥</span> <span>Çevrimdışı Harita</span>
               </span>
               <span id="mobile-offline-badge" class="text-[10px] text-emerald-400 font-mono">Yönet</span>
+            </button>
+            <button onclick="openLocationPickerModal(); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-bold text-cyan-300 hover:bg-cyan-500/10 flex items-center justify-between">
+              <span class="flex items-center space-x-1.5">
+                <span>📍</span> <span>Konumumu Doğrula</span>
+              </span>
+              <span class="text-[10px] text-cyan-400 font-mono">Düzelt</span>
             </button>
             <div class="h-px bg-slate-800 my-1"></div>
             <button onclick="RotamCommunity.toggleLayer(); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-bold text-amber-400 hover:bg-amber-500/10 flex items-center justify-between">
@@ -2438,12 +2449,12 @@
 
         <!-- 3. TAB: ARAÇ & DOSYALAR -->
         <div id="tab-pane-hub-tools" class="hidden space-y-2.5">
-          <button onclick="startManualLocationPicker(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-cyan-500/40 text-left flex items-center justify-between transition-all group">
+          <button onclick="openLocationPickerModal(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-cyan-500/40 text-left flex items-center justify-between transition-all group">
             <div class="flex items-center space-x-3 min-w-0">
               <span class="w-10 h-10 rounded-xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center text-lg shrink-0">📍</span>
               <div class="min-w-0">
-                <span class="font-extrabold text-sm text-white group-hover:text-cyan-300 block truncate">Konumumu Haritadan Seç / Düzelt</span>
-                <span class="text-xs text-slate-400 block truncate">Cihazınızın GPS'i yanlış gösteriyorsa haritaya dokunarak yerinizi belirleyin</span>
+                <span class="font-extrabold text-sm text-white group-hover:text-cyan-300 block truncate">Konumumu Doğrula / Değiştir</span>
+                <span class="text-xs text-slate-400 block truncate">Cihazınızın GPS'i yanlış gösteriyorsa şehir arayın veya haritada yerinizi sabitleyin</span>
               </div>
             </div>
             <i data-lucide="crosshair" class="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition-transform shrink-0"></i>
@@ -2500,6 +2511,125 @@
             <i data-lucide="external-link" class="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-transform shrink-0"></i>
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: KONUMUMU BELİRLE & DÜZELT (LOCATION ACCURACY & PICKER) -->
+  <div id="modal-location-picker" class="hidden fixed inset-0 z-[1100] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
+    <div class="bg-slate-900 border border-slate-700/80 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-fade-in">
+      <!-- Modal Header -->
+      <div class="p-4 border-b border-slate-800 bg-slate-950 flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-9 h-9 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+            <i data-lucide="crosshair" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-black text-white">Konumumu Doğrula & Düzelt</h3>
+            <p class="text-[11px] text-slate-400">GPS veya Wi-Fi yanlışsa yerinizi anında sabitleyin</p>
+          </div>
+        </div>
+        <button onclick="closeLocationPickerModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-4 space-y-4 overflow-y-auto no-scrollbar">
+        <!-- Mevcut Durum Kartı -->
+        <div class="p-3 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-1.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-slate-400 font-medium">Algılanan Durum:</span>
+            <span id="loc-picker-status-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">Tespit Ediliyor...</span>
+          </div>
+          <p id="loc-picker-current-text" class="text-xs text-slate-200 font-bold truncate">Henüz konum tespit edilmedi</p>
+          <p class="text-[10px] text-slate-400 leading-relaxed">
+            ℹ️ Bilgisayarlarda dahili uydu GPS'i bulunmadığı için tarayıcılar konumu Wi-Fi veya internet sağlayıcısının (TurkNet vb.) IP sunucusundan tahmin eder. Bu yüzden farklı bir şehirde görünebilirsiniz. Buradan gerçek yerinizi 1 tıkla sabitleyebilirsiniz.
+          </p>
+        </div>
+
+        <!-- Seçenek 1: Şehir / İlçe Ara -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-300 block">1. Şehir, İlçe veya Mahalle Ara</label>
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+            <input id="loc-picker-search-input" type="text"
+              placeholder="Örn: Kadıköy, Beşiktaş, Çankaya, Karşıyaka, Nilüfer..."
+              oninput="handleLocationPickerSearch(this.value)"
+              class="w-full bg-slate-950 border border-slate-800 focus:border-cyan-500/60 rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-colors" />
+          </div>
+          <!-- Arama Sonuçları Listesi -->
+          <div id="loc-picker-results-dropdown" class="hidden mt-1 bg-slate-950 border border-slate-800 rounded-xl max-h-44 overflow-y-auto divide-y divide-slate-800/80 text-xs">
+          </div>
+        </div>
+
+        <!-- Seçenek 2: Hızlı Popüler Şehirler -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-300 block">2. Hızlı Şehir Seçimi (1 Tıkla Konum Yap)</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            <button onclick="selectQuickLocationCity(41.0082, 28.9784, 'İstanbul')" class="p-2 rounded-xl bg-slate-950 border border-slate-800 hover:border-cyan-500/40 hover:bg-slate-800 text-left transition-all active:scale-95">
+              <span class="font-bold text-white block">🏙️ İstanbul</span>
+              <span class="text-[10px] text-slate-400">Tarihi Yarımada</span>
+            </button>
+            <button onclick="selectQuickLocationCity(40.9927, 29.0267, 'İstanbul (Kadıköy)')" class="p-2 rounded-xl bg-slate-950 border border-slate-800 hover:border-cyan-500/40 hover:bg-slate-800 text-left transition-all active:scale-95">
+              <span class="font-bold text-white block">⚓ Kadıköy</span>
+              <span class="text-[10px] text-slate-400">Anadolu Yakası</span>
+            </button>
+            <button onclick="selectQuickLocationCity(39.9208, 32.8541, 'Ankara')" class="p-2 rounded-xl bg-slate-950 border border-slate-800 hover:border-cyan-500/40 hover:bg-slate-800 text-left transition-all active:scale-95">
+              <span class="font-bold text-white block">🏛️ Ankara</span>
+              <span class="text-[10px] text-slate-400">Kızılay / Çankaya</span>
+            </button>
+            <button onclick="selectQuickLocationCity(38.4192, 27.1287, 'İzmir')" class="p-2 rounded-xl bg-slate-950 border border-slate-800 hover:border-cyan-500/40 hover:bg-slate-800 text-left transition-all active:scale-95">
+              <span class="font-bold text-white block">🌊 İzmir</span>
+              <span class="text-[10px] text-slate-400">Konak / Kordon</span>
+            </button>
+            <button onclick="selectQuickLocationCity(36.8848, 30.7040, 'Antalya')" class="p-2 rounded-xl bg-slate-950 border border-slate-800 hover:border-cyan-500/40 hover:bg-slate-800 text-left transition-all active:scale-95">
+              <span class="font-bold text-white block">🏖️ Antalya</span>
+              <span class="text-[10px] text-slate-400">Muratpaşa / Sahil</span>
+            </button>
+            <button onclick="selectQuickLocationCity(40.1885, 29.0610, 'Bursa')" class="p-2 rounded-xl bg-slate-950 border border-slate-800 hover:border-cyan-500/40 hover:bg-slate-800 text-left transition-all active:scale-95">
+              <span class="font-bold text-white block">🌲 Bursa</span>
+              <span class="text-[10px] text-slate-400">Osmangazi / Nilüfer</span>
+            </button>
+            <button onclick="selectQuickLocationCity(37.0545, 28.3242, 'Muğla (Akyaka)')" class="p-2 rounded-xl bg-slate-950 border border-slate-800 hover:border-cyan-500/40 hover:bg-slate-800 text-left transition-all active:scale-95">
+              <span class="font-bold text-white block">⛵ Muğla</span>
+              <span class="text-[10px] text-slate-400">Akyaka / Gökova</span>
+            </button>
+            <button onclick="selectQuickLocationCity(39.7767, 30.5206, 'Eskişehir')" class="p-2 rounded-xl bg-slate-950 border border-slate-800 hover:border-cyan-500/40 hover:bg-slate-800 text-left transition-all active:scale-95">
+              <span class="font-bold text-white block">🏰 Eskişehir</span>
+              <span class="text-[10px] text-slate-400">Odunpazarı</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Seçenek 3 & 4: Haritadan Seç veya GPS Zorla -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-slate-800/80">
+          <button onclick="triggerMapPickFromModal()" class="p-3 rounded-2xl bg-cyan-950/40 border border-cyan-500/30 hover:bg-cyan-900/60 text-cyan-300 text-left flex items-center space-x-2.5 transition-all active:scale-98">
+            <span class="text-xl shrink-0">🗺️</span>
+            <div class="min-w-0">
+              <span class="font-bold block text-xs">Haritaya Dokunarak Seç</span>
+              <span class="text-[10px] text-cyan-400/80 block truncate">Haritada tam evinizin veya garajınızın üzerine tıklayın</span>
+            </div>
+          </button>
+
+          <button onclick="forceRecheckGPS()" class="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 hover:bg-emerald-900/60 text-emerald-300 text-left flex items-center space-x-2.5 transition-all active:scale-98">
+            <span class="text-xl shrink-0">🛰️</span>
+            <div class="min-w-0">
+              <span class="font-bold block text-xs">Cihaz GPS'ini Yeniden Tara</span>
+              <span class="text-[10px] text-emerald-400/80 block truncate">Hassas Wi-Fi / Uydu taraması yap</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-3 bg-slate-950 border-t border-slate-800 flex items-center justify-between text-xs">
+        <button id="btn-clear-saved-loc" onclick="clearSavedVerifiedLocation()" class="text-rose-400 hover:text-rose-300 text-[11px] font-semibold transition-colors">
+          Kayıtlı Konumu Sıfırla
+        </button>
+        <button onclick="closeLocationPickerModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition-colors">
+          Kapat
+        </button>
       </div>
     </div>
   </div>

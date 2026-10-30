@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v77 (Relocate map-hint from top chips row to bottom center)
-const CACHE_NAME = 'rotam-cache-v77';
+// Rotam PWA Service Worker - v78 (Location Verification & Accuracy Suite with LocalStorage Persistence)
+const CACHE_NAME = 'rotam-cache-v78';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

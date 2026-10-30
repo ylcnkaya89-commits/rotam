@@ -362,10 +362,32 @@ function initMap() {
   tileLayers = createTileLayers();
   const defaultTile = tileLayers.dark || tileLayers.yandex;
 
-  // Center on Turkey
+  // Center on saved verified user location if available, otherwise Turkey center
+  let initialCenter = [39.0, 35.2];
+  let initialZoom = 6;
+  try {
+    const savedLocRaw = localStorage.getItem('rotam_verified_user_location');
+    if (savedLocRaw) {
+      const s = JSON.parse(savedLocRaw);
+      if (s && s.lat && s.lon) {
+        initialCenter = [s.lat, s.lon];
+        initialZoom = 14;
+        state.userLocation = {
+          lat: s.lat,
+          lon: s.lon,
+          accuracy: 5,
+          isManual: true,
+          isFallback: false,
+          name: s.name || 'Kayıtlı Konumum',
+          timestamp: Date.now()
+        };
+      }
+    }
+  } catch (e) {}
+
   map = L.map('map', {
-    center: [39.0, 35.2],
-    zoom: 6,
+    center: initialCenter,
+    zoom: initialZoom,
     layers: defaultTile ? [defaultTile] : [],
     zoomControl: false,
     tap: true,
@@ -441,6 +463,11 @@ function initMap() {
 
   // Proactively warm GPS user location cache in background for instant navigation startup
   proactivelyWarmUserLocation();
+
+  // If a verified user location was restored from localStorage, show pulse marker
+  if (state.userLocation && state.userLocation.isManual && map) {
+    showUserLocationPulseMarker(state.userLocation.lat, state.userLocation.lon, 5);
+  }
 
   // Initialize Real-time Community Live Hazard & Road Alert Network
   if (typeof RotamCommunity !== 'undefined') {
@@ -542,16 +569,28 @@ function cancelManualLocationPicker() {
   if (map) map.getContainer().style.cursor = '';
 }
 
-function setUserLocationManually(lat, lon) {
+function setUserLocationManually(lat, lon, customName = null) {
   const isEn = (window.state && window.state.lang === 'en');
+  const locName = customName || (isEn ? '📍 Set Location' : '📍 Belirlenen Konumum');
   state.userLocation = {
     lat,
     lon,
     accuracy: 5,
     isManual: true,
     isFallback: false,
+    name: locName,
     timestamp: Date.now()
   };
+
+  // Persist to localStorage so the user never gets placed in the wrong city again!
+  try {
+    localStorage.setItem('rotam_verified_user_location', JSON.stringify({
+      lat,
+      lon,
+      name: locName,
+      timestamp: Date.now()
+    }));
+  } catch (e) {}
 
   // Update pulsing location marker on map
   showUserLocationPulseMarker(lat, lon, 5);
@@ -560,7 +599,7 @@ function setUserLocationManually(lat, lon) {
   if (state.waypoints && state.waypoints[0] && (!state.waypoints[0].lat || state.waypoints[0].name.includes('Konum'))) {
     state.waypoints[0].lat = lat;
     state.waypoints[0].lon = lon;
-    state.waypoints[0].name = isEn ? '📍 Set Location' : '📍 Belirlenen Konumum';
+    state.waypoints[0].name = locName;
     updateWaypointsListUI();
     updateWaypointMarkers();
     if (state.waypoints[1]?.lat) {
@@ -578,19 +617,208 @@ function setUserLocationManually(lat, lon) {
     });
   }
 
-  showToast(isEn ? '📍 Location manually set on map' : '📍 Konumunuz haritada başarıyla belirlendi', 'success');
+  if (map) {
+    map.flyTo([lat, lon], 15, { duration: 1.2 });
+  }
+
+  showToast((isEn ? '📍 Location saved: ' : '📍 Konumunuz kaydedildi ve odaklandı: ') + locName, 'success');
+}
+
+// ==========================================
+// LOCATION VERIFICATION & PICKER MODAL SUITE
+// ==========================================
+function openLocationPickerModal() {
+  const modal = document.getElementById('modal-location-picker');
+  if (!modal) return;
+
+  const isEn = (window.state && window.state.lang === 'en');
+  const badge = document.getElementById('loc-picker-status-badge');
+  const text = document.getElementById('loc-picker-current-text');
+  const clearBtn = document.getElementById('btn-clear-saved-loc');
+
+  let savedRaw = null;
+  try { savedRaw = localStorage.getItem('rotam_verified_user_location'); } catch (e) {}
+
+  if (savedRaw) {
+    const s = JSON.parse(savedRaw);
+    if (badge) {
+      badge.textContent = isEn ? 'Verified / Saved' : 'Doğrulanmış & Kayıtlı';
+      badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+    }
+    if (text) {
+      text.textContent = `📍 ${s.name || 'Sabit Konum'} (${s.lat.toFixed(4)}, ${s.lon.toFixed(4)})`;
+    }
+    if (clearBtn) clearBtn.classList.remove('hidden');
+  } else if (state.userLocation && state.userLocation.lat) {
+    const acc = state.userLocation.accuracy || 10;
+    if (badge) {
+      badge.textContent = acc <= 45 ? `GPS (±${acc}m)` : `Wi-Fi/IP (±${acc}m)`;
+      badge.className = acc <= 45 
+        ? 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+        : 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40';
+    }
+    if (text) {
+      text.textContent = `🌐 ${state.userLocation.lat.toFixed(4)}, ${state.userLocation.lon.toFixed(4)}`;
+    }
+    if (clearBtn) clearBtn.classList.add('hidden');
+  } else {
+    if (badge) {
+      badge.textContent = isEn ? 'Not Detected' : 'Tespit Edilmedi';
+      badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-700 text-slate-300';
+    }
+    if (text) {
+      text.textContent = isEn ? 'No location acquired yet' : 'Henüz konum alınamadı (Türkiye geneli)';
+    }
+    if (clearBtn) clearBtn.classList.add('hidden');
+  }
+
+  const input = document.getElementById('loc-picker-search-input');
+  if (input) input.value = '';
+  const dropdown = document.getElementById('loc-picker-results-dropdown');
+  if (dropdown) dropdown.classList.add('hidden');
+
+  modal.classList.remove('hidden');
+  if (typeof initIcons === 'function') initIcons();
+}
+
+function closeLocationPickerModal() {
+  const modal = document.getElementById('modal-location-picker');
+  if (modal) modal.classList.add('hidden');
+}
+
+function selectQuickLocationCity(lat, lon, cityName) {
+  setUserLocationManually(lat, lon, cityName);
+  closeLocationPickerModal();
+}
+
+function triggerMapPickFromModal() {
+  closeLocationPickerModal();
+  startManualLocationPicker();
+}
+
+function forceRecheckGPS() {
+  closeLocationPickerModal();
+  flyToCurrentLocation();
+}
+
+function clearSavedVerifiedLocation() {
+  try {
+    localStorage.removeItem('rotam_verified_user_location');
+  } catch (e) {}
+  state.userLocation = null;
+  if (nonNavLocationMarker && map) {
+    map.removeLayer(nonNavLocationMarker);
+    nonNavLocationMarker = null;
+  }
+  if (nonNavAccuracyCircle && map) {
+    map.removeLayer(nonNavAccuracyCircle);
+    nonNavAccuracyCircle = null;
+  }
+  const isEn = (window.state && window.state.lang === 'en');
+  showToast(isEn ? 'Saved location cleared. Reset to GPS.' : 'Kayıtlı konum sıfırlandı. Cihaz GPS\'i aktif.', 'info');
+  openLocationPickerModal();
+}
+
+let locSearchDebounce = null;
+function handleLocationPickerSearch(query) {
+  clearTimeout(locSearchDebounce);
+  const dropdown = document.getElementById('loc-picker-results-dropdown');
+  if (!dropdown) return;
+  if (!query || query.trim().length < 2) {
+    dropdown.classList.add('hidden');
+    dropdown.innerHTML = '';
+    return;
+  }
+
+  locSearchDebounce = setTimeout(async () => {
+    const qClean = query.trim().toLocaleLowerCase('tr');
+    const matched = [];
+
+    // Search local places database
+    if (state.allPlaces && Array.isArray(state.allPlaces)) {
+      for (const p of state.allPlaces) {
+        if ((p.name && p.name.toLocaleLowerCase('tr').includes(qClean)) ||
+            (p.city && p.city.toLocaleLowerCase('tr').includes(qClean))) {
+          matched.push({ name: p.name, city: p.city || '', lat: p.lat, lon: p.lon });
+          if (matched.length >= 8) break;
+        }
+      }
+    }
+
+    if (matched.length === 0) {
+      try {
+        const nomUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query.trim() + ' Türkiye')}&format=json&limit=5&accept-language=tr,en;q=0.9`;
+        const res = await fetch(nomUrl, { headers: { 'Accept': 'application/json' } });
+        if (res.ok) {
+          const data = await res.json();
+          data.forEach(item => {
+            matched.push({
+              name: item.display_name.split(',')[0],
+              city: item.display_name.split(',').slice(1, 3).join(','),
+              lat: parseFloat(item.lat),
+              lon: parseFloat(item.lon)
+            });
+          });
+        }
+      } catch (e) {}
+    }
+
+    if (matched.length === 0) {
+      dropdown.innerHTML = '<div class="p-3 text-slate-400 text-center">Sonuç bulunamadı. Lütfen haritadan dokunarak seçin.</div>';
+      dropdown.classList.remove('hidden');
+      return;
+    }
+
+    dropdown.innerHTML = matched.map(m => `
+      <div onclick="selectQuickLocationCity(${m.lat}, ${m.lon}, '${m.name.replace(/'/g, "\\'")}')" class="p-2.5 hover:bg-slate-800 cursor-pointer flex items-center justify-between text-xs transition-colors">
+        <div class="min-w-0 pr-2">
+          <span class="font-bold text-white block truncate">📍 ${m.name}</span>
+          <span class="text-[10px] text-slate-400 block truncate">${m.city || ''}</span>
+        </div>
+        <span class="text-[10px] text-cyan-400 font-bold shrink-0">Seç →</span>
+      </div>
+    `).join('');
+    dropdown.classList.remove('hidden');
+  }, 220);
 }
 
 window.ensureUserLocation = ensureUserLocation;
 window.startManualLocationPicker = startManualLocationPicker;
 window.cancelManualLocationPicker = cancelManualLocationPicker;
 window.setUserLocationManually = setUserLocationManually;
+window.openLocationPickerModal = openLocationPickerModal;
+window.closeLocationPickerModal = closeLocationPickerModal;
+window.selectQuickLocationCity = selectQuickLocationCity;
+window.triggerMapPickFromModal = triggerMapPickFromModal;
+window.forceRecheckGPS = forceRecheckGPS;
+window.clearSavedVerifiedLocation = clearSavedVerifiedLocation;
+window.handleLocationPickerSearch = handleLocationPickerSearch;
 
 // Proactive user location cache warmer (High accuracy satellite query)
 function proactivelyWarmUserLocation() {
+  try {
+    const saved = localStorage.getItem('rotam_verified_user_location');
+    if (saved) {
+      const s = JSON.parse(saved);
+      if (s && s.lat && s.lon) {
+        state.userLocation = {
+          lat: s.lat,
+          lon: s.lon,
+          accuracy: 5,
+          isManual: true,
+          isFallback: false,
+          name: s.name || 'Doğrulanmış Konumum',
+          timestamp: Date.now()
+        };
+        return;
+      }
+    }
+  } catch (e) {}
+
   if (typeof navigator === 'undefined' || !navigator.geolocation) return;
   navigator.geolocation.getCurrentPosition(
     (pos) => {
+      if (state.userLocation && state.userLocation.isManual) return;
       state.userLocation = {
         lat: pos.coords.latitude,
         lon: pos.coords.longitude,
@@ -1875,12 +2103,28 @@ function handleHeroEndInput(value) {
 
 // GPS Location for Start Point (High accuracy satellite fix)
 function useCurrentLocationForStart() {
+  const input = document.getElementById('hero-start-input');
+  const isEn = (window.state && window.state.lang === 'en');
+
+  // If user has a verified saved location, use it directly!
+  if (state.userLocation && state.userLocation.lat && state.userLocation.isManual) {
+    const lat = state.userLocation.lat;
+    const lon = state.userLocation.lon;
+    state.waypoints[0].lat = lat;
+    state.waypoints[0].lon = lon;
+    state.waypoints[0].name = state.userLocation.name || (isEn ? 'Current Location' : 'Mevcut Konumum');
+    if (input) input.value = `📍 ${state.waypoints[0].name}`;
+    updateWaypointsListUI();
+    updateWaypointMarkers();
+    checkAndPanToWaypoint(0);
+    showToast(isEn ? 'Saved verified location set as start' : 'Doğrulanmış konumunuz başlangıç noktası olarak ayarlandı.', 'success');
+    return;
+  }
+
   if (!navigator.geolocation) {
     showToast('Tarayıcınız konum servisini desteklemiyor.', 'warning');
     return;
   }
-  const input = document.getElementById('hero-start-input');
-  const isEn = (window.state && window.state.lang === 'en');
   if (input) input.value = isEn ? 'Getting current location...' : 'Mevcut Konumum alınıyor...';
 
   navigator.geolocation.getCurrentPosition(
