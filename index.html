@@ -880,13 +880,19 @@
             <span data-i18n="gmaps_chip_fuel">Benzin</span>
           </button>
 
-          <!-- 3. Mola & Kafe -->
+          <!-- 3. Motosiklet & Araç Servisi, Tamirci, Lastikçi -->
+          <button onclick="quickFilterCategory('service')" id="gmaps-chip-service" data-cat="service" class="gmaps-chip px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-semibold text-slate-200 flex items-center space-x-1.5 shrink-0 active:scale-95" title="Motosiklet & Araç Servisi, Lastikçi, Yol Yardım">
+            <span>🔧</span>
+            <span data-i18n="gmaps_chip_service">Tamir & Servis</span>
+          </button>
+
+          <!-- 4. Mola & Kafe -->
           <button onclick="quickFilterCategory('gastronomy')" id="gmaps-chip-rest" data-cat="gastronomy" class="gmaps-chip px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-semibold text-slate-200 flex items-center space-x-1.5 shrink-0 active:scale-95" title="Mola Yerleri & Kafe">
             <span>☕</span>
             <span data-i18n="gmaps_chip_rest">Mola</span>
           </button>
 
-          <!-- 4. Tarihi Yerler & Antik Kent -->
+          <!-- 5. Tarihi Yerler & Antik Kent -->
           <button onclick="quickFilterCategory('historic')" id="gmaps-chip-historic" data-cat="historic" class="gmaps-chip px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-semibold text-slate-200 flex items-center space-x-1.5 shrink-0 active:scale-95" title="Tarihi Yerler & Antik Kentler">
             <span>🏛️</span>
             <span data-i18n="gmaps_chip_historic">Tarih</span>
@@ -1449,6 +1455,17 @@
                 <div class="flex-1 min-w-0">
                   <span class="text-xs font-bold text-white block" data-i18n="live_nav_search_fuel">Benzin & Mola Ara</span>
                   <span class="text-[10px] text-slate-400 block truncate" data-i18n="live_nav_search_fuel_desc">En yakın istasyonu rotaya ekle</span>
+                </div>
+              </button>
+
+              <!-- Motosiklet Tamirci & Servis & Lastikçi -->
+              <button onclick="LiveNavigation.findNearestServiceStop(); LiveNavigation.toggleToolsPopover(false);" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-800/90 active:bg-slate-750 text-left transition-all">
+                <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/30">
+                  <i data-lucide="wrench" class="w-4 h-4"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <span class="text-xs font-bold text-white block">Tamir & Servis Ara</span>
+                  <span class="text-[10px] text-slate-400 block truncate">En yakın tamirci ve lastikçiyi ekle</span>
                 </div>
               </button>
 
@@ -2128,9 +2145,13 @@
                   <span class="w-2 h-2 rounded-full bg-rose-400 shrink-0"></span>
                   <span class="truncate">Lezzet: <strong id="count-pill-gastronomy" class="text-rose-400">0</strong></span>
                 </button>
-                <button onclick="togglePoiCategoryFilter('fuel')" id="filter-pill-fuel" class="col-span-2 flex items-center space-x-1.5 p-1.5 rounded-lg opacity-40 border border-slate-900 bg-slate-950/40 hover:border-teal-500/40 text-left transition-all">
+                <button onclick="togglePoiCategoryFilter('fuel')" id="filter-pill-fuel" class="flex items-center space-x-1.5 p-1.5 rounded-lg opacity-40 border border-slate-900 bg-slate-950/40 hover:border-teal-500/40 text-left transition-all">
                   <span class="w-2 h-2 rounded-full bg-teal-400 shrink-0"></span>
-                  <span class="truncate">Yakıt & Destek: <strong id="count-pill-fuel" class="text-teal-400">0</strong></span>
+                  <span class="truncate">Yakıt: <strong id="count-pill-fuel" class="text-teal-400">0</strong></span>
+                </button>
+                <button onclick="togglePoiCategoryFilter('service')" id="filter-pill-service" class="flex items-center space-x-1.5 p-1.5 rounded-lg opacity-40 border border-slate-900 bg-slate-950/40 hover:border-blue-500/40 text-left transition-all">
+                  <span class="w-2 h-2 rounded-full bg-blue-400 shrink-0"></span>
+                  <span class="truncate">Tamir & Servis: <strong id="count-pill-service" class="text-blue-400">0</strong></span>
                 </button>
               </div>
             </details>

@@ -286,6 +286,11 @@ body.sunlight-mode .leaflet-container {
   box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
 }
 
+.pin-service, .pin-repair {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  box-shadow: 0 0 12px rgba(37, 99, 235, 0.6);
+}
+
 /* Pulsing Start Marker Effect */
 .pulse-effect {
   position: absolute;

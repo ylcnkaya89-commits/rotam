@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v80 (Expanded Iconic Highway & Regional Gastronomy Database)
-const CACHE_NAME = 'rotam-cache-v80';
+// Rotam PWA Service Worker - v81 (Comprehensive Route Repair, Motorcycle Service & Tyre Stations Engine)
+const CACHE_NAME = 'rotam-cache-v81';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

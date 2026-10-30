@@ -139,7 +139,9 @@ const CATEGORY_CONFIG = {
   ev_charge: { title: 'Elektrikli Araç Şarj (EV)', title_en: 'EV Charging Station', icon: 'zap', emoji: '⚡', color: '#0891b2', fill: '#06b6d4', pinClass: 'pin-ev_charge' },
   camping: { title: 'Kamp & Çadır & Karavan Sahası', title_en: 'Camping, Tent & Camper Site', icon: 'tent', emoji: '🏕️', color: '#16a34a', fill: '#22c55e', pinClass: 'pin-camping' },
   viewpoint: { title: 'Seyir Noktası & Geçit', title_en: 'Scenic Viewpoint & Pass', icon: 'mountain', emoji: '🌄', color: '#ea580c', fill: '#f97316', pinClass: 'pin-viewpoint' },
-  mountain_pass: { title: 'Dağ Geçidi', title_en: 'Mountain Pass', icon: 'mountain-snow', emoji: '⛰️', color: '#4f46e5', fill: '#6366f1', pinClass: 'pin-mountain_pass' }
+  mountain_pass: { title: 'Dağ Geçidi', title_en: 'Mountain Pass', icon: 'mountain-snow', emoji: '⛰️', color: '#4f46e5', fill: '#6366f1', pinClass: 'pin-mountain_pass' },
+  service: { title: 'Motosiklet & Araç Servisi & Lastik', title_en: 'Motorcycle & Auto Repair & Tyres', icon: 'wrench', emoji: '🔧', color: '#2563eb', fill: '#3b82f6', pinClass: 'pin-service' },
+  repair: { title: 'Motosiklet & Araç Servisi & Lastik', title_en: 'Motorcycle & Auto Repair & Tyres', icon: 'wrench', emoji: '🔧', color: '#2563eb', fill: '#3b82f6', pinClass: 'pin-service' }
 };
 
 function getCategoryTitle(cat) {
@@ -155,7 +157,8 @@ const CATEGORY_GROUPS = {
   photography: ['photography', 'viewpoint', 'mountain_pass'],
   beach: ['beach'],
   gastronomy: ['gastronomy', 'cafe'],
-  fuel: ['fuel', 'ev_charge']
+  fuel: ['fuel', 'ev_charge'],
+  service: ['service', 'repair']
 };
 
 // Modern Glassmorphic Non-Blocking Toast Notification System
@@ -2409,7 +2412,8 @@ const RotamSearchEngine = {
     { id: 'nature', label: 'Doğa & Kanyon', icon: '🌲', matchCats: ['nature'] },
     { id: 'beach', label: 'Sahil & Deniz', icon: '🌊', matchCats: ['beach'] },
     { id: 'cafe', label: 'Mola & Kafe', icon: '☕', matchCats: ['cafe', 'gastronomy'] },
-    { id: 'camping', label: 'Kamp & Karavan', icon: '⛺', matchCats: ['camping'] }
+    { id: 'camping', label: 'Kamp & Karavan', icon: '⛺', matchCats: ['camping'] },
+    { id: 'service', label: 'Tamir & Servis', icon: '🔧', matchCats: ['service', 'repair'] }
   ],
 
   getDistanceFromUser(lat, lon) {
@@ -2432,6 +2436,10 @@ const RotamSearchEngine = {
       nature: 'Doğa & Kanyon',
       beach: 'Sahil & Plaj',
       cafe: 'Motorcu Molası & Kafe',
+      gastronomy: 'Gastronomi & Lezzet',
+      fuel: 'Akaryakıt İstasyonu',
+      service: 'Tamir & Servis & Lastik',
+      repair: 'Tamir & Servis & Lastik',
       camping: 'Kamp & Karavan',
       photography: 'Fotoğraf Noktası'
     };
@@ -2454,7 +2462,7 @@ const RotamSearchEngine = {
 
     const list = filtered.map(p => {
       const dist = this.getDistanceFromUser(p.lat, p.lon);
-      const icon = p.category === 'mountain_pass' ? '🏍️' : p.category === 'viewpoint' ? '🌄' : p.category === 'historic' ? '🏛️' : p.category === 'nature' ? '🌲' : p.category === 'beach' ? '🌊' : p.category === 'cafe' ? '☕' : p.category === 'camping' ? '⛺' : '📍';
+      const icon = (p.category === 'service' || p.category === 'repair') ? '🔧' : p.category === 'fuel' ? '⛽' : p.category === 'mountain_pass' ? '🏍️' : p.category === 'viewpoint' ? '🌄' : p.category === 'historic' ? '🏛️' : p.category === 'nature' ? '🌲' : p.category === 'beach' ? '🌊' : (p.category === 'cafe' || p.category === 'gastronomy') ? '☕' : p.category === 'camping' ? '⛺' : '📍';
       return {
         name: p.name,
         fullName: p.city ? `${p.name}, ${p.city}` : p.name,
@@ -2520,7 +2528,7 @@ const RotamSearchEngine = {
       if ((pNorm.includes(qNorm) || descNorm.includes(qNorm)) && !seen.has(p.name)) {
         seen.add(p.name);
         const dist = this.getDistanceFromUser(p.lat, p.lon);
-        const icon = p.category === 'mountain_pass' ? '🏍️' : p.category === 'viewpoint' ? '🌄' : p.category === 'historic' ? '🏛️' : p.category === 'nature' ? '🌲' : p.category === 'beach' ? '🌊' : p.category === 'cafe' ? '☕' : p.category === 'camping' ? '⛺' : '📍';
+        const icon = (p.category === 'service' || p.category === 'repair') ? '🔧' : p.category === 'fuel' ? '⛽' : p.category === 'mountain_pass' ? '🏍️' : p.category === 'viewpoint' ? '🌄' : p.category === 'historic' ? '🏛️' : p.category === 'nature' ? '🌲' : p.category === 'beach' ? '🌊' : (p.category === 'cafe' || p.category === 'gastronomy') ? '☕' : p.category === 'camping' ? '⛺' : '📍';
         results.push({
           name: p.name,
           fullName: p.city ? `${p.name}, ${p.city}` : p.name,
@@ -5394,7 +5402,7 @@ function analyzeRouteCorridor(route, radiusMeters = 50000) {
   // Rota oluşturulduğunda keşif filtreleri otomatik olarak aktif hale getirilir
   const ALL_POI_CATEGORIES = [
     'historic', 'nature', 'photography', 'beach', 'gastronomy', 'cafe',
-    'fuel', 'ev_charge', 'camping', 'viewpoint', 'mountain_pass'
+    'fuel', 'ev_charge', 'camping', 'viewpoint', 'mountain_pass', 'service', 'repair'
   ];
   ALL_POI_CATEGORIES.forEach(cat => state.activePoiCategories.add(cat));
 
@@ -5407,7 +5415,8 @@ function analyzeRouteCorridor(route, radiusMeters = 50000) {
     photography: 0,
     beach: 0,
     gastronomy: 0,
-    fuel: 0
+    fuel: 0,
+    service: 0
   };
 
   state.allPlaces.forEach(p => {
@@ -5426,6 +5435,8 @@ function analyzeRouteCorridor(route, radiusMeters = 50000) {
         counts.gastronomy++;
       } else if (cat === 'fuel' || cat === 'ev_charge') {
         counts.fuel++;
+      } else if (cat === 'service' || cat === 'repair') {
+        counts.service++;
       } else if (cat === 'beach') {
         counts.beach++;
       } else {
@@ -5478,7 +5489,8 @@ function analyzeRouteCorridor(route, radiusMeters = 50000) {
     photography: document.getElementById('count-pill-photography'),
     beach: document.getElementById('count-pill-beach'),
     gastronomy: document.getElementById('count-pill-gastronomy'),
-    fuel: document.getElementById('count-pill-fuel')
+    fuel: document.getElementById('count-pill-fuel'),
+    service: document.getElementById('count-pill-service')
   };
 
   if (countPills.historic) countPills.historic.textContent = counts.historic;
@@ -5488,6 +5500,7 @@ function analyzeRouteCorridor(route, radiusMeters = 50000) {
   if (countPills.beach) countPills.beach.textContent = counts.beach;
   if (countPills.gastronomy) countPills.gastronomy.textContent = counts.gastronomy;
   if (countPills.fuel) countPills.fuel.textContent = counts.fuel;
+  if (countPills.service) countPills.service.textContent = counts.service;
 
   // Visual filter pill states
   updatePoiCategoryFilterUI();
@@ -5523,12 +5536,16 @@ async function fetchRouteCorridorLiveStations(route) {
 
   if (sampledCoords.length === 0) return;
 
-  // Build Overpass QL query around sampled points (radius 2500-4000 meters for fuel, ev, restaurants & cafes)
+  // Build Overpass QL query around sampled points (radius 2500-4000 meters for fuel, ev, repair, tyres, restaurants & cafes)
   const aroundQueries = sampledCoords.map(c => `
     node["amenity"="fuel"](around:4000,${c.lat.toFixed(4)},${c.lon.toFixed(4)});
     node["amenity"="charging_station"](around:4000,${c.lat.toFixed(4)},${c.lon.toFixed(4)});
     node["amenity"="restaurant"](around:2500,${c.lat.toFixed(4)},${c.lon.toFixed(4)});
     node["amenity"="cafe"](around:2500,${c.lat.toFixed(4)},${c.lon.toFixed(4)});
+    node["shop"="motorcycle_repair"](around:4000,${c.lat.toFixed(4)},${c.lon.toFixed(4)});
+    node["shop"="motorcycle"](around:4000,${c.lat.toFixed(4)},${c.lon.toFixed(4)});
+    node["shop"="car_repair"](around:3500,${c.lat.toFixed(4)},${c.lon.toFixed(4)});
+    node["shop"="tyres"](around:3500,${c.lat.toFixed(4)},${c.lon.toFixed(4)});
   `).join('\n');
 
   const query = `
@@ -5536,7 +5553,7 @@ async function fetchRouteCorridorLiveStations(route) {
     (
       ${aroundQueries}
     );
-    out center 60;
+    out center 80;
   `;
 
   try {
@@ -5566,8 +5583,9 @@ async function fetchRouteCorridorLiveStations(route) {
       const isFuel = tags.amenity === 'fuel';
       const isRestaurant = tags.amenity === 'restaurant' || tags.amenity === 'fast_food';
       const isCafe = tags.amenity === 'cafe';
+      const isRepair = tags.shop === 'motorcycle_repair' || tags.shop === 'motorcycle' || tags.shop === 'car_repair' || tags.shop === 'tyres' || tags.craft === 'mechanic';
 
-      if (!isCharging && !isFuel && !isRestaurant && !isCafe) return;
+      if (!isCharging && !isFuel && !isRestaurant && !isCafe && !isRepair) return;
 
       let category = 'fuel';
       let cleanName = tags.name || '';
@@ -5586,6 +5604,12 @@ async function fetchRouteCorridorLiveStations(route) {
       } else if (isCafe) {
         category = 'cafe';
         if (!cleanName) return; // İsimsiz mekanları ekleme
+      } else if (isRepair) {
+        category = 'service';
+        const isMoto = tags.shop === 'motorcycle_repair' || tags.shop === 'motorcycle';
+        const isTyre = tags.shop === 'tyres';
+        const defaultName = isMoto ? 'Motosiklet Tamircisi & Servis' : isTyre ? 'Oto & Lastik Tamir Servisi' : 'Oto & Motosiklet Tamir Servisi';
+        cleanName = tags.name || defaultName;
       }
 
       // Check if POI already exists within 250m in corridorPois
@@ -5598,6 +5622,9 @@ async function fetchRouteCorridorLiveStations(route) {
       const distKm = parseFloat((distM / 1000).toFixed(1));
 
       const details = [];
+      if (tags.phone || tags['contact:phone']) details.push(`Tel: ${tags.phone || tags['contact:phone']}`);
+      if (tags['motorcycle:brand']) details.push(`Marka: ${tags['motorcycle:brand']}`);
+      if (tags.brand) details.push(tags.brand);
       if (tags.cuisine) {
         const trCuisine = tags.cuisine
           .replace(/turkish/gi, 'Türk Mutfağı')
@@ -5613,12 +5640,14 @@ async function fetchRouteCorridorLiveStations(route) {
       if (tags.outdoor_seating === 'yes') details.push('Açık Hava');
       if (tags['fuel:lpg'] === 'yes') details.push('LPG / Otogaz');
       if (tags['fuel:diesel'] === 'yes') details.push('Dizel');
-      if (tags.shop) details.push('Market');
+      if (tags.shop && !isRepair) details.push('Market');
       if (isCharging && tags.socket) details.push(`Soket: ${tags.socket}`);
 
       let desc = '';
       if (details.length > 0) {
         desc = details.join(' • ');
+      } else if (isRepair) {
+        desc = 'Motosiklet & araç tamirci, lastik ve servis noktası.';
       } else if (isRestaurant) {
         desc = 'Yol üstü restoran ve gastronomi durağı.';
       } else if (isCafe) {
@@ -5694,8 +5723,23 @@ function filterToCorridorBreaks() {
   showToast(isEn ? 'Showing rest areas & food stops' : 'Güzergahtaki mola yerleri ve dinlenme tesisleri listelendi ☕🍴', 'info');
 }
 
+// Güzergahtaki Tamir ve Servis Noktalarını Filtrele ve Sağ Paneli Aç
+function filterToCorridorServices() {
+  if (typeof openRightPanel === 'function') openRightPanel();
+  if (typeof switchRightPanelTab === 'function') switchRightPanelTab('pois');
+  state.activePoiCategories.clear();
+  state.activePoiCategories.add('service');
+  state.activePoiCategories.add('repair');
+  updatePoiCategoryFilterUI();
+  renderCorridorPoiMarkers();
+  renderCorridorPoiList();
+  const isEn = window.state && window.state.lang === 'en';
+  showToast(isEn ? 'Showing repair & service centers along the route' : 'Güzergah üzerindeki motosiklet & araç tamirci ve servisleri listelendi 🔧🛞', 'info');
+}
+
 window.filterToCorridorStations = filterToCorridorStations;
 window.filterToCorridorBreaks = filterToCorridorBreaks;
+window.filterToCorridorServices = filterToCorridorServices;
 
 // Quick Place Preview State
 let currentPreviewPlace = null;
@@ -5830,7 +5874,8 @@ function updatePoiCategoryFilterUI() {
     photography: 0,
     beach: 0,
     gastronomy: 0,
-    fuel: 0
+    fuel: 0,
+    service: 0
   };
 
   dataSource.forEach(p => {
@@ -5845,6 +5890,8 @@ function updatePoiCategoryFilterUI() {
       groupCounts.gastronomy++;
     } else if (cat === 'fuel' || cat === 'ev_charge') {
       groupCounts.fuel++;
+    } else if (cat === 'service' || cat === 'repair') {
+      groupCounts.service++;
     } else if (cat === 'beach') {
       groupCounts.beach++;
     } else {
@@ -13263,6 +13310,46 @@ const LiveNavigation = {
     this.showFuelBanner(nearest);
   },
 
+  findNearestServiceStop() {
+    if (!this.lastCoord) {
+      const isEn = (window.state && window.state.lang === 'en');
+      showToast(isEn ? 'Determining location...' : 'Konumunuz belirleniyor...', 'info');
+      return;
+    }
+    const [lat, lon] = this.lastCoord;
+    let pool = [];
+
+    const serviceCategories = ['service', 'repair'];
+
+    if (Array.isArray(state.corridorPois) && state.corridorPois.length > 0) {
+      pool = state.corridorPois.filter(p => serviceCategories.includes(p.category));
+    }
+    if (pool.length === 0 && Array.isArray(state.allPlaces) && state.allPlaces.length > 0) {
+      pool = state.allPlaces.filter(p => serviceCategories.includes(p.category));
+    }
+
+    if (pool.length === 0) {
+      const isEn = (window.state && window.state.lang === 'en');
+      showToast(isEn ? 'No repair or service center found nearby.' : 'Yakında tamirci veya servis noktası bulunamadı.', 'info');
+      return;
+    }
+
+    const scored = pool.map(item => {
+      const d = haversineMeters(lat, lon, item.lat, item.lon);
+      return { ...item, distMeters: d };
+    }).filter(item => item.distMeters >= 50).sort((a, b) => a.distMeters - b.distMeters);
+
+    if (scored.length === 0) {
+      const isEn = (window.state && window.state.lang === 'en');
+      showToast(isEn ? 'No service center ahead within range.' : 'İleride menzil içinde servis veya tamirci bulunamadı.', 'info');
+      return;
+    }
+
+    const nearest = scored[0];
+    this.pendingFuelStop = nearest;
+    this.showFuelBanner(nearest);
+  },
+
   showFuelBanner(spot) {
     const banner = document.getElementById('live-nav-fuel-banner');
     const nameEl = document.getElementById('live-nav-fuel-name');
@@ -13271,10 +13358,12 @@ const LiveNavigation = {
 
     const distKm = (spot.distMeters / 1000).toFixed(1);
     const isEn = (window.state && window.state.lang === 'en');
-    let catLabel = spot.category === 'fuel' ? '⛽ Akaryakıt İstasyonu'
-      : (spot.category === 'ev_charge' ? '⚡ Elektrikli Şarj İstasyonu' : '☕ Mola & Dinlenme');
-    if (isEn) catLabel = spot.category === 'fuel' ? '⛽ Fuel Station'
-      : (spot.category === 'ev_charge' ? '⚡ EV Charging Station' : '☕ Rest Stop & Cafe');
+    let catLabel = (spot.category === 'service' || spot.category === 'repair') ? '🔧 Tamir & Servis & Lastik'
+      : (spot.category === 'fuel' ? '⛽ Akaryakıt İstasyonu'
+      : (spot.category === 'ev_charge' ? '⚡ Elektrikli Şarj İstasyonu' : '☕ Mola & Dinlenme'));
+    if (isEn) catLabel = (spot.category === 'service' || spot.category === 'repair') ? '🔧 Repair & Service & Tyres'
+      : (spot.category === 'fuel' ? '⛽ Fuel Station'
+      : (spot.category === 'ev_charge' ? '⚡ EV Charging Station' : '☕ Rest Stop & Cafe'));
 
     nameEl.textContent = spot.name;
     if (distEl) distEl.textContent = `${distKm} km • ${catLabel}`;
