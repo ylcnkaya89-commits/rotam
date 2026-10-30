@@ -114,42 +114,69 @@
     </div>
   </div>
 
-  <!-- TOP NAVIGATION BAR -->
-  <!-- TOP NAVIGATION BAR -->
+  <!-- TOP NAVIGATION & OMNI SEARCH BAR -->
   <header id="app-header" class="relative z-30 shrink-0 w-full bg-slate-900/95 border-b border-slate-800/80 backdrop-blur-xl">
-    <div class="h-14 sm:h-16 px-3 sm:px-5 flex items-center justify-between max-w-full">
+    <div class="h-14 sm:h-16 px-2.5 sm:px-4 flex items-center justify-between max-w-full gap-2">
       <!-- 1. Sol: Logo & Başlık -->
-      <div class="flex items-center space-x-2.5 cursor-pointer shrink-0" onclick="showHomepagePlanner()">
+      <div class="flex items-center space-x-2 cursor-pointer shrink-0" onclick="showHomepagePlanner()">
         <div onclick="handleLogoAdminClick(event)" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden border border-amber-500/40 shadow-lg shadow-brand-500/20 shrink-0 bg-slate-950 flex items-center justify-center cursor-pointer active:scale-90 transition-transform" title="Rotam">
           <img src="rotam_logo.png" alt="Rotam Logo" class="w-full h-full object-cover">
         </div>
-        <div class="min-w-0">
+        <div class="hidden min-[420px]:block min-w-0">
           <div class="flex items-center space-x-1.5">
-            <span class="text-base sm:text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-100 to-brand-400 bg-clip-text text-transparent">Rotam</span>
+            <span class="text-base sm:text-lg font-black tracking-tight bg-gradient-to-r from-white via-slate-100 to-brand-400 bg-clip-text text-transparent">Rotam</span>
             <span class="px-1.5 py-0.5 text-[9px] font-extrabold tracking-wider uppercase bg-gradient-to-r from-amber-500/20 to-brand-500/20 text-amber-300 border border-amber-500/40 rounded-full shrink-0 shadow-sm shadow-amber-500/10">V3</span>
           </div>
-          <p class="text-[10px] text-slate-400 hidden lg:block truncate" data-i18n="app_subtitle">Seyahat, Rota & Keşif Platformu</p>
         </div>
       </div>
 
-      <!-- 2. Orta: Sade & Şık Akordiyon Menü Tetikleyicisi -->
-      <div class="flex items-center space-x-2">
-        <!-- Rota Planla (Temel Giriş) -->
-        <button id="nav-btn-planner" onclick="showHomepagePlanner()" class="flex items-center space-x-1.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold transition-all bg-brand-600 hover:bg-brand-500 text-white shadow-md shadow-brand-600/30 active:scale-95">
-          <i data-lucide="map" class="w-3.5 h-3.5 shrink-0"></i>
-          <span>Rota Planla</span>
-        </button>
+      <!-- 2. Orta: Floating Omni-Search Kapsülü -->
+      <div class="flex-1 max-w-xl mx-auto relative min-w-0">
+        <div class="gmaps-search-box rounded-2xl flex items-center px-2.5 sm:px-3 py-1.5 sm:py-2 space-x-2 text-white">
+          <i data-lucide="search" class="w-4 h-4 text-brand-400 shrink-0"></i>
+          
+          <!-- Search Input -->
+          <div class="flex-1 min-w-0 relative">
+            <input id="gmaps-search-input" type="text" autocomplete="off"
+              placeholder="Nereye gitmek istiyorsunuz? (İl, rota, benzinlik...)"
+              data-i18n-placeholder="gmaps_search_placeholder"
+              oninput="handleGmapsSearchInput(this.value)"
+              onfocus="handleGmapsSearchFocus()"
+              onkeydown="handleGmapsSearchKeyDown(event)"
+              class="w-full bg-transparent text-xs sm:text-sm font-semibold text-white placeholder-slate-400 focus:outline-none" />
+          </div>
 
-        <!-- Akordiyon Menü Aç / Kapa Butonu -->
-        <button id="btn-toggle-header-accordion" onclick="toggleHeaderAccordion()" class="flex items-center space-x-2 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold transition-all bg-slate-950/80 hover:bg-slate-800 text-slate-200 border border-slate-800 hover:border-slate-700 active:scale-95 shadow-sm group">
-          <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
-          <span class="text-xs">Keşif & Menü</span>
-          <i id="icon-header-accordion-chevron" data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 group-hover:text-amber-400 transition-transform duration-200"></i>
-        </button>
+          <!-- Clear Button (Hidden when empty) -->
+          <button id="gmaps-search-clear-btn" onclick="clearGmapsSearch()" class="hidden p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors shrink-0" title="Temizle">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+
+          <!-- Voice Search Mic Button -->
+          <button id="gmaps-voice-search-btn" onclick="startGmapsVoiceSearch()" class="p-1 text-slate-300 hover:text-brand-400 rounded-lg hover:bg-slate-800 transition-colors shrink-0" title="Sesle Ara">
+            <i data-lucide="mic" class="w-4 h-4"></i>
+          </button>
+
+          <!-- Quick Vehicle Selector Badge -->
+          <button id="gmaps-vehicle-badge" onclick="cycleVehicleProfile()" class="px-2 py-1 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700/80 text-xs font-bold flex items-center space-x-1 shrink-0 transition-transform active:scale-95 shadow-sm" title="Araç Modunu Değiştir">
+            <span id="gmaps-vehicle-emoji">🏍️</span>
+            <span id="gmaps-vehicle-label" class="hidden md:inline text-[10px] text-amber-400 font-bold uppercase">Moto</span>
+          </button>
+        </div>
+
+        <!-- Autocomplete Dropdown List -->
+        <div id="gmaps-search-dropdown" class="hidden absolute top-full left-0 right-0 mt-1.5 z-50 w-full bg-slate-900/98 border border-slate-700/90 rounded-2xl shadow-2xl backdrop-blur-2xl max-h-80 overflow-y-auto no-scrollbar py-2 divide-y divide-slate-800/80">
+          <!-- Populated by JS -->
+        </div>
       </div>
 
-      <!-- 3. Sağ: Hızlı Araçlar, Profil & Çekmece -->
-      <div class="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+      <!-- 3. Sağ: Sürücü & Keşif Merkezi, Dil, Profil, Planlayıcı -->
+      <div class="flex items-center space-x-1 sm:space-x-2 shrink-0">
+        <!-- Sürücü & Keşif Merkezi Butonu (Mega Hub) -->
+        <button id="btn-driver-hub" onclick="openDriverHubModal()" class="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold transition-all bg-gradient-to-r from-amber-500/20 to-brand-500/20 hover:from-amber-500/30 hover:to-brand-500/30 text-amber-300 border border-amber-500/40 shadow-sm active:scale-95 group" title="Sürücü & Keşif Merkezi (Tüm Araçlar)">
+          <i data-lucide="layout-grid" class="w-4 h-4 text-amber-400 shrink-0 group-hover:rotate-6 transition-transform"></i>
+          <span class="hidden md:inline text-xs">Keşif & Menü</span>
+        </button>
+
         <!-- Dil Değiştirici (TR / EN) -->
         <button id="btn-toggle-lang" onclick="toggleLanguage()" class="flex items-center space-x-1 bg-slate-800/90 hover:bg-slate-750 text-slate-200 px-2 sm:px-2.5 py-1.5 rounded-xl text-xs font-semibold border border-slate-700/80 active:scale-95 transition-all shadow-sm" title="Dili Değiştir / Change Language">
           <span id="lang-flag" class="text-sm">🇹🇷</span>
@@ -160,203 +187,19 @@
         <button id="btn-user-auth-trigger" onclick="openUserAuthModal()" class="flex items-center space-x-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/40 px-2.5 py-1.5 rounded-xl text-xs font-semibold shadow-md active:scale-95 transition-all" title="Bulut Hesabı / Giriş Yap">
           <span id="user-auth-status-indicator" class="hidden w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <i data-lucide="user" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
-          <span id="user-auth-btn-label" class="hidden sm:inline text-[11px]">Giriş Yap</span>
+          <span id="user-auth-btn-label" class="hidden lg:inline text-[11px]">Giriş</span>
         </button>
 
-        <!-- Masaüstü Çekmece Butonu -->
-        <button id="btn-tablet-sidebar-toggle" onclick="toggleSidebar()" class="hidden md:flex items-center space-x-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1.5 rounded-xl text-xs font-semibold shadow-md border border-slate-700 active:scale-95 transition-all" title="Rota Planlayıcı ve Duraklar">
+        <!-- Detaylı Rota Planlayıcı Çekmece Butonu -->
+        <button id="btn-tablet-sidebar-toggle" onclick="toggleSidebar()" class="flex items-center space-x-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1.5 rounded-xl text-xs font-semibold shadow-md border border-slate-700 active:scale-95 transition-all" title="Çoklu Duraklı Rota Planlayıcı">
           <i id="icon-tablet-sidebar" data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-brand-400 shrink-0"></i>
           <span class="hidden xl:inline text-[11px]" id="text-tablet-sidebar">Planlayıcı</span>
         </button>
-
-        <!-- Mobil Çekmece Butonu -->
-        <button id="btn-toggle-sidebar" onclick="toggleSidebar()" class="md:hidden p-2 rounded-xl bg-slate-800 text-slate-200 hover:text-white border border-slate-700 active:scale-95 transition-all" title="Rota Planlayıcı ve Duraklar">
-          <i data-lucide="sliders-horizontal" class="w-4 h-4 text-brand-400"></i>
-        </button>
       </div>
     </div>
 
-    <!-- HEADER AKORDİYON MENÜ (AÇILIR MEGA PANEL) -->
-    <div id="header-accordion-panel" class="hidden border-t border-slate-800/90 bg-slate-950/98 backdrop-blur-2xl shadow-2xl transition-all duration-300">
-      <div class="max-w-7xl mx-auto p-4 sm:p-5 grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-5">
-        
-        <!-- 1. GRUP: KEŞİF & ROTALAR -->
-        <div class="bg-slate-900/80 border border-slate-800/90 rounded-2xl p-3.5 space-y-2">
-          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-            <span class="flex items-center space-x-2 text-amber-400">
-              <i data-lucide="compass" class="w-4 h-4"></i>
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-300">Keşif & Güzergahlar</span>
-            </span>
-            <span class="text-[10px] text-slate-500 font-mono">4 Araç</span>
-          </div>
-          <div class="space-y-1">
-            <button onclick="openDiscoverModal(); closeHeaderAccordion();" class="w-full p-2 rounded-xl hover:bg-slate-800/90 text-left flex items-center justify-between text-xs text-slate-300 hover:text-white transition-all group">
-              <span class="flex items-center space-x-2.5 min-w-0">
-                <span class="w-7 h-7 rounded-lg bg-orange-500/15 text-orange-400 flex items-center justify-center shrink-0">🏛️</span>
-                <span class="min-w-0">
-                  <span class="font-bold block text-white group-hover:text-amber-300 truncate">Türkiye'yi Keşfet</span>
-                  <span class="text-[10px] text-slate-400 block truncate">Antik kentler, kanyonlar ve sahiller</span>
-                </span>
-              </span>
-              <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400 transition-transform shrink-0"></i>
-            </button>
-
-            <button onclick="openPresetsModal(); closeHeaderAccordion();" class="w-full p-2 rounded-xl hover:bg-slate-800/90 text-left flex items-center justify-between text-xs text-slate-300 hover:text-white transition-all group">
-              <span class="flex items-center space-x-2.5 min-w-0">
-                <span class="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0">✨</span>
-                <span class="min-w-0">
-                  <span class="font-bold block text-white group-hover:text-amber-300 truncate">Efsane Hazır Rotalar</span>
-                  <span class="text-[10px] text-slate-400 block truncate">14 ikonik motosiklet ve karavan rotası</span>
-                </span>
-              </span>
-              <span class="px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-500/30 shrink-0">14 Rota</span>
-            </button>
-
-            <button onclick="openNearbyModal(); closeHeaderAccordion();" class="w-full p-2 rounded-xl hover:bg-slate-800/90 text-left flex items-center justify-between text-xs text-slate-300 hover:text-white transition-all group">
-              <span class="flex items-center space-x-2.5 min-w-0">
-                <span class="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0">📍</span>
-                <span class="min-w-0">
-                  <span class="font-bold block text-white group-hover:text-amber-300 truncate">Yakınımda Ne Var?</span>
-                  <span class="text-[10px] text-slate-400 block truncate">Çevrenizdeki mola ve tarihi yerler</span>
-                </span>
-              </span>
-              <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400 transition-transform shrink-0"></i>
-            </button>
-
-            <button onclick="openSavedRoutesModal(); closeHeaderAccordion();" class="w-full p-2 rounded-xl hover:bg-slate-800/90 text-left flex items-center justify-between text-xs text-slate-300 hover:text-white transition-all group">
-              <span class="flex items-center space-x-2.5 min-w-0">
-                <span class="w-7 h-7 rounded-lg bg-rose-500/15 text-rose-400 flex items-center justify-center shrink-0">❤️</span>
-                <span class="min-w-0">
-                  <span class="font-bold block text-white group-hover:text-amber-300 truncate">Kayıtlı Rotalarım</span>
-                  <span class="text-[10px] text-slate-400 block truncate">Favoriler ve kaydedilen sürüşler</span>
-                </span>
-              </span>
-              <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400 transition-transform shrink-0"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- 2. GRUP: TOPLULUK & SÜRÜŞ ARAÇLARI -->
-        <div class="bg-slate-900/80 border border-slate-800/90 rounded-2xl p-3.5 space-y-2">
-          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-            <span class="flex items-center space-x-2 text-cyan-400">
-              <i data-lucide="users" class="w-4 h-4"></i>
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-300">Topluluk & Canlı Sürüş</span>
-            </span>
-            <span class="text-[10px] text-slate-500 font-mono">Canlı Ağ</span>
-          </div>
-          <div class="space-y-1">
-            <button onclick="RotamConvoy.openModal(); closeHeaderAccordion();" class="w-full p-2 rounded-xl hover:bg-slate-800/90 text-left flex items-center justify-between text-xs text-slate-300 hover:text-white transition-all group">
-              <span class="flex items-center space-x-2.5 min-w-0">
-                <span class="w-7 h-7 rounded-lg bg-cyan-500/15 text-cyan-400 flex items-center justify-center shrink-0">👥</span>
-                <span class="min-w-0">
-                  <span class="font-bold block text-white group-hover:text-cyan-300 truncate">Canlı Grup Sürüşü (Konvoy)</span>
-                  <span class="text-[10px] text-slate-400 block truncate">Grup kurun veya kodla odaya katılın</span>
-                </span>
-              </span>
-              <span class="px-1.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 text-[10px] font-bold border border-cyan-500/30 shrink-0">YENİ</span>
-            </button>
-
-            <button onclick="LiveNavigation.openIncidentReportModal(); closeHeaderAccordion();" class="w-full p-2 rounded-xl hover:bg-slate-800/90 text-left flex items-center justify-between text-xs text-slate-300 hover:text-white transition-all group">
-              <span class="flex items-center space-x-2.5 min-w-0">
-                <span class="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0">⚠️</span>
-                <span class="min-w-0">
-                  <span class="font-bold block text-white group-hover:text-cyan-300 truncate">Yol Durumu & Olay Bildir</span>
-                  <span class="text-[10px] text-slate-400 block truncate">Radar, mıcır, kaza, yol çalışması</span>
-                </span>
-              </span>
-              <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-400 transition-transform shrink-0"></i>
-            </button>
-
-            <button onclick="RotamIntercom.testHelmetAudio(); closeHeaderAccordion();" class="w-full p-2 rounded-xl hover:bg-slate-800/90 text-left flex items-center justify-between text-xs text-slate-300 hover:text-white transition-all group">
-              <span class="flex items-center space-x-2.5 min-w-0">
-                <span class="w-7 h-7 rounded-lg bg-sky-500/15 text-sky-400 flex items-center justify-center shrink-0">🎧</span>
-                <span class="min-w-0">
-                  <span class="font-bold block text-white group-hover:text-cyan-300 truncate">Kask & Intercom Ses Testi</span>
-                  <span class="text-[10px] text-slate-400 block truncate">Bluetooth D5-A5 çan ve ses kontrolü</span>
-                </span>
-              </span>
-              <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-400 transition-transform shrink-0"></i>
-            </button>
-
-            <button onclick="openCampingAssistantModal(); closeHeaderAccordion();" class="w-full p-2 rounded-xl hover:bg-slate-800/90 text-left flex items-center justify-between text-xs text-slate-300 hover:text-white transition-all group">
-              <span class="flex items-center space-x-2.5 min-w-0">
-                <span class="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0">🏕️</span>
-                <span class="min-w-0">
-                  <span class="font-bold block text-white group-hover:text-cyan-300 truncate">Kamp & Karavan Asistanı</span>
-                  <span class="text-[10px] text-slate-400 block truncate">Gece sıcaklığı ve ekipman listesi</span>
-                </span>
-              </span>
-              <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-400 transition-transform shrink-0"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- 3. GRUP: DOSYA, ÇEVRİMDIŞI & HARİCİ ARAÇLAR -->
-        <div class="bg-slate-900/80 border border-slate-800/90 rounded-2xl p-3.5 space-y-2">
-          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-            <span class="flex items-center space-x-2 text-emerald-400">
-              <i data-lucide="hard-drive-download" class="w-4 h-4"></i>
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-300">Dosya & Harici Araçlar</span>
-            </span>
-            <span class="text-[10px] text-slate-500 font-mono">Dışa Aktar</span>
-          </div>
-          <div class="space-y-1">
-            <button id="btn-save-route-modal" disabled onclick="openSaveRouteModal(); closeHeaderAccordion();" class="w-full p-2 rounded-xl hover:bg-slate-800/90 disabled:opacity-40 disabled:cursor-not-allowed text-left flex items-center justify-between text-xs text-slate-300 hover:text-white transition-all group">
-              <span class="flex items-center space-x-2.5 min-w-0">
-                <span class="w-7 h-7 rounded-lg bg-brand-500/15 text-brand-400 flex items-center justify-center shrink-0">💾</span>
-                <span class="min-w-0">
-                  <span class="font-bold block text-white group-hover:text-emerald-300 truncate">Rotayı Buluta Kaydet</span>
-                  <span class="text-[10px] text-slate-400 block truncate">Oturum açarak tüm cihazlara eşitle</span>
-                </span>
-              </span>
-              <i data-lucide="bookmark-plus" class="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-400 transition-transform shrink-0"></i>
-            </button>
-
-            <div class="grid grid-cols-2 gap-2 pt-0.5">
-              <button id="btn-export-gpx" disabled onclick="exportGPX(); closeHeaderAccordion();" class="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-left flex items-center space-x-2 text-xs text-slate-300 hover:text-white transition-all">
-                <span class="text-base shrink-0">📥</span>
-                <div class="min-w-0">
-                  <span class="font-bold block text-xs truncate">GPX İndir</span>
-                  <span class="text-[9px] text-slate-500 block truncate">Garmin / BMW</span>
-                </div>
-              </button>
-
-              <button id="btn-import-gpx-trigger" onclick="openGpxImportModal(); closeHeaderAccordion();" class="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-left flex items-center space-x-2 text-xs text-slate-300 hover:text-white transition-all">
-                <span class="text-base shrink-0">📤</span>
-                <div class="min-w-0">
-                  <span class="font-bold block text-xs truncate">GPX Yükle</span>
-                  <span class="text-[9px] text-slate-500 block truncate">Dosya Aktar</span>
-                </div>
-              </button>
-            </div>
-
-            <button id="btn-offline-top" onclick="RotamOfflineMap.openModal(); closeHeaderAccordion();" class="w-full p-2 rounded-xl hover:bg-slate-800/90 text-left flex items-center justify-between text-xs text-slate-300 hover:text-white transition-all group">
-              <span class="flex items-center space-x-2.5 min-w-0">
-                <span class="w-7 h-7 rounded-lg bg-teal-500/15 text-teal-400 flex items-center justify-center shrink-0">🌐</span>
-                <span class="min-w-0">
-                  <span class="font-bold block text-white group-hover:text-emerald-300 truncate">Çevrimdışı Harita İndir</span>
-                  <span class="text-[10px] text-slate-400 block truncate">İnternetsiz dağ paketi</span>
-                </span>
-              </span>
-              <i data-lucide="download-cloud" class="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-400 transition-transform shrink-0"></i>
-            </button>
-
-            <button id="btn-open-gmaps" onclick="openInGoogleMaps(); closeHeaderAccordion();" class="w-full p-2 rounded-xl hover:bg-slate-800/90 text-left flex items-center justify-between text-xs text-slate-300 hover:text-white transition-all group">
-              <span class="flex items-center space-x-2.5 min-w-0">
-                <span class="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0">🗺️</span>
-                <span class="min-w-0">
-                  <span class="font-bold block text-white group-hover:text-emerald-300 truncate">Google Maps'te Aç</span>
-                  <span class="text-[10px] text-slate-400 block truncate">Harici navigasyona aktar</span>
-                </span>
-              </span>
-              <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-400 transition-transform shrink-0"></i>
-            </button>
-          </div>
-        </div>
-
-      </div>
-    </div>
+    <!-- Hidden stub for backwards compatibility -->
+    <div id="header-accordion-panel" class="hidden"></div>
   </header>
 
   <!-- MAIN APP CONTAINER -->
@@ -1020,83 +863,50 @@
       <!-- LEAFLET HARİTA DİVİ -->
       <div id="map" class="w-full h-full dark-map"></div>
 
-      <!-- GOOGLE MAPS FLOATING TOP SEARCH BAR & CATEGORY CHIPS (#gmaps-top-container) -->
-      <div id="gmaps-top-container" class="absolute top-3 left-3 right-3 sm:left-4 sm:right-auto sm:w-[460px] z-[950] pointer-events-none flex flex-col space-y-2">
-        <!-- Floating Google Maps Search Box -->
-        <div class="pointer-events-auto w-full gmaps-search-box rounded-2xl flex items-center px-3 py-2 space-x-2 text-white">
-          <!-- Hamburger Menu Button -->
-          <button onclick="toggleSidebar()" class="p-2 -ml-1 text-slate-300 hover:text-white rounded-xl hover:bg-slate-800/80 active:scale-95 transition-all shrink-0" title="Menü & Rota Planlayıcı">
-            <i data-lucide="menu" class="w-5 h-5 text-brand-400"></i>
-          </button>
-          
-          <!-- Search Input -->
-          <div class="flex-1 min-w-0 relative">
-            <input id="gmaps-search-input" type="text" autocomplete="off"
-              placeholder="Mekan, şehir veya rota ara..."
-              data-i18n-placeholder="gmaps_search_placeholder"
-              oninput="handleGmapsSearchInput(this.value)"
-              onfocus="handleGmapsSearchFocus()"
-              onkeydown="handleGmapsSearchKeyDown(event)"
-              class="w-full bg-transparent text-xs sm:text-sm font-semibold text-white placeholder-slate-400 focus:outline-none" />
-          </div>
-
-          <!-- Clear Button (Hidden when empty) -->
-          <button id="gmaps-search-clear-btn" onclick="clearGmapsSearch()" class="hidden p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors shrink-0" title="Temizle">
-            <i data-lucide="x" class="w-4 h-4"></i>
-          </button>
-
-          <!-- Voice Search Mic Button -->
-          <button id="gmaps-voice-search-btn" onclick="startGmapsVoiceSearch()" class="p-1.5 text-slate-300 hover:text-brand-400 rounded-lg hover:bg-slate-800 transition-colors shrink-0" title="Sesle Ara">
-            <i data-lucide="mic" class="w-4 h-4"></i>
-          </button>
-
-          <!-- Quick Vehicle Selector Badge -->
-          <button id="gmaps-vehicle-badge" onclick="cycleVehicleProfile()" class="px-2 py-1 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700/80 text-xs font-bold flex items-center space-x-1 shrink-0 transition-transform active:scale-95 shadow-sm" title="Araç Modunu Değiştir">
-            <span id="gmaps-vehicle-emoji">🏍️</span>
-            <span id="gmaps-vehicle-label" class="hidden sm:inline text-[10px] text-amber-400 font-bold uppercase">Moto</span>
-          </button>
-        </div>
-
-        <!-- Autocomplete Dropdown List -->
-        <div id="gmaps-search-dropdown" class="hidden pointer-events-auto w-full bg-slate-900/98 border border-slate-700/90 rounded-2xl shadow-2xl backdrop-blur-2xl max-h-80 overflow-y-auto no-scrollbar py-2 divide-y divide-slate-800/80">
-          <!-- Populated by JS -->
-        </div>
-
-        <!-- Primary Google Maps Quick Category Chips Row -->
+      <!-- GOOGLE MAPS FLOATING QUICK DISCOVERY CHIPS & CATEGORIES (#gmaps-top-container) -->
+      <div id="gmaps-top-container" class="absolute top-3 left-3 right-3 sm:left-4 sm:right-auto sm:max-w-2xl z-[950] pointer-events-none flex flex-col space-y-2">
+        <!-- Primary Quick Discovery Chips Row -->
         <div id="gmaps-category-chips" class="pointer-events-auto flex items-center space-x-1.5 py-1 overflow-x-auto sm:overflow-visible no-scrollbar">
-          <!-- 1. Benzin & Şarj -->
+          <!-- 1. Efsane Rotalar (14 Küratör Güzergah) -->
+          <button onclick="openPresetsModal()" class="gmaps-chip px-3 py-1.5 rounded-full text-xs font-bold text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/40 flex items-center space-x-1.5 shrink-0 active:scale-95 shadow-md" title="14 Küratör Motosiklet & Seyahat Rotası">
+            <span>🏍️</span>
+            <span>Efsane Rotalar</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-amber-500/30 text-amber-200">14</span>
+          </button>
+
+          <!-- 2. Benzin & Şarj -->
           <button onclick="quickFilterCategory('fuel')" id="gmaps-chip-fuel" data-cat="fuel" class="gmaps-chip px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-semibold text-slate-200 flex items-center space-x-1.5 shrink-0 active:scale-95" title="Akaryakıt & EV Şarj">
             <span>⛽</span>
             <span data-i18n="gmaps_chip_fuel">Benzin</span>
           </button>
 
-          <!-- 2. Mola & Kafe -->
+          <!-- 3. Mola & Kafe -->
           <button onclick="quickFilterCategory('gastronomy')" id="gmaps-chip-rest" data-cat="gastronomy" class="gmaps-chip px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-semibold text-slate-200 flex items-center space-x-1.5 shrink-0 active:scale-95" title="Mola Yerleri & Kafe">
             <span>☕</span>
             <span data-i18n="gmaps_chip_rest">Mola</span>
           </button>
 
-          <!-- 3. Tarihi Yerler & Antik Kent -->
+          <!-- 4. Tarihi Yerler & Antik Kent -->
           <button onclick="quickFilterCategory('historic')" id="gmaps-chip-historic" data-cat="historic" class="gmaps-chip px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-semibold text-slate-200 flex items-center space-x-1.5 shrink-0 active:scale-95" title="Tarihi Yerler & Antik Kentler">
             <span>🏛️</span>
             <span data-i18n="gmaps_chip_historic">Tarih</span>
           </button>
 
-          <!-- 4. Lezzet Durakları -->
-          <button onclick="quickFilterCategory('food')" id="gmaps-chip-food" data-cat="food" class="gmaps-chip px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-semibold text-slate-200 flex items-center space-x-1.5 shrink-0 active:scale-95" title="Yöresel Lezzetler">
-            <span>🍽️</span>
-            <span data-i18n="gmaps_chip_food">Lezzet</span>
+          <!-- 5. Canlı Konvoy Sürüşü -->
+          <button onclick="RotamConvoy.openModal()" class="gmaps-chip px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-bold text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/40 flex items-center space-x-1.5 shrink-0 active:scale-95 shadow-sm" title="Canlı Grup Sürüşü (Konvoy)">
+            <span>👥</span>
+            <span>Konvoy</span>
           </button>
 
-          <!-- 5. Akordiyon / Tüm Kategorileri Genişlet Butonu -->
-          <button id="btn-categories-accordion-toggle" onclick="toggleCategoriesAccordion()" class="gmaps-chip px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-bold text-amber-300 bg-slate-900/90 hover:bg-slate-800 border border-amber-500/40 flex items-center space-x-1.5 shrink-0 active:scale-95 transition-all" title="Tüm Keşif & Mola Kategorileri">
+          <!-- 6. Akordiyon / Tüm Kategorileri Genişlet Butonu -->
+          <button id="btn-categories-accordion-toggle" onclick="toggleCategoriesAccordion()" class="gmaps-chip px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-bold text-slate-300 bg-slate-900/90 hover:bg-slate-800 border border-slate-700 flex items-center space-x-1.5 shrink-0 active:scale-95 transition-all" title="Tüm Keşif & Mola Kategorileri">
             <span>📂</span>
             <span id="category-accordion-btn-text">Keşfet</span>
             <span id="category-active-count-badge" class="hidden px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500 text-slate-950">0</span>
-            <i id="category-accordion-chevron" data-lucide="chevron-down" class="w-3.5 h-3.5 text-amber-400 transition-transform duration-200"></i>
+            <i id="category-accordion-chevron" data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200"></i>
           </button>
 
-          <!-- 6. Filtreleri Temizle Butonu (Aktif filtre olunca görünür) -->
+          <!-- 7. Filtreleri Temizle Butonu (Aktif filtre olunca görünür) -->
           <button id="btn-clear-category-filters" onclick="clearAllCategoryFilters()" class="hidden gmaps-chip px-2 py-1.5 rounded-full text-xs font-semibold text-rose-300 bg-rose-950/70 hover:bg-rose-900/90 border border-rose-500/40 flex items-center space-x-1 shrink-0 active:scale-95 transition-all" title="Filtreleri Temizle">
             <i data-lucide="x" class="w-3 h-3"></i>
             <span class="text-[11px]">Temizle</span>
@@ -1337,6 +1147,73 @@
             <button onclick="openInGoogleMaps()" class="py-3 px-3 bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-2xl text-xs font-bold border border-slate-700 flex items-center space-x-1 active:scale-95 transition-all shadow-md" title="Google Maps'e Aktar">
               <i data-lucide="navigation" class="w-3.5 h-3.5 shrink-0"></i>
               <span>Maps</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROTAM UNIVERSAL ROUTE STAGING SHEET (#rotam-staging-sheet) -->
+      <div id="rotam-staging-sheet" class="hidden absolute bottom-4 left-3 right-3 sm:left-1/2 sm:-translate-x-1/2 sm:w-[480px] max-w-full z-[1055] pointer-events-auto transition-all duration-300 ease-out transform translate-y-6 opacity-0">
+        <div class="glass-card bg-slate-900/98 border border-slate-700/90 rounded-3xl p-4 sm:p-5 shadow-2xl backdrop-blur-2xl flex flex-col space-y-3.5">
+          <!-- Üst Satır: Rota Başlığı + İptal/Kapat -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2 min-w-0">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+              <h3 id="staging-route-title" class="text-sm sm:text-base font-extrabold text-white truncate">Hedefe Rota Hazır</h3>
+              <span id="staging-vehicle-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">🏍️ Moto</span>
+            </div>
+            <button onclick="dismissStagingSheet()" class="w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors shrink-0" title="Kapat">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Ana Metrikler: Süre, Mesafe ve Tahmini Varış (ETA) -->
+          <div class="grid grid-cols-3 gap-2 py-2 px-3 bg-slate-950/70 border border-slate-800/80 rounded-2xl text-center">
+            <div>
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Sürüş Süresi</span>
+              <span id="staging-route-dur" class="text-base sm:text-lg font-black text-emerald-400 tracking-tight block">-- dk</span>
+            </div>
+            <div class="border-x border-slate-800/80">
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Mesafe</span>
+              <span id="staging-route-dist" class="text-base sm:text-lg font-black text-white tracking-tight block">-- km</span>
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Tahmini Varış</span>
+              <span id="staging-route-eta" class="text-base sm:text-lg font-black text-amber-300 tracking-tight block">--:--</span>
+            </div>
+          </div>
+
+          <!-- Akıllı Rota Rozetleri (Benzinlik, Viraj, Yükselti) -->
+          <div id="staging-badges-row" class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-0.5 text-[11px] font-semibold text-slate-300">
+            <span id="staging-badge-speed" class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center space-x-1 shrink-0">
+              <span>⚡ En Hızlı Güzergah</span>
+            </span>
+            <span id="staging-badge-fuel" class="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center space-x-1 shrink-0">
+              <span>⛽ Benzinlikler Hazır</span>
+            </span>
+            <span id="staging-badge-curve" class="px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-300 border border-sky-500/30 flex items-center space-x-1 shrink-0">
+              <span>🏍️ Virajlı Asfalt</span>
+            </span>
+          </div>
+
+          <!-- BÜYÜK VE NET HERO AKSİYON: SÜRÜŞÜ BAŞLAT -->
+          <div class="pt-1">
+            <button onclick="startLiveRideFromStaging()" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-white text-sm sm:text-base font-black flex items-center justify-center space-x-2.5 shadow-xl shadow-emerald-600/35 active:scale-[0.98] transition-all border border-emerald-300/40">
+              <i data-lucide="play" class="w-5 h-5 fill-white text-white"></i>
+              <span class="tracking-wider uppercase">SÜRÜŞÜ BAŞLAT</span>
+              <span class="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded-full font-bold ml-1">CANLI HUD</span>
+            </button>
+          </div>
+
+          <!-- Alt Kısayollar: Google Maps, Detaylı Duraklar -->
+          <div class="flex items-center space-x-2 pt-1 border-t border-slate-800/80">
+            <button onclick="openInGoogleMaps()" class="flex-1 py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-xl text-xs font-bold border border-slate-700 flex items-center justify-center space-x-1.5 active:scale-95 transition-all shadow-sm">
+              <i data-lucide="navigation" class="w-3.5 h-3.5 shrink-0"></i>
+              <span>Google Maps'te Aç</span>
+            </button>
+            <button onclick="openMobileSidebar(); dismissStagingSheet();" class="flex-1 py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl text-xs font-bold border border-slate-700 flex items-center justify-center space-x-1.5 active:scale-95 transition-all shadow-sm">
+              <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-brand-400 shrink-0"></i>
+              <span>Duraklar & Detay</span>
             </button>
           </div>
         </div>
@@ -2415,6 +2292,197 @@
       <!-- Keşif Kartları Grid Listesi -->
       <div class="p-4 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-3" id="discover-places-grid">
         <!-- JS tarafından doldurulur -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SÜRÜCÜ & KEŞİF MERKEZİ (UNIFIED DRIVER HUB) -->
+  <div id="modal-driver-hub" class="hidden fixed inset-0 z-[1000] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
+    <div class="responsive-modal-card bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
+      <!-- Hub Header -->
+      <div class="p-4 sm:p-5 border-b border-slate-800/90 flex items-center justify-between bg-slate-950/60">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500/20 to-brand-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0 shadow-inner">
+            <i data-lucide="layout-grid" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h3 class="text-base sm:text-lg font-black text-white">Sürücü & Keşif Merkezi</h3>
+              <span class="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[10px] font-extrabold uppercase">V3 HUB</span>
+            </div>
+            <p class="text-xs text-slate-400">Rotanızı zenginleştirin, topluluğa bağlanın ve sürüş araçlarını yönetin.</p>
+          </div>
+        </div>
+        <button onclick="closeDriverHubModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors" title="Kapat">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Segmented Hub Tabs -->
+      <div class="p-2 sm:px-4 bg-slate-950 border-b border-slate-800/80 flex items-center space-x-1.5 overflow-x-auto no-scrollbar">
+        <button id="tab-btn-hub-discover" onclick="switchDriverHubTab('discover')" class="hub-tab-btn active px-3 py-2 rounded-xl text-xs font-bold transition-all border border-amber-500/40 bg-amber-500/20 text-amber-300 flex items-center space-x-1.5 shrink-0">
+          <span>🏛️</span>
+          <span>Keşif & Güzergahlar</span>
+        </button>
+        <button id="tab-btn-hub-ride" onclick="switchDriverHubTab('ride')" class="hub-tab-btn px-3 py-2 rounded-xl text-xs font-bold transition-all border border-transparent text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center space-x-1.5 shrink-0">
+          <span>👥</span>
+          <span>Topluluk & Canlı Sürüş</span>
+        </button>
+        <button id="tab-btn-hub-tools" onclick="switchDriverHubTab('tools')" class="hub-tab-btn px-3 py-2 rounded-xl text-xs font-bold transition-all border border-transparent text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center space-x-1.5 shrink-0">
+          <span>⚙️</span>
+          <span>Araç & Dosyalar</span>
+        </button>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="p-4 sm:p-5 overflow-y-auto space-y-4">
+        <!-- 1. TAB: KEŞİF & GÜZERGAHLAR -->
+        <div id="tab-pane-hub-discover" class="space-y-2.5">
+          <button onclick="openPresetsModal(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-amber-500/40 text-left flex items-center justify-between transition-all group">
+            <div class="flex items-center space-x-3 min-w-0">
+              <span class="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center text-lg shrink-0">✨</span>
+              <div class="min-w-0">
+                <span class="font-extrabold text-sm text-white group-hover:text-amber-300 block truncate">14 Efsane Hazır Rota</span>
+                <span class="text-xs text-slate-400 block truncate">Motosiklet ve karavan için seçilmiş ikonik Türkiye rotaları</span>
+              </div>
+            </div>
+            <span class="px-2 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold border border-amber-500/30 shrink-0">14 Rota</span>
+          </button>
+
+          <button onclick="openDiscoverModal(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-orange-500/40 text-left flex items-center justify-between transition-all group">
+            <div class="flex items-center space-x-3 min-w-0">
+              <span class="w-10 h-10 rounded-xl bg-orange-500/15 text-orange-400 flex items-center justify-center text-lg shrink-0">🏛️</span>
+              <div class="min-w-0">
+                <span class="font-extrabold text-sm text-white group-hover:text-amber-300 block truncate">Türkiye'yi Keşfet (870+ Nokta)</span>
+                <span class="text-xs text-slate-400 block truncate">Antik kentler, kanyonlar, virajlı dağ geçitleri ve seyir terasları</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition-transform shrink-0"></i>
+          </button>
+
+          <button onclick="openNearbyModal(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-emerald-500/40 text-left flex items-center justify-between transition-all group">
+            <div class="flex items-center space-x-3 min-w-0">
+              <span class="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-lg shrink-0">📍</span>
+              <div class="min-w-0">
+                <span class="font-extrabold text-sm text-white group-hover:text-emerald-300 block truncate">Yakınımda Ne Var? (Geo-Explorer)</span>
+                <span class="text-xs text-slate-400 block truncate">Mevcut konumunuzun 10-50 km çevresindeki en popüler duraklar</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-transform shrink-0"></i>
+          </button>
+
+          <button onclick="openSavedRoutesModal(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-rose-500/40 text-left flex items-center justify-between transition-all group">
+            <div class="flex items-center space-x-3 min-w-0">
+              <span class="w-10 h-10 rounded-xl bg-rose-500/15 text-rose-400 flex items-center justify-center text-lg shrink-0">❤️</span>
+              <div class="min-w-0">
+                <span class="font-extrabold text-sm text-white group-hover:text-rose-300 block truncate">Kayıtlı Rotalarım & Favoriler</span>
+                <span class="text-xs text-slate-400 block truncate">Daha önce kaydettiğiniz sürüş planları ve favori duraklarınız</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-rose-400 transition-transform shrink-0"></i>
+          </button>
+        </div>
+
+        <!-- 2. TAB: TOPLULUK & CANLI SÜRÜŞ -->
+        <div id="tab-pane-hub-ride" class="hidden space-y-2.5">
+          <button onclick="RotamConvoy.openModal(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-cyan-500/40 text-left flex items-center justify-between transition-all group">
+            <div class="flex items-center space-x-3 min-w-0">
+              <span class="w-10 h-10 rounded-xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center text-lg shrink-0">👥</span>
+              <div class="min-w-0">
+                <span class="font-extrabold text-sm text-white group-hover:text-cyan-300 block truncate">Canlı Grup Sürüşü (Konvoy)</span>
+                <span class="text-xs text-slate-400 block truncate">Arkadaşlarınızla aynı haritada canlı konum paylaşarak sürün</span>
+              </div>
+            </div>
+            <span class="px-2 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-bold border border-cyan-500/30 shrink-0">CANLI AĞ</span>
+          </button>
+
+          <button onclick="LiveNavigation.openIncidentReportModal(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-amber-500/40 text-left flex items-center justify-between transition-all group">
+            <div class="flex items-center space-x-3 min-w-0">
+              <span class="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center text-lg shrink-0">⚠️</span>
+              <div class="min-w-0">
+                <span class="font-extrabold text-sm text-white group-hover:text-amber-300 block truncate">Yol Durumu & Olay Bildir</span>
+                <span class="text-xs text-slate-400 block truncate">Radar, mıcır, yol çalışması, kaza ve sis uyarıları</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition-transform shrink-0"></i>
+          </button>
+
+          <button onclick="RotamIntercom.testHelmetAudio(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-sky-500/40 text-left flex items-center justify-between transition-all group">
+            <div class="flex items-center space-x-3 min-w-0">
+              <span class="w-10 h-10 rounded-xl bg-sky-500/15 text-sky-400 flex items-center justify-center text-lg shrink-0">🎧</span>
+              <div class="min-w-0">
+                <span class="font-extrabold text-sm text-white group-hover:text-sky-300 block truncate">Kask & Intercom Ses Testi</span>
+                <span class="text-xs text-slate-400 block truncate">Bluetooth kulaklık ve D5-A5 çan ses seviyesini deneyin</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-sky-400 transition-transform shrink-0"></i>
+          </button>
+
+          <button onclick="openCampingAssistantModal(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-emerald-500/40 text-left flex items-center justify-between transition-all group">
+            <div class="flex items-center space-x-3 min-w-0">
+              <span class="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-lg shrink-0">🏕️</span>
+              <div class="min-w-0">
+                <span class="font-extrabold text-sm text-white group-hover:text-emerald-300 block truncate">Kamp & Karavan Asistanı</span>
+                <span class="text-xs text-slate-400 block truncate">Gece sıcaklığı, tulum konfor limiti ve ekipman listesi</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-transform shrink-0"></i>
+          </button>
+        </div>
+
+        <!-- 3. TAB: ARAÇ & DOSYALAR -->
+        <div id="tab-pane-hub-tools" class="hidden space-y-2.5">
+          <button id="hub-btn-save-route" onclick="openSaveRouteModal(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-brand-500/40 text-left flex items-center justify-between transition-all group">
+            <div class="flex items-center space-x-3 min-w-0">
+              <span class="w-10 h-10 rounded-xl bg-brand-500/15 text-brand-400 flex items-center justify-center text-lg shrink-0">💾</span>
+              <div class="min-w-0">
+                <span class="font-extrabold text-sm text-white group-hover:text-brand-300 block truncate">Rotayı Buluta Kaydet</span>
+                <span class="text-xs text-slate-400 block truncate">Oturum açarak oluşturduğunuz rotayı tüm cihazlarınıza eşitleyin</span>
+              </div>
+            </div>
+            <i data-lucide="bookmark-plus" class="w-4 h-4 text-slate-500 group-hover:text-brand-400 transition-transform shrink-0"></i>
+          </button>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <button onclick="exportGPX(); closeDriverHubModal();" class="p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-slate-700 text-left flex items-center space-x-2.5 transition-all">
+              <span class="text-xl shrink-0">📥</span>
+              <div class="min-w-0">
+                <span class="font-bold text-xs text-white block truncate">GPX İndir</span>
+                <span class="text-[10px] text-slate-500 block truncate">Garmin / BMW Motorrad</span>
+              </div>
+            </button>
+
+            <button onclick="openGpxImportModal(); closeDriverHubModal();" class="p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-slate-700 text-left flex items-center space-x-2.5 transition-all">
+              <span class="text-xl shrink-0">📤</span>
+              <div class="min-w-0">
+                <span class="font-bold text-xs text-white block truncate">GPX Yükle</span>
+                <span class="text-[10px] text-slate-500 block truncate">Harici Dosya Aç</span>
+              </div>
+            </button>
+          </div>
+
+          <button onclick="RotamOfflineMap.openModal(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-teal-500/40 text-left flex items-center justify-between transition-all group">
+            <div class="flex items-center space-x-3 min-w-0">
+              <span class="w-10 h-10 rounded-xl bg-teal-500/15 text-teal-400 flex items-center justify-center text-lg shrink-0">🌐</span>
+              <div class="min-w-0">
+                <span class="font-extrabold text-sm text-white group-hover:text-teal-300 block truncate">Çevrimdışı Harita İndir</span>
+                <span class="text-xs text-slate-400 block truncate">İnternetsiz dağ ve kanyon rotaları için paket indirin</span>
+              </div>
+            </div>
+            <i data-lucide="download-cloud" class="w-4 h-4 text-slate-500 group-hover:text-teal-400 transition-transform shrink-0"></i>
+          </button>
+
+          <button onclick="openInGoogleMaps(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-emerald-500/40 text-left flex items-center justify-between transition-all group">
+            <div class="flex items-center space-x-3 min-w-0">
+              <span class="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-lg shrink-0">🗺️</span>
+              <div class="min-w-0">
+                <span class="font-extrabold text-sm text-white group-hover:text-emerald-300 block truncate">Google Maps'te Aç</span>
+                <span class="text-xs text-slate-400 block truncate">Harici telefon veya araç navigasyonuna aktarın</span>
+              </div>
+            </div>
+            <i data-lucide="external-link" class="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-transform shrink-0"></i>
+          </button>
+        </div>
       </div>
     </div>
   </div>

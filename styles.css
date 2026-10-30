@@ -2307,3 +2307,58 @@ body.sunlight-mode #gmaps-search-dropdown .divide-slate-800\/80 > * {
   border-radius: 4px;
   transition: width 0.4s ease;
 }
+
+/* ==========================================
+   ROTAM UNIVERSAL ROUTE STAGING SHEET & DRIVER HUB
+   ========================================== */
+#rotam-staging-sheet {
+  transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.hub-tab-btn {
+  user-select: none;
+  cursor: pointer;
+}
+
+body.day-mode #rotam-staging-sheet .glass-card,
+body.sunlight-mode #rotam-staging-sheet .glass-card {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.25) !important;
+}
+
+body.day-mode #rotam-staging-sheet h3,
+body.sunlight-mode #rotam-staging-sheet h3,
+body.day-mode #rotam-staging-sheet #staging-route-dist,
+body.sunlight-mode #rotam-staging-sheet #staging-route-dist {
+  color: #0f172a !important;
+}
+
+body.day-mode #rotam-staging-sheet .bg-slate-950\/70,
+body.sunlight-mode #rotam-staging-sheet .bg-slate-950\/70 {
+  background: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+}
+
+body.day-mode #modal-driver-hub .bg-slate-900,
+body.sunlight-mode #modal-driver-hub .bg-slate-900 {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+body.day-mode #modal-driver-hub .bg-slate-950\/80,
+body.sunlight-mode #modal-driver-hub .bg-slate-950\/80 {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+body.day-mode #modal-driver-hub h3,
+body.sunlight-mode #modal-driver-hub h3,
+body.day-mode #modal-driver-hub span.text-white,
+body.sunlight-mode #modal-driver-hub span.text-white {
+  color: #0f172a !important;
+}

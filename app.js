@@ -864,36 +864,55 @@ function toggleSidebar() {
 }
 
 // ==========================================
-// HEADER AKORDİYON MENÜ (COLLAPSIBLE HEADER MEGA-MENU)
+// SÜRÜCÜ & KEŞİF MERKEZİ (UNIFIED DRIVER HUB MODAL)
 // ==========================================
-function toggleHeaderAccordion() {
-  const panel = document.getElementById('header-accordion-panel');
-  const chevron = document.getElementById('icon-header-accordion-chevron');
-  const btn = document.getElementById('btn-toggle-header-accordion');
-  if (!panel) return;
-
-  const isHidden = panel.classList.contains('hidden');
-  if (isHidden) {
-    panel.classList.remove('hidden');
-    chevron?.classList.add('rotate-180');
-    btn?.classList.add('bg-slate-800', 'border-amber-500/40', 'text-amber-300');
+function openDriverHubModal(tab = 'discover') {
+  const modal = document.getElementById('modal-driver-hub');
+  if (modal) {
+    modal.classList.remove('hidden');
+    switchDriverHubTab(tab);
     if (typeof initIcons === 'function') initIcons();
-  } else {
-    panel.classList.add('hidden');
-    chevron?.classList.remove('rotate-180');
-    btn?.classList.remove('bg-slate-800', 'border-amber-500/40', 'text-amber-300');
   }
 }
 
-function closeHeaderAccordion() {
-  const panel = document.getElementById('header-accordion-panel');
-  const chevron = document.getElementById('icon-header-accordion-chevron');
-  const btn = document.getElementById('btn-toggle-header-accordion');
-  if (panel && !panel.classList.contains('hidden')) {
-    panel.classList.add('hidden');
-    chevron?.classList.remove('rotate-180');
-    btn?.classList.remove('bg-slate-800', 'border-amber-500/40', 'text-amber-300');
+function closeDriverHubModal() {
+  const modal = document.getElementById('modal-driver-hub');
+  if (modal) {
+    modal.classList.add('hidden');
   }
+}
+
+function switchDriverHubTab(tabName) {
+  const tabs = ['discover', 'ride', 'tools'];
+  tabs.forEach(t => {
+    const btn = document.getElementById(`tab-btn-hub-${t}`);
+    const pane = document.getElementById(`tab-pane-hub-${t}`);
+    if (t === tabName) {
+      if (btn) {
+        btn.classList.add('active', 'bg-amber-500/20', 'text-amber-300', 'border-amber-500/40');
+        btn.classList.remove('text-slate-400', 'hover:text-white', 'border-transparent');
+      }
+      if (pane) pane.classList.remove('hidden');
+    } else {
+      if (btn) {
+        btn.classList.remove('active', 'bg-amber-500/20', 'text-amber-300', 'border-amber-500/40');
+        btn.classList.add('text-slate-400', 'hover:text-white', 'border-transparent');
+      }
+      if (pane) pane.classList.add('hidden');
+    }
+  });
+}
+
+window.openDriverHubModal = openDriverHubModal;
+window.closeDriverHubModal = closeDriverHubModal;
+window.switchDriverHubTab = switchDriverHubTab;
+
+function toggleHeaderAccordion() {
+  openDriverHubModal('discover');
+}
+
+function closeHeaderAccordion() {
+  closeDriverHubModal();
 }
 
 window.toggleHeaderAccordion = toggleHeaderAccordion;
@@ -2542,6 +2561,7 @@ function clearRouteDisplay() {
   ghostPolylines = [];
   clearRouteAlternativeMarkers();
   dismissGmapsRouteSelector();
+  dismissStagingSheet();
 
   clearPoiMarkers();
   state.activePoiCategories.clear();
@@ -3709,6 +3729,29 @@ function handleGmapsSearchInput(query) {
     }
   }
 
+  // 4. Search in Efsane Hazır Rotalar (14 Curated Scenic Routes)
+  const presets = (typeof getAllPresetRoutes === 'function') ? getAllPresetRoutes() : (window.PRESET_ROUTES || []);
+  for (const pr of presets) {
+    const pTitle = normalizeTurkishSearch(pr.title);
+    const pDesc = normalizeTurkishSearch(pr.description || '');
+    if (pTitle.includes(normalized) || pDesc.includes(normalized)) {
+      const key = `preset|${pr.id}`;
+      if (!seenKeys.has(key)) {
+        seenKeys.add(key);
+        localResults.push({
+          type: 'preset',
+          presetId: pr.id,
+          name: pr.title,
+          region: `${pr.points.length} Durak • ${pr.distance_km || ''} km • Efsane Rota`,
+          lat: pr.points[0]?.lat || 39.0,
+          lon: pr.points[0]?.lon || 35.0,
+          emoji: '✨'
+        });
+        if (localResults.length >= 10) break;
+      }
+    }
+  }
+
   // Render instant local matches with loading flag if user typed >= 2 characters
   const shouldFetchOnline = query.trim().length >= 2;
   renderGmapsSearchResults(localResults, shouldFetchOnline);
@@ -3837,6 +3880,14 @@ function selectGmapsSearchResult(idx) {
 
   // Persist to Recent Searches History
   RotamSearchHistory.add(item);
+
+  // If item is a preset route, load and calculate it immediately
+  if (item.type === 'preset' && item.presetId) {
+    if (typeof loadPresetRoute === 'function') {
+      loadPresetRoute(item.presetId);
+      return;
+    }
+  }
 
   if (map) {
     map.flyTo([item.lat, item.lon], 14, { duration: 1.0 });
@@ -4187,6 +4238,9 @@ async function calculateRouteMain() {
       const minRem = m % 60;
       document.getElementById('mobile-mini-dur').textContent = isEn ? `${h > 0 ? h + ' h ' : ''}${minRem} m` : `${h > 0 ? h + ' sa ' : ''}${minRem} dk`;
     }
+
+    // ROTAM Universal Route Staging Sheet (Desktop & Mobile)
+    showRouteStagingSheet(activeRoute);
 
     // On mobile, auto-close sidebar so user immediately views their route on the map
     if (window.innerWidth < 768) {
@@ -4673,11 +4727,100 @@ function dismissGmapsRouteSelector() {
 
 function startLiveRide() {
   dismissGmapsRouteSelector();
+  dismissStagingSheet();
   clearRouteAlternativeMarkers();
   if (typeof LiveNavigation !== 'undefined') {
     LiveNavigation.start(false);
   }
 }
+
+// ==========================================
+// ROTAM UNIVERSAL ROUTE STAGING SHEET
+// ==========================================
+function showRouteStagingSheet(routeData) {
+  const sheet = document.getElementById('rotam-staging-sheet');
+  if (!sheet) return;
+  const activeRoute = routeData || state.routeData;
+  if (!activeRoute) return;
+
+  const isEn = (window.state && window.state.lang === 'en');
+
+  // Title: destination name or first/last waypoint
+  const destName = (state.waypoints && state.waypoints.length > 1 && state.waypoints[state.waypoints.length - 1]?.name)
+    ? state.waypoints[state.waypoints.length - 1].name
+    : (isEn ? 'Selected Route' : 'Hedefe Rota Hazır');
+  
+  const titleEl = document.getElementById('staging-route-title');
+  if (titleEl) titleEl.textContent = destName;
+
+  // Vehicle badge
+  const vehicleBadge = document.getElementById('staging-vehicle-badge');
+  const vehicleIcons = { motorcycle: '🏍️ Moto', car: '🚗 Otomobil', camper: '🚐 Karavan', bicycle: '🚲 Bisiklet' };
+  if (vehicleBadge) {
+    vehicleBadge.textContent = vehicleIcons[state.currentVehicle] || '🏍️ Moto';
+  }
+
+  // Duration, Distance, ETA
+  const distEl = document.getElementById('staging-route-dist');
+  const durEl = document.getElementById('staging-route-dur');
+  const etaEl = document.getElementById('staging-route-eta');
+
+  if (distEl) {
+    distEl.textContent = (activeRoute.distance / 1000).toFixed(1) + ' km';
+  }
+
+  const m = Math.floor(activeRoute.duration / 60);
+  const hrs = Math.floor(m / 60);
+  const minRem = m % 60;
+  if (durEl) {
+    durEl.textContent = isEn
+      ? `${hrs > 0 ? hrs + ' h ' : ''}${minRem} min`
+      : `${hrs > 0 ? hrs + ' sa ' : ''}${minRem} dk`;
+  }
+
+  if (etaEl) {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + m);
+    const etaStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+    etaEl.textContent = etaStr;
+  }
+
+  // Badges
+  const curveBadge = document.getElementById('staging-badge-curve');
+  if (curveBadge) {
+    if (activeRoute.source === 'valhalla') {
+      curveBadge.innerHTML = isEn ? '<span>🏍️ Scenic & Twisties</span>' : '<span>🏍️ Manzaralı & Virajlı</span>';
+    } else {
+      curveBadge.innerHTML = isEn ? '<span>🛣️ Fast Highway</span>' : '<span>🛣️ Hızlı Ana Yol</span>';
+    }
+  }
+
+  // Reveal smoothly
+  sheet.classList.remove('hidden');
+  requestAnimationFrame(() => {
+    sheet.classList.remove('translate-y-6', 'opacity-0');
+    sheet.classList.add('translate-y-0', 'opacity-100');
+  });
+}
+
+function dismissStagingSheet() {
+  const sheet = document.getElementById('rotam-staging-sheet');
+  if (!sheet || sheet.classList.contains('hidden')) return;
+  sheet.classList.remove('translate-y-0', 'opacity-100');
+  sheet.classList.add('translate-y-6', 'opacity-0');
+  setTimeout(() => {
+    sheet.classList.add('hidden');
+  }, 250);
+}
+
+function startLiveRideFromStaging() {
+  dismissStagingSheet();
+  startLiveRide();
+}
+
+window.showRouteStagingSheet = showRouteStagingSheet;
+window.dismissStagingSheet = dismissStagingSheet;
+window.startLiveRideFromStaging = startLiveRideFromStaging;
 
 // Render Alternative Routes Comparison UI Cards
 function renderRouteAlternativesUI(routes, activeIdx) {
@@ -9367,23 +9510,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   } catch (e) {}
 
-  // Progress animation on splash screen
+  // Fast Instant Boot (Dismiss splash screen immediately)
   const pBar = document.getElementById('splash-progress-bar');
   const pTxt = document.getElementById('splash-status-text');
-
-  setTimeout(() => {
-    if (pBar) pBar.style.width = '70%';
-    if (pTxt) pTxt.textContent = 'Mekan veritabanı hazırlandı...';
-  }, 400);
-
-  setTimeout(() => {
-    if (pBar) pBar.style.width = '100%';
-    if (pTxt) pTxt.textContent = 'Harita ve seyahat motoru hazır!';
-  }, 850);
+  if (pBar) pBar.style.width = '100%';
+  if (pTxt) pTxt.textContent = 'Harita ve seyahat motoru hazır!';
 
   setTimeout(() => {
     dismissSplashScreen();
-  }, 1400);
+  }, 150);
 });
 
 // Standalone PWA & Dynamic Viewport Synchronizer (iOS 'Ana Ekrana Ekle' & Android PWA)
@@ -11761,8 +11896,10 @@ const LiveNavigation = {
 
     document.getElementById('floating-map-controls')?.classList.add('hidden');
     document.getElementById('gmaps-top-container')?.classList.add('hidden');
+    document.getElementById('app-header')?.classList.add('hidden');
     if (typeof closeGmapsPlaceSheet === 'function') closeGmapsPlaceSheet();
     if (typeof dismissGmapsRouteSelector === 'function') dismissGmapsRouteSelector();
+    if (typeof dismissStagingSheet === 'function') dismissStagingSheet();
     if (typeof clearRouteAlternativeMarkers === 'function') clearRouteAlternativeMarkers();
     document.getElementById('btn-toggle-right-panel')?.classList.add('hidden');
     document.getElementById('map-hint')?.classList.add('hidden');
@@ -11902,7 +12039,11 @@ const LiveNavigation = {
     document.getElementById('floating-map-controls')?.classList.remove('hidden');
     document.getElementById('map-category-filter-bar')?.classList.remove('hidden');
     document.getElementById('gmaps-top-container')?.classList.remove('hidden');
+    document.getElementById('app-header')?.classList.remove('hidden');
     document.getElementById('btn-toggle-right-panel')?.classList.remove('hidden');
+    if (state.routeData && typeof showRouteStagingSheet === 'function') {
+      showRouteStagingSheet(state.routeData);
+    }
 
     // Restore desktop sidebar
     const sidebar = document.getElementById('sidebar');
