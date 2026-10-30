@@ -473,7 +473,7 @@ function initMap() {
   });
 }
 
-// Proactive user location cache warmer
+// Proactive user location cache warmer (High accuracy satellite query)
 function proactivelyWarmUserLocation() {
   if (typeof navigator === 'undefined' || !navigator.geolocation) return;
   navigator.geolocation.getCurrentPosition(
@@ -486,31 +486,54 @@ function proactivelyWarmUserLocation() {
     () => {
       // Ignore silently if permission prompt not yet accepted
     },
-    { enableHighAccuracy: true, timeout: 6000, maximumAge: 120000 }
+    { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
   );
 }
 
 // Map Floating Control: Fly to current location & zoom in at street level (zoom 18)
 let nonNavLocationMarker = null;
-function showUserLocationPulseMarker(lat, lon) {
+let nonNavAccuracyCircle = null;
+
+function showUserLocationPulseMarker(lat, lon, accuracy = null) {
   if (!map) return;
   if (nonNavLocationMarker) {
     nonNavLocationMarker.setLatLng([lat, lon]);
-    return;
+  } else {
+    const html = `
+      <div class="live-rider-marker">
+        <div class="live-rider-pulse"></div>
+        <div class="w-4 h-4 rounded-full bg-cyan-400 border-2 border-white shadow-lg shadow-cyan-400/80"></div>
+      </div>
+    `;
+    const icon = L.divIcon({
+      className: '',
+      html,
+      iconSize: [40, 40],
+      iconAnchor: [20, 20]
+    });
+    nonNavLocationMarker = L.marker([lat, lon], { icon, zIndexOffset: 900 }).addTo(map);
   }
-  const html = `
-    <div class="live-rider-marker">
-      <div class="live-rider-pulse"></div>
-      <div class="w-4 h-4 rounded-full bg-cyan-400 border-2 border-white shadow-lg shadow-cyan-400/80"></div>
-    </div>
-  `;
-  const icon = L.divIcon({
-    className: '',
-    html,
-    iconSize: [40, 40],
-    iconAnchor: [20, 20]
-  });
-  nonNavLocationMarker = L.marker([lat, lon], { icon, zIndexOffset: 900 }).addTo(map);
+
+  // Visual accuracy halo on map (dynamic radius & precision color)
+  if (accuracy && typeof accuracy === 'number' && accuracy > 0) {
+    const rad = Math.max(5, Math.min(accuracy, 250));
+    const color = rad > 45 ? '#ef4444' : (rad > 20 ? '#06b6d4' : '#10b981');
+    if (nonNavAccuracyCircle) {
+      nonNavAccuracyCircle.setLatLng([lat, lon]);
+      nonNavAccuracyCircle.setRadius(rad);
+      nonNavAccuracyCircle.setStyle({ color: color, fillColor: color });
+    } else {
+      nonNavAccuracyCircle = L.circle([lat, lon], {
+        radius: rad,
+        color: color,
+        fillColor: color,
+        fillOpacity: 0.12,
+        weight: 1.5,
+        dashArray: '3, 4',
+        interactive: false
+      }).addTo(map);
+    }
+  }
 }
 
 function flyToCurrentLocation() {
@@ -519,12 +542,19 @@ function flyToCurrentLocation() {
     return;
   }
   const isEn = (window.state && window.state.lang === 'en');
-  showToast(isEn ? 'Locating your position...' : 'Konumunuz alınıyor ve yaklaşılıyor...', 'info');
+  showToast(isEn ? 'Acquiring high-precision GPS...' : 'Hassas GPS konumu alınıyor...', 'info');
+
+  const geoOptions = {
+    enableHighAccuracy: true,
+    maximumAge: 0, // Force fresh hardware GPS satellite reading
+    timeout: 10000
+  };
 
   navigator.geolocation.getCurrentPosition(
     (pos) => {
       const lat = pos.coords.latitude;
       const lon = pos.coords.longitude;
+      const acc = Math.round(pos.coords.accuracy || 10);
       state.userLocation = { lat, lon };
 
       if (map) {
@@ -537,16 +567,33 @@ function flyToCurrentLocation() {
         if (LiveNavigation.marker) {
           LiveNavigation.marker.setLatLng([lat, lon]);
         }
+        if (typeof LiveNavigation.updateAccuracyCircle === 'function') {
+          LiveNavigation.updateAccuracyCircle([lat, lon], acc);
+        }
       } else {
-        showUserLocationPulseMarker(lat, lon);
+        showUserLocationPulseMarker(lat, lon, acc);
       }
-      showToast(isEn ? '📍 Centered on your current location.' : '📍 Bulunduğunuz konuma yaklaşıldı.', 'success');
+
+      let accMsg = '';
+      if (acc <= 15) {
+        accMsg = isEn ? ` (±${acc}m High Accuracy)` : ` (±${acc}m Yüksek Hassasiyet)`;
+      } else if (acc <= 45) {
+        accMsg = isEn ? ` (±${acc}m Normal)` : ` (±${acc}m Normal Hassasiyet)`;
+      } else {
+        accMsg = isEn ? ` (±${acc}m Low Accuracy - Open sky recommended)` : ` (±${acc}m Düşük Hassasiyet - Açık alana çıkın)`;
+      }
+
+      showToast((isEn ? '📍 Centered on your current location' : '📍 Bulunduğunuz konuma yaklaşıldı') + accMsg, acc > 45 ? 'warning' : 'success');
     },
     (err) => {
       console.warn('Geolocation error in flyToCurrentLocation:', err);
-      showToast(isEn ? 'Could not obtain location: ' + err.message : 'Konum alınamadı: ' + err.message, 'error');
+      let errMsg = err.message;
+      if (err.code === 1) errMsg = isEn ? 'Location permission denied by user' : 'Konum izni reddedildi. Lütfen tarayıcı ayarlarından izin verin.';
+      else if (err.code === 2) errMsg = isEn ? 'Position unavailable' : 'GPS uydusu veya konum bulunamadı.';
+      else if (err.code === 3) errMsg = isEn ? 'GPS request timed out' : 'GPS yanıt süresi aşıldı. Tekrar deneyin.';
+      showToast((isEn ? 'Could not obtain location: ' : 'Konum alınamadı: ') + errMsg, 'error');
     },
-    { enableHighAccuracy: true, timeout: 8000 }
+    geoOptions
   );
 }
 window.flyToCurrentLocation = flyToCurrentLocation;
@@ -1141,7 +1188,7 @@ function handleMobileNavRideStart() {
             openMobileSidebar('start');
           }
         },
-        { enableHighAccuracy: true, timeout: 6000 }
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 }
       );
       return;
     }
@@ -1703,35 +1750,37 @@ function handleHeroEndInput(value) {
   }
 }
 
-// GPS Location for Start Point
+// GPS Location for Start Point (High accuracy satellite fix)
 function useCurrentLocationForStart() {
   if (!navigator.geolocation) {
     showToast('Tarayıcınız konum servisini desteklemiyor.', 'warning');
     return;
   }
   const input = document.getElementById('hero-start-input');
-  if (input) input.value = 'Mevcut Konumum alınıyor...';
+  const isEn = (window.state && window.state.lang === 'en');
+  if (input) input.value = isEn ? 'Getting current location...' : 'Mevcut Konumum alınıyor...';
 
   navigator.geolocation.getCurrentPosition(
     async (pos) => {
       const lat = pos.coords.latitude;
       const lon = pos.coords.longitude;
+      const acc = Math.round(pos.coords.accuracy || 10);
       state.userLocation = { lat, lon };
 
       state.waypoints[0].lat = lat;
       state.waypoints[0].lon = lon;
-      state.waypoints[0].name = 'Mevcut Konumum';
-      if (input) input.value = '📍 Mevcut Konumum';
+      state.waypoints[0].name = isEn ? 'Current Location' : 'Mevcut Konumum';
+      if (input) input.value = isEn ? '📍 Current Location' : '📍 Mevcut Konumum';
       updateWaypointsListUI();
       updateWaypointMarkers();
       checkAndPanToWaypoint(0);
-      showToast('Mevcut konumunuz başlangıç noktası olarak ayarlandı.', 'success');
+      showToast((isEn ? 'Current location set as starting point' : 'Mevcut konumunuz başlangıç noktası olarak ayarlandı.') + ` (±${acc}m)`, 'success');
     },
     (err) => {
-      showToast('Konum alınamadı: ' + err.message, 'error');
+      showToast((isEn ? 'Could not obtain location: ' : 'Konum alınamadı: ') + err.message, 'error');
       if (input) input.value = '';
     },
-    { enableHighAccuracy: true, timeout: 10000 }
+    { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
   );
 }
 
@@ -2828,7 +2877,7 @@ async function gmapsQuickStartFromSheet() {
           state.userLocation = { lat: fallbackLat, lon: fallbackLon };
           executeGmapsQuickStart(target);
         },
-        { enableHighAccuracy: true, timeout: 7000 }
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 }
       );
       return;
     }
@@ -3137,7 +3186,7 @@ const RotamFavorites = {
           (err) => {
             showToast(isEn ? 'Could not get GPS location.' : 'GPS konumu alınamadı.', 'warning');
           },
-          { enableHighAccuracy: true, timeout: 6000 }
+          { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 }
         );
       }
     }
@@ -6584,7 +6633,7 @@ function fetchNearby(radiusKm, forceGps = false) {
       (err) => {
         list.innerHTML = `<p class="text-xs text-red-400 text-center py-4">Konum erişimi reddedildi: ${err.message}</p>`;
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
     );
   } else {
     renderNearbyResults(state.userLocation.lat, state.userLocation.lon, radiusKm);
@@ -10510,6 +10559,338 @@ const RotamBackgroundEngine = {
 
 window.RotamBackgroundEngine = RotamBackgroundEngine;
 
+/* ==========================================================================
+   ROTAM GPS OPTIMIZER & SMART MAP MATCHING ENGINE (V3.8)
+   - Kalman / Exponential Moving Average (EMA) Coordinate Smoothing
+   - True Segment Perpendicular Road-Snapping (Map Matching)
+   - Zero-Jitter Heading Filter with Red-Light / Low-Speed Deadband (< 3.5 km/h)
+   - Outlier & Teleport Spike Rejection (Filtering bad fixes & WiFi jumps)
+   - Dynamic Accuracy Ring & Real-Time Signal Quality Telemetry
+   ========================================================================== */
+const RotamGpsOptimizer = {
+  // Config
+  SNAP_TOLERANCE_METERS: 38,      // Snap to route if within 38 meters
+  OFF_ROUTE_THRESHOLD_METERS: 55, // Off route if farther than 55 meters
+  OFF_ROUTE_CONFIRM_PINGS: 3,     // Require 3 consecutive off-route pings before reroute
+  MAX_ACCEPTABLE_ACCURACY: 90,    // Reject outright if accuracy > 90m and prior good fix exists
+  LOW_SPEED_DEADBAND_KMH: 3.5,    // Freeze heading when below 3.5 km/h to avoid spinning
+  MAX_PLAUSIBLE_SPEED_KMH: 220,   // Rejection threshold for GPS teleport spikes
+
+  // Internal State
+  lastRawCoord: null,        // [lat, lon]
+  lastProcessedCoord: null,  // [lat, lon]
+  lastHeading: 0,
+  lastSpeedKmH: 0,
+  lastAccuracy: 10,
+  lastTimestamp: 0,
+  lastSegmentIndex: 0,
+  offRoutePings: 0,
+  isSnapped: false,
+  distanceToRoad: 0,
+  roadBearing: 0,
+  signalQuality: 'good', // 'excellent' | 'good' | 'moderate' | 'weak'
+
+  reset() {
+    this.lastRawCoord = null;
+    this.lastProcessedCoord = null;
+    this.lastHeading = 0;
+    this.lastSpeedKmH = 0;
+    this.lastAccuracy = 10;
+    this.lastTimestamp = 0;
+    this.lastSegmentIndex = 0;
+    this.offRoutePings = 0;
+    this.isSnapped = false;
+    this.distanceToRoad = 0;
+    this.roadBearing = 0;
+    this.signalQuality = 'good';
+  },
+
+  // Perpendicular projection of point P onto line segment AB
+  projectPointToSegment(lat, lon, lat1, lon1, lat2, lon2) {
+    const cosLat = Math.cos(lat1 * Math.PI / 180);
+    const dx = (lon2 - lon1) * cosLat * 111320;
+    const dy = (lat2 - lat1) * 110540;
+    const lenSq = dx * dx + dy * dy;
+    if (lenSq < 0.0001) {
+      return {
+        lat: lat1,
+        lon: lon1,
+        dist: haversineMeters(lat, lon, lat1, lon1),
+        t: 0
+      };
+    }
+    const px = (lon - lon1) * cosLat * 111320;
+    const py = (lat - lat1) * 110540;
+    const t = Math.max(0, Math.min(1, (px * dx + py * dy) / lenSq));
+    const projLat = lat1 + t * (lat2 - lat1);
+    const projLon = lon1 + t * (lon2 - lon1);
+    const dist = haversineMeters(lat, lon, projLat, projLon);
+    return { lat: projLat, lon: projLon, dist, t };
+  },
+
+  // Find nearest projection on the route polyline
+  snapToRoute(lat, lon, routeCoords) {
+    if (!routeCoords || routeCoords.length < 2) return null;
+
+    let startIdx = 0;
+    let endIdx = routeCoords.length - 1;
+
+    // Fast local neighborhood search around last known segment
+    if (this.lastSegmentIndex >= 0 && this.lastSegmentIndex < routeCoords.length - 1) {
+      startIdx = Math.max(0, this.lastSegmentIndex - 8);
+      endIdx = Math.min(routeCoords.length - 1, this.lastSegmentIndex + 35);
+    }
+
+    let bestSnap = null;
+    let bestDist = Infinity;
+    let bestIdx = -1;
+
+    for (let i = startIdx; i < endIdx; i++) {
+      const p1 = routeCoords[i];
+      const p2 = routeCoords[i + 1];
+      const proj = this.projectPointToSegment(lat, lon, p1[1], p1[0], p2[1], p2[0]);
+      if (proj.dist < bestDist) {
+        bestDist = proj.dist;
+        bestSnap = proj;
+        bestIdx = i;
+      }
+    }
+
+    // If local window didn't find anything close enough (< 50m), do coarse global search
+    if (bestDist > 50 && (startIdx > 0 || endIdx < routeCoords.length - 1)) {
+      for (let i = 0; i < routeCoords.length - 1; i += 4) {
+        const p1 = routeCoords[i];
+        const d = haversineMeters(lat, lon, p1[1], p1[0]);
+        if (d < 150) {
+          const s = Math.max(0, i - 4);
+          const e = Math.min(routeCoords.length - 1, i + 8);
+          for (let j = s; j < e; j++) {
+            const sp1 = routeCoords[j];
+            const sp2 = routeCoords[j + 1];
+            const proj = this.projectPointToSegment(lat, lon, sp1[1], sp1[0], sp2[1], sp2[0]);
+            if (proj.dist < bestDist) {
+              bestDist = proj.dist;
+              bestSnap = proj;
+              bestIdx = j;
+            }
+          }
+        }
+      }
+    }
+
+    if (bestSnap && bestIdx >= 0) {
+      const p1 = routeCoords[bestIdx];
+      const p2 = routeCoords[bestIdx + 1];
+      const roadBearing = calculateBearing(p1[1], p1[0], p2[1], p2[0]);
+      return {
+        lat: bestSnap.lat,
+        lon: bestSnap.lon,
+        distanceToRoad: bestDist,
+        segmentIndex: bestIdx,
+        roadBearing: roadBearing,
+        isSnapped: bestDist <= this.SNAP_TOLERANCE_METERS
+      };
+    }
+
+    return null;
+  },
+
+  // Calculate shortest-path angle difference (-180 to +180)
+  angleDiff(target, source) {
+    let diff = (target - source) % 360;
+    if (diff > 180) diff -= 360;
+    if (diff < -180) diff += 360;
+    return diff;
+  },
+
+  // Process raw position from Geolocation API
+  processPosition(pos, isInitialFix = false, activeRouteCoords = null) {
+    const rawLat = pos.coords.latitude;
+    const rawLon = pos.coords.longitude;
+    const accuracy = (typeof pos.coords.accuracy === 'number') ? pos.coords.accuracy : 15;
+    const timestamp = pos.timestamp || Date.now();
+
+    // 1. Evaluate Signal Quality
+    let signalQuality = 'good';
+    if (accuracy <= 10) signalQuality = 'excellent';
+    else if (accuracy <= 25) signalQuality = 'good';
+    else if (accuracy <= 50) signalQuality = 'moderate';
+    else signalQuality = 'weak';
+    this.signalQuality = signalQuality;
+    this.lastAccuracy = accuracy;
+
+    // 2. Outlier Rejection:
+    // If accuracy is poor (> 90m) and we already have a previous reliable fix,
+    // or if the implied speed is impossible (> 220 km/h), reject or heavily dampen the jump!
+    if (!isInitialFix && this.lastProcessedCoord && this.lastTimestamp > 0) {
+      const timeDeltaSec = Math.max(0.2, (timestamp - this.lastTimestamp) / 1000);
+      const jumpMeters = haversineMeters(this.lastProcessedCoord[0], this.lastProcessedCoord[1], rawLat, rawLon);
+      const impliedSpeedKmH = (jumpMeters / timeDeltaSec) * 3.6;
+
+      if (accuracy > this.MAX_ACCEPTABLE_ACCURACY && jumpMeters > 70) {
+        console.warn(`[RotamGPS] Outlier rejected: accuracy ${Math.round(accuracy)}m, jump ${Math.round(jumpMeters)}m`);
+        return {
+          lat: this.lastProcessedCoord[0],
+          lon: this.lastProcessedCoord[1],
+          rawLat,
+          rawLon,
+          speed: this.lastSpeedKmH,
+          heading: this.lastHeading,
+          accuracy,
+          isSnapped: this.isSnapped,
+          distanceToRoad: this.distanceToRoad,
+          signalQuality,
+          isRejected: true
+        };
+      }
+
+      if (impliedSpeedKmH > this.MAX_PLAUSIBLE_SPEED_KMH && jumpMeters > 100) {
+        console.warn(`[RotamGPS] Teleport rejected: speed ${Math.round(impliedSpeedKmH)} km/h, jump ${Math.round(jumpMeters)}m`);
+        return {
+          lat: this.lastProcessedCoord[0],
+          lon: this.lastProcessedCoord[1],
+          rawLat,
+          rawLon,
+          speed: this.lastSpeedKmH,
+          heading: this.lastHeading,
+          accuracy,
+          isSnapped: this.isSnapped,
+          distanceToRoad: this.distanceToRoad,
+          signalQuality,
+          isRejected: true
+        };
+      }
+    }
+
+    // 3. Raw Speed
+    let speedKmH = 0;
+    if (pos.coords.speed !== null && !isNaN(pos.coords.speed)) {
+      speedKmH = Math.max(0, Math.round(pos.coords.speed * 3.6));
+    } else if (this.lastProcessedCoord && this.lastTimestamp > 0) {
+      const dt = Math.max(0.5, (timestamp - this.lastTimestamp) / 1000);
+      const dm = haversineMeters(this.lastProcessedCoord[0], this.lastProcessedCoord[1], rawLat, rawLon);
+      speedKmH = Math.min(180, Math.round((dm / dt) * 3.6));
+    }
+
+    // 4. Map Matching (Snap-to-Route)
+    let targetLat = rawLat;
+    let targetLon = rawLon;
+    let isSnapped = false;
+    let distanceToRoad = 0;
+    let roadBearing = 0;
+
+    if (activeRouteCoords && activeRouteCoords.length >= 2) {
+      const snapResult = this.snapToRoute(rawLat, rawLon, activeRouteCoords);
+      if (snapResult) {
+        distanceToRoad = snapResult.distanceToRoad;
+        roadBearing = snapResult.roadBearing;
+        if (snapResult.isSnapped) {
+          targetLat = snapResult.lat;
+          targetLon = snapResult.lon;
+          isSnapped = true;
+          this.lastSegmentIndex = snapResult.segmentIndex;
+          this.offRoutePings = 0;
+        } else {
+          isSnapped = false;
+          if (distanceToRoad > this.OFF_ROUTE_THRESHOLD_METERS) {
+            this.offRoutePings++;
+          } else {
+            this.offRoutePings = 0;
+          }
+        }
+      }
+    } else {
+      this.offRoutePings = 0;
+    }
+
+    this.isSnapped = isSnapped;
+    this.distanceToRoad = distanceToRoad;
+    this.roadBearing = roadBearing;
+
+    // 5. Coordinate Smoothing (Exponential Moving Average)
+    let smoothedLat = targetLat;
+    let smoothedLon = targetLon;
+
+    if (!isInitialFix && this.lastProcessedCoord) {
+      const distFromLast = haversineMeters(this.lastProcessedCoord[0], this.lastProcessedCoord[1], targetLat, targetLon);
+
+      // Stationary deadband: if speed is 0 and movement is under 1.2m, completely lock position
+      if (speedKmH < 2 && distFromLast < 1.2) {
+        smoothedLat = this.lastProcessedCoord[0];
+        smoothedLon = this.lastProcessedCoord[1];
+      } else {
+        // Dynamic alpha: higher responsive alpha at high speed, smoother at low speed
+        let alpha = 0.55;
+        if (speedKmH > 60) alpha = 0.85;
+        else if (speedKmH > 25) alpha = 0.65;
+        else if (speedKmH < 5) alpha = 0.35;
+
+        smoothedLat = this.lastProcessedCoord[0] + alpha * (targetLat - this.lastProcessedCoord[0]);
+        smoothedLon = this.lastProcessedCoord[1] + alpha * (targetLon - this.lastProcessedCoord[1]);
+      }
+    }
+
+    // 6. Heading Stabilization & Deadband (< 3.5 km/h)
+    let rawHeading = pos.coords.heading;
+    let targetHeading = this.lastHeading;
+
+    if (speedKmH < this.LOW_SPEED_DEADBAND_KMH) {
+      // Stopped at red light or walking slowly: freeze heading to avoid spinning!
+      targetHeading = this.lastHeading;
+    } else if (rawHeading !== null && !isNaN(rawHeading) && rawHeading >= 0) {
+      targetHeading = rawHeading;
+      // If snapped to road and direction is aligned (within 55 degrees), smoothly blend with road bearing
+      if (isSnapped && roadBearing !== undefined) {
+        const diffWithRoad = Math.abs(this.angleDiff(roadBearing, rawHeading));
+        if (diffWithRoad < 55) {
+          targetHeading = (rawHeading + this.angleDiff(roadBearing, rawHeading) * 0.65 + 360) % 360;
+        }
+      }
+    } else if (this.lastProcessedCoord) {
+      // Compute bearing from movement vector
+      const dist = haversineMeters(this.lastProcessedCoord[0], this.lastProcessedCoord[1], smoothedLat, smoothedLon);
+      if (dist >= 2.5) {
+        targetHeading = calculateBearing(this.lastProcessedCoord[0], this.lastProcessedCoord[1], smoothedLat, smoothedLon);
+      } else {
+        targetHeading = this.lastHeading;
+      }
+    }
+
+    // Smooth heading transition
+    let smoothedHeading = targetHeading;
+    if (this.lastHeading !== undefined && this.lastHeading !== null) {
+      const hDiff = this.angleDiff(targetHeading, this.lastHeading);
+      const hAlpha = (speedKmH > 40) ? 0.6 : 0.35;
+      smoothedHeading = (this.lastHeading + hDiff * hAlpha + 360) % 360;
+    }
+
+    // Store state
+    this.lastRawCoord = [rawLat, rawLon];
+    this.lastProcessedCoord = [smoothedLat, smoothedLon];
+    this.lastHeading = smoothedHeading;
+    this.lastSpeedKmH = speedKmH;
+    this.lastTimestamp = timestamp;
+
+    return {
+      lat: smoothedLat,
+      lon: smoothedLon,
+      rawLat,
+      rawLon,
+      speed: speedKmH,
+      heading: smoothedHeading,
+      accuracy,
+      isSnapped,
+      distanceToRoad,
+      roadBearing,
+      signalQuality,
+      isOffRouteConfirmed: this.offRoutePings >= this.OFF_ROUTE_CONFIRM_PINGS,
+      isRejected: false
+    };
+  }
+};
+
+window.RotamGpsOptimizer = RotamGpsOptimizer;
+
 const LiveNavigation = {
   isActive: false,
   isSimulation: false,
@@ -10519,6 +10900,7 @@ const LiveNavigation = {
   wakeLock: null,
   watchId: null,
   marker: null,
+  accuracyCircle: null,
   simIndex: 0,
   simInterval: null,
   lastCoord: null,
@@ -10949,25 +11331,46 @@ const LiveNavigation = {
     }
   },
 
-  checkOffRoute(lat, lon) {
+  checkOffRoute(lat, lon, gpsMeta = null) {
     if (this.isRerouting || this.isSimulation) return;
+
+    // Fast-path: use RotamGpsOptimizer telemetry if provided
+    if (gpsMeta) {
+      if (gpsMeta.isOffRouteConfirmed) {
+        this.triggerAutoReroute(gpsMeta.rawLat, gpsMeta.rawLon);
+      }
+      return;
+    }
+
     const coords = state.routeData?.geometry?.coordinates;
     if (!coords || coords.length < 2) return;
 
-    let minDistM = Infinity;
-    for (let i = 0; i < coords.length; i++) {
-      const d = haversineMeters(lat, lon, coords[i][1], coords[i][0]);
-      if (d < minDistM) minDistM = d;
-      if (minDistM < 30) break;
-    }
-
-    if (minDistM > 90) {
-      this.offRouteCounter = (this.offRouteCounter || 0) + 1;
-      if (this.offRouteCounter >= 2) {
-        this.triggerAutoReroute(lat, lon);
+    if (typeof RotamGpsOptimizer !== 'undefined') {
+      const snap = RotamGpsOptimizer.snapToRoute(lat, lon, coords);
+      if (snap && snap.distanceToRoad > RotamGpsOptimizer.OFF_ROUTE_THRESHOLD_METERS) {
+        this.offRouteCounter = (this.offRouteCounter || 0) + 1;
+        if (this.offRouteCounter >= RotamGpsOptimizer.OFF_ROUTE_CONFIRM_PINGS) {
+          this.triggerAutoReroute(lat, lon);
+        }
+      } else {
+        this.offRouteCounter = 0;
       }
     } else {
-      this.offRouteCounter = 0;
+      let minDistM = Infinity;
+      for (let i = 0; i < coords.length; i++) {
+        const d = haversineMeters(lat, lon, coords[i][1], coords[i][0]);
+        if (d < minDistM) minDistM = d;
+        if (minDistM < 30) break;
+      }
+
+      if (minDistM > 90) {
+        this.offRouteCounter = (this.offRouteCounter || 0) + 1;
+        if (this.offRouteCounter >= 3) {
+          this.triggerAutoReroute(lat, lon);
+        }
+      } else {
+        this.offRouteCounter = 0;
+      }
     }
   },
 
@@ -10994,6 +11397,9 @@ const LiveNavigation = {
     try {
       await calculateRouteMain();
       if (state.routeData) {
+        if (typeof RotamGpsOptimizer !== 'undefined') {
+          RotamGpsOptimizer.reset();
+        }
         this.initRouteSteps();
         this.currentStepIndex = 0;
         let initialDist = 100;
@@ -11469,10 +11875,17 @@ const LiveNavigation = {
     this.steps = [];
     this.currentStepIndex = 0;
 
-    // Remove rider marker
+    // Remove rider marker & accuracy halo circle
     if (this.marker && map) {
       map.removeLayer(this.marker);
       this.marker = null;
+    }
+    if (this.accuracyCircle && map) {
+      map.removeLayer(this.accuracyCircle);
+      this.accuracyCircle = null;
+    }
+    if (typeof RotamGpsOptimizer !== 'undefined') {
+      RotamGpsOptimizer.reset();
     }
 
     // Hide HUD overlay
@@ -11540,38 +11953,63 @@ const LiveNavigation = {
     this.isSimulation = false;
     this.updateModeBadge();
     this._bgLowAccuracyMode = false; // Arka plan düşük doğruluk bayrağını sıfırla
+    if (typeof RotamGpsOptimizer !== 'undefined') {
+      RotamGpsOptimizer.reset();
+    }
 
     const options = {
       enableHighAccuracy: true,
-      maximumAge: 1500, // 1.5s tolerance prevents GPS satellite lock thrashing
-      timeout: 15000
+      maximumAge: 0, // Direct real-time hardware GPS satellite reading (no stale cache)
+      timeout: 12000
     };
 
     let gpsReceived = false;
 
+    const handlePos = (pos, isInitial = false) => {
+      if (!this.isActive) return;
+      gpsReceived = true;
+      if (this.simInterval && !this.forceSimulationExplicit) {
+        clearInterval(this.simInterval);
+        this.simInterval = null;
+        this.isSimulation = false;
+        this.updateModeBadge();
+      }
+
+      // Process via RotamGpsOptimizer (Road Snap, EMA filter, zero-jitter heading)
+      const activeCoords = (this.isFreeRide || !state.routeData) ? null : state.routeData?.geometry?.coordinates;
+      let res = null;
+      if (typeof RotamGpsOptimizer !== 'undefined') {
+        res = RotamGpsOptimizer.processPosition(pos, isInitial, activeCoords);
+      } else {
+        const rawSpeed = (pos.coords.speed !== null && !isNaN(pos.coords.speed))
+          ? Math.max(0, Math.round(pos.coords.speed * 3.6)) : 0;
+        res = {
+          lat: pos.coords.latitude,
+          lon: pos.coords.longitude,
+          rawLat: pos.coords.latitude,
+          rawLon: pos.coords.longitude,
+          speed: rawSpeed,
+          heading: (pos.coords.heading !== null && !isNaN(pos.coords.heading)) ? pos.coords.heading : (this.lastHeading || 0),
+          accuracy: pos.coords.accuracy || 12,
+          isSnapped: false,
+          signalQuality: 'good',
+          isRejected: false
+        };
+      }
+
+      if (res.isRejected) {
+        this.updateGpsSignalBadge(res.accuracy, res.signalQuality, res.isSnapped);
+        return;
+      }
+
+      state.userLocation = { lat: res.lat, lon: res.lon };
+      this.onLocationUpdate(res.lat, res.lon, res.speed, res.heading, isInitial, res);
+      this.updateGpsSignalBadge(res.accuracy, res.signalQuality, res.isSnapped);
+    };
+
     // Instant single-shot position query to lock on and zoom as fast as hardware allows
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        if (!this.isActive) return;
-        gpsReceived = true;
-        if (this.simInterval && !this.forceSimulationExplicit) {
-          clearInterval(this.simInterval);
-          this.simInterval = null;
-          this.isSimulation = false;
-          this.updateModeBadge();
-        }
-        const lat = pos.coords.latitude;
-        const lon = pos.coords.longitude;
-        const speed = (pos.coords.speed !== null && !isNaN(pos.coords.speed))
-          ? Math.max(0, Math.round(pos.coords.speed * 3.6))
-          : 0;
-        let heading = pos.coords.heading;
-        if (heading === null || isNaN(heading)) {
-          heading = this.lastHeading || 0;
-        }
-        state.userLocation = { lat, lon };
-        this.onLocationUpdate(lat, lon, speed, heading, true /* isInitialFix */);
-      },
+      (pos) => handlePos(pos, true),
       (err) => {
         console.warn('Initial getCurrentPosition in LiveNavigation:', err);
       },
@@ -11579,31 +12017,7 @@ const LiveNavigation = {
     );
 
     this.watchId = navigator.geolocation.watchPosition(
-      (pos) => {
-        gpsReceived = true;
-        if (this.simInterval && !this.forceSimulationExplicit) {
-          clearInterval(this.simInterval);
-          this.simInterval = null;
-          this.isSimulation = false;
-          this.updateModeBadge();
-        }
-        const lat = pos.coords.latitude;
-        const lon = pos.coords.longitude;
-        const speed = (pos.coords.speed !== null && !isNaN(pos.coords.speed))
-          ? Math.max(0, Math.round(pos.coords.speed * 3.6))
-          : 0;
-
-        let heading = pos.coords.heading;
-        if (heading === null || isNaN(heading)) {
-          if (this.lastCoord) {
-            heading = calculateBearing(this.lastCoord[0], this.lastCoord[1], lat, lon);
-          } else {
-            heading = this.lastHeading || 0;
-          }
-        }
-        state.userLocation = { lat, lon };
-        this.onLocationUpdate(lat, lon, speed, heading);
-      },
+      (pos) => handlePos(pos, false),
       (err) => {
         console.warn('Geolocation in LiveNavigation:', err);
         const isEn = (window.state && window.state.lang === 'en');
@@ -11620,7 +12034,7 @@ const LiveNavigation = {
         const isEn = (window.state && window.state.lang === 'en');
         showToast(isEn ? 'Waiting for GPS signal... Ensure location is enabled. 📡' : 'GPS sinyali aranıyor... Lütfen konum izninizin açık olduğundan emin olun. 📡', 'info');
       }
-    }, 15000);
+    }, 12000);
   },
 
   stopGPS() {
@@ -11792,15 +12206,26 @@ const LiveNavigation = {
   },
 
   // Native iOS/Android GPS bridge entrypoint
-  onNativeLocationUpdate(lat, lon, speed, heading) {
+  onNativeLocationUpdate(lat, lon, speed, heading, accuracy = 8) {
     if (!this.isActive) return;
     this.isSimulation = false;
     this.updateModeBadge();
-    state.userLocation = { lat, lon };
-    this.onLocationUpdate(lat, lon, speed, heading);
+    const activeCoords = (this.isFreeRide || !state.routeData) ? null : state.routeData?.geometry?.coordinates;
+    let res = null;
+    if (typeof RotamGpsOptimizer !== 'undefined') {
+      res = RotamGpsOptimizer.processPosition({
+        coords: { latitude: lat, longitude: lon, speed: speed ? (speed / 3.6) : 0, heading, accuracy },
+        timestamp: Date.now()
+      }, false, activeCoords);
+    } else {
+      res = { lat, lon, rawLat: lat, rawLon: lon, speed, heading, accuracy, isSnapped: false, signalQuality: 'good', isRejected: false };
+    }
+    state.userLocation = { lat: res.lat, lon: res.lon };
+    this.onLocationUpdate(res.lat, res.lon, res.speed, res.heading, false, res);
+    this.updateGpsSignalBadge(res.accuracy, res.signalQuality, res.isSnapped);
   },
 
-  onLocationUpdate(lat, lon, speed, heading, isInitialFix = false) {
+  onLocationUpdate(lat, lon, speed, heading, isInitialFix = false, gpsMeta = null) {
     this.speedKmH = speed;
     this.lastHeading = heading || 0;
     this.lastCoord = [lat, lon];
@@ -11838,6 +12263,10 @@ const LiveNavigation = {
       } else {
         this.createRiderMarker([lat, lon]);
       }
+
+      // Visual accuracy halo circle around rider
+      const acc = (gpsMeta && gpsMeta.accuracy) || 10;
+      this.updateAccuracyCircle([lat, lon], acc);
 
       const iconElem = document.getElementById('live-rider-icon-elem');
       if (iconElem) {
@@ -11916,7 +12345,7 @@ const LiveNavigation = {
     this.detectUpcomingCurvature(lat, lon);
 
     // Off-route Detection & Auto Reroute (runs in foreground & background)
-    this.checkOffRoute(lat, lon);
+    this.checkOffRoute(lat, lon, gpsMeta);
 
     // Route Progress & Turn-by-turn guidance (runs in foreground & background)
     this.updateRouteProgress(lat, lon);
@@ -12441,9 +12870,78 @@ const LiveNavigation = {
     if (this.isSimulation) {
       if (badgeText) badgeText.textContent = isEn ? 'Demo Ride' : 'Demo Sürüş';
       if (demoBtnText) demoBtnText.textContent = isEn ? 'Live GPS' : 'GPS Modu';
+      const badgeEl = document.getElementById('live-nav-mode-badge');
+      if (badgeEl) {
+        badgeEl.className = 'inline-flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40';
+      }
     } else {
       if (badgeText) badgeText.textContent = isEn ? 'Live GPS' : 'GPS Canlı';
       if (demoBtnText) demoBtnText.textContent = isEn ? 'Demo' : 'Demo';
+    }
+  },
+
+  updateGpsSignalBadge(accuracy = null, signalQuality = 'good', isSnapped = false) {
+    const badgeEl = document.getElementById('live-nav-mode-badge');
+    const textEl = document.getElementById('live-nav-mode-text');
+    if (!badgeEl || !textEl) return;
+    const isEn = (window.state && window.state.lang === 'en');
+
+    if (this.isSimulation) {
+      badgeEl.className = 'inline-flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40';
+      badgeEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span><span id="live-nav-mode-text">${isEn ? 'Demo Ride' : 'Demo Sürüş'}</span>`;
+      return;
+    }
+
+    const accRound = accuracy ? Math.round(accuracy) : null;
+    let label = isEn ? 'GPS Live' : 'GPS Canlı';
+    let snapLabel = isSnapped ? (isEn ? ' • Snapped' : ' • Yola Kilitli') : '';
+
+    if (signalQuality === 'excellent') {
+      badgeEl.className = 'inline-flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/25 text-emerald-300 border border-emerald-400/50 shadow-sm shadow-emerald-500/20';
+      label = isEn ? `GPS ±${accRound}m (High)` : `GPS ±${accRound}m (Yüksek)${snapLabel}`;
+      badgeEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span id="live-nav-mode-text">${label}</span>`;
+    } else if (signalQuality === 'good') {
+      badgeEl.className = 'inline-flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/25 text-cyan-300 border border-cyan-400/50';
+      label = isEn ? `GPS ±${accRound}m` : `GPS ±${accRound}m${snapLabel}`;
+      badgeEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span><span id="live-nav-mode-text">${label}</span>`;
+    } else if (signalQuality === 'moderate') {
+      badgeEl.className = 'inline-flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40';
+      label = isEn ? `GPS ±${accRound}m (Moderate)` : `GPS ±${accRound}m (Orta)${snapLabel}`;
+      badgeEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span id="live-nav-mode-text">${label}</span>`;
+    } else {
+      badgeEl.className = 'inline-flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/40 animate-pulse';
+      label = isEn ? `GPS Weak (±${accRound}m)` : `GPS Zayıf (±${accRound}m)`;
+      badgeEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-red-400"></span><span id="live-nav-mode-text">${label}</span>`;
+    }
+  },
+
+  updateAccuracyCircle(latlng, accuracy) {
+    if (!map) return;
+    const radius = Math.max(4, Math.min(accuracy || 12, 250));
+    let color = '#10b981';
+    let fillColor = '#10b981';
+    if (radius > 45) {
+      color = '#ef4444';
+      fillColor = '#ef4444';
+    } else if (radius > 20) {
+      color = '#06b6d4';
+      fillColor = '#06b6d4';
+    }
+
+    if (this.accuracyCircle) {
+      this.accuracyCircle.setLatLng(latlng);
+      this.accuracyCircle.setRadius(radius);
+      this.accuracyCircle.setStyle({ color: color, fillColor: fillColor });
+    } else {
+      this.accuracyCircle = L.circle(latlng, {
+        radius: radius,
+        color: color,
+        fillColor: fillColor,
+        fillOpacity: 0.10,
+        weight: 1.5,
+        dashArray: '3, 4',
+        interactive: false
+      }).addTo(map);
     }
   },
 

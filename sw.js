@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v71 (Clean Header Accordion Menu)
-const CACHE_NAME = 'rotam-cache-v71';
+// Rotam PWA Service Worker - v72 (Smart GPS Optimizer & Map-Matching Engine)
+const CACHE_NAME = 'rotam-cache-v72';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
