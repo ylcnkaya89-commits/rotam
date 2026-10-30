@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v75 (Clean Anti-Overlap Viewport & Z-Index Architecture)
-const CACHE_NAME = 'rotam-cache-v75';
+// Rotam PWA Service Worker - v76 (Clean Separate Rows for Chips & Map Controls)
+const CACHE_NAME = 'rotam-cache-v76';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

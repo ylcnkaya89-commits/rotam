@@ -2088,13 +2088,45 @@ body.sunlight-mode #set-special-desc {
 }
 
 /* 8. Floating Map Controls & Mobile Layers Popover */
-body.day-mode #floating-map-controls,
-body.sunlight-mode #floating-map-controls,
+body.day-mode #floating-map-controls .glass-panel,
+body.sunlight-mode #floating-map-controls .glass-panel,
 body.day-mode #mobile-layers-popover,
 body.sunlight-mode #mobile-layers-popover {
   background: rgba(255, 255, 255, 0.98) !important;
-  border: 1.5px solid #cbd5e1 !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
+  color: #0f172a !important;
+}
+
+body.day-mode #floating-map-controls .glass-panel button,
+body.sunlight-mode #floating-map-controls .glass-panel button,
+body.day-mode #floating-map-controls #desktop-active-layer-name,
+body.sunlight-mode #floating-map-controls #desktop-active-layer-name {
+  color: #0f172a !important;
+}
+
+body.day-mode #floating-map-controls .h-4.w-px,
+body.sunlight-mode #floating-map-controls .h-4.w-px {
+  background-color: #cbd5e1 !important;
+}
+
+body.day-mode #desktop-layers-accordion,
+body.sunlight-mode #desktop-layers-accordion {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15) !important;
+  color: #0f172a !important;
+}
+
+body.day-mode #desktop-layers-accordion .bg-slate-950\/70,
+body.sunlight-mode #desktop-layers-accordion .bg-slate-950\/70 {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+body.day-mode #desktop-layers-accordion button,
+body.sunlight-mode #desktop-layers-accordion button {
+  color: #0f172a !important;
 }
 
 body.day-mode .tile-btn,

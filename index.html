@@ -864,9 +864,9 @@
       <div id="map" class="w-full h-full dark-map"></div>
 
       <!-- GOOGLE MAPS FLOATING QUICK DISCOVERY CHIPS & CATEGORIES (#gmaps-top-container) -->
-      <div id="gmaps-top-container" class="absolute top-2.5 left-2.5 right-2.5 sm:left-4 sm:right-auto sm:max-w-xl lg:max-w-2xl z-[950] pointer-events-none flex flex-col space-y-2">
+      <div id="gmaps-top-container" class="absolute top-2.5 left-2.5 right-2.5 sm:left-4 sm:right-4 z-[950] pointer-events-none flex flex-col space-y-2">
         <!-- Primary Quick Discovery Chips Row -->
-        <div id="gmaps-category-chips" class="pointer-events-auto flex items-center space-x-1.5 py-1 overflow-x-auto sm:overflow-visible no-scrollbar">
+        <div id="gmaps-category-chips" class="pointer-events-auto flex items-center space-x-1.5 py-1 overflow-x-auto no-scrollbar max-w-full">
           <!-- 1. Efsane Rotalar (14 Küratör Güzergah) -->
           <button onclick="openPresetsModal()" class="gmaps-chip px-3 py-1.5 rounded-full text-xs font-bold text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/40 flex items-center space-x-1.5 shrink-0 active:scale-95 shadow-md" title="14 Küratör Motosiklet & Seyahat Rotası">
             <span>🏍️</span>
@@ -1775,7 +1775,7 @@
       </div>
 
       <!-- HARİTA ÜSTÜ FLOATING KONTROLLER & AKORDİYON MENÜ (MASAÜSTÜ & TABLET) -->
-      <div id="floating-map-controls" class="hidden sm:flex absolute top-4 right-4 z-[900] flex-col items-end">
+      <div id="floating-map-controls" class="hidden sm:flex absolute top-14 right-3 sm:top-14 sm:right-4 z-[900] flex-col items-end">
         <!-- Kompakt Cam Kapsül (Trigger Bar) -->
         <div class="glass-panel p-1 rounded-2xl shadow-2xl flex items-center space-x-1 border border-slate-700/80 bg-slate-900/90 backdrop-blur-xl">
           <!-- Hızlı Konum Butonu (1 Tıkla Konumuma Git) -->
@@ -2044,7 +2044,7 @@
       </div>
 
       <!-- SAĞ ÇEKMECE / PANEL TOGGLE (KEŞİF & ZAMAN ÇİZELGESİ) -->
-      <button id="btn-toggle-right-panel" onclick="toggleRightPanel()" class="hidden absolute top-14 right-3 sm:top-16 sm:right-4 z-[1030] glass-panel p-2.5 rounded-xl border border-slate-800 text-slate-300 hover:text-white hover:border-amber-500/40 shadow-xl items-center space-x-1.5 text-xs transition-all cursor-pointer">
+      <button id="btn-toggle-right-panel" onclick="toggleRightPanel()" class="hidden absolute top-28 right-3 sm:top-28 sm:right-4 z-[1030] glass-panel p-2.5 rounded-xl border border-slate-800 text-slate-300 hover:text-white hover:border-amber-500/40 shadow-xl items-center space-x-1.5 text-xs transition-all cursor-pointer">
         <i data-lucide="compass" class="w-4 h-4 text-amber-400"></i>
         <span data-i18n="nav_stream">Keşif & Akış</span>
         <span id="badge-right-panel-poi-count" class="hidden px-1.5 py-0.5 bg-amber-500/20 text-amber-300 rounded-full text-[10px] font-bold border border-amber-500/30">0</span>
