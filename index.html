@@ -1100,6 +1100,12 @@
               <span data-i18n="gmaps_btn_preview">Rota Çiz</span>
             </button>
 
+            <!-- 3. "BURADAN BAŞLA" BUTONU (KONUM / BAŞLANGIÇ YAP) -->
+            <button id="gmaps-sheet-btn-set-start" onclick="gmapsSetAsStartFromSheet()" class="py-3 px-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-teal-300 border border-teal-500/40 text-xs font-bold flex items-center justify-center space-x-1 active:scale-95 transition-all shadow-md" title="Bu Noktayı Başlangıç / Konumum Olarak Ayarla">
+              <i data-lucide="map-pin" class="w-4 h-4 text-teal-400"></i>
+              <span class="hidden sm:inline">Başla</span>
+            </button>
+
             <!-- 3. "EKLE" BUTONU -->
             <button id="gmaps-sheet-btn-add" onclick="gmapsAddStopFromSheet()" class="py-3 px-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/40 text-xs font-bold flex items-center justify-center space-x-1 active:scale-95 transition-all shadow-md" title="Rotaya Durak Olarak Ekle">
               <i data-lucide="plus" class="w-4 h-4"></i>
@@ -2432,6 +2438,17 @@
 
         <!-- 3. TAB: ARAÇ & DOSYALAR -->
         <div id="tab-pane-hub-tools" class="hidden space-y-2.5">
+          <button onclick="startManualLocationPicker(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-cyan-500/40 text-left flex items-center justify-between transition-all group">
+            <div class="flex items-center space-x-3 min-w-0">
+              <span class="w-10 h-10 rounded-xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center text-lg shrink-0">📍</span>
+              <div class="min-w-0">
+                <span class="font-extrabold text-sm text-white group-hover:text-cyan-300 block truncate">Konumumu Haritadan Seç / Düzelt</span>
+                <span class="text-xs text-slate-400 block truncate">Cihazınızın GPS'i yanlış gösteriyorsa haritaya dokunarak yerinizi belirleyin</span>
+              </div>
+            </div>
+            <i data-lucide="crosshair" class="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition-transform shrink-0"></i>
+          </button>
+
           <button id="hub-btn-save-route" onclick="openSaveRouteModal(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-brand-500/40 text-left flex items-center justify-between transition-all group">
             <div class="flex items-center space-x-3 min-w-0">
               <span class="w-10 h-10 rounded-xl bg-brand-500/15 text-brand-400 flex items-center justify-center text-lg shrink-0">💾</span>

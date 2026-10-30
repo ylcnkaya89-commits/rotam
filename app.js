@@ -380,6 +380,12 @@ function initMap() {
 
   // Map Click Listener to add waypoints & auto-collapse filters on mobile
   map.on('click', async (e) => {
+    if (isManualLocationPicking) {
+      isManualLocationPicking = false;
+      if (map) map.getContainer().style.cursor = '';
+      setUserLocationManually(e.latlng.lat, e.latlng.lng);
+      return;
+    }
     dismissQuickPlacePreview();
     const gmapsDropdown = document.getElementById('gmaps-search-dropdown');
     if (gmapsDropdown) gmapsDropdown.classList.add('hidden');
@@ -473,6 +479,113 @@ function initMap() {
   });
 }
 
+// ==========================================
+// CENTRALIZED ROBUST GPS & LOCATION MANAGER
+// ==========================================
+let isManualLocationPicking = false;
+
+function ensureUserLocation(onSuccess, onError) {
+  if (typeof navigator === 'undefined' || !navigator.geolocation) {
+    if (typeof onError === 'function') onError(new Error('Tarayıcı konum desteklemiyor'));
+    return;
+  }
+
+  // If we already have a fresh verified location (< 15 seconds old and not fallback)
+  if (state.userLocation && state.userLocation.lat && !state.userLocation.isFallback && state.userLocation.timestamp && (Date.now() - state.userLocation.timestamp < 15000)) {
+    if (typeof onSuccess === 'function') onSuccess(state.userLocation);
+    return;
+  }
+
+  const isEn = (window.state && window.state.lang === 'en');
+  const geoOptions = {
+    enableHighAccuracy: true,
+    maximumAge: 0, // Never use stale cache
+    timeout: 10000
+  };
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      const acc = Math.round(pos.coords.accuracy || 10);
+      state.userLocation = {
+        lat,
+        lon,
+        accuracy: acc,
+        isFallback: false,
+        timestamp: Date.now()
+      };
+      if (typeof onSuccess === 'function') onSuccess(state.userLocation);
+    },
+    (err) => {
+      console.warn('[RotamGPS] ensureUserLocation error:', err);
+      if (typeof onError === 'function') onError(err);
+    },
+    geoOptions
+  );
+}
+
+function startManualLocationPicker() {
+  isManualLocationPicking = true;
+  const isEn = (window.state && window.state.lang === 'en');
+  showToast(
+    isEn 
+      ? '📍 Tap on the map to set your exact location'
+      : '📍 Haritada bulunduğunuz noktaya dokunarak konumunuzu belirleyin',
+    'info'
+  );
+  if (map) map.getContainer().style.cursor = 'crosshair';
+}
+
+function cancelManualLocationPicker() {
+  isManualLocationPicking = false;
+  if (map) map.getContainer().style.cursor = '';
+}
+
+function setUserLocationManually(lat, lon) {
+  const isEn = (window.state && window.state.lang === 'en');
+  state.userLocation = {
+    lat,
+    lon,
+    accuracy: 5,
+    isManual: true,
+    isFallback: false,
+    timestamp: Date.now()
+  };
+
+  // Update pulsing location marker on map
+  showUserLocationPulseMarker(lat, lon, 5);
+
+  // If start waypoint is 'Mevcut Konumum' or unset, update it!
+  if (state.waypoints && state.waypoints[0] && (!state.waypoints[0].lat || state.waypoints[0].name.includes('Konum'))) {
+    state.waypoints[0].lat = lat;
+    state.waypoints[0].lon = lon;
+    state.waypoints[0].name = isEn ? '📍 Set Location' : '📍 Belirlenen Konumum';
+    updateWaypointsListUI();
+    updateWaypointMarkers();
+    if (state.waypoints[1]?.lat) {
+      calculateRouteMain();
+    }
+  }
+
+  // If LiveNavigation is active, update rider location
+  if (typeof LiveNavigation !== 'undefined' && LiveNavigation.isActive) {
+    LiveNavigation.lastCoord = [lat, lon];
+    LiveNavigation.onLocationUpdate(lat, lon, 0, LiveNavigation.lastHeading || 0, false, {
+      accuracy: 5,
+      isSnapped: false,
+      signalQuality: 'excellent'
+    });
+  }
+
+  showToast(isEn ? '📍 Location manually set on map' : '📍 Konumunuz haritada başarıyla belirlendi', 'success');
+}
+
+window.ensureUserLocation = ensureUserLocation;
+window.startManualLocationPicker = startManualLocationPicker;
+window.cancelManualLocationPicker = cancelManualLocationPicker;
+window.setUserLocationManually = setUserLocationManually;
+
 // Proactive user location cache warmer (High accuracy satellite query)
 function proactivelyWarmUserLocation() {
   if (typeof navigator === 'undefined' || !navigator.geolocation) return;
@@ -480,13 +593,16 @@ function proactivelyWarmUserLocation() {
     (pos) => {
       state.userLocation = {
         lat: pos.coords.latitude,
-        lon: pos.coords.longitude
+        lon: pos.coords.longitude,
+        accuracy: Math.round(pos.coords.accuracy || 10),
+        isFallback: false,
+        timestamp: Date.now()
       };
     },
     () => {
       // Ignore silently if permission prompt not yet accepted
     },
-    { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+    { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
   );
 }
 
@@ -555,7 +671,7 @@ function flyToCurrentLocation() {
       const lat = pos.coords.latitude;
       const lon = pos.coords.longitude;
       const acc = Math.round(pos.coords.accuracy || 10);
-      state.userLocation = { lat, lon };
+      state.userLocation = { lat, lon, accuracy: acc, isFallback: false, timestamp: Date.now() };
 
       if (map) {
         map.flyTo([lat, lon], 18, { duration: 1.2, easeLinearity: 0.25 });
@@ -580,7 +696,7 @@ function flyToCurrentLocation() {
       } else if (acc <= 45) {
         accMsg = isEn ? ` (±${acc}m Normal)` : ` (±${acc}m Normal Hassasiyet)`;
       } else {
-        accMsg = isEn ? ` (±${acc}m Low Accuracy - Open sky recommended)` : ` (±${acc}m Düşük Hassasiyet - Açık alana çıkın)`;
+        accMsg = isEn ? ` (±${acc}m Wi-Fi/IP - Tap to correct on map)` : ` (±${acc}m Wi-Fi/IP Konumu - Yanlışsa haritada dokunarak düzeltin)`;
       }
 
       showToast((isEn ? '📍 Centered on your current location' : '📍 Bulunduğunuz konuma yaklaşıldı') + accMsg, acc > 45 ? 'warning' : 'success');
@@ -591,7 +707,8 @@ function flyToCurrentLocation() {
       if (err.code === 1) errMsg = isEn ? 'Location permission denied by user' : 'Konum izni reddedildi. Lütfen tarayıcı ayarlarından izin verin.';
       else if (err.code === 2) errMsg = isEn ? 'Position unavailable' : 'GPS uydusu veya konum bulunamadı.';
       else if (err.code === 3) errMsg = isEn ? 'GPS request timed out' : 'GPS yanıt süresi aşıldı. Tekrar deneyin.';
-      showToast((isEn ? 'Could not obtain location: ' : 'Konum alınamadı: ') + errMsg, 'error');
+      showToast((isEn ? 'Could not obtain location: ' : 'Konum alınamadı: ') + errMsg + (isEn ? ' Tap map to set manually.' : ' Haritaya dokunarak konumunuzu belirleyebilirsiniz.'), 'error');
+      startManualLocationPicker();
     },
     geoOptions
   );
@@ -1191,21 +1308,8 @@ function handleMobileNavRideStart() {
         },
         async (err) => {
           console.warn('Geolocation fallback in handleMobileNavRideStart:', err);
-          // If GPS fails or is slow, fallback to starting location so user is never blocked
-          const fallbackLat = state.userLocation?.lat || 41.0082;
-          const fallbackLon = state.userLocation?.lon || 28.9784;
-          state.waypoints[0].lat = fallbackLat;
-          state.waypoints[0].lon = fallbackLon;
-          state.waypoints[0].name = isEn ? 'Start' : 'Başlangıç';
-          try {
-            await calculateRouteMain();
-            if (state.routeData && typeof LiveNavigation !== 'undefined') {
-              LiveNavigation.start(false);
-            }
-          } catch (e2) {
-            showToast(isEn ? 'Route calculation failed.' : 'Rota hesaplanamadı.', 'error');
-            openMobileSidebar('start');
-          }
+          showToast(isEn ? 'GPS unavailable. Tap map to set your location.' : 'GPS konumu alınamadı. Haritaya dokunarak başlangıç noktanızı belirleyin.', 'warning');
+          startManualLocationPicker();
         },
         { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 }
       );
@@ -1985,6 +2089,9 @@ function updateWaypointsListUI() {
         ${isStart ? `
           <button type="button" onclick="useCurrentLocationForStart()" class="p-1 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded transition-colors" title="Mevcut Konumumu Kullan">
             <i data-lucide="crosshair" class="w-3.5 h-3.5"></i>
+          </button>
+          <button type="button" onclick="startManualLocationPicker()" class="p-1 text-teal-400 hover:text-teal-300 hover:bg-teal-500/10 rounded transition-colors" title="Haritadan Konum Seç / Düzelt">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
           </button>
         ` : ''}
         ${isEnd ? `
@@ -2823,7 +2930,23 @@ function showGmapsPlaceSheet(place) {
   } else {
     if (distEl) distEl.textContent = isEn ? 'Locating...' : 'Konum alınıyor...';
     if (timeEl) timeEl.textContent = '~--';
-    proactivelyWarmUserLocation();
+    ensureUserLocation((loc) => {
+      if (activeGmapsSheetTarget === place && distEl && timeEl) {
+        const rawDistM = haversineMeters(loc.lat, loc.lon, place.lat, place.lon);
+        const roadDistKm = Math.max(0.5, (rawDistM * 1.25) / 1000);
+        const vehicleSpeeds = { motorcycle: 70, car: 70, camper: 60, bicycle: 18, walk: 5 };
+        const avgSpeed = vehicleSpeeds[state.currentVehicle] || 70;
+        const timeMinutes = Math.max(1, Math.round((roadDistKm / avgSpeed) * 60));
+        distEl.textContent = roadDistKm < 10 ? `${roadDistKm.toFixed(1)} km` : `${Math.round(roadDistKm)} km`;
+        if (timeMinutes >= 60) {
+          const hrs = Math.floor(timeMinutes / 60);
+          const mins = timeMinutes % 60;
+          timeEl.textContent = isEn ? `~${hrs} hr ${mins} min` : `~${hrs} sa ${mins} dk`;
+        } else {
+          timeEl.textContent = isEn ? `~${timeMinutes} min` : `~${timeMinutes} dk`;
+        }
+      }
+    });
   }
 
   // 5. Details button for rich places
@@ -2880,27 +3003,26 @@ async function gmapsQuickStartFromSheet() {
   const target = activeGmapsSheetTarget;
   const isEn = (window.state && window.state.lang === 'en');
 
-  // Check if current user GPS location is known
-  if (!state.userLocation || !state.userLocation.lat) {
+  // Check if current user GPS location is known and fresh
+  if (!state.userLocation || !state.userLocation.lat || state.userLocation.isFallback) {
     showToast(isEn ? 'Acquiring GPS location... 🛰️' : 'Mevcut GPS konumunuz alınıyor... 🛰️', 'info');
-    if (typeof navigator !== 'undefined' && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          state.userLocation = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+    ensureUserLocation(
+      (loc) => {
+        executeGmapsQuickStart(target);
+      },
+      (err) => {
+        console.warn('[RotamGPS] Quick start location error:', err);
+        // If user already defined a start waypoint, use that!
+        if (state.waypoints && state.waypoints[0] && state.waypoints[0].lat) {
           executeGmapsQuickStart(target);
-        },
-        (err) => {
-          console.warn('GPS location request failed:', err);
-          // Fallback to start waypoint if defined, else Istanbul default
-          const fallbackLat = state.waypoints[0]?.lat || 41.0082;
-          const fallbackLon = state.waypoints[0]?.lon || 28.9784;
-          state.userLocation = { lat: fallbackLat, lon: fallbackLon };
-          executeGmapsQuickStart(target);
-        },
-        { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 }
-      );
-      return;
-    }
+        } else {
+          showToast(isEn ? 'GPS unavailable. Tap map to set your location.' : 'GPS konumu alınamadı. Haritaya dokunarak konumunuzu belirleyin.', 'warning');
+          closeGmapsPlaceSheet();
+          startManualLocationPicker();
+        }
+      }
+    );
+    return;
   }
 
   executeGmapsQuickStart(target);
@@ -2908,9 +3030,16 @@ async function gmapsQuickStartFromSheet() {
 
 function executeGmapsQuickStart(target) {
   const isEn = (window.state && window.state.lang === 'en');
-  const startLat = state.userLocation?.lat || 41.0082;
-  const startLon = state.userLocation?.lon || 28.9784;
-  const startName = isEn ? 'My Location' : 'Mevcut Konumum';
+  const startLat = state.userLocation?.lat || state.waypoints[0]?.lat;
+  const startLon = state.userLocation?.lon || state.waypoints[0]?.lon;
+  const startName = state.userLocation ? (isEn ? 'My Location' : 'Mevcut Konumum') : (state.waypoints[0]?.name || (isEn ? 'Start' : 'Başlangıç'));
+
+  if (!startLat || !startLon) {
+    showToast(isEn ? 'Please set your starting point on map.' : 'Lütfen haritaya dokunarak başlangıç noktanızı belirleyin.', 'warning');
+    closeGmapsPlaceSheet();
+    startManualLocationPicker();
+    return;
+  }
 
   state.waypoints = [
     { id: 'start', type: 'start', name: startName, lat: startLat, lon: startLon, marker: null },
@@ -2941,9 +3070,41 @@ function gmapsPreviewRouteFromSheet() {
   const target = activeGmapsSheetTarget;
   const isEn = (window.state && window.state.lang === 'en');
 
-  const startLat = state.userLocation?.lat || state.waypoints[0]?.lat || 41.0082;
-  const startLon = state.userLocation?.lon || state.waypoints[0]?.lon || 28.9784;
-  const startName = state.userLocation ? (isEn ? 'My Location' : 'Mevcut Konumum') : (state.waypoints[0]?.name || 'İstanbul');
+  // If userLocation is not known, fetch it actively
+  if (!state.userLocation || !state.userLocation.lat || state.userLocation.isFallback) {
+    showToast(isEn ? 'Acquiring GPS location... 🛰️' : 'Mevcut GPS konumunuz alınıyor... 🛰️', 'info');
+    ensureUserLocation(
+      (loc) => {
+        executeGmapsPreviewRoute(target);
+      },
+      (err) => {
+        if (state.waypoints && state.waypoints[0] && state.waypoints[0].lat) {
+          executeGmapsPreviewRoute(target);
+        } else {
+          showToast(isEn ? 'GPS unavailable. Tap map to set your location.' : 'GPS konumu alınamadı. Haritaya dokunarak konumunuzu belirleyin.', 'warning');
+          closeGmapsPlaceSheet();
+          startManualLocationPicker();
+        }
+      }
+    );
+    return;
+  }
+
+  executeGmapsPreviewRoute(target);
+}
+
+function executeGmapsPreviewRoute(target) {
+  const isEn = (window.state && window.state.lang === 'en');
+  const startLat = state.userLocation?.lat || state.waypoints[0]?.lat;
+  const startLon = state.userLocation?.lon || state.waypoints[0]?.lon;
+  const startName = state.userLocation ? (isEn ? 'My Location' : 'Mevcut Konumum') : (state.waypoints[0]?.name || (isEn ? 'Start' : 'Başlangıç'));
+
+  if (!startLat || !startLon) {
+    showToast(isEn ? 'Please set your starting point on map.' : 'Lütfen haritaya dokunarak başlangıç noktanızı belirleyin.', 'warning');
+    closeGmapsPlaceSheet();
+    startManualLocationPicker();
+    return;
+  }
 
   state.waypoints = [
     { id: 'start', type: 'start', name: startName, lat: startLat, lon: startLon, marker: null },
@@ -2957,6 +3118,16 @@ function gmapsPreviewRouteFromSheet() {
   showToast(isEn ? `Calculating route to ${target.name}...` : `${target.name} güzergahı hesaplanıyor...`, 'info');
   calculateRouteMain();
 }
+
+// "BURADAN BAŞLA" Button (Set this place as starting location)
+function gmapsSetAsStartFromSheet() {
+  if (!activeGmapsSheetTarget) return;
+  const target = activeGmapsSheetTarget;
+  setUserLocationManually(target.lat, target.lon);
+  closeGmapsPlaceSheet();
+}
+
+window.gmapsSetAsStartFromSheet = gmapsSetAsStartFromSheet;
 
 // "EKLE" Button (Add as intermediate waypoint)
 function gmapsAddStopFromSheet() {
@@ -10724,6 +10895,8 @@ const RotamGpsOptimizer = {
   distanceToRoad: 0,
   roadBearing: 0,
   signalQuality: 'good', // 'excellent' | 'good' | 'moderate' | 'weak'
+  hasRealGpsFix: false,
+  consecutiveTeleports: 0,
 
   reset() {
     this.lastRawCoord = null;
@@ -10738,6 +10911,8 @@ const RotamGpsOptimizer = {
     this.distanceToRoad = 0;
     this.roadBearing = 0;
     this.signalQuality = 'good';
+    this.hasRealGpsFix = false;
+    this.consecutiveTeleports = 0;
   },
 
   // Perpendicular projection of point P onto line segment AB
@@ -10854,10 +11029,10 @@ const RotamGpsOptimizer = {
     this.signalQuality = signalQuality;
     this.lastAccuracy = accuracy;
 
-    // 2. Outlier Rejection:
-    // If accuracy is poor (> 90m) and we already have a previous reliable fix,
-    // or if the implied speed is impossible (> 220 km/h), reject or heavily dampen the jump!
-    if (!isInitialFix && this.lastProcessedCoord && this.lastTimestamp > 0) {
+    // 2. Outlier Rejection & Fresh GPS Recovery:
+    // Only apply outlier rejection if we already have a prior verified hardware fix!
+    // If accuracy is good (<= 45m) or after 2 consecutive pings, it's a real GPS relocation: accept immediately!
+    if (this.hasRealGpsFix && !isInitialFix && this.lastProcessedCoord && this.lastTimestamp > 0) {
       const timeDeltaSec = Math.max(0.2, (timestamp - this.lastTimestamp) / 1000);
       const jumpMeters = haversineMeters(this.lastProcessedCoord[0], this.lastProcessedCoord[1], rawLat, rawLon);
       const impliedSpeedKmH = (jumpMeters / timeDeltaSec) * 3.6;
@@ -10880,21 +11055,36 @@ const RotamGpsOptimizer = {
       }
 
       if (impliedSpeedKmH > this.MAX_PLAUSIBLE_SPEED_KMH && jumpMeters > 100) {
-        console.warn(`[RotamGPS] Teleport rejected: speed ${Math.round(impliedSpeedKmH)} km/h, jump ${Math.round(jumpMeters)}m`);
-        return {
-          lat: this.lastProcessedCoord[0],
-          lon: this.lastProcessedCoord[1],
-          rawLat,
-          rawLon,
-          speed: this.lastSpeedKmH,
-          heading: this.lastHeading,
-          accuracy,
-          isSnapped: this.isSnapped,
-          distanceToRoad: this.distanceToRoad,
-          signalQuality,
-          isRejected: true
-        };
+        this.consecutiveTeleports++;
+        // If accuracy is good (<=45m) or after 2 consecutive pings, it's NOT a spike: accept new GPS fix!
+        if (accuracy <= 45 || this.consecutiveTeleports >= 2) {
+          console.log(`[RotamGPS] New real GPS fix accepted at [${rawLat.toFixed(5)}, ${rawLon.toFixed(5)}] (accuracy ${Math.round(accuracy)}m)`);
+          this.consecutiveTeleports = 0;
+          this.lastProcessedCoord = [rawLat, rawLon];
+        } else {
+          console.warn(`[RotamGPS] Teleport rejected (ping ${this.consecutiveTeleports}): speed ${Math.round(impliedSpeedKmH)} km/h, jump ${Math.round(jumpMeters)}m`);
+          return {
+            lat: this.lastProcessedCoord[0],
+            lon: this.lastProcessedCoord[1],
+            rawLat,
+            rawLon,
+            speed: this.lastSpeedKmH,
+            heading: this.lastHeading,
+            accuracy,
+            isSnapped: this.isSnapped,
+            distanceToRoad: this.distanceToRoad,
+            signalQuality,
+            isRejected: true
+          };
+        }
+      } else {
+        this.consecutiveTeleports = 0;
       }
+    } else {
+      // First verified hardware GPS fix
+      this.hasRealGpsFix = true;
+      this.consecutiveTeleports = 0;
+      this.lastProcessedCoord = [rawLat, rawLon];
     }
 
     // 3. Raw Speed
@@ -10949,8 +11139,12 @@ const RotamGpsOptimizer = {
     if (!isInitialFix && this.lastProcessedCoord) {
       const distFromLast = haversineMeters(this.lastProcessedCoord[0], this.lastProcessedCoord[1], targetLat, targetLon);
 
-      // Stationary deadband: if speed is 0 and movement is under 1.2m, completely lock position
-      if (speedKmH < 2 && distFromLast < 1.2) {
+      if (distFromLast > 45) {
+        // Large movement or initial relocation: jump directly without smoothing lag!
+        smoothedLat = targetLat;
+        smoothedLon = targetLon;
+      } else if (this.hasRealGpsFix && speedKmH < 2 && distFromLast < 1.2) {
+        // Stationary deadband: if speed is 0 and movement is under 1.2m, lock position
         smoothedLat = this.lastProcessedCoord[0];
         smoothedLon = this.lastProcessedCoord[1];
       } else {
