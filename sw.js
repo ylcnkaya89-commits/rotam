@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v78 (Location Verification & Accuracy Suite with LocalStorage Persistence)
-const CACHE_NAME = 'rotam-cache-v78';
+// Rotam PWA Service Worker - v79 (Route Corridor Real-Time Restaurants & Gastronomy Engine)
+const CACHE_NAME = 'rotam-cache-v79';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

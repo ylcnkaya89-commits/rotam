@@ -5523,10 +5523,12 @@ async function fetchRouteCorridorLiveStations(route) {
 
   if (sampledCoords.length === 0) return;
 
-  // Build Overpass QL query around sampled points (radius 4000 meters)
+  // Build Overpass QL query around sampled points (radius 2500-4000 meters for fuel, ev, restaurants & cafes)
   const aroundQueries = sampledCoords.map(c => `
     node["amenity"="fuel"](around:4000,${c.lat.toFixed(4)},${c.lon.toFixed(4)});
     node["amenity"="charging_station"](around:4000,${c.lat.toFixed(4)},${c.lon.toFixed(4)});
+    node["amenity"="restaurant"](around:2500,${c.lat.toFixed(4)},${c.lon.toFixed(4)});
+    node["amenity"="cafe"](around:2500,${c.lat.toFixed(4)},${c.lon.toFixed(4)});
   `).join('\n');
 
   const query = `
@@ -5534,7 +5536,7 @@ async function fetchRouteCorridorLiveStations(route) {
     (
       ${aroundQueries}
     );
-    out center 40;
+    out center 60;
   `;
 
   try {
@@ -5561,27 +5563,71 @@ async function fetchRouteCorridorLiveStations(route) {
 
       const tags = el.tags || {};
       const isCharging = tags.amenity === 'charging_station';
-      const brand = tags.brand || tags.operator || tags.name || (isCharging ? 'Elektrikli Şarj İstasyonu' : 'Akaryakıt İstasyonu');
-      const cleanName = tags.name || `${brand} İstasyonu`;
+      const isFuel = tags.amenity === 'fuel';
+      const isRestaurant = tags.amenity === 'restaurant' || tags.amenity === 'fast_food';
+      const isCafe = tags.amenity === 'cafe';
 
-      // Check if station already exists within 250m in corridorPois
+      if (!isCharging && !isFuel && !isRestaurant && !isCafe) return;
+
+      let category = 'fuel';
+      let cleanName = tags.name || '';
+
+      if (isCharging) {
+        category = 'ev_charge';
+        const brand = tags.brand || tags.operator || tags.name || 'Elektrikli Şarj İstasyonu';
+        cleanName = tags.name || `${brand} Şarj Noktası`;
+      } else if (isFuel) {
+        category = 'fuel';
+        const brand = tags.brand || tags.operator || tags.name || 'Akaryakıt İstasyonu';
+        cleanName = tags.name || `${brand} İstasyonu`;
+      } else if (isRestaurant) {
+        category = 'gastronomy';
+        if (!cleanName) return; // İsimsiz mekanları ekleme
+      } else if (isCafe) {
+        category = 'cafe';
+        if (!cleanName) return; // İsimsiz mekanları ekleme
+      }
+
+      // Check if POI already exists within 250m in corridorPois
       const exists = state.corridorPois.some(cp => haversineMeters(elLat, elLon, cp.lat, cp.lon) < 250);
       if (exists) return;
 
       const distM = minDistanceToRoute(elLat, elLon, coords);
-      if (distM > 10000) return; // ignore stations farther than 10km from route
+      if (distM > 8000) return; // 8km'den uzak noktaları koridora alma
 
       const distKm = parseFloat((distM / 1000).toFixed(1));
-      const category = isCharging ? 'ev_charge' : 'fuel';
 
       const details = [];
+      if (tags.cuisine) {
+        const trCuisine = tags.cuisine
+          .replace(/turkish/gi, 'Türk Mutfağı')
+          .replace(/kebab/gi, 'Kebap')
+          .replace(/fish|seafood/gi, 'Balık & Deniz')
+          .replace(/pizza/gi, 'Pizza')
+          .replace(/burger/gi, 'Burger')
+          .replace(/breakfast/gi, 'Kahvaltı')
+          .replace(/;/g, ', ');
+        details.push(trCuisine);
+      }
+      if (tags.opening_hours === '24/7') details.push('24 Saat Açık');
+      if (tags.outdoor_seating === 'yes') details.push('Açık Hava');
       if (tags['fuel:lpg'] === 'yes') details.push('LPG / Otogaz');
       if (tags['fuel:diesel'] === 'yes') details.push('Dizel');
-      if (tags.opening_hours === '24/7') details.push('24 Saat Açık');
       if (tags.shop) details.push('Market');
       if (isCharging && tags.socket) details.push(`Soket: ${tags.socket}`);
 
-      const desc = details.length > 0 ? details.join(' • ') : (isCharging ? 'Elektrikli araç hızlı şarj noktası.' : 'Akaryakıt ve servis istasyonu.');
+      let desc = '';
+      if (details.length > 0) {
+        desc = details.join(' • ');
+      } else if (isRestaurant) {
+        desc = 'Yol üstü restoran ve gastronomi durağı.';
+      } else if (isCafe) {
+        desc = 'Mola ve dinlenme tesisi.';
+      } else if (isCharging) {
+        desc = 'Elektrikli araç hızlı şarj noktası.';
+      } else {
+        desc = 'Akaryakıt ve servis istasyonu.';
+      }
 
       const newPoi = {
         id: 500000 + el.id,
