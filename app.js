@@ -9645,6 +9645,15 @@ document.addEventListener('DOMContentLoaded', () => {
   renderJourneyTimeline();
   initIcons();
 
+  // Auto-dismiss map hint after 8 seconds to prevent visual clutter
+  setTimeout(() => {
+    const hint = document.getElementById('map-hint');
+    if (hint) {
+      hint.style.opacity = '0';
+      setTimeout(() => hint.remove(), 400);
+    }
+  }, 8000);
+
   // Initialize real-time telemetry (#34)
   if (typeof RotamTelemetry !== 'undefined') {
     RotamTelemetry.init();

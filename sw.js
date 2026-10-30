@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v76 (Clean Separate Rows for Chips & Map Controls)
-const CACHE_NAME = 'rotam-cache-v76';
+// Rotam PWA Service Worker - v77 (Relocate map-hint from top chips row to bottom center)
+const CACHE_NAME = 'rotam-cache-v77';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

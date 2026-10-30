@@ -2034,11 +2034,11 @@
         <span id="route-loading-stage-text" class="font-medium">Rota hesaplanıyor...</span>
       </div>
 
-      <!-- Harita İpucu Bildirimi (Zoom butonlarının yanına konumlandırıldı) -->
-      <div id="map-hint" class="hidden sm:flex absolute top-3 left-14 sm:top-4 sm:left-14 z-20 glass-panel px-3 py-1.5 rounded-xl text-xs text-slate-300 items-center space-x-2 shadow-lg border border-slate-800/80">
-        <i data-lucide="mouse-pointer-click" class="w-4 h-4 text-brand-400 shrink-0"></i>
-        <span class="text-[11px]">Haritaya tıklayarak durak ekleyebilirsiniz.</span>
-        <button onclick="document.getElementById('map-hint').remove()" class="text-slate-500 hover:text-slate-300 ml-1">
+      <!-- Harita İpucu Bildirimi (Alt orta bölgeye konumlandırıldı, kategori butonlarından tamamen uzaklaştırıldı) -->
+      <div id="map-hint" class="hidden sm:flex absolute bottom-6 left-1/2 -translate-x-1/2 z-20 glass-panel px-3.5 py-1.5 rounded-full text-xs text-slate-300 items-center space-x-2 shadow-xl border border-slate-700/80 bg-slate-900/90 backdrop-blur-md pointer-events-auto transition-opacity duration-300">
+        <i data-lucide="mouse-pointer-click" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
+        <span class="text-[11px] font-medium">Haritaya tıklayarak durak ekleyebilirsiniz.</span>
+        <button onclick="document.getElementById('map-hint')?.remove()" class="text-slate-400 hover:text-white ml-1 p-0.5 rounded-md hover:bg-slate-800 transition-colors" title="Kapat">
           <i data-lucide="x" class="w-3.5 h-3.5"></i>
         </button>
       </div>
