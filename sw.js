@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v70 (Convoy, Smart Fuel, Elevation Profile & Traffic)
-const CACHE_NAME = 'rotam-cache-v70';
+// Rotam PWA Service Worker - v71 (Clean Header Accordion Menu)
+const CACHE_NAME = 'rotam-cache-v71';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

@@ -816,6 +816,52 @@ function toggleSidebar() {
   }
 }
 
+// ==========================================
+// HEADER AKORDİYON MENÜ (COLLAPSIBLE HEADER MEGA-MENU)
+// ==========================================
+function toggleHeaderAccordion() {
+  const panel = document.getElementById('header-accordion-panel');
+  const chevron = document.getElementById('icon-header-accordion-chevron');
+  const btn = document.getElementById('btn-toggle-header-accordion');
+  if (!panel) return;
+
+  const isHidden = panel.classList.contains('hidden');
+  if (isHidden) {
+    panel.classList.remove('hidden');
+    chevron?.classList.add('rotate-180');
+    btn?.classList.add('bg-slate-800', 'border-amber-500/40', 'text-amber-300');
+    if (typeof initIcons === 'function') initIcons();
+  } else {
+    panel.classList.add('hidden');
+    chevron?.classList.remove('rotate-180');
+    btn?.classList.remove('bg-slate-800', 'border-amber-500/40', 'text-amber-300');
+  }
+}
+
+function closeHeaderAccordion() {
+  const panel = document.getElementById('header-accordion-panel');
+  const chevron = document.getElementById('icon-header-accordion-chevron');
+  const btn = document.getElementById('btn-toggle-header-accordion');
+  if (panel && !panel.classList.contains('hidden')) {
+    panel.classList.add('hidden');
+    chevron?.classList.remove('rotate-180');
+    btn?.classList.remove('bg-slate-800', 'border-amber-500/40', 'text-amber-300');
+  }
+}
+
+window.toggleHeaderAccordion = toggleHeaderAccordion;
+window.closeHeaderAccordion = closeHeaderAccordion;
+
+// Tıklama dışı otomatik kapatma (Click outside to close)
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('header-accordion-panel');
+  const btn = document.getElementById('btn-toggle-header-accordion');
+  if (!panel || panel.classList.contains('hidden')) return;
+  if (!panel.contains(e.target) && !btn?.contains(e.target)) {
+    closeHeaderAccordion();
+  }
+});
+
 function toggleMobileLayersPopover() {
   const popover = document.getElementById('mobile-layers-popover');
   if (popover) {
