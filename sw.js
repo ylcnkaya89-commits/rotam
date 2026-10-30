@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v79 (Route Corridor Real-Time Restaurants & Gastronomy Engine)
-const CACHE_NAME = 'rotam-cache-v79';
+// Rotam PWA Service Worker - v80 (Expanded Iconic Highway & Regional Gastronomy Database)
+const CACHE_NAME = 'rotam-cache-v80';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
