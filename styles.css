@@ -2362,3 +2362,47 @@ body.day-mode #modal-driver-hub span.text-white,
 body.sunlight-mode #modal-driver-hub span.text-white {
   color: #0f172a !important;
 }
+
+/* ==========================================================================
+   ROTAM ANTI-OVERLAP ARCHITECTURE & CLEAN VIEWPORT COMPOSITION
+   ========================================================================== */
+#app-header {
+  z-index: 1200 !important;
+}
+
+#sidebar {
+  z-index: 1300 !important;
+}
+
+#sidebar-backdrop {
+  z-index: 1290 !important;
+}
+
+/* Ensure mobile floating sheets always float above mobile bottom nav */
+@media (max-width: 767px) {
+  #rotam-staging-sheet,
+  #gmaps-place-sheet,
+  #gmaps-route-selector-container,
+  #mobile-bottom-bar {
+    bottom: calc(3.5rem + 0.75rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* Prevent category chips from colliding into right-hand controls */
+@media (min-width: 640px) and (max-width: 1024px) {
+  #gmaps-top-container {
+    max-width: calc(100vw - 340px) !important;
+  }
+}
+
+/* Search Box Compact Mode on Small Screens */
+@media (max-width: 480px) {
+  .gmaps-search-box {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+    gap: 0.35rem !important;
+  }
+  #gmaps-search-input {
+    font-size: 0.75rem !important;
+  }
+}

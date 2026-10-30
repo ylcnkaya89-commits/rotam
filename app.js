@@ -4394,21 +4394,11 @@ async function calculateRouteMain() {
       navStreamBtn.classList.add('flex');
     }
 
-    // Mobile mini cockpit
+    // Hide legacy mini cockpit to prevent double-card bottom collision
     const bottomBar = document.getElementById('mobile-bottom-bar');
-    if (bottomBar) bottomBar.classList.remove('hidden');
+    if (bottomBar) bottomBar.classList.add('hidden');
     const mini = document.getElementById('mobile-mini-cockpit');
-    const plannerBtn = document.getElementById('btn-mobile-open-planner');
-    if (mini) {
-      mini.classList.remove('hidden');
-      if (plannerBtn) plannerBtn.classList.add('hidden');
-      document.getElementById('mobile-mini-dist').textContent = (activeRoute.distance / 1000).toFixed(1) + ' km';
-      const m = Math.floor(activeRoute.duration / 60);
-      const isEn = (window.state && window.state.lang === 'en');
-      const h = Math.floor(m / 60);
-      const minRem = m % 60;
-      document.getElementById('mobile-mini-dur').textContent = isEn ? `${h > 0 ? h + ' h ' : ''}${minRem} m` : `${h > 0 ? h + ' sa ' : ''}${minRem} dk`;
-    }
+    if (mini) mini.classList.add('hidden');
 
     // ROTAM Universal Route Staging Sheet (Desktop & Mobile)
     showRouteStagingSheet(activeRoute);
@@ -4913,6 +4903,14 @@ function showRouteStagingSheet(routeData) {
   if (!sheet) return;
   const activeRoute = routeData || state.routeData;
   if (!activeRoute) return;
+
+  // Dismiss colliding sheets & bars so only ONE clean bottom card is presented
+  if (typeof closeGmapsPlaceSheet === 'function') closeGmapsPlaceSheet();
+  if (typeof dismissGmapsRouteSelector === 'function') dismissGmapsRouteSelector();
+  const bottomBar = document.getElementById('mobile-bottom-bar');
+  if (bottomBar) bottomBar.classList.add('hidden');
+  const mini = document.getElementById('mobile-mini-cockpit');
+  if (mini) mini.classList.add('hidden');
 
   const isEn = (window.state && window.state.lang === 'en');
 
@@ -12225,8 +12223,6 @@ const LiveNavigation = {
     document.getElementById('live-nav-recenter-pill-box')?.classList.add('hidden');
 
     // Restore floating controls and cards
-    const bottomBar = document.getElementById('mobile-bottom-bar');
-    if (bottomBar) bottomBar.classList.remove('hidden');
     const bottomNav = document.getElementById('mobile-bottom-nav');
     if (bottomNav) bottomNav.classList.remove('hidden');
 
