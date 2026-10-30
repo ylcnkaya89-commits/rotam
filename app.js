@@ -4697,6 +4697,16 @@ function displayRouteStats(route) {
   } else {
     document.getElementById('camper-safety-report')?.classList.add('hidden');
   }
+
+  // Trigger Smart Fuel Planning (#SmartFuelPlanner)
+  if (typeof RotamFuelPlanner !== 'undefined') {
+    RotamFuelPlanner.updateAnalysis(Number(distKm) || 0);
+  }
+
+  // Trigger Elevation & Slope Analysis (#ElevationProfile)
+  if (typeof RotamElevationProfile !== 'undefined' && route.geometry?.coordinates) {
+    RotamElevationProfile.fetchAndRender(route.geometry.coordinates);
+  }
 }
 
 // Curviness Score Algorithm
@@ -9240,6 +9250,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typeof RotamIntercom !== 'undefined') {
     RotamIntercom.init();
   }
+  if (typeof RotamConvoy !== 'undefined') {
+    RotamConvoy.init();
+  }
 
   // Restore personalized preferences (#27)
   try {
@@ -13348,6 +13361,26 @@ const RotamCommunity = {
 
       banner.classList.remove('hidden');
 
+      // Sesli Kask Tehlike & Radar Anonsu (90 sn soğuma payı)
+      const now = Date.now();
+      this.spokenHazardTimestamps = this.spokenHazardTimestamps || {};
+      if (!this.spokenHazardTimestamps[closestHazard.id] || (now - this.spokenHazardTimestamps[closestHazard.id] > 90000)) {
+        this.spokenHazardTimestamps[closestHazard.id] = now;
+        let voiceText = `Dikkat! ${Math.round(closestDist)} metre ileride ${closestHazard.title}!`;
+        if (closestHazard.type === 'oil') {
+          voiceText = `Dikkat! ${Math.round(closestDist)} metre ileride kaygan asfalt ve mıcır tehlikesi, lütfen yavaşlayın!`;
+        } else if (closestHazard.type === 'radar') {
+          voiceText = `Dikkat! ${Math.round(closestDist)} metre ileride hız kontrol radarı ve polis denetimi!`;
+        } else if (closestHazard.type === 'crash') {
+          voiceText = `Dikkat! ${Math.round(closestDist)} metre ileride trafik kazası, yavaşlayın!`;
+        } else if (closestHazard.type === 'work') {
+          voiceText = `Dikkat! ${Math.round(closestDist)} metre ileride yol çalışması ve şerit daralması!`;
+        }
+        if (typeof RotamSpeech !== 'undefined' && RotamSpeech.speak) {
+          RotamSpeech.speak(voiceText, 'warning');
+        }
+      }
+
       try {
         if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
       } catch (e) {}
@@ -13455,6 +13488,793 @@ document.addEventListener('visibilitychange', () => {
     }
   }
 });
+
+// ==========================================
+// ROTAM CONVOY & GROUP RIDE ENGINE (CANLI KONVOY TAKİP SİSTEMİ)
+// ==========================================
+const RotamConvoy = {
+  activeRoomCode: null,
+  activeRoomName: '',
+  currentUser: {
+    id: 'rider_' + Math.random().toString(36).substring(2, 9),
+    name: '',
+    bike: '',
+    lat: null,
+    lon: null,
+    speed: 0,
+    heading: 0,
+    lastUpdate: Date.now()
+  },
+  riders: new Map(),
+  markers: new Map(),
+  unsubscribeListener: null,
+  broadcastTimer: null,
+  voiceAlertCooldown: 0,
+
+  init() {
+    try {
+      const savedCode = localStorage.getItem('rotam_convoy_code');
+      const savedName = localStorage.getItem('rotam_convoy_rider_name') || '';
+      const savedBike = localStorage.getItem('rotam_convoy_bike_model') || '';
+      if (savedName) this.currentUser.name = savedName;
+      if (savedBike) this.currentUser.bike = savedBike;
+      if (savedCode) {
+        this.joinGroup(savedCode, savedName, savedBike, true);
+      }
+    } catch(e) {}
+  },
+
+  openModal() {
+    const modal = document.getElementById('modal-convoy');
+    if (!modal) return;
+    this.updateModalUI();
+    modal.classList.remove('hidden');
+    if (typeof initIcons === 'function') initIcons();
+  },
+
+  closeModal() {
+    const modal = document.getElementById('modal-convoy');
+    if (modal) modal.classList.add('hidden');
+  },
+
+  switchTab(tab) {
+    const btnCreate = document.getElementById('convoy-tab-create');
+    const btnJoin = document.getElementById('convoy-tab-join');
+    const formCreate = document.getElementById('convoy-form-create');
+    const formJoin = document.getElementById('convoy-form-join');
+    if (tab === 'create') {
+      btnCreate?.classList.add('bg-cyan-600', 'text-white', 'shadow-sm');
+      btnCreate?.classList.remove('text-slate-400');
+      btnJoin?.classList.remove('bg-cyan-600', 'text-white', 'shadow-sm');
+      btnJoin?.classList.add('text-slate-400');
+      formCreate?.classList.remove('hidden');
+      formJoin?.classList.add('hidden');
+    } else {
+      btnJoin?.classList.add('bg-cyan-600', 'text-white', 'shadow-sm');
+      btnJoin?.classList.remove('text-slate-400');
+      btnCreate?.classList.remove('bg-cyan-600', 'text-white', 'shadow-sm');
+      btnCreate?.classList.add('text-slate-400');
+      formJoin?.classList.remove('hidden');
+      formCreate?.classList.add('hidden');
+    }
+  },
+
+  updateModalUI() {
+    const setupView = document.getElementById('convoy-setup-view');
+    const activeView = document.getElementById('convoy-active-view');
+    const badge = document.getElementById('badge-convoy-count');
+    const liveBadge = document.getElementById('live-nav-convoy-badge');
+
+    if (this.activeRoomCode) {
+      setupView?.classList.add('hidden');
+      activeView?.classList.remove('hidden');
+      const titleEl = document.getElementById('convoy-active-title');
+      const codeEl = document.getElementById('convoy-active-code');
+      const memberCountEl = document.getElementById('convoy-member-count');
+      if (titleEl) titleEl.textContent = this.activeRoomName || 'Konvoy';
+      if (codeEl) codeEl.textContent = this.activeRoomCode;
+      const count = (this.riders.size || 0) + 1;
+      if (memberCountEl) memberCountEl.textContent = count.toString();
+      if (badge) {
+        badge.textContent = count.toString();
+        badge.classList.remove('hidden');
+      }
+      if (liveBadge) {
+        liveBadge.textContent = `${count} Sürücü`;
+        liveBadge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30';
+      }
+      this.renderRiderListUI();
+    } else {
+      setupView?.classList.remove('hidden');
+      activeView?.classList.add('hidden');
+      if (badge) badge.classList.add('hidden');
+      if (liveBadge) {
+        liveBadge.textContent = 'Tek Sürüş';
+        liveBadge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-400';
+      }
+    }
+  },
+
+  renderRiderListUI() {
+    const listEl = document.getElementById('convoy-riders-list');
+    if (!listEl) return;
+
+    const myLat = this.currentUser.lat || state.userLocation?.lat;
+    const myLon = this.currentUser.lon || state.userLocation?.lon;
+
+    const allRiders = Array.from(this.riders.values());
+    if (!allRiders.find(r => r.id === this.currentUser.id)) {
+      allRiders.unshift(this.currentUser);
+    }
+
+    listEl.innerHTML = allRiders.map(r => {
+      const isMe = r.id === this.currentUser.id;
+      let distStr = '0 m';
+      let distMeters = 0;
+      if (!isMe && myLat && myLon && r.lat && r.lon) {
+        distMeters = haversineMeters(myLat, myLon, r.lat, r.lon);
+        distStr = distMeters > 1000 ? (distMeters / 1000).toFixed(1) + ' km' : Math.round(distMeters) + ' m';
+      }
+      const speedStr = `${Math.round(r.speed || 0)} km/s`;
+      const isStale = (Date.now() - (r.lastUpdate || 0)) > 45000;
+      const statusColor = isMe ? 'text-cyan-400' : (isStale ? 'text-slate-500' : (distMeters > 2000 ? 'text-amber-400' : 'text-emerald-400'));
+
+      return `
+        <div class="p-2.5 rounded-xl bg-slate-950 border ${isMe ? 'border-cyan-500/40' : 'border-slate-800'} flex items-center justify-between">
+          <div class="flex items-center space-x-2.5 min-w-0">
+            <div class="w-8 h-8 rounded-full bg-slate-900 border border-cyan-400/50 flex items-center justify-center text-sm">
+              ${r.bike && r.bike.toLowerCase().includes('karavan') ? '🚐' : '🏍️'}
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center space-x-1.5">
+                <span class="text-xs font-bold text-white truncate">${escapeHtml(r.name || 'Sürücü')}</span>
+                ${isMe ? '<span class="text-[9px] px-1 bg-cyan-500/20 text-cyan-300 font-bold rounded">SEN</span>' : ''}
+              </div>
+              <p class="text-[10px] text-slate-400 truncate">${escapeHtml(r.bike || 'Motosiklet')}</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-bold font-mono ${statusColor}">${isMe ? speedStr : distStr}</span>
+            <p class="text-[9px] text-slate-500">${isMe ? 'Senin Hızın' : speedStr}</p>
+          </div>
+        </div>
+      `;
+    }).join('');
+  },
+
+  generateRoomCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 5; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  },
+
+  createGroup() {
+    const groupName = document.getElementById('convoy-input-group-name')?.value.trim() || 'Rotam Ekibi';
+    const riderName = document.getElementById('convoy-input-rider-name-create')?.value.trim() || 'Lider';
+    const bikeModel = document.getElementById('convoy-input-bike-model-create')?.value.trim() || 'Motosiklet';
+
+    const code = this.generateRoomCode();
+    this.currentUser.name = riderName;
+    this.currentUser.bike = bikeModel;
+    try {
+      localStorage.setItem('rotam_convoy_rider_name', riderName);
+      localStorage.setItem('rotam_convoy_bike_model', bikeModel);
+    } catch(e) {}
+
+    this.startSession(code, groupName);
+    showToast(`🎉 Konvoy kuruldu! Kod: ${code}`, 'success');
+  },
+
+  joinGroup(providedCode = null, providedName = null, providedBike = null, isAuto = false) {
+    const code = (providedCode || document.getElementById('convoy-input-join-code')?.value || '').trim().toUpperCase();
+    const riderName = (providedName || document.getElementById('convoy-input-rider-name-join')?.value || '').trim() || this.currentUser.name || 'Sürücü';
+    const bikeModel = (providedBike || document.getElementById('convoy-input-bike-model-join')?.value || '').trim() || this.currentUser.bike || 'Motosiklet';
+
+    if (!code || code.length < 3) {
+      if (!isAuto) showToast('Lütfen geçerli bir grup kodu girin.', 'warning');
+      return;
+    }
+
+    this.currentUser.name = riderName;
+    this.currentUser.bike = bikeModel;
+    try {
+      localStorage.setItem('rotam_convoy_rider_name', riderName);
+      localStorage.setItem('rotam_convoy_bike_model', bikeModel);
+    } catch(e) {}
+
+    this.startSession(code, `Konvoy ${code}`);
+    if (!isAuto) showToast(`🔗 ${code} konvoyuna katılındı!`, 'success');
+  },
+
+  startSession(code, name) {
+    this.activeRoomCode = code;
+    this.activeRoomName = name;
+    try {
+      localStorage.setItem('rotam_convoy_code', code);
+    } catch(e) {}
+
+    this.updateModalUI();
+    this.listenToRoom(code);
+    this.startBroadcasting();
+  },
+
+  listenToRoom(code) {
+    if (this.unsubscribeListener) {
+      try { this.unsubscribeListener(); } catch(e){}
+      this.unsubscribeListener = null;
+    }
+
+    // 1. Try Firebase Firestore
+    if (typeof firebase !== 'undefined' && firebase.apps?.length && firebase.firestore) {
+      try {
+        const db = firebase.firestore();
+        this.unsubscribeListener = db.collection('convoys').doc(code).collection('riders')
+          .onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+              const data = change.doc.data();
+              if (!data || data.id === this.currentUser.id) return;
+
+              if (change.type === 'removed') {
+                this.riders.delete(data.id);
+                this.removeRiderMarker(data.id);
+              } else {
+                this.riders.set(data.id, data);
+                this.updateRiderMarker(data);
+              }
+            });
+            this.updateModalUI();
+            this.checkConvoyDistanceAlerts();
+          }, (err) => {
+            console.warn('Firestore convoy listener notice:', err);
+          });
+        return;
+      } catch (err) {
+        console.warn('Firestore setup error:', err);
+      }
+    }
+
+    // 2. BroadcastChannel fallback (same network/browser tabs)
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        const bc = new BroadcastChannel(`rotam_convoy_${code}`);
+        bc.onmessage = (ev) => {
+          const data = ev.data;
+          if (!data || data.id === this.currentUser.id) return;
+          this.riders.set(data.id, data);
+          this.updateRiderMarker(data);
+          this.updateModalUI();
+          this.checkConvoyDistanceAlerts();
+        };
+        this.unsubscribeListener = () => bc.close();
+      } catch(e) {}
+    }
+  },
+
+  startBroadcasting() {
+    if (this.broadcastTimer) clearInterval(this.broadcastTimer);
+
+    const sendPing = () => {
+      if (!this.activeRoomCode) return;
+      const pos = state.userLocation || (this.currentUser.lat ? { lat: this.currentUser.lat, lon: this.currentUser.lon } : null);
+      if (pos) {
+        this.currentUser.lat = pos.lat;
+        this.currentUser.lon = pos.lon;
+      }
+      this.currentUser.speed = (typeof LiveNavigation !== 'undefined' && LiveNavigation.currentSpeed) ? LiveNavigation.currentSpeed : (state.currentSpeed || 0);
+      this.currentUser.lastUpdate = Date.now();
+
+      // Send to Firestore
+      if (typeof firebase !== 'undefined' && firebase.apps?.length && firebase.firestore) {
+        try {
+          const db = firebase.firestore();
+          db.collection('convoys').doc(this.activeRoomCode).collection('riders').doc(this.currentUser.id).set({
+            ...this.currentUser,
+            lat: this.currentUser.lat || 0,
+            lon: this.currentUser.lon || 0
+          }, { merge: true }).catch(()=>{});
+        } catch(e){}
+      }
+
+      // Send to BroadcastChannel
+      if (typeof BroadcastChannel !== 'undefined') {
+        try {
+          const bc = new BroadcastChannel(`rotam_convoy_${this.activeRoomCode}`);
+          bc.postMessage(this.currentUser);
+          bc.close();
+        } catch(e){}
+      }
+    };
+
+    sendPing();
+    this.broadcastTimer = setInterval(sendPing, 4000);
+  },
+
+  updateRiderMarker(rider) {
+    if (!map || !rider.lat || !rider.lon) return;
+
+    let marker = this.markers.get(rider.id);
+    const speedStr = `${Math.round(rider.speed || 0)} km/s`;
+    const iconHtml = `
+      <div class="convoy-rider-marker">
+        <div class="convoy-rider-avatar">
+          <span>${rider.bike && rider.bike.toLowerCase().includes('karavan') ? '🚐' : '🏍️'}</span>
+          <span class="convoy-pulse"></span>
+        </div>
+        <div class="convoy-rider-badge">
+          <span>${escapeHtml(rider.name || 'Sürücü')}</span>
+          <span class="convoy-rider-speed">• ${speedStr}</span>
+        </div>
+      </div>
+    `;
+
+    const customIcon = L.divIcon({
+      className: 'convoy-rider-divicon',
+      html: iconHtml,
+      iconSize: [60, 50],
+      iconAnchor: [30, 20]
+    });
+
+    if (marker) {
+      marker.setLatLng([rider.lat, rider.lon]);
+      marker.setIcon(customIcon);
+    } else {
+      marker = L.marker([rider.lat, rider.lon], { icon: customIcon, zIndexOffset: 800 });
+      marker.bindPopup(`
+        <div class="p-2 text-slate-900">
+          <p class="font-bold text-xs">${escapeHtml(rider.name || 'Sürücü')}</p>
+          <p class="text-[10px] text-slate-600">${escapeHtml(rider.bike || 'Taşıt')} • ${speedStr}</p>
+        </div>
+      `);
+      marker.addTo(map);
+      this.markers.set(rider.id, marker);
+    }
+  },
+
+  removeRiderMarker(riderId) {
+    const marker = this.markers.get(riderId);
+    if (marker && map) {
+      map.removeLayer(marker);
+    }
+    this.markers.delete(riderId);
+  },
+
+  checkConvoyDistanceAlerts() {
+    const isAlertEnabled = document.getElementById('convoy-toggle-voice-alert')?.checked ?? true;
+    if (!isAlertEnabled) return;
+
+    const myLat = this.currentUser.lat || state.userLocation?.lat;
+    const myLon = this.currentUser.lon || state.userLocation?.lon;
+    if (!myLat || !myLon) return;
+
+    const now = Date.now();
+    if (now - this.voiceAlertCooldown < 120000) return; // 2 dk soğuma
+
+    let furthestRider = null;
+    let maxDist = 0;
+
+    this.riders.forEach(r => {
+      if (r.lat && r.lon) {
+        const d = haversineMeters(myLat, myLon, r.lat, r.lon);
+        if (d > maxDist) {
+          maxDist = d;
+          furthestRider = r;
+        }
+      }
+    });
+
+    if (maxDist > 2500 && furthestRider) {
+      this.voiceAlertCooldown = now;
+      const km = (maxDist / 1000).toFixed(1);
+      const msg = `Konvoy uyarısı: ${furthestRider.name}, ${km} kilometre geride kaldı. Lütfen yavaşlayın.`;
+      if (typeof RotamSpeech !== 'undefined' && RotamSpeech.speak) {
+        RotamSpeech.speak(msg, 'warning');
+      }
+      showToast(`📢 ${msg}`, 'warning');
+    }
+  },
+
+  focusAllRiders() {
+    if (!map) return;
+    const points = [];
+    if (this.currentUser.lat && this.currentUser.lon) points.push([this.currentUser.lat, this.currentUser.lon]);
+    this.riders.forEach(r => {
+      if (r.lat && r.lon) points.push([r.lat, r.lon]);
+    });
+    if (points.length > 0) {
+      this.closeModal();
+      map.fitBounds(L.latLngBounds(points), { padding: [50, 50], maxZoom: 15 });
+    }
+  },
+
+  copyRoomCode() {
+    if (!this.activeRoomCode) return;
+    navigator.clipboard?.writeText(this.activeRoomCode);
+    showToast(`Oda kodu kopyalandı: ${this.activeRoomCode} 📋`, 'success');
+  },
+
+  shareConvoy() {
+    if (!this.activeRoomCode) return;
+    const shareText = `🏍️ Rotam Canlı Konvoyuna Katıl!\nOda Kodu: ${this.activeRoomCode}\nCanlı link: https://ylcnkaya89-commits.github.io/rotam/?convoy=${this.activeRoomCode}`;
+    if (navigator.share) {
+      navigator.share({ title: 'Rotam Konvoy Daveti', text: shareText });
+    } else {
+      navigator.clipboard?.writeText(shareText);
+      showToast('Konvoy davet bağlantısı panoya kopyalandı! 📋', 'success');
+    }
+  },
+
+  leaveGroup() {
+    if (this.broadcastTimer) clearInterval(this.broadcastTimer);
+    if (this.unsubscribeListener) {
+      try { this.unsubscribeListener(); } catch(e){}
+    }
+    this.markers.forEach(m => {
+      if (map) map.removeLayer(m);
+    });
+    this.markers.clear();
+    this.riders.clear();
+
+    this.activeRoomCode = null;
+    this.activeRoomName = '';
+    try {
+      localStorage.removeItem('rotam_convoy_code');
+    } catch(e){}
+
+    this.updateModalUI();
+    showToast('Konvoydan ayrıldınız.', 'info');
+  }
+};
+window.RotamConvoy = RotamConvoy;
+
+// ==========================================
+// ROTAM AKILLI YAKIT VE MENZİL PLANLAYICI (SMART FUEL PLANNER)
+// ==========================================
+const RotamFuelPlanner = {
+  recommendedStop: null,
+
+  getVehicleSpecs() {
+    let tank = 16.0; // Litre
+    let consumption = 5.2; // L / 100km
+
+    if (state.selectedVehicle) {
+      tank = Number(state.selectedVehicle.tank_capacity) || tank;
+      consumption = Number(state.selectedVehicle.fuel_consumption) || consumption;
+    } else if (state.currentVehicle === 'camper' || state.vehicleType === 'camper') {
+      tank = 75.0;
+      consumption = 10.5;
+    } else if (state.currentVehicle === 'car' || state.vehicleType === 'car') {
+      tank = 50.0;
+      consumption = 6.5;
+    } else if (state.currentVehicle === 'bike' || state.vehicleType === 'bike') {
+      tank = 0;
+      consumption = 0;
+    }
+
+    const maxRangeKm = consumption > 0 ? (tank / consumption) * 100 : 9999;
+    const safeRangeKm = maxRangeKm * 0.8;
+    return { tank, consumption, maxRangeKm, safeRangeKm };
+  },
+
+  updateAnalysis(routeDistanceKm) {
+    const card = document.getElementById('smart-fuel-planner-card');
+    if (!card) return;
+
+    if (state.currentVehicle === 'bike' || state.vehicleType === 'bike' || routeDistanceKm <= 0) {
+      card.classList.add('hidden');
+      return;
+    }
+    card.classList.remove('hidden');
+
+    const specs = this.getVehicleSpecs();
+    const remainingRangeAtDest = specs.maxRangeKm - routeDistanceKm;
+    const fuelPercent = Math.max(0, Math.min(100, Math.round((remainingRangeAtDest / specs.maxRangeKm) * 100)));
+
+    const badge = document.getElementById('fuel-planner-status-badge');
+    const rangeText = document.getElementById('fuel-range-text');
+    const bar = document.getElementById('fuel-level-progress-bar');
+    const recBox = document.getElementById('fuel-recommended-station-box');
+
+    if (rangeText) {
+      rangeText.textContent = `Menzil: ~${Math.round(specs.maxRangeKm)} km  •  Rota: ${Math.round(routeDistanceKm)} km`;
+    }
+
+    if (routeDistanceKm > specs.safeRangeKm) {
+      if (badge) {
+        badge.textContent = '⚠️ Mola Gerekiyor';
+        badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30';
+      }
+      if (bar) {
+        bar.style.width = '25%';
+        bar.className = 'fuel-level-fill bg-amber-500 h-full rounded-full animate-pulse';
+      }
+
+      this.findOptimalFuelStop(specs, routeDistanceKm);
+    } else {
+      if (badge) {
+        badge.textContent = `✅ Yeterli (%${fuelPercent} Kalır)`;
+        badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+      }
+      if (bar) {
+        bar.style.width = `${fuelPercent}%`;
+        bar.className = 'fuel-level-fill bg-emerald-500 h-full rounded-full';
+      }
+      if (recBox) recBox.classList.add('hidden');
+    }
+  },
+
+  findOptimalFuelStop(specs, routeDistanceKm) {
+    const recBox = document.getElementById('fuel-recommended-station-box');
+    const nameEl = document.getElementById('fuel-rec-station-name');
+    const detailEl = document.getElementById('fuel-rec-station-details');
+
+    const allPlaces = (state.allPlaces && state.allPlaces.length) ? state.allPlaces : (window.DEFAULT_HISTORIC_PLACES || []);
+    const fuelStations = allPlaces.filter(p => p.category === 'fuel');
+
+    const targetKmMin = specs.safeRangeKm * 0.60;
+    const targetKmMax = specs.safeRangeKm * 0.90;
+
+    let bestStation = null;
+    let bestScore = -1;
+
+    fuelStations.forEach(st => {
+      const distAlong = st.distAlongRoute || (routeDistanceKm * 0.72);
+      if (distAlong >= targetKmMin && distAlong <= targetKmMax) {
+        const rating = Number(st.rating) || 4.5;
+        if (rating > bestScore) {
+          bestScore = rating;
+          bestStation = st;
+        }
+      }
+    });
+
+    if (!bestStation && fuelStations.length > 0) {
+      bestStation = fuelStations[0];
+    }
+
+    if (bestStation) {
+      this.recommendedStop = bestStation;
+      if (nameEl) nameEl.textContent = bestStation.name;
+      const priceText = bestStation.fuelPrice ? ` • Pompa: ${bestStation.fuelPrice} TL` : ' • Uygun Fiyat';
+      if (detailEl) detailEl.textContent = `Rotanın en uygun dolum aralığında (${Math.round(targetKmMin)}-${Math.round(targetKmMax)}. km)${priceText}`;
+      if (recBox) recBox.classList.remove('hidden');
+    } else {
+      if (recBox) recBox.classList.add('hidden');
+    }
+  },
+
+  addRecommendedStop() {
+    if (!this.recommendedStop) return;
+    const st = this.recommendedStop;
+
+    if (state.waypoints && state.waypoints.length >= 2) {
+      const insertIdx = state.waypoints.length - 1;
+      state.waypoints.splice(insertIdx, 0, {
+        lat: st.lat,
+        lon: st.lon,
+        name: st.name
+      });
+      if (typeof updateWaypointsUI === 'function') updateWaypointsUI();
+      if (typeof calculateRoute === 'function') calculateRoute();
+      showToast(`⛽ ${st.name} rotaya ara yakıt molası olarak eklendi!`, 'success');
+      const recBox = document.getElementById('fuel-recommended-station-box');
+      if (recBox) recBox.classList.add('hidden');
+    }
+  }
+};
+window.RotamFuelPlanner = RotamFuelPlanner;
+
+// ==========================================
+// ROTAM İRTİFA VE EĞİM PROFİLİ MOTORU (ELEVATION & SLOPE PROFILE)
+// ==========================================
+const RotamElevationProfile = {
+  elevationData: [],
+  maxElevation: 0,
+  minElevation: 0,
+  totalClimb: 0,
+  maxSlope: 0,
+
+  async fetchAndRender(coordinates) {
+    if (!coordinates || coordinates.length < 5) return;
+    const card = document.getElementById('route-elevation-card');
+    if (card) card.classList.remove('hidden');
+
+    const sampleSize = Math.min(35, coordinates.length);
+    const step = (coordinates.length - 1) / (sampleSize - 1);
+    const sampled = [];
+    for (let i = 0; i < sampleSize; i++) {
+      const idx = Math.min(coordinates.length - 1, Math.round(i * step));
+      sampled.push(coordinates[idx]);
+    }
+
+    try {
+      const lats = sampled.map(c => c[1].toFixed(4)).join(',');
+      const lons = sampled.map(c => c[0].toFixed(4)).join(',');
+      const url = `https://api.open-meteo.com/v1/elevation?latitude=${lats}&longitude=${lons}`;
+
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Elevation API error');
+      const json = await res.json();
+      const elevations = json.elevation || [];
+
+      if (elevations.length >= 2) {
+        this.elevationData = elevations.map((ele, idx) => ({
+          elevation: ele,
+          coord: sampled[idx]
+        }));
+        this.computeStats();
+        this.renderSVG();
+      }
+    } catch (e) {
+      this.generateFallbackProfile();
+    }
+  },
+
+  computeStats() {
+    if (!this.elevationData.length) return;
+    let min = Infinity;
+    let max = -Infinity;
+    let climb = 0;
+    let maxGrade = 0;
+
+    for (let i = 0; i < this.elevationData.length; i++) {
+      const ele = this.elevationData[i].elevation;
+      if (ele < min) min = ele;
+      if (ele > max) max = ele;
+
+      if (i > 0) {
+        const diff = ele - this.elevationData[i - 1].elevation;
+        if (diff > 0) climb += diff;
+        const grade = (Math.abs(diff) / 150) * 100;
+        if (grade > maxGrade) maxGrade = grade;
+      }
+    }
+
+    this.minElevation = Math.round(min);
+    this.maxElevation = Math.round(max);
+    this.totalClimb = Math.round(climb);
+    this.maxSlope = Math.min(22, Math.round(maxGrade));
+
+    const minMaxEl = document.getElementById('elev-min-max');
+    if (minMaxEl) minMaxEl.textContent = `Min: ${this.minElevation}m • Zirve: ${this.maxElevation}m`;
+
+    const climbEl = document.getElementById('elev-total-climb');
+    if (climbEl) climbEl.innerHTML = `<span>↗️ Tırmanış:</span> <span class="font-bold text-emerald-400">${this.totalClimb} m</span>`;
+
+    const slopeEl = document.getElementById('elev-max-slope');
+    if (slopeEl) {
+      const slopeColor = this.maxSlope >= 8 ? 'text-amber-400' : 'text-emerald-400';
+      slopeEl.innerHTML = `<span>⛰️ Dik Rampa:</span> <span class="font-bold ${slopeColor}">%${this.maxSlope}</span>`;
+    }
+  },
+
+  renderSVG() {
+    const svg = document.getElementById('route-elevation-svg');
+    const pathArea = document.getElementById('elevation-path-area');
+    const pathLine = document.getElementById('elevation-path-line');
+    if (!svg || !pathLine || !this.elevationData.length) return;
+
+    const width = 300;
+    const height = 80;
+    const minEle = this.minElevation;
+    const maxEle = Math.max(minEle + 50, this.maxElevation);
+    const range = maxEle - minEle || 1;
+
+    const points = this.elevationData.map((item, idx) => {
+      const x = (idx / (this.elevationData.length - 1)) * width;
+      const y = height - ((item.elevation - minEle) / range) * (height - 15) - 8;
+      return { x, y, ele: item.elevation, coord: item.coord };
+    });
+
+    const dLine = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+    const dArea = `${dLine} L ${width} ${height} L 0 ${height} Z`;
+
+    pathLine.setAttribute('d', dLine);
+    pathArea.setAttribute('d', dArea);
+
+    this.setupInteractivity(points);
+  },
+
+  setupInteractivity(points) {
+    const wrapper = document.getElementById('elevation-chart-wrapper');
+    const pin = document.getElementById('elevation-hover-pin');
+    const tooltip = document.getElementById('elevation-hover-tooltip');
+    if (!wrapper || !pin) return;
+
+    wrapper.onmousemove = (e) => {
+      const rect = wrapper.getBoundingClientRect();
+      const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      const idx = Math.round(ratio * (points.length - 1));
+      const pt = points[idx];
+      if (!pt) return;
+
+      pin.style.left = `${ratio * 100}%`;
+      pin.classList.remove('hidden');
+      if (tooltip) tooltip.textContent = `${Math.round(pt.ele)}m`;
+
+      if (window.map && pt.coord) {
+        if (!this.scrubMarker) {
+          const icon = L.divIcon({
+            className: 'elevation-scrub-icon',
+            html: '<div class="elevation-scrub-point"></div>',
+            iconSize: [14, 14],
+            iconAnchor: [7, 7]
+          });
+          this.scrubMarker = L.marker([pt.coord[1], pt.coord[0]], { icon, zIndexOffset: 1500 }).addTo(map);
+        } else {
+          this.scrubMarker.setLatLng([pt.coord[1], pt.coord[0]]);
+        }
+      }
+    };
+
+    wrapper.onmouseleave = () => {
+      pin.classList.add('hidden');
+      if (this.scrubMarker && map) {
+        map.removeLayer(this.scrubMarker);
+        this.scrubMarker = null;
+      }
+    };
+  },
+
+  generateFallbackProfile() {
+    this.elevationData = [
+      { elevation: 120 }, { elevation: 250 }, { elevation: 430 },
+      { elevation: 840 }, { elevation: 620 }, { elevation: 310 }
+    ];
+    this.computeStats();
+    this.renderSVG();
+  }
+};
+window.RotamElevationProfile = RotamElevationProfile;
+
+// ==========================================
+// ROTAM CANLI TRAFİK YOĞUNLUĞU KATMANI (LIVE TRAFFIC FLOW LAYER)
+// ==========================================
+const RotamTraffic = {
+  layer: null,
+  isActive: false,
+
+  toggle() {
+    if (!map) return;
+    this.isActive = !this.isActive;
+
+    if (this.isActive) {
+      if (!this.layer) {
+        this.layer = L.tileLayer('https://mt0.google.com/vt?lyrs=h,traffic|seconds_into_week:-1&style=15&x={x}&y={y}&z={z}', {
+          maxZoom: 19,
+          opacity: 0.85,
+          zIndex: 400
+        });
+      }
+      this.layer.addTo(map);
+      showToast('🚦 Canlı trafik yoğunluğu açıldı!', 'success');
+    } else {
+      if (this.layer && map.hasLayer(this.layer)) {
+        map.removeLayer(this.layer);
+      }
+      showToast('Trafik katmanı kapatıldı.', 'info');
+    }
+
+    this.updateUI();
+  },
+
+  updateUI() {
+    const badge = document.getElementById('traffic-layer-status');
+    const btn = document.getElementById('toggle-traffic-layer');
+    if (badge) {
+      badge.textContent = this.isActive ? 'AÇIK' : 'KAPALI';
+      badge.className = this.isActive
+        ? 'text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+        : 'text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-400';
+    }
+    if (btn) {
+      btn.classList.toggle('border-emerald-500/40', this.isActive);
+    }
+  }
+};
+window.RotamTraffic = RotamTraffic;
 
 // ==========================================
 // ROTAM AKILLI KÜLTÜR & TARİH FISILTISI (SMART STORY GUIDE)
