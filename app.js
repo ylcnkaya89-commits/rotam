@@ -262,17 +262,21 @@ function createTileLayers() {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
   });
 
-  // 2. ROTAM Gündüz Navigasyon Modu (Official OSM Daylight - 100% Reliable, Zero Key, 100% EPSG:3857, Sıfır Kayma)
+  // 2. ROTAM Net Gündüz Navigasyon Modu (Official OSM Daylight - 100% Reliable, Zero Key, 100% EPSG:3857, Sıfır Kayma)
   layers.day = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
   });
   layers.voyager = layers.day;
-  layers.yandex = layers.day;
-
-  // 3. Standart Dünya / OpenStreetMap
   layers.global = layers.day;
   layers.osm = layers.day;
+
+  // 3. Orijinal Yandex Harita Katmanı (Doğrudan Yandex Karo Sunucusu)
+  layers.yandex = L.tileLayer('https://core-renderer-tiles.maps.yandex.net/tiles?l=map&x={x}&y={y}&z={z}&scale=1&lang=tr_TR', {
+    maxZoom: 19,
+    subdomains: [],
+    attribution: '&copy; <a href="https://yandex.com.tr/harita" target="_blank">Yandex</a>'
+  });
 
   // 4. High-Resolution Satellite (Esri World Imagery)
   layers.sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -993,12 +997,10 @@ function switchTile(tileKey) {
   const mapEl = document.getElementById('map');
   const isDark = (tileKey === 'dark');
 
-  // Normalize tileKey: 'yandex', 'dark', 'sat', 'global', 'topo'
+  // Normalize tileKey: 'day', 'yandex', 'dark', 'sat', 'global', 'topo'
   let canonicalKey = tileKey;
   if (tileKey === 'osm' || tileKey === 'voyager') {
     canonicalKey = 'global';
-  } else if (tileKey === 'day') {
-    canonicalKey = 'yandex';
   }
 
   // Handle dark mode / day mode classes
@@ -1010,19 +1012,21 @@ function switchTile(tileKey) {
     document.body.classList.add('day-mode');
   }
 
-  // Determine target layer: 'global', 'topo', 'sat', 'dark', 'yandex'
+  // Determine target layer: 'day', 'yandex', 'dark', 'sat', 'global', 'topo'
   let targetLayer = null;
   if (tileLayers) {
     if (canonicalKey === 'global') {
-      targetLayer = tileLayers.global || tileLayers.osm || tileLayers.dark;
+      targetLayer = tileLayers.global || tileLayers.osm || tileLayers.day;
     } else if (canonicalKey === 'topo') {
       targetLayer = tileLayers.topo || tileLayers.dark;
     } else if (canonicalKey === 'sat') {
       targetLayer = tileLayers.sat || tileLayers.dark;
     } else if (canonicalKey === 'dark') {
       targetLayer = tileLayers.dark || tileLayers.global;
+    } else if (canonicalKey === 'yandex') {
+      targetLayer = tileLayers.yandex || tileLayers.day;
     } else {
-      targetLayer = tileLayers.yandex || tileLayers.voyager || tileLayers.global;
+      targetLayer = tileLayers.day || tileLayers.dark;
     }
   }
 
@@ -1050,9 +1054,11 @@ function switchTile(tileKey) {
   });
 
   const activeBtnId = (canonicalKey === 'dark') ? 'tile-dark'
+    : (canonicalKey === 'day' ? 'tile-day'
+    : (canonicalKey === 'yandex' ? 'tile-yandex'
     : (canonicalKey === 'sat' ? 'tile-sat'
     : (canonicalKey === 'global' ? 'tile-global'
-    : (canonicalKey === 'topo' ? 'tile-topo' : 'tile-yandex')));
+    : (canonicalKey === 'topo' ? 'tile-topo' : 'tile-day')))));
   const activeBtn = document.getElementById(activeBtnId);
   if (activeBtn) {
     activeBtn.classList.add('bg-slate-800', 'text-white');
@@ -1063,7 +1069,8 @@ function switchTile(tileKey) {
 
   // Update active layer label on desktop accordion pill
   const layerLabels = {
-    yandex: '☀️ Gündüz',
+    day: '☀️ Gündüz',
+    yandex: 'Я Yandex',
     dark: '🌙 Gece',
     sat: '🛰️ Uydu',
     global: '🌍 Dünya',
@@ -1115,14 +1122,14 @@ const RotamAutoTheme = {
   },
 
   apply() {
-    if (!map || !tileLayers || (!tileLayers.yandex && !tileLayers.dark)) return;
+    if (!map || !tileLayers || (!tileLayers.day && !tileLayers.dark && !tileLayers.yandex)) return;
     let targetTile = 'dark';
     if (this.mode === 'auto') {
       const userLat = state.userLocation?.lat || 39.0;
       const userLon = state.userLocation?.lon || 35.0;
-      targetTile = this.isDaytime(userLat, userLon) ? 'yandex' : 'dark';
+      targetTile = this.isDaytime(userLat, userLon) ? 'day' : 'dark';
     } else if (this.mode === 'day') {
-      targetTile = 'yandex';
+      targetTile = 'day';
     } else {
       targetTile = 'dark';
     }
@@ -1136,7 +1143,7 @@ const RotamAutoTheme = {
       const isDay = this.isDaytime();
       this.mode = isDay ? 'dark' : 'day';
       localStorage.setItem('rotam_theme_mode', this.mode);
-      switchTile(this.mode === 'dark' ? 'dark' : 'yandex');
+      switchTile(this.mode === 'dark' ? 'dark' : 'day');
       showToast(this.mode === 'dark' ? (isEn ? '🌙 Gece Modu' : '🌙 Gece Modu') : (isEn ? '☀️ Gündüz Modu' : '☀️ Gündüz Modu'), 'info');
     } else {
       this.mode = 'auto';
