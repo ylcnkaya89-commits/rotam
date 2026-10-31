@@ -2450,3 +2450,33 @@ body.sunlight-mode #modal-driver-hub span.text-white {
     font-size: 0.75rem !important;
   }
 }
+
+/* ===================================================
+   WAYPOINT REORDERING & DRAG-AND-DROP STYLES
+   =================================================== */
+.waypoint-item {
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.waypoint-drag-handle {
+  touch-action: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+.waypoint-item.is-dragging {
+  opacity: 0.45;
+  transform: scale(0.98);
+  border-color: #f59e0b !important;
+  box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.25);
+}
+
+.waypoint-item.drag-over {
+  border-color: #f59e0b !important;
+  background-color: rgba(245, 158, 11, 0.12) !important;
+  transform: translateY(-2px);
+}
+

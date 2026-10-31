@@ -2450,6 +2450,295 @@ async function submitHeroRoute() {
   await calculateRouteMain();
 }
 
+// ==========================================
+// ROTAM WAYPOINT REORDERING & DRAG ENGINE
+// ==========================================
+let activeDraggedWaypointIndex = null;
+
+function reorderWaypoint(fromIndex, toIndex) {
+  if (fromIndex === toIndex) return;
+  if (fromIndex < 0 || fromIndex >= state.waypoints.length) return;
+  if (toIndex < 0 || toIndex >= state.waypoints.length) return;
+
+  const movedWp = state.waypoints.splice(fromIndex, 1)[0];
+  state.waypoints.splice(toIndex, 0, movedWp);
+
+  // Normalize waypoint types and IDs
+  const total = state.waypoints.length;
+  state.waypoints.forEach((wp, idx) => {
+    if (idx === 0) {
+      wp.type = 'start';
+      wp.id = 'start';
+    } else if (idx === total - 1) {
+      wp.type = 'end';
+      wp.id = 'end';
+    } else {
+      wp.type = 'waypoint';
+      if (wp.id === 'start' || wp.id === 'end') {
+        wp.id = 'waypoint-' + Date.now() + '-' + idx;
+      }
+    }
+  });
+
+  // Sync hero inputs if start or destination changed
+  const heroStart = document.getElementById('hero-start-input');
+  if (heroStart) heroStart.value = state.waypoints[0]?.name || '';
+  const heroEnd = document.getElementById('hero-end-input');
+  if (heroEnd) heroEnd.value = state.waypoints[total - 1]?.name || '';
+
+  // Update UI and map markers
+  updateWaypointsListUI();
+  updateWaypointMarkers();
+
+  // If journey timeline is currently open/rendered, refresh it
+  if (typeof renderJourneyTimeline === 'function') {
+    renderJourneyTimeline();
+  }
+
+  // Calculate route if 2 or more waypoints are valid
+  const valid = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
+  if (valid.length >= 2) {
+    calculateRouteMain();
+  }
+
+  const name = movedWp.name || (toIndex === 0 ? 'Başlangıç' : toIndex === total - 1 ? 'Varış' : `Durak ${toIndex}`);
+  const isEn = (window.state && window.state.lang === 'en');
+  showToast(isEn ? `"${name}" moved to stop #${toIndex + 1} ↕️` : `"${name}" ${toIndex + 1}. sıraya taşındı ↕️`, 'info');
+}
+
+function moveWaypointUp(index) {
+  if (index <= 0) return;
+  reorderWaypoint(index, index - 1);
+}
+
+function moveWaypointDown(index) {
+  if (index >= state.waypoints.length - 1) return;
+  reorderWaypoint(index, index + 1);
+}
+
+window.reorderWaypoint = reorderWaypoint;
+window.moveWaypointUp = moveWaypointUp;
+window.moveWaypointDown = moveWaypointDown;
+
+// Attach Drag and Drop handlers (HTML5 + Mobile Touch)
+function attachWaypointDragListeners(itemEl, index) {
+  // HTML5 Mouse Drag Events
+  itemEl.addEventListener('dragstart', (e) => {
+    activeDraggedWaypointIndex = index;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(index));
+    itemEl.classList.add('is-dragging');
+  });
+
+  itemEl.addEventListener('dragend', () => {
+    activeDraggedWaypointIndex = null;
+    itemEl.classList.remove('is-dragging');
+    document.querySelectorAll('.waypoint-item').forEach(el => {
+      el.classList.remove('drag-over');
+    });
+  });
+
+  itemEl.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (activeDraggedWaypointIndex !== null && activeDraggedWaypointIndex !== index) {
+      itemEl.classList.add('drag-over');
+    }
+  });
+
+  itemEl.addEventListener('dragleave', () => {
+    itemEl.classList.remove('drag-over');
+  });
+
+  itemEl.addEventListener('drop', (e) => {
+    e.preventDefault();
+    itemEl.classList.remove('drag-over');
+    const fromIndex = activeDraggedWaypointIndex !== null ? activeDraggedWaypointIndex : parseInt(e.dataTransfer.getData('text/plain'), 10);
+    const toIndex = index;
+    if (!isNaN(fromIndex) && fromIndex !== toIndex) {
+      reorderWaypoint(fromIndex, toIndex);
+    }
+  });
+
+  // Mobile Touch Drag Events on Handle
+  const handle = itemEl.querySelector('.waypoint-drag-handle');
+  if (handle) {
+    let isTouching = false;
+    let touchTargetEl = null;
+
+    handle.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 1) return;
+      isTouching = true;
+      activeDraggedWaypointIndex = index;
+      itemEl.classList.add('is-dragging');
+      if (navigator.vibrate) navigator.vibrate(15);
+    }, { passive: true });
+
+    handle.addEventListener('touchmove', (e) => {
+      if (!isTouching || e.touches.length !== 1) return;
+      const touchY = e.touches[0].clientY;
+      const touchX = e.touches[0].clientX;
+
+      const elem = document.elementFromPoint(touchX, touchY);
+      const targetItem = elem ? elem.closest('.waypoint-item') : null;
+
+      document.querySelectorAll('.waypoint-item').forEach(el => {
+        if (el !== itemEl) el.classList.remove('drag-over');
+      });
+
+      if (targetItem && targetItem !== itemEl) {
+        touchTargetEl = targetItem;
+        targetItem.classList.add('drag-over');
+      }
+    }, { passive: true });
+
+    const finishTouch = () => {
+      if (!isTouching) return;
+      isTouching = false;
+      itemEl.classList.remove('is-dragging');
+      document.querySelectorAll('.waypoint-item').forEach(el => {
+        el.classList.remove('drag-over');
+      });
+
+      if (touchTargetEl) {
+        const toIndex = parseInt(touchTargetEl.getAttribute('data-index'), 10);
+        if (!isNaN(toIndex) && toIndex !== index) {
+          if (navigator.vibrate) navigator.vibrate(25);
+          reorderWaypoint(index, toIndex);
+        }
+        touchTargetEl = null;
+      }
+      activeDraggedWaypointIndex = null;
+    };
+
+    handle.addEventListener('touchend', finishTouch);
+    handle.addEventListener('touchcancel', finishTouch);
+  }
+}
+
+// Smart Route Optimization (TSP - Traveling Salesperson for Waypoints)
+// Reorders intermediate stops to minimize overall distance between Start and Destination.
+function optimizeWaypointsOrder() {
+  const isEn = (window.state && window.state.lang === 'en');
+  const total = state.waypoints.length;
+  if (total < 4) {
+    showToast(isEn ? 'Add at least 2 intermediate stops for smart optimization 📍' : 'Akıllı sıralama için en az 2 ara durak eklemelisiniz 📍', 'info');
+    return;
+  }
+
+  const startWp = state.waypoints[0];
+  const endWp = state.waypoints[total - 1];
+
+  if (!startWp.lat || !endWp.lat) {
+    showToast(isEn ? 'Please set start and destination points first.' : 'Lütfen önce başlangıç ve varış noktalarını belirleyin.', 'info');
+    return;
+  }
+
+  const intermediates = state.waypoints.slice(1, total - 1);
+  const validIntermediates = intermediates.filter(w => w.lat !== null && w.lon !== null);
+
+  if (validIntermediates.length < 2) {
+    showToast(isEn ? 'At least 2 intermediate stops must have locations.' : 'En az 2 ara durağın konumu belirlenmiş olmalıdır.', 'info');
+    return;
+  }
+
+  const dist = (p1, p2) => haversineMeters(p1.lat, p1.lon, p2.lat, p2.lon);
+
+  let bestOrder = [...validIntermediates];
+  const calcTotalDist = (list) => {
+    let d = dist(startWp, list[0]);
+    for (let i = 0; i < list.length - 1; i++) {
+      d += dist(list[i], list[i + 1]);
+    }
+    d += dist(list[list.length - 1], endWp);
+    return d;
+  };
+
+  let bestDist = calcTotalDist(bestOrder);
+
+  if (validIntermediates.length <= 7) {
+    const permute = (arr) => {
+      const result = [];
+      const backtrack = (curr, remaining) => {
+        if (remaining.length === 0) {
+          result.push(curr);
+          return;
+        }
+        for (let i = 0; i < remaining.length; i++) {
+          backtrack([...curr, remaining[i]], [...remaining.slice(0, i), ...remaining.slice(i + 1)]);
+        }
+      };
+      backtrack([], arr);
+      return result;
+    };
+
+    const allPerms = permute(validIntermediates);
+    for (const p of allPerms) {
+      const d = calcTotalDist(p);
+      if (d < bestDist) {
+        bestDist = d;
+        bestOrder = p;
+      }
+    }
+  } else {
+    let improved = true;
+    while (improved) {
+      improved = false;
+      for (let i = 0; i < bestOrder.length - 1; i++) {
+        for (let k = i + 1; k < bestOrder.length; k++) {
+          const newOrder = [...bestOrder.slice(0, i), ...bestOrder.slice(i, k + 1).reverse(), ...bestOrder.slice(k + 1)];
+          const newDist = calcTotalDist(newOrder);
+          if (newDist < bestDist) {
+            bestDist = newDist;
+            bestOrder = newOrder;
+            improved = true;
+          }
+        }
+      }
+    }
+  }
+
+  // Check if order actually changed
+  let changed = false;
+  for (let i = 0; i < validIntermediates.length; i++) {
+    if (validIntermediates[i] !== bestOrder[i]) {
+      changed = true;
+      break;
+    }
+  }
+
+  if (!changed) {
+    showToast(isEn ? 'Stops are already in the most optimal sequence! ⚡' : 'Duraklar zaten en mantıklı ve en kısa sırada! ⚡', 'success');
+    return;
+  }
+
+  // Replace intermediate stops with optimal sequence
+  state.waypoints.splice(1, total - 2, ...bestOrder);
+
+  // Normalize waypoint types and ids
+  state.waypoints.forEach((wp, idx) => {
+    if (idx === 0) {
+      wp.type = 'start';
+    } else if (idx === state.waypoints.length - 1) {
+      wp.type = 'end';
+    } else {
+      wp.type = 'waypoint';
+      wp.id = 'waypoint-' + Date.now() + '-' + idx;
+    }
+  });
+
+  updateWaypointsListUI();
+  updateWaypointMarkers();
+  if (typeof renderJourneyTimeline === 'function') {
+    renderJourneyTimeline();
+  }
+  calculateRouteMain();
+
+  showToast(isEn ? 'Stops optimized for the shortest route! ⚡' : 'Duraklar en kısa rotaya göre otomatik sıralandı ⚡', 'success');
+}
+
+window.optimizeWaypointsOrder = optimizeWaypointsOrder;
+
 // Waypoint List & UI Management
 function updateWaypointsListUI() {
   const container = document.getElementById('waypoints-container');
@@ -2463,17 +2752,34 @@ function updateWaypointsListUI() {
     const isWaypoint = !isStart && !isEnd;
 
     const div = document.createElement('div');
-    div.className = 'flex items-center space-x-2 bg-slate-950/70 p-2 rounded-xl border border-slate-800/80 group transition-all relative';
+    div.className = 'waypoint-item flex items-center space-x-1.5 bg-slate-950/70 p-2 rounded-xl border border-slate-800/80 hover:border-slate-700/90 group transition-all relative select-none';
+    div.setAttribute('data-index', String(index));
+    div.setAttribute('draggable', 'true');
 
     let iconHtml = '';
-    if (isStart) iconHtml = '<span class="w-3 h-3 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>';
-    else if (isEnd) iconHtml = '<span class="w-3 h-3 rounded-full bg-red-500 shadow-sm shadow-red-500/50"></span>';
-    else iconHtml = '<span class="w-3 h-3 rounded-full bg-amber-500 shadow-sm shadow-amber-500/50"></span>';
+    if (isStart) iconHtml = '<span class="w-3.5 h-3.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50 flex items-center justify-center text-[9px] font-black text-slate-950">A</span>';
+    else if (isEnd) iconHtml = '<span class="w-3.5 h-3.5 rounded-full bg-red-500 shadow-sm shadow-red-500/50 flex items-center justify-center text-[9px] font-black text-white">B</span>';
+    else iconHtml = `<span class="w-3.5 h-3.5 rounded-full bg-amber-500 shadow-sm shadow-amber-500/50 flex items-center justify-center text-[9px] font-black text-slate-950">${index}</span>`;
 
     const hasValue = (wp.name && wp.name.trim() !== '');
 
     div.innerHTML = `
-      <div class="p-1 shrink-0 flex items-center justify-center">${iconHtml}</div>
+      <!-- Sürükleme Tutamacı (Drag Handle) -->
+      <div class="waypoint-drag-handle p-1 text-slate-500 hover:text-amber-400 active:text-amber-300 cursor-grab active:cursor-grabbing shrink-0 flex items-center justify-center touch-none transition-colors" title="Sıralamayı değiştirmek için sürükleyin">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="6" r="1.5" fill="currentColor"></circle>
+          <circle cx="15" cy="6" r="1.5" fill="currentColor"></circle>
+          <circle cx="9" cy="12" r="1.5" fill="currentColor"></circle>
+          <circle cx="15" cy="12" r="1.5" fill="currentColor"></circle>
+          <circle cx="9" cy="18" r="1.5" fill="currentColor"></circle>
+          <circle cx="15" cy="18" r="1.5" fill="currentColor"></circle>
+        </svg>
+      </div>
+
+      <!-- Durak Rozeti (A, 1, 2, B) -->
+      <div class="p-0.5 shrink-0 flex items-center justify-center">${iconHtml}</div>
+
+      <!-- Konum Giriş Kutusu -->
       <input type="text" value="${escapeHtml(wp.name || '')}" 
         autocomplete="off" autocorrect="off" spellcheck="false"
         placeholder="${isStart ? (typeof t === 'function' ? t('wp_start_placeholder', 'Başlangıç Noktası (Örn: Ankara)') : 'Başlangıç Noktası') : isEnd ? (typeof t === 'function' ? t('wp_end_placeholder', 'Varış Noktası (Örn: Dikmen veya Kaş)') : 'Varış Noktası') : ((typeof t === 'function' ? t('wp_stop_prefix', 'Ara Durak ') : 'Ara Durak ') + index)}" 
@@ -2481,8 +2787,28 @@ function updateWaypointsListUI() {
         onfocus="handleWaypointFocus(${index}, this.value, this)"
         onblur="setTimeout(closeWaypointAutocomplete, 350); handleWaypointBlur(${index}, this.value)"
         onkeydown="if(event.key==='Enter') { closeWaypointAutocomplete(); handleWaypointBlur(${index}, this.value); calculateRouteMain(); }"
-        class="bg-transparent flex-1 text-xs text-white placeholder-slate-500 focus:outline-none truncate font-medium">
-      <div class="flex items-center space-x-1 shrink-0">
+        class="bg-transparent flex-1 min-w-0 text-xs text-white placeholder-slate-500 focus:outline-none truncate font-medium">
+
+      <!-- Aksiyon Butonları -->
+      <div class="flex items-center space-x-0.5 shrink-0">
+        <!-- Yukarı / Aşağı Sıralama Butonları -->
+        <div class="flex items-center space-x-0.5 border-r border-slate-800/80 pr-1 mr-0.5">
+          ${index > 0 ? `
+            <button type="button" onclick="event.stopPropagation(); moveWaypointUp(${index})" class="p-1 text-slate-400 hover:text-amber-300 hover:bg-slate-800 rounded transition-colors" title="Yukarı Taşı">
+              <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
+            </button>
+          ` : `
+            <span class="w-5 h-5 inline-block opacity-0 pointer-events-none"></span>
+          `}
+          ${index < state.waypoints.length - 1 ? `
+            <button type="button" onclick="event.stopPropagation(); moveWaypointDown(${index})" class="p-1 text-slate-400 hover:text-amber-300 hover:bg-slate-800 rounded transition-colors" title="Aşağı Taşı">
+              <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+            </button>
+          ` : `
+            <span class="w-5 h-5 inline-block opacity-0 pointer-events-none"></span>
+          `}
+        </div>
+
         ${hasValue ? `
           <button type="button" onclick="clearWaypointInput(${index})" class="p-1 text-slate-500 hover:text-slate-300 rounded transition-colors" title="Temizle">
             <i data-lucide="x" class="w-3.5 h-3.5"></i>
@@ -2508,6 +2834,9 @@ function updateWaypointsListUI() {
         ` : ''}
       </div>
     `;
+
+    // Attach Drag & Drop handlers (Mouse & Touch)
+    attachWaypointDragListeners(div, index);
 
     container.appendChild(div);
   });
@@ -6475,27 +6804,6 @@ function addPoiToRoute(lat, lon, name) {
   showToast(`"${name}" rotanıza durak olarak eklendi! Güzergah güncelleniyor...`, 'success');
 }
 
-// Reordering stops along the route
-function moveWaypointUp(index) {
-  if (index <= 1 || index >= state.waypoints.length - 1) return;
-  const temp = state.waypoints[index];
-  state.waypoints[index] = state.waypoints[index - 1];
-  state.waypoints[index - 1] = temp;
-  updateWaypointsListUI();
-  updateWaypointMarkers();
-  calculateRouteMain();
-}
-
-function moveWaypointDown(index) {
-  if (index < 1 || index >= state.waypoints.length - 2) return;
-  const temp = state.waypoints[index];
-  state.waypoints[index] = state.waypoints[index + 1];
-  state.waypoints[index + 1] = temp;
-  updateWaypointsListUI();
-  updateWaypointMarkers();
-  calculateRouteMain();
-}
-
 // JOURNEY TIMELINE
 function renderJourneyTimeline() {
   const container = document.getElementById('journey-timeline-container');
@@ -6590,23 +6898,23 @@ function renderJourneyTimeline() {
             <span>${icon}</span>
             <span>${label}</span>
           </span>
-          ${isWaypoint && realIdx > 0 ? `
-            <div class="flex items-center space-x-1">
-              ${realIdx > 1 ? `
-                <button onclick="moveWaypointUp(${realIdx})" class="p-1 text-slate-400 hover:text-white" title="Yukarı Taşı">
-                  <i data-lucide="chevron-up" class="w-3 h-3"></i>
-                </button>
-              ` : ''}
-              ${realIdx < state.waypoints.length - 2 ? `
-                <button onclick="moveWaypointDown(${realIdx})" class="p-1 text-slate-400 hover:text-white" title="Aşağı Taşı">
-                  <i data-lucide="chevron-down" class="w-3 h-3"></i>
-                </button>
-              ` : ''}
+          <div class="flex items-center space-x-1">
+            ${realIdx > 0 ? `
+              <button onclick="moveWaypointUp(${realIdx})" class="p-1 text-slate-400 hover:text-white" title="Yukarı Taşı">
+                <i data-lucide="chevron-up" class="w-3 h-3"></i>
+              </button>
+            ` : ''}
+            ${realIdx < state.waypoints.length - 1 ? `
+              <button onclick="moveWaypointDown(${realIdx})" class="p-1 text-slate-400 hover:text-white" title="Aşağı Taşı">
+                <i data-lucide="chevron-down" class="w-3 h-3"></i>
+              </button>
+            ` : ''}
+            ${isWaypoint ? `
               <button onclick="removeWaypoint(${realIdx})" class="p-1 text-slate-500 hover:text-red-400" title="Durağı Kaldır">
                 <i data-lucide="trash-2" class="w-3 h-3"></i>
               </button>
-            </div>
-          ` : ''}
+            ` : ''}
+          </div>
         </div>
         <p class="font-bold text-white text-xs mt-0.5">${escapeHtml(wp.name || (isStart ? 'Başlangıç Konumu' : isEnd ? 'Varış Konumu' : 'İsimsiz Durak'))}</p>
         <p class="text-[10px] text-slate-400 mt-0.5">${isStart ? 'Çıkış Noktası' : isEnd ? 'Hedef Varış' : 'Planlanan Durak'}</p>

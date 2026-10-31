@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v86 (Dual Day & Yandex Map Layers + Zero Projection Drift)
-const CACHE_NAME = 'rotam-cache-v86';
+// Rotam PWA Service Worker - v87 (Drag & Drop Waypoints, One-Tap Reordering, Smart TSP Optimization)
+const CACHE_NAME = 'rotam-cache-v87';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
