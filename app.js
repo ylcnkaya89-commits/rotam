@@ -2828,6 +2828,9 @@ function updateWaypointsListUI() {
           </button>
         ` : ''}
         ${isWaypoint ? `
+          <button type="button" onclick="activateMapPickMode(${index})" class="p-1 text-teal-400 hover:text-teal-300 hover:bg-teal-500/10 rounded transition-colors" title="Haritadan Manuel Seç / Düzelt">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+          </button>
           <button type="button" onclick="removeWaypoint(${index})" class="p-1 text-slate-500 hover:text-red-400 rounded transition-colors" title="Durağı Sil">
             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
           </button>
@@ -2868,14 +2871,177 @@ function clearWaypointInput(index) {
 function activateMapPickMode(index) {
   state.mapPickTargetIndex = index;
   const isStart = index === 0;
-  showToast(isStart ? 'Haritada başlangıç noktasına dokunun 📍' : 'Haritada varış noktasına dokunun 🏁', 'info');
+  const isEnd = index === state.waypoints.length - 1;
+  const isEn = (window.state && window.state.lang === 'en');
+  const toastMsg = isStart ? (isEn ? 'Tap on map to select start point 📍' : 'Haritada başlangıç noktasına dokunun 📍')
+    : isEnd ? (isEn ? 'Tap on map to select destination 🏁' : 'Haritada varış noktasına dokunun 🏁')
+    : (isEn ? `Tap on map to set location for stop #${index} 📍` : `Haritada ${index}. ara durağın konumuna dokunun 📍`);
+  showToast(toastMsg, 'info');
+
+  if (map) {
+    map.getContainer().style.cursor = 'crosshair';
+  }
+
   if (typeof toggleMobileNavDrawer === 'function') {
     const drawer = document.getElementById('mobile-nav-drawer');
     if (drawer && !drawer.classList.contains('hidden')) {
       toggleMobileNavDrawer(false);
     }
   }
+
+  if (window.innerWidth < 768 && typeof closeMobileSidebar === 'function') {
+    closeMobileSidebar();
+  }
 }
+
+// ==========================================
+// ROTAM MANUEL DURAK EKLEME SİSTEMİ (MANUAL WAYPOINT ENGINE)
+// ==========================================
+function parseCoordinatesInput(str) {
+  if (!str || typeof str !== 'string') return null;
+  const match = str.match(/(-?\d{1,2}(?:\.\d+)?)\s*[,;\s]\s*(-?\d{1,3}(?:\.\d+)?)/);
+  if (match) {
+    const lat = parseFloat(match[1]);
+    const lon = parseFloat(match[2]);
+    if (!isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+      return { lat, lon };
+    }
+  }
+  return null;
+}
+
+function openManualWaypointModal() {
+  const modal = document.getElementById('rotam-manual-waypoint-modal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    const coordInp = document.getElementById('manual-wp-coord-input');
+    const nameInp = document.getElementById('manual-wp-name-input');
+    if (coordInp) coordInp.value = '';
+    if (nameInp) nameInp.value = '';
+    setTimeout(() => { if (coordInp) coordInp.focus(); }, 120);
+  }
+}
+
+function closeManualWaypointModal() {
+  const modal = document.getElementById('rotam-manual-waypoint-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+  }
+}
+
+function addManualWaypointFromMap() {
+  closeManualWaypointModal();
+  const newIndex = state.waypoints.length - 1;
+  const newWp = {
+    id: 'waypoint-' + Date.now(),
+    type: 'waypoint',
+    name: 'Haritada Seçilen Durak',
+    lat: null,
+    lon: null,
+    marker: null
+  };
+  state.waypoints.splice(newIndex, 0, newWp);
+  updateWaypointsListUI();
+  activateMapPickMode(newIndex);
+}
+
+function addCurrentGPSAsWaypoint() {
+  closeManualWaypointModal();
+  const applyGPS = (lat, lon) => {
+    const newIndex = state.waypoints.length - 1;
+    const friendlyName = findNearestCityOrPlace(lat, lon);
+    const newWp = {
+      id: 'waypoint-' + Date.now(),
+      type: 'waypoint',
+      name: friendlyName ? `Mevcut Konum (${friendlyName})` : 'Mevcut Konum (Ara Durak)',
+      lat: lat,
+      lon: lon,
+      marker: null
+    };
+    state.waypoints.splice(newIndex, 0, newWp);
+    updateWaypointsListUI();
+    updateWaypointMarkers();
+
+    reverseGeocodeCoordinate(lat, lon, (geo) => {
+      const refined = geo.name ? (geo.region ? `${geo.name}, ${geo.region}` : geo.name) : friendlyName;
+      if (refined) newWp.name = refined;
+      updateWaypointsListUI();
+    });
+
+    const valid = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
+    if (valid.length >= 2) calculateRouteMain();
+    showToast('Mevcut GPS konumunuz ara durak olarak eklendi 📍', 'success');
+  };
+
+  if (state.userLocation && state.userLocation.lat) {
+    applyGPS(state.userLocation.lat, state.userLocation.lon);
+  } else if (navigator.geolocation) {
+    showToast('GPS konumu alınıyor...', 'info');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => applyGPS(pos.coords.latitude, pos.coords.longitude),
+      (err) => showToast('GPS konumu alınamadı. Lütfen konum izinlerini kontrol edin.', 'error'),
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  } else {
+    showToast('Tarayıcınız konum servisini desteklemiyor.', 'error');
+  }
+}
+
+function submitManualCoordinateWaypoint() {
+  const coordInp = document.getElementById('manual-wp-coord-input');
+  const nameInp = document.getElementById('manual-wp-name-input');
+  const rawCoord = coordInp ? coordInp.value.trim() : '';
+  const customName = nameInp ? nameInp.value.trim() : '';
+
+  const parsed = parseCoordinatesInput(rawCoord);
+  if (!parsed) {
+    showToast('Lütfen geçerli bir enlem ve boylam girin (Örn: 41.0082, 28.9784)', 'error');
+    if (coordInp) coordInp.focus();
+    return;
+  }
+
+  const { lat, lon } = parsed;
+  const friendlyName = customName || findNearestCityOrPlace(lat, lon) || `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+
+  const newIndex = state.waypoints.length - 1;
+  const newWp = {
+    id: 'waypoint-' + Date.now(),
+    type: 'waypoint',
+    name: friendlyName,
+    lat: lat,
+    lon: lon,
+    marker: null
+  };
+  state.waypoints.splice(newIndex, 0, newWp);
+
+  closeManualWaypointModal();
+  updateWaypointsListUI();
+  updateWaypointMarkers();
+
+  if (map) {
+    map.setView([lat, lon], Math.max(map.getZoom(), 12));
+  }
+
+  if (!customName) {
+    reverseGeocodeCoordinate(lat, lon, (geo) => {
+      const refined = geo.name ? (geo.region ? `${geo.name}, ${geo.region}` : geo.name) : friendlyName;
+      if (refined) newWp.name = refined;
+      updateWaypointsListUI();
+    });
+  }
+
+  const valid = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
+  if (valid.length >= 2) calculateRouteMain();
+
+  showToast(`"${friendlyName}" ara durak olarak eklendi 📍`, 'success');
+}
+
+window.activateMapPickMode = activateMapPickMode;
+window.openManualWaypointModal = openManualWaypointModal;
+window.closeManualWaypointModal = closeManualWaypointModal;
+window.addManualWaypointFromMap = addManualWaypointFromMap;
+window.addCurrentGPSAsWaypoint = addCurrentGPSAsWaypoint;
+window.submitManualCoordinateWaypoint = submitManualCoordinateWaypoint;
 
 // ==========================================
 // ROTAM AKILLI KONUM & HEDEF ARAMA MOTORU (SMART SEARCH & DISAMBIGUATION)
@@ -3488,6 +3654,7 @@ async function handleMapClick(lat, lon) {
 
   // 0. Explicit map pick mode
   if (state.mapPickTargetIndex !== null && state.mapPickTargetIndex !== undefined) {
+    if (map) map.getContainer().style.cursor = '';
     const targetIdx = state.mapPickTargetIndex;
     state.mapPickTargetIndex = null;
     state.waypoints[targetIdx].lat = lat;

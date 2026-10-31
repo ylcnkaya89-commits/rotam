@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v87 (Drag & Drop Waypoints, One-Tap Reordering, Smart TSP Optimization)
-const CACHE_NAME = 'rotam-cache-v87';
+// Rotam PWA Service Worker - v88 (Manual Waypoint Adding Suite, Map Pick on Stops, GPS Coordinates)
+const CACHE_NAME = 'rotam-cache-v88';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

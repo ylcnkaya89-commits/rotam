@@ -125,6 +125,7 @@ window.TRANSLATIONS = {
     wp_end_placeholder: "Varış Noktası (Örn: Antalya)",
     wp_stop_prefix: "Ara Durak ",
     btn_add_waypoint: "Ara Durak Ekle",
+    btn_add_waypoint_manual: "Manuel Ekle",
     or_click_map: "veya haritaya tıkla",
 
     // Map Controls
@@ -511,6 +512,7 @@ window.TRANSLATIONS = {
     wp_end_placeholder: "Destination (e.g. Antalya)",
     wp_stop_prefix: "Stop ",
     btn_add_waypoint: "Add Stop",
+    btn_add_waypoint_manual: "Manual Add",
     or_click_map: "or click on map",
 
     // Map Controls
