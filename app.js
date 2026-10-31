@@ -262,22 +262,17 @@ function createTileLayers() {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
   });
 
-  // 2. ROTAM Gündüz Navigasyon Modu (CartoDB Voyager - 100% EPSG:3857 Uyumlu, Sıfır Projeksiyon Kayması)
-  layers.day = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+  // 2. ROTAM Gündüz Navigasyon Modu (Official OSM Daylight - 100% Reliable, Zero Key, 100% EPSG:3857, Sıfır Kayma)
+  layers.day = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
-    subdomains: 'abcd',
-    attribution: '&copy; <a href="https://carto.com/" target="_blank">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
   });
   layers.voyager = layers.day;
   layers.yandex = layers.day;
 
   // 3. Standart Dünya / OpenStreetMap
-  layers.global = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
-  });
-  layers.osm = layers.global;
-  layers.voyager = layers.global;
+  layers.global = layers.day;
+  layers.osm = layers.day;
 
   // 4. High-Resolution Satellite (Esri World Imagery)
   layers.sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
