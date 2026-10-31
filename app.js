@@ -262,13 +262,14 @@ function createTileLayers() {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
   });
 
-  // 2. Direct Yandex High-Resolution Tiles (Official Turkish Streets & Labels without JS API key requirement)
-  layers.yandex = L.tileLayer('https://core-renderer-tiles.maps.yandex.net/tiles?l=map&x={x}&y={y}&z={z}&scale=1&lang=tr_TR', {
+  // 2. ROTAM Gündüz Navigasyon Modu (CartoDB Voyager - 100% EPSG:3857 Uyumlu, Sıfır Projeksiyon Kayması)
+  layers.day = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
     maxZoom: 19,
-    subdomains: [],
-    attribution: '&copy; <a href="https://yandex.com.tr/harita" target="_blank">Yandex</a>'
+    subdomains: 'abcd',
+    attribution: '&copy; <a href="https://carto.com/" target="_blank">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
   });
-  layers.day = layers.yandex;
+  layers.voyager = layers.day;
+  layers.yandex = layers.day;
 
   // 3. Standart Dünya / OpenStreetMap
   layers.global = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1067,7 +1068,7 @@ function switchTile(tileKey) {
 
   // Update active layer label on desktop accordion pill
   const layerLabels = {
-    yandex: 'Я Yandex',
+    yandex: '☀️ Gündüz',
     dark: '🌙 Gece',
     sat: '🛰️ Uydu',
     global: '🌍 Dünya',
@@ -1141,13 +1142,13 @@ const RotamAutoTheme = {
       this.mode = isDay ? 'dark' : 'day';
       localStorage.setItem('rotam_theme_mode', this.mode);
       switchTile(this.mode === 'dark' ? 'dark' : 'yandex');
-      showToast(this.mode === 'dark' ? (isEn ? '🌙 Yandex Gece Modu' : '🌙 Yandex Gece Modu') : (isEn ? '☀️ Yandex Gündüz Modu' : '☀️ Yandex Gündüz Modu'), 'info');
+      showToast(this.mode === 'dark' ? (isEn ? '🌙 Gece Modu' : '🌙 Gece Modu') : (isEn ? '☀️ Gündüz Modu' : '☀️ Gündüz Modu'), 'info');
     } else {
       this.mode = 'auto';
       localStorage.setItem('rotam_theme_mode', 'auto');
       this.apply();
       const isDay = this.isDaytime();
-      showToast(isEn ? `🌓 Otomatik Yandex Gündüz/Gece (${isDay ? 'Gündüz ☀️' : 'Gece 🌙'})` : `🌓 Otomatik Yandex Gündüz/Gece (${isDay ? 'Gündüz ☀️' : 'Gece 🌙'}) Aktif`, 'success');
+      showToast(isEn ? `🌓 Otomatik Gündüz/Gece (${isDay ? 'Gündüz ☀️' : 'Gece 🌙'})` : `🌓 Otomatik Gündüz/Gece (${isDay ? 'Gündüz ☀️' : 'Gece 🌙'}) Aktif`, 'success');
     }
     this.updateUI();
   },

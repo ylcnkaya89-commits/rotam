@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v83 (Pixel-Perfect Map Marker Pin Alignment & Accurate Location Sync)
-const CACHE_NAME = 'rotam-cache-v83';
+// Rotam PWA Service Worker - v84 (Calibrated Daylight Map - 100% EPSG:3857, Zero Projection Shift)
+const CACHE_NAME = 'rotam-cache-v84';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
