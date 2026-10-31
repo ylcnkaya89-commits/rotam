@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v81 (Comprehensive Route Repair, Motorcycle Service & Tyre Stations Engine)
-const CACHE_NAME = 'rotam-cache-v81';
+// Rotam PWA Service Worker - v82 (Accurate Reverse Geocoding & Strict Map-Click Location Resolution)
+const CACHE_NAME = 'rotam-cache-v82';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

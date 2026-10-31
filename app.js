@@ -1961,35 +1961,146 @@ function searchLocalGeo(query) {
   return null;
 }
 
-// Reverse Geocoding Lookup for Coordinates (Nearest City or Landmark)
+// Asynchronous Reverse Geocoding Cache & Handler (OpenStreetMap Nominatim)
+let lastReverseGeocodeAbort = null;
+const reverseGeocodeCache = new Map();
+
+async function reverseGeocodeCoordinate(lat, lon, onResult) {
+  const cacheKey = `${Number(lat).toFixed(4)},${Number(lon).toFixed(4)}`;
+  if (reverseGeocodeCache.has(cacheKey)) {
+    if (typeof onResult === 'function') onResult(reverseGeocodeCache.get(cacheKey));
+    return;
+  }
+
+  if (lastReverseGeocodeAbort) {
+    lastReverseGeocodeAbort.abort();
+    lastReverseGeocodeAbort = null;
+  }
+
+  const controller = new AbortController();
+  lastReverseGeocodeAbort = controller;
+  const timeoutId = setTimeout(() => controller.abort(), 2600);
+
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1&accept-language=tr,en;q=0.9`;
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: { 'Accept': 'application/json' }
+    });
+    clearTimeout(timeoutId);
+
+    if (!res.ok) throw new Error('Nominatim status ' + res.status);
+    const data = await res.json();
+    if (!data || !data.address) throw new Error('No address found');
+
+    const addr = data.address;
+    const isEn = (window.state && window.state.lang === 'en');
+
+    // Extract road / avenue / highway / street
+    const road = addr.road || addr.pedestrian || addr.highway || addr.footway || addr.path || addr.street;
+    // Extract neighbourhood / quarter / village / hamlet
+    const neighbourhood = addr.neighbourhood || addr.suburb || addr.quarter || addr.village || addr.hamlet;
+    // Extract district / county / town / municipality
+    const district = addr.town || addr.district || addr.county || addr.municipality || addr.city_district;
+    // Extract city / province / state
+    const city = addr.city || addr.province || addr.state;
+
+    let primaryName = '';
+    let secondaryName = '';
+
+    if (road) {
+      primaryName = road;
+      if (neighbourhood && neighbourhood !== road) {
+        secondaryName = district ? `${neighbourhood}, ${district}` : `${neighbourhood}, ${city || 'Türkiye'}`;
+      } else if (district) {
+        secondaryName = city && city !== district ? `${district}, ${city}` : (city || 'Türkiye');
+      } else {
+        secondaryName = city || 'Türkiye';
+      }
+    } else if (neighbourhood) {
+      primaryName = neighbourhood;
+      secondaryName = district ? (city && city !== district ? `${district}, ${city}` : district) : (city || 'Türkiye');
+    } else if (district) {
+      primaryName = district;
+      secondaryName = city && city !== district ? `${city}, Türkiye` : 'Türkiye';
+    } else if (city) {
+      primaryName = city;
+      secondaryName = 'Türkiye';
+    } else {
+      primaryName = isEn ? 'Selected Location' : 'Seçilen Konum';
+      secondaryName = isEn ? 'Turkey' : 'Türkiye';
+    }
+
+    const result = {
+      name: primaryName,
+      region: secondaryName,
+      fullAddress: data.display_name || `${primaryName}, ${secondaryName}`,
+      city: city || district || secondaryName,
+      lat,
+      lon
+    };
+
+    if (reverseGeocodeCache.size > 150) {
+      const firstKey = reverseGeocodeCache.keys().next().value;
+      reverseGeocodeCache.delete(firstKey);
+    }
+    reverseGeocodeCache.set(cacheKey, result);
+
+    if (typeof onResult === 'function') {
+      onResult(result);
+    }
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      console.debug('Reverse geocode fallback:', err.message);
+    }
+  }
+}
+
+// Reverse Geocoding Lookup for Coordinates (Nearest City or Settlement)
 function findNearestCityOrPlace(lat, lon) {
-  let nearestName = null;
-  let minDistance = Infinity;
+  let nearestCity = null;
+  let minCityDist = Infinity;
 
   const geoDb = (window.TURKEY_GEO_DATABASE && Array.isArray(window.TURKEY_GEO_DATABASE)) ? window.TURKEY_GEO_DATABASE : [];
   for (const city of geoDb) {
-    const d = Math.hypot(city.lat - lat, city.lon - lon);
-    if (d < minDistance) {
-      minDistance = d;
-      nearestName = city.name;
+    const d = haversineMeters(city.lat, city.lon, lat, lon) / 1000;
+    if (d < minCityDist) {
+      minCityDist = d;
+      nearestCity = city;
     }
   }
 
+  const isEn = (window.state && window.state.lang === 'en');
+
+  // SADECE ve SADECE tam bir POI işaretçisine doğrudan dokunulduğunda (< 60m) o mekanın adını al
+  let matchedPlace = null;
+  let minPlaceDist = Infinity;
   const placesDb = (state && state.allPlaces && Array.isArray(state.allPlaces)) ? state.allPlaces : (window.DEFAULT_HISTORIC_PLACES || []);
   for (const p of placesDb) {
-    const d = Math.hypot(p.lat - lat, p.lon - lon);
-    if (d < minDistance) {
-      minDistance = d;
-      nearestName = p.name;
+    const d = haversineMeters(p.lat, p.lon, lat, lon);
+    if (d < 60 && d < minPlaceDist) {
+      minPlaceDist = d;
+      matchedPlace = p;
     }
   }
 
-  if (minDistance < 0.12) {
-    return nearestName || `Konum (${lat.toFixed(3)}, ${lon.toFixed(3)})`;
-  } else if (minDistance < 0.35) {
-    return `${nearestName} Çevresi`;
+  if (matchedPlace) {
+    return matchedPlace.name;
   }
-  return `Konum (${lat.toFixed(3)}, ${lon.toFixed(3)})`;
+
+  // Rastgele harita dokunuşlarında asla uzaktaki bir restoran veya müzeyi yer adı yapma!
+  // Sadece gerçek yerleşim/il/ilçe baz alınır:
+  if (nearestCity) {
+    if (minCityDist < 8) {
+      return nearestCity.name;
+    } else if (minCityDist < 25) {
+      return isEn ? `Near ${nearestCity.name}` : `${nearestCity.name} Yakınları`;
+    } else if (minCityDist < 60) {
+      return isEn ? `${nearestCity.name} Region` : `${nearestCity.name} Çevresi`;
+    }
+  }
+
+  return isEn ? `Location (${lat.toFixed(3)}, ${lon.toFixed(3)})` : `Konum (${lat.toFixed(3)}, ${lon.toFixed(3)})`;
 }
 
 // Populate Turkish Cities & Tourist Hubs Datalist for Autocomplete
@@ -3019,6 +3130,24 @@ async function handleMapClick(lat, lon) {
     updateWaypointsListUI();
     updateWaypointMarkers();
     showToast(`Nokta belirlendi: ${friendlyName} 📍`, 'success');
+
+    // Refine asynchronously with real-time reverse geocoding
+    reverseGeocodeCoordinate(lat, lon, (geo) => {
+      if (state.waypoints && state.waypoints[targetIdx] && Math.abs(state.waypoints[targetIdx].lat - lat) < 0.0001) {
+        const refinedName = geo.name ? (geo.region ? `${geo.name}, ${geo.region}` : geo.name) : friendlyName;
+        state.waypoints[targetIdx].name = refinedName;
+        if (targetIdx === 0) {
+          const heroInp = document.getElementById('hero-start-input');
+          if (heroInp) heroInp.value = refinedName;
+        } else if (targetIdx === state.waypoints.length - 1) {
+          const heroInp = document.getElementById('hero-end-input');
+          if (heroInp) heroInp.value = refinedName;
+        }
+        updateWaypointsListUI();
+        updateWaypointMarkers();
+      }
+    });
+
     const valid = state.waypoints.filter(w => w.lat !== null && w.lon !== null);
     if (valid.length >= 2) calculateRouteMain();
     return;
@@ -3037,6 +3166,15 @@ async function handleMapClick(lat, lon) {
       region: friendlyName || (isEn ? 'Saved Map Point' : 'Haritadan Seçilen Nokta')
     });
     dropGmapsPin(lat, lon);
+
+    reverseGeocodeCoordinate(lat, lon, (geo) => {
+      RotamFavorites.setSpecial(type, {
+        name,
+        lat,
+        lon,
+        region: geo.region ? `${geo.name}, ${geo.region}` : (geo.name || friendlyName)
+      });
+    });
     return;
   }
 
@@ -3088,13 +3226,13 @@ function removeGmapsPin() {
 function handleGmapsMapClick(lat, lon, friendlyName) {
   dropGmapsPin(lat, lon);
 
-  // Check if a known POI is within 250m
+  // Check if a known POI was directly clicked on (< 60m)
   let matchedPoi = null;
   const places = (state && state.allPlaces && Array.isArray(state.allPlaces)) ? state.allPlaces : (window.DEFAULT_HISTORIC_PLACES || []);
   let minD = Infinity;
   for (const p of places) {
     const d = haversineMeters(p.lat, p.lon, lat, lon);
-    if (d < 250 && d < minD) {
+    if (d < 60 && d < minD) {
       minD = d;
       matchedPoi = p;
     }
@@ -3102,17 +3240,40 @@ function handleGmapsMapClick(lat, lon, friendlyName) {
 
   const isEn = (window.state && window.state.lang === 'en');
   const targetPlace = matchedPoi || {
-    name: friendlyName,
+    name: isEn ? 'Selected Location' : 'Seçilen Konum',
     lat: lat,
     lon: lon,
     category: 'custom',
-    city: friendlyName.includes('(') ? '' : friendlyName,
+    city: friendlyName.includes('(') ? (isEn ? 'Turkey' : 'Türkiye') : friendlyName,
+    region: friendlyName.includes('(') ? (isEn ? 'Turkey' : 'Türkiye') : friendlyName,
+    isCustomPoint: true,
     description: isEn
-      ? `Selected map location at ${lat.toFixed(4)}, ${lon.toFixed(4)}. Tap Start to begin live navigation.`
+      ? `Selected map coordinate at ${lat.toFixed(4)}, ${lon.toFixed(4)}. Tap Start for turn-by-turn navigation.`
       : `${lat.toFixed(4)}, ${lon.toFixed(4)} koordinatındaki nokta. Hemen canlı navigasyon başlatabilir veya rotanızı planlayabilirsiniz.`
   };
 
   showGmapsPlaceSheet(targetPlace);
+
+  // If this is a random map click (not a direct click on a POI icon), refine address in real-time with reverse geocoding!
+  if (!matchedPoi) {
+    reverseGeocodeCoordinate(lat, lon, (geo) => {
+      if (activeGmapsSheetTarget && Math.abs(activeGmapsSheetTarget.lat - lat) < 0.0001 && Math.abs(activeGmapsSheetTarget.lon - lon) < 0.0001) {
+        activeGmapsSheetTarget.name = geo.name;
+        activeGmapsSheetTarget.city = geo.city;
+        activeGmapsSheetTarget.region = geo.region;
+        activeGmapsSheetTarget.description = `${geo.fullAddress} • (${lat.toFixed(4)}, ${lon.toFixed(4)})`;
+
+        const titleEl = document.getElementById('gmaps-sheet-title');
+        if (titleEl) titleEl.textContent = geo.name;
+
+        const regionEl = document.getElementById('gmaps-sheet-region');
+        if (regionEl) regionEl.textContent = geo.region;
+
+        const descEl = document.getElementById('gmaps-sheet-desc');
+        if (descEl) descEl.textContent = `${geo.fullAddress}`;
+      }
+    });
+  }
 }
 
 // Show Google Maps Bottom Place Sheet
