@@ -711,6 +711,8 @@ body.sunlight-mode .leaflet-container {
    =================================================== */
 .live-rider-marker {
   position: relative;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -719,21 +721,25 @@ body.sunlight-mode .leaflet-container {
 
 .live-rider-pulse {
   position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 54px;
   height: 54px;
   border-radius: 50%;
   background: rgba(37, 99, 235, 0.28);
   border: 1.5px solid rgba(59, 130, 246, 0.6);
   animation: riderRadarPulse 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  pointer-events: none;
 }
 
 @keyframes riderRadarPulse {
   0% {
-    transform: scale(0.5);
+    transform: translate(-50%, -50%) scale(0.45);
     opacity: 0.95;
   }
   100% {
-    transform: scale(1.6);
+    transform: translate(-50%, -50%) scale(1.6);
     opacity: 0;
   }
 }
@@ -1627,62 +1633,56 @@ body.sunlight-mode .gmaps-tool-btn {
   display: block !important;
 }
 
-/* Animated Google Maps Drop Pin Marker */
+/* Animated Google Maps Drop Pin Marker (Zero-offset, mathematically aligned to needle tip at 17, 46) */
+.gmaps-drop-pin-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.live-rider-pulse-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
 .gmaps-drop-pin-wrapper {
   position: relative;
   width: 34px;
   height: 46px;
-  transform: translate(-17px, -46px);
   pointer-events: none;
 }
 
-.gmaps-pin-body {
-  width: 34px;
-  height: 46px;
-  background: radial-gradient(circle at 50% 35%, #ef4444 0%, #dc2626 50%, #991b1b 100%);
-  border-radius: 50% 50% 50% 0;
-  transform: rotate(-45deg);
+.gmaps-drop-pin-svg {
   position: absolute;
   top: 0;
   left: 0;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.45), 0 0 12px rgba(239, 68, 68, 0.6);
-  border: 2.5px solid #ffffff;
-  animation: gmapsPinDrop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.gmaps-pin-dot {
-  width: 11px;
-  height: 11px;
-  background: #ffffff;
-  border-radius: 50%;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+  width: 34px;
+  height: 46px;
+  transform-origin: 17px 46px;
+  animation: gmapsPinDrop 0.36s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .gmaps-pin-shadow {
   position: absolute;
-  bottom: -4px;
-  left: 7px;
-  width: 20px;
-  height: 8px;
-  background: rgba(0, 0, 0, 0.4);
+  bottom: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 7px;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 75%);
   border-radius: 50%;
-  filter: blur(2.5px);
-  animation: gmapsShadowPop 0.4s ease-out;
+  filter: blur(1.5px);
+  animation: gmapsShadowPop 0.36s ease-out;
 }
 
 @keyframes gmapsPinDrop {
-  0% { transform: translateY(-32px) rotate(-45deg) scale(0.5); opacity: 0; }
-  70% { transform: translateY(4px) rotate(-45deg) scale(1.05); }
-  100% { transform: translateY(0) rotate(-45deg) scale(1); opacity: 1; }
+  0% { transform: translateY(-28px) scale(0.5); opacity: 0; }
+  70% { transform: translateY(2px) scale(1.04); }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
 }
 
 @keyframes gmapsShadowPop {
-  0% { transform: scale(0.2); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+  0% { transform: translateX(-50%) scale(0.2); opacity: 0; }
+  100% { transform: translateX(-50%) scale(1); opacity: 1; }
 }
 
 /* ==========================================

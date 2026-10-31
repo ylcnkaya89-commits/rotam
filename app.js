@@ -701,6 +701,12 @@ function triggerMapPickFromModal() {
 
 function forceRecheckGPS() {
   closeLocationPickerModal();
+  if (state.userLocation) {
+    state.userLocation.isManual = false;
+  }
+  try {
+    localStorage.removeItem('rotam_verified_user_location');
+  } catch (e) {}
   flyToCurrentLocation();
 }
 
@@ -822,13 +828,23 @@ function proactivelyWarmUserLocation() {
   navigator.geolocation.getCurrentPosition(
     (pos) => {
       if (state.userLocation && state.userLocation.isManual) return;
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      const acc = Math.round(pos.coords.accuracy || 10);
       state.userLocation = {
-        lat: pos.coords.latitude,
-        lon: pos.coords.longitude,
-        accuracy: Math.round(pos.coords.accuracy || 10),
+        lat,
+        lon,
+        accuracy: acc,
         isFallback: false,
         timestamp: Date.now()
       };
+      if (map && !state.routeData) {
+        const center = map.getCenter();
+        if (center && Math.abs(center.lat - 39.0) < 1.0 && Math.abs(center.lng - 35.2) < 1.0) {
+          showUserLocationPulseMarker(lat, lon, acc);
+          map.setView([lat, lon], 15);
+        }
+      }
     },
     () => {
       // Ignore silently if permission prompt not yet accepted
@@ -849,11 +865,11 @@ function showUserLocationPulseMarker(lat, lon, accuracy = null) {
     const html = `
       <div class="live-rider-marker">
         <div class="live-rider-pulse"></div>
-        <div class="w-4 h-4 rounded-full bg-cyan-400 border-2 border-white shadow-lg shadow-cyan-400/80"></div>
+        <div class="w-4 h-4 rounded-full bg-cyan-400 border-2 border-white shadow-lg shadow-cyan-400/80 relative z-10"></div>
       </div>
     `;
     const icon = L.divIcon({
-      className: '',
+      className: 'live-rider-pulse-icon',
       html,
       iconSize: [40, 40],
       iconAnchor: [20, 20]
@@ -920,6 +936,22 @@ function flyToCurrentLocation() {
       } else {
         showUserLocationPulseMarker(lat, lon, acc);
       }
+
+      // Reverse-geocode in real-time to save the exact street/district and persist
+      reverseGeocodeCoordinate(lat, lon, (geo) => {
+        const fullLocName = geo.name ? (geo.region ? `${geo.name}, ${geo.region}` : geo.name) : 'Mevcut Konumum';
+        if (state.userLocation && Math.abs(state.userLocation.lat - lat) < 0.0001) {
+          state.userLocation.name = fullLocName;
+        }
+        try {
+          localStorage.setItem('rotam_verified_user_location', JSON.stringify({
+            lat,
+            lon,
+            name: fullLocName,
+            timestamp: Date.now()
+          }));
+        } catch (e) {}
+      });
 
       let accMsg = '';
       if (acc <= 15) {
@@ -2137,11 +2169,11 @@ function checkAndPanToWaypoint(index) {
   if (wp && wp.lat !== null && wp.lon !== null && map) {
     const start = state.waypoints[0];
     const end = state.waypoints[state.waypoints.length - 1];
-    if (start && end && start.lat !== null && end.lat !== null) {
+    if (start && end && start.lat !== null && end.lat !== null && state.waypoints.length > 1 && (Math.abs(start.lat - end.lat) > 0.001 || Math.abs(start.lon - end.lon) > 0.001)) {
       const bounds = L.latLngBounds([[start.lat, start.lon], [end.lat, end.lon]]);
-      map.fitBounds(bounds, { padding: [60, 60], maxZoom: 12 });
+      map.fitBounds(bounds, { padding: [60, 60], maxZoom: 14 });
     } else {
-      map.setView([wp.lat, wp.lon], 9);
+      map.setView([wp.lat, wp.lon], 15);
     }
   }
 }
@@ -2246,7 +2278,7 @@ function useCurrentLocationForStart() {
       const lat = pos.coords.latitude;
       const lon = pos.coords.longitude;
       const acc = Math.round(pos.coords.accuracy || 10);
-      state.userLocation = { lat, lon };
+      state.userLocation = { lat, lon, accuracy: acc, isFallback: false, timestamp: Date.now() };
 
       state.waypoints[0].lat = lat;
       state.waypoints[0].lon = lon;
@@ -2254,7 +2286,16 @@ function useCurrentLocationForStart() {
       if (input) input.value = isEn ? '📍 Current Location' : '📍 Mevcut Konumum';
       updateWaypointsListUI();
       updateWaypointMarkers();
-      checkAndPanToWaypoint(0);
+      showUserLocationPulseMarker(lat, lon, acc);
+      if (map) {
+        map.setView([lat, lon], 16);
+      }
+      reverseGeocodeCoordinate(lat, lon, (geo) => {
+        const fullLocName = geo.name ? (geo.region ? `${geo.name}, ${geo.region}` : geo.name) : (isEn ? 'Current Location' : 'Mevcut Konumum');
+        state.waypoints[0].name = fullLocName;
+        if (input) input.value = `📍 ${fullLocName}`;
+        updateWaypointsListUI();
+      });
       showToast((isEn ? 'Current location set as starting point' : 'Mevcut konumunuz başlangıç noktası olarak ayarlandı.') + ` (±${acc}m)`, 'success');
     },
     (err) => {
@@ -3200,13 +3241,25 @@ function dropGmapsPin(lat, lon) {
   const html = `
     <div class="gmaps-drop-pin-wrapper">
       <div class="gmaps-pin-shadow"></div>
-      <div class="gmaps-pin-body">
-        <div class="gmaps-pin-dot"></div>
-      </div>
+      <svg class="gmaps-drop-pin-svg" width="34" height="46" viewBox="0 0 34 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="gmaps-pin-grad" x1="17" y1="0" x2="17" y2="46" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#EF4444"/>
+            <stop offset="0.55" stop-color="#DC2626"/>
+            <stop offset="1" stop-color="#991B1B"/>
+          </linearGradient>
+          <filter id="gmaps-pin-glow" x="-20%" y="-10%" width="140%" height="130%">
+            <feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-color="#000000" flood-opacity="0.5"/>
+          </filter>
+        </defs>
+        <path d="M17 0C7.611 0 0 7.611 0 17C0 29.75 17 46 17 46C17 46 34 29.75 34 17C34 7.611 26.389 0 17 0Z" fill="url(#gmaps-pin-grad)" filter="url(#gmaps-pin-glow)"/>
+        <circle cx="17" cy="17" r="6" fill="#FFFFFF"/>
+        <circle cx="17" cy="17" r="2.8" fill="#B91C1C"/>
+      </svg>
     </div>
   `;
   const icon = L.divIcon({
-    className: '',
+    className: 'gmaps-drop-pin-icon',
     html: html,
     iconSize: [34, 46],
     iconAnchor: [17, 46]
