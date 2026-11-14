@@ -598,8 +598,13 @@ function setUserLocationManually(lat, lon, customName = null) {
   // Update pulsing location marker on map
   showUserLocationPulseMarker(lat, lon, 5);
 
-  // If start waypoint is 'Mevcut Konumum' or unset, update it!
-  if (state.waypoints && state.waypoints[0] && (!state.waypoints[0].lat || state.waypoints[0].name.includes('Konum'))) {
+  // If start waypoint is 'Mevcut Konumum' or unset (and not a custom named city), update it!
+  const hasCustomStartName = state.waypoints && state.waypoints[0]
+    && state.waypoints[0].name
+    && !state.waypoints[0].name.includes('Konum')
+    && !state.waypoints[0].name.includes('Location');
+
+  if (state.waypoints && state.waypoints[0] && (!state.waypoints[0].lat || state.waypoints[0].name.includes('Konum')) && !hasCustomStartName) {
     state.waypoints[0].lat = lat;
     state.waypoints[0].lon = lon;
     state.waypoints[0].name = locName;
@@ -1546,9 +1551,45 @@ function handleMobileNavRideStart() {
     return;
   }
 
-  // If destination is defined but start point is missing: automatically use current GPS location!
-  if (state.waypoints[1] && state.waypoints[1].lat !== null && (!state.waypoints[0] || state.waypoints[0].lat === null)) {
-    const isEn = (window.state && window.state.lang === 'en');
+  // If destination is defined but start point is missing or has un-geocoded custom name:
+  const isEn = (window.state && window.state.lang === 'en');
+  const startWp = state.waypoints && state.waypoints[0];
+  const endWp = state.waypoints && state.waypoints[state.waypoints.length - 1];
+
+  if (endWp && endWp.lat !== null && (!startWp || startWp.lat === null)) {
+    // If user provided a name for start, resolve it first before falling back to GPS!
+    if (startWp && startWp.name && !startWp.name.includes('Konum') && !startWp.name.includes('Location')) {
+      const local = searchLocalGeo(startWp.name);
+      if (local) {
+        startWp.lat = local.lat;
+        startWp.lon = local.lon;
+        if (typeof updateWaypointsListUI === 'function') updateWaypointsListUI();
+        if (typeof updateWaypointMarkers === 'function') updateWaypointMarkers();
+        calculateRouteMain().then(() => {
+          if (state.routeData && typeof LiveNavigation !== 'undefined') {
+            LiveNavigation.start();
+          }
+        });
+        return;
+      }
+      showToast(isEn ? 'Resolving start location...' : 'Başlangıç konumu aranıyor...', 'info');
+      geocodeLocation(startWp.name).then(async (coord) => {
+        if (coord) {
+          startWp.lat = coord.lat;
+          startWp.lon = coord.lon;
+          if (typeof updateWaypointsListUI === 'function') updateWaypointsListUI();
+          if (typeof updateWaypointMarkers === 'function') updateWaypointMarkers();
+          await calculateRouteMain();
+          if (state.routeData && typeof LiveNavigation !== 'undefined') {
+            LiveNavigation.start();
+          }
+        } else {
+          showToast(isEn ? `Could not find "${startWp.name}".` : `"${startWp.name}" konumu bulunamadı.`, 'warning');
+        }
+      });
+      return;
+    }
+
     if (navigator.geolocation) {
       showToast(isEn ? 'Getting your location and preparing route...' : 'Mevcut konumunuz alınıyor ve rota oluşturuluyor...', 'info');
       navigator.geolocation.getCurrentPosition(
@@ -2233,6 +2274,10 @@ function handleHeroStartInput(value) {
       state.waypoints[0].lat = local.lat;
       state.waypoints[0].lon = local.lon;
       updateWaypointMarkers();
+    } else {
+      // Invalidate old coordinate so stale GPS or previous city does not persist
+      state.waypoints[0].lat = null;
+      state.waypoints[0].lon = null;
     }
   }
 }
@@ -2246,6 +2291,10 @@ function handleHeroEndInput(value) {
       state.waypoints[lastIdx].lat = local.lat;
       state.waypoints[lastIdx].lon = local.lon;
       updateWaypointMarkers();
+    } else {
+      // Invalidate old coordinate so stale previous destination does not persist
+      state.waypoints[lastIdx].lat = null;
+      state.waypoints[lastIdx].lon = null;
     }
   }
 }
@@ -2408,8 +2457,9 @@ async function submitHeroRoute() {
   if (startVal.includes('Mevcut Konumum') && state.userLocation) {
     startCoord = state.userLocation;
   } else {
-    if (state.waypoints[0] && state.waypoints[0].lat !== null && state.waypoints[0].name === startVal) {
-      startCoord = { lat: state.waypoints[0].lat, lon: state.waypoints[0].lon };
+    const localStart = searchLocalGeo(startVal);
+    if (localStart) {
+      startCoord = { lat: localStart.lat, lon: localStart.lon };
     } else {
       startCoord = await geocodeLocation(startVal);
     }
@@ -2417,8 +2467,9 @@ async function submitHeroRoute() {
 
   const lastIdx = state.waypoints.length - 1;
   let endCoord = null;
-  if (state.waypoints[lastIdx] && state.waypoints[lastIdx].lat !== null && state.waypoints[lastIdx].name === endVal) {
-    endCoord = { lat: state.waypoints[lastIdx].lat, lon: state.waypoints[lastIdx].lon };
+  const localEnd = searchLocalGeo(endVal);
+  if (localEnd) {
+    endCoord = { lat: localEnd.lat, lon: localEnd.lon };
   } else {
     endCoord = await geocodeLocation(endVal);
   }
@@ -3067,7 +3118,14 @@ const RotamSearchEngine = {
   ],
 
   getDistanceFromUser(lat, lon) {
-    const origin = state.userLocation || (state.waypoints[0] && state.waypoints[0].lat ? state.waypoints[0] : null);
+    const hasCustomStart = state.waypoints && state.waypoints[0]
+      && state.waypoints[0].lat !== null
+      && state.waypoints[0].name
+      && !state.waypoints[0].name.includes('Konum')
+      && !state.waypoints[0].name.includes('Location');
+    const origin = hasCustomStart
+      ? state.waypoints[0]
+      : (state.userLocation || (state.waypoints[0] && state.waypoints[0].lat ? state.waypoints[0] : null));
     if (!origin || !origin.lat || !origin.lon || !lat || !lon) return null;
     return haversineMeters(origin.lat, origin.lon, lat, lon) / 1000;
   },
@@ -3206,7 +3264,14 @@ const RotamSearchEngine = {
     try {
       const q = encodeURIComponent(query.trim());
       let url = `https://photon.komoot.io/api/?q=${q}&limit=8&lang=en`;
-      const origin = state.userLocation || (state.waypoints[0] && state.waypoints[0].lat ? state.waypoints[0] : null);
+      const hasCustomStart = state.waypoints && state.waypoints[0]
+        && state.waypoints[0].lat !== null
+        && state.waypoints[0].name
+        && !state.waypoints[0].name.includes('Konum')
+        && !state.waypoints[0].name.includes('Location');
+      const origin = hasCustomStart
+        ? state.waypoints[0]
+        : (state.userLocation || (state.waypoints[0] && state.waypoints[0].lat ? state.waypoints[0] : null));
       if (origin && origin.lat && origin.lon) {
         url += `&lat=${origin.lat}&lon=${origin.lon}`;
       }
@@ -3445,6 +3510,19 @@ function handleWaypointNameChange(index, value, inputEl) {
   if (!state.waypoints[index]) return;
   state.waypoints[index].name = value;
 
+  // Immediately check if typed value matches a local geo place
+  const local = searchLocalGeo(value);
+  if (local) {
+    state.waypoints[index].lat = local.lat;
+    state.waypoints[index].lon = local.lon;
+    updateWaypointMarkers();
+  } else {
+    // Crucial: clear old stale coordinate (e.g. from GPS or previous city)
+    // so calculateRouteMain and handleWaypointBlur will properly geocode the new city!
+    state.waypoints[index].lat = null;
+    state.waypoints[index].lon = null;
+  }
+
   // Sync to hero inputs
   if (index === 0) {
     const heroStart = document.getElementById('hero-start-input');
@@ -3501,6 +3579,14 @@ function closeWaypointAutocomplete() {
 async function handleWaypointBlur(index, value) {
   if (!state.waypoints[index] || !value || value.trim() === '') return;
   if (state.waypoints[index].lat === null || state.waypoints[index].lon === null) {
+    const local = searchLocalGeo(value);
+    if (local) {
+      state.waypoints[index].lat = local.lat;
+      state.waypoints[index].lon = local.lon;
+      updateWaypointMarkers();
+      checkAndPanToWaypoint(index);
+      return;
+    }
     const coord = await geocodeLocation(value);
     if (coord) {
       state.waypoints[index].lat = coord.lat;
@@ -3865,10 +3951,17 @@ function showGmapsPlaceSheet(place) {
     descEl.textContent = place.description || (isEn ? 'Tap Start for instant turn-by-turn live navigation.' : 'Tek tıkla canlı sürüş ve sesli navigasyon başlatın.');
   }
 
-  // 4. Calculate Distance & Driving Time from Current Location
+  // 4. Calculate Distance & Driving Time from Starting Location
   const distEl = document.getElementById('gmaps-sheet-dist');
   const timeEl = document.getElementById('gmaps-sheet-time');
-  const origin = state.userLocation || (state.waypoints[0]?.lat ? state.waypoints[0] : null);
+  const hasCustomStart = state.waypoints && state.waypoints[0]
+    && state.waypoints[0].lat !== null
+    && state.waypoints[0].name
+    && !state.waypoints[0].name.includes('Konum')
+    && !state.waypoints[0].name.includes('Location');
+  const origin = hasCustomStart
+    ? state.waypoints[0]
+    : (state.userLocation || (state.waypoints[0]?.lat ? state.waypoints[0] : null));
 
   if (origin && origin.lat && origin.lon) {
     const rawDistM = haversineMeters(origin.lat, origin.lon, place.lat, place.lon);
@@ -3968,6 +4061,18 @@ async function gmapsQuickStartFromSheet() {
   const target = activeGmapsSheetTarget;
   const isEn = (window.state && window.state.lang === 'en');
 
+  const hasCustomStart = state.waypoints && state.waypoints[0]
+    && state.waypoints[0].lat !== null
+    && state.waypoints[0].name
+    && !state.waypoints[0].name.includes('Konum')
+    && !state.waypoints[0].name.includes('Location');
+
+  // If user already specified a custom starting city/location, start immediately using it!
+  if (hasCustomStart) {
+    executeGmapsQuickStart(target);
+    return;
+  }
+
   // Check if current user GPS location is known and fresh
   if (!state.userLocation || !state.userLocation.lat || state.userLocation.isFallback) {
     showToast(isEn ? 'Acquiring GPS location... 🛰️' : 'Mevcut GPS konumunuz alınıyor... 🛰️', 'info');
@@ -3995,9 +4100,26 @@ async function gmapsQuickStartFromSheet() {
 
 function executeGmapsQuickStart(target) {
   const isEn = (window.state && window.state.lang === 'en');
-  const startLat = state.userLocation?.lat || state.waypoints[0]?.lat;
-  const startLon = state.userLocation?.lon || state.waypoints[0]?.lon;
-  const startName = state.userLocation ? (isEn ? 'My Location' : 'Mevcut Konumum') : (state.waypoints[0]?.name || (isEn ? 'Start' : 'Başlangıç'));
+  const hasCustomStart = state.waypoints && state.waypoints[0]
+    && state.waypoints[0].lat !== null
+    && state.waypoints[0].name
+    && !state.waypoints[0].name.includes('Konum')
+    && !state.waypoints[0].name.includes('Location');
+
+  let startLat, startLon, startName;
+  if (hasCustomStart) {
+    startLat = state.waypoints[0].lat;
+    startLon = state.waypoints[0].lon;
+    startName = state.waypoints[0].name;
+  } else if (state.userLocation && state.userLocation.lat && !state.userLocation.isFallback) {
+    startLat = state.userLocation.lat;
+    startLon = state.userLocation.lon;
+    startName = state.userLocation.name || (isEn ? 'My Location' : 'Mevcut Konumum');
+  } else if (state.waypoints && state.waypoints[0] && state.waypoints[0].lat !== null) {
+    startLat = state.waypoints[0].lat;
+    startLon = state.waypoints[0].lon;
+    startName = state.waypoints[0].name;
+  }
 
   if (!startLat || !startLon) {
     showToast(isEn ? 'Please set your starting point on map.' : 'Lütfen haritaya dokunarak başlangıç noktanızı belirleyin.', 'warning');
@@ -4035,6 +4157,18 @@ function gmapsPreviewRouteFromSheet() {
   const target = activeGmapsSheetTarget;
   const isEn = (window.state && window.state.lang === 'en');
 
+  const hasCustomStart = state.waypoints && state.waypoints[0]
+    && state.waypoints[0].lat !== null
+    && state.waypoints[0].name
+    && !state.waypoints[0].name.includes('Konum')
+    && !state.waypoints[0].name.includes('Location');
+
+  // If custom start point was set by user, preview route immediately!
+  if (hasCustomStart) {
+    executeGmapsPreviewRoute(target);
+    return;
+  }
+
   // If userLocation is not known, fetch it actively
   if (!state.userLocation || !state.userLocation.lat || state.userLocation.isFallback) {
     showToast(isEn ? 'Acquiring GPS location... 🛰️' : 'Mevcut GPS konumunuz alınıyor... 🛰️', 'info');
@@ -4060,9 +4194,26 @@ function gmapsPreviewRouteFromSheet() {
 
 function executeGmapsPreviewRoute(target) {
   const isEn = (window.state && window.state.lang === 'en');
-  const startLat = state.userLocation?.lat || state.waypoints[0]?.lat;
-  const startLon = state.userLocation?.lon || state.waypoints[0]?.lon;
-  const startName = state.userLocation ? (isEn ? 'My Location' : 'Mevcut Konumum') : (state.waypoints[0]?.name || (isEn ? 'Start' : 'Başlangıç'));
+  const hasCustomStart = state.waypoints && state.waypoints[0]
+    && state.waypoints[0].lat !== null
+    && state.waypoints[0].name
+    && !state.waypoints[0].name.includes('Konum')
+    && !state.waypoints[0].name.includes('Location');
+
+  let startLat, startLon, startName;
+  if (hasCustomStart) {
+    startLat = state.waypoints[0].lat;
+    startLon = state.waypoints[0].lon;
+    startName = state.waypoints[0].name;
+  } else if (state.userLocation && state.userLocation.lat && !state.userLocation.isFallback) {
+    startLat = state.userLocation.lat;
+    startLon = state.userLocation.lon;
+    startName = state.userLocation.name || (isEn ? 'My Location' : 'Mevcut Konumum');
+  } else if (state.waypoints && state.waypoints[0] && state.waypoints[0].lat !== null) {
+    startLat = state.waypoints[0].lat;
+    startLon = state.waypoints[0].lon;
+    startName = state.waypoints[0].name;
+  }
 
   if (!startLat || !startLon) {
     showToast(isEn ? 'Please set your starting point on map.' : 'Lütfen haritaya dokunarak başlangıç noktanızı belirleyin.', 'warning');
@@ -5261,11 +5412,17 @@ async function calculateRouteMain() {
   for (let i = 0; i < state.waypoints.length; i++) {
     const wp = state.waypoints[i];
     if ((wp.lat === null || wp.lon === null) && wp.name && wp.name.trim() !== '') {
-      showLoadingBanner(true, `Konum aranıyor: ${wp.name}...`);
-      const coord = await geocodeLocation(wp.name);
-      if (coord) {
-        wp.lat = coord.lat;
-        wp.lon = coord.lon;
+      const local = searchLocalGeo(wp.name);
+      if (local) {
+        wp.lat = local.lat;
+        wp.lon = local.lon;
+      } else {
+        showLoadingBanner(true, `Konum aranıyor: ${wp.name}...`);
+        const coord = await geocodeLocation(wp.name);
+        if (coord) {
+          wp.lat = coord.lat;
+          wp.lon = coord.lon;
+        }
       }
     }
   }
@@ -13162,19 +13319,45 @@ const LiveNavigation = {
     let initialCoord = null;
     const isEn = (window.state && window.state.lang === 'en');
 
-    if (!forceSimulation && state.userLocation && state.userLocation.lat && state.userLocation.lon) {
-      // Real GPS location is already known: fly and zoom directly into rider's current location!
+    // Check if route has a custom start point different from user's current GPS position
+    const routeStartCoord = state.routeData && state.routeData.geometry && state.routeData.geometry.coordinates && state.routeData.geometry.coordinates[0]
+      ? [state.routeData.geometry.coordinates[0][1], state.routeData.geometry.coordinates[0][0]]
+      : (state.waypoints && state.waypoints[0] && state.waypoints[0].lat ? [state.waypoints[0].lat, state.waypoints[0].lon] : null);
+
+    const hasCustomStart = state.waypoints && state.waypoints[0]
+      && state.waypoints[0].lat !== null
+      && state.waypoints[0].name
+      && !state.waypoints[0].name.includes('Konum')
+      && !state.waypoints[0].name.includes('Location');
+
+    // Calculate distance from rider's actual GPS to route start if both exist
+    let riderDistKm = null;
+    if (state.userLocation && state.userLocation.lat && routeStartCoord) {
+      riderDistKm = haversineMeters(state.userLocation.lat, state.userLocation.lon, routeStartCoord[0], routeStartCoord[1]) / 1000;
+    }
+
+    if (!forceSimulation && state.userLocation && state.userLocation.lat && state.userLocation.lon && (!hasCustomStart || riderDistKm === null || riderDistKm < 25)) {
+      // Real GPS location is near the route start: fly and zoom directly into rider's current location!
       initialCoord = [state.userLocation.lat, state.userLocation.lon];
       this.hasCenteredOnCurrentLocation = true;
       showToast(isEn ? '📍 Centered on your current location' : '📍 Bulunduğunuz konuma yaklaşıldı', 'success');
     } else {
-      // Fallback to route start point (or for demo simulation)
-      const coords = state.routeData.geometry.coordinates;
-      const startPt = coords[0];
-      initialCoord = [startPt[1], startPt[0]];
+      // Custom start in another city or distant simulation: zoom to the route start!
+      if (routeStartCoord) {
+        initialCoord = routeStartCoord;
+      } else {
+        const coords = state.routeData?.geometry?.coordinates;
+        const startPt = coords ? coords[0] : [35.0, 39.0];
+        initialCoord = [startPt[1], startPt[0]];
+      }
       this.hasCenteredOnCurrentLocation = forceSimulation;
       if (!forceSimulation) {
-        showToast(isEn ? '📍 Locating your position & zooming in...' : '📍 Konumunuz alınıyor ve yaklaşılıyor...', 'info');
+        if (hasCustomStart && riderDistKm && riderDistKm >= 25) {
+          const startCityName = state.waypoints[0].name;
+          showToast(isEn ? `📍 Centered on route start: ${startCityName}` : `📍 Rota başlangıcı (${startCityName}) odaklandı`, 'info');
+        } else {
+          showToast(isEn ? '📍 Locating your position & zooming in...' : '📍 Konumunuz alınıyor ve yaklaşılıyor...', 'info');
+        }
       }
     }
 

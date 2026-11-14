@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v88 (Manual Waypoint Adding Suite, Map Pick on Stops, GPS Coordinates)
-const CACHE_NAME = 'rotam-cache-v88';
+// Rotam PWA Service Worker - v89 (Custom Route Start Preservation, Fixed GPS Override)
+const CACHE_NAME = 'rotam-cache-v89';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
