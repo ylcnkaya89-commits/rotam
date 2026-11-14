@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v89 (Custom Route Start Preservation, Fixed GPS Override)
-const CACHE_NAME = 'rotam-cache-v89';
+// Rotam PWA Service Worker - v90 (Live Navigation Zoom Controls, Pinch/Wheel Zoom & Overview Support)
+const CACHE_NAME = 'rotam-cache-v90';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

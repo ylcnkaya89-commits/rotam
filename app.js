@@ -12454,6 +12454,10 @@ const LiveNavigation = {
   audioCtx: null,
   lastGpsTime: null,         // GPS stale detection: son geolocation güncellemesinin zamanı
   _bgLowAccuracyMode: false, // Arka planda pil tasarrufu için düşük doğruluk bayrağı
+  isManualZoom: false,       // Kullanıcı kendi istediği ölçeğe zoom in/out yaptığında true olur
+  manualZoomLevel: null,     // Kullanıcının seçtiği kalıcı zoom seviyesi
+  programmaticZooming: false,
+  _mapListenersAttached: false,
 
   playNavSound(type) {
     try {
@@ -13138,17 +13142,12 @@ const LiveNavigation = {
     }
 
     this.requestWakeLock();
+    this.isManualZoom = false;
+    this.manualZoomLevel = null;
+    this.programmaticZooming = true;
+    setTimeout(() => { this.programmaticZooming = false; }, 1400);
 
-    if (map) {
-      map.on('dragstart', () => {
-        if (this.isActive) {
-          this.autoCenter = false;
-          this.toggleToolsPopover(false);
-          const recenterPill = document.getElementById('live-nav-recenter-pill-box');
-          if (recenterPill) recenterPill.classList.remove('hidden');
-        }
-      });
-    }
+    this.attachMapInteractionListeners();
 
     // Configure Top Maneuver Card for Free Ride
     const isEn = (window.state && window.state.lang === 'en');
@@ -13302,18 +13301,12 @@ const LiveNavigation = {
 
     // Request screen wake lock
     this.requestWakeLock();
+    this.isManualZoom = false;
+    this.manualZoomLevel = null;
+    this.programmaticZooming = true;
+    setTimeout(() => { this.programmaticZooming = false; }, 1400);
 
-    // Map drag listener to pause auto-center
-    if (map) {
-      map.on('dragstart', () => {
-        if (this.isActive) {
-          this.autoCenter = false;
-          this.toggleToolsPopover(false);
-          const recenterPill = document.getElementById('live-nav-recenter-pill-box');
-          if (recenterPill) recenterPill.classList.remove('hidden');
-        }
-      });
-    }
+    this.attachMapInteractionListeners();
 
     // Determine starting coordinates: prioritize rider's real current location!
     let initialCoord = null;
@@ -13422,6 +13415,9 @@ const LiveNavigation = {
       this.incidentMarkers = [];
     }
     this.isOverviewMode = false;
+    this.isManualZoom = false;
+    this.manualZoomLevel = null;
+    this.programmaticZooming = false;
     this.steps = [];
     this.currentStepIndex = 0;
 
@@ -13828,20 +13824,26 @@ const LiveNavigation = {
       // Automatically zoom in & center on user's current location when journey starts!
       if (!this.hasCenteredOnCurrentLocation || isInitialFix) {
         this.hasCenteredOnCurrentLocation = true;
+        this.programmaticZooming = true;
         if (map) {
           map.flyTo([lat, lon], 18, { duration: 1.2, easeLinearity: 0.25 });
         }
+        setTimeout(() => { this.programmaticZooming = false; }, 1400);
         const isEn = (window.state && window.state.lang === 'en');
         showToast(isEn ? '📍 Centered on your current location' : '📍 Bulunduğunuz konuma yaklaşıldı', 'success');
       } else if (this.autoCenter && !this.isOverviewMode && map) {
-        // Dynamic Speed-Adaptive Camera Zoom
-        let targetZoom = 18;
-        if (this.speedKmH > 85) targetZoom = 16;
-        else if (this.speedKmH > 40) targetZoom = 17;
-        else targetZoom = 18;
+        // Dynamic Speed-Adaptive Camera Zoom ONLY when user has NOT set a manual zoom level!
+        if (!this.isManualZoom) {
+          let targetZoom = 18;
+          if (this.speedKmH > 85) targetZoom = 16;
+          else if (this.speedKmH > 40) targetZoom = 17;
+          else targetZoom = 18;
 
-        if (map.getZoom() !== targetZoom) {
-          map.setZoom(targetZoom, { animate: true });
+          if (map.getZoom() !== targetZoom) {
+            this.programmaticZooming = true;
+            map.setZoom(targetZoom, { animate: true });
+            setTimeout(() => { this.programmaticZooming = false; }, 300);
+          }
         }
         map.panTo([lat, lon], { animate: true, duration: 0.5 });
       }
@@ -14311,18 +14313,102 @@ const LiveNavigation = {
     this.stop(true);
   },
 
+  attachMapInteractionListeners() {
+    if (!map || this._mapListenersAttached) return;
+    this._mapListenersAttached = true;
+
+    // Tek parmak harita kaydırma dinleyicisi (Auto-center geçici durdurma)
+    map.on('dragstart', () => {
+      if (this.isActive) {
+        this.autoCenter = false;
+        this.toggleToolsPopover(false);
+        const recenterPill = document.getElementById('live-nav-recenter-pill-box');
+        if (recenterPill) recenterPill.classList.remove('hidden');
+      }
+    });
+
+    // Kullanıcı jestle zoom (pinch, mouse wheel, çift tık) yaptığında tetiklenir
+    map.on('zoomstart', () => {
+      if (this.isActive && !this.programmaticZooming) {
+        this.isManualZoom = true;
+        this.toggleToolsPopover(false);
+        const recenterPill = document.getElementById('live-nav-recenter-pill-box');
+        if (recenterPill) recenterPill.classList.remove('hidden');
+      }
+    });
+
+    map.on('zoomend', () => {
+      if (this.isActive && this.isManualZoom && !this.programmaticZooming && map) {
+        this.manualZoomLevel = map.getZoom();
+      }
+    });
+  },
+
+  zoomIn() {
+    if (!map) return;
+    const current = map.getZoom();
+    const newZoom = Math.min(map.getMaxZoom() || 19, current + 1);
+    this.handleManualZoom(newZoom);
+  },
+
+  zoomOut() {
+    if (!map) return;
+    const current = map.getZoom();
+    const newZoom = Math.max(map.getMinZoom() || 5, current - 1);
+    this.handleManualZoom(newZoom);
+  },
+
+  handleManualZoom(targetZoom) {
+    if (!map) return;
+    this.isManualZoom = true;
+    this.manualZoomLevel = targetZoom;
+    this.programmaticZooming = true;
+    map.setZoom(targetZoom, { animate: true });
+
+    // Kullanıcı haritayı uzaklaştırdığında veya kaydırdığında Yeniden Ortala butonu görünür
+    const recenterPill = document.getElementById('live-nav-recenter-pill-box');
+    if (recenterPill) {
+      if (targetZoom !== 18 || !this.autoCenter) {
+        recenterPill.classList.remove('hidden');
+      } else {
+        recenterPill.classList.add('hidden');
+      }
+    }
+
+    setTimeout(() => {
+      this.programmaticZooming = false;
+    }, 450);
+
+    const isEn = (window.state && window.state.lang === 'en');
+    showToast(isEn ? `Zoom: ${targetZoom}` : `Ölçek: Zoom ${targetZoom}`, 'info');
+  },
+
   recenterMap() {
     this.autoCenter = true;
+    this.isManualZoom = false;
+    this.manualZoomLevel = null;
+    this.isOverviewMode = false;
+    this.programmaticZooming = true;
     const recenterPill = document.getElementById('live-nav-recenter-pill-box');
     if (recenterPill) recenterPill.classList.add('hidden');
+
+    const overviewIcon = document.getElementById('live-nav-overview-icon');
+    if (overviewIcon) overviewIcon.setAttribute('data-lucide', 'crosshair');
+    const quickIcon = document.getElementById('live-nav-quick-overview-icon');
+    if (quickIcon) quickIcon.setAttribute('data-lucide', 'map');
+
     if (this.lastCoord && map) {
       map.flyTo(this.lastCoord, 18, { duration: 0.8 });
       if (this.compassMode === 'heading') {
         this.updateMapHeading(this.lastHeading || 0);
       }
+      setTimeout(() => {
+        this.programmaticZooming = false;
+      }, 900);
       const isEn = (window.state && window.state.lang === 'en');
       showToast(isEn ? 'Camera centered & locked to road' : 'Harita sürücüye odaklandı ve kilitlendi', 'info');
     }
+    if (typeof initIcons === 'function') initIcons();
   },
 
   showRideSummary() {
@@ -14593,9 +14679,10 @@ const LiveNavigation = {
   toggleOverviewOrRecenter() {
     const isEn = (window.state && window.state.lang === 'en');
     const overviewIcon = document.getElementById('live-nav-overview-icon');
+    const quickIcon = document.getElementById('live-nav-quick-overview-icon');
 
-    // If user has panned away while riding, first tap re-centers the camera on the rider!
-    if (!this.autoCenter && !this.isOverviewMode) {
+    // Kullanıcı haritayı kaydırdıysa veya manuel zoom yaptıysa, ilk basış sürücüyü ortalar
+    if ((!this.autoCenter || this.isManualZoom) && !this.isOverviewMode) {
       this.recenterMap();
       return;
     }
@@ -14603,8 +14690,12 @@ const LiveNavigation = {
     if (!this.isOverviewMode) {
       this.isOverviewMode = true;
       this.autoCenter = false;
-      this.updateMapHeading(0); // Reset map rotation while viewing full overview
+      this.isManualZoom = true;
+      this.manualZoomLevel = null;
+      this.programmaticZooming = true;
+      this.updateMapHeading(0); // Tüm rotayı net görmek için pusulayı kuzeye sabitler
       if (overviewIcon) overviewIcon.setAttribute('data-lucide', 'locate-fixed');
+      if (quickIcon) quickIcon.setAttribute('data-lucide', 'locate-fixed');
       if (map && state.routeLayer) {
         try {
           map.fitBounds(state.routeLayer.getBounds(), { padding: [60, 60], animate: true, duration: 1.0 });
@@ -14612,13 +14703,21 @@ const LiveNavigation = {
           // ignore
         }
       }
-      showToast(isEn ? 'Route Overview mode' : 'Rota Genel Bakış Modu', 'info');
+      setTimeout(() => {
+        this.programmaticZooming = false;
+      }, 1100);
+      const recenterPill = document.getElementById('live-nav-recenter-pill-box');
+      if (recenterPill) recenterPill.classList.remove('hidden');
+      showToast(isEn ? 'Route Overview mode' : 'Rota Genel Bakış Modu (Tüm Rota)', 'info');
     } else {
       this.isOverviewMode = false;
       this.autoCenter = true;
+      this.isManualZoom = false;
+      this.manualZoomLevel = null;
       if (overviewIcon) overviewIcon.setAttribute('data-lucide', 'crosshair');
+      if (quickIcon) quickIcon.setAttribute('data-lucide', 'map');
       this.recenterMap();
-      this.updateMapHeading(this.lastHeading || 0); // Re-apply heading rotation
+      this.updateMapHeading(this.lastHeading || 0);
     }
     if (typeof initIcons === 'function') initIcons();
   },

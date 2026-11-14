@@ -1439,7 +1439,25 @@
             <span class="text-lg">☀️</span>
           </button>
 
-          <!-- 4. Diğer Araçlar & Menü Popover -->
+          <!-- 4. Navigasyon Zoom In (+) & Zoom Out (-) & Genel Bakış Kapsülü -->
+          <div id="live-nav-zoom-control-pill" class="flex flex-col items-center bg-slate-900/95 border border-slate-700/80 rounded-2xl shadow-2xl p-1 space-y-1 backdrop-blur-xl">
+            <!-- Zoom In (+) -->
+            <button id="live-nav-btn-zoom-in" onclick="LiveNavigation.zoomIn()" class="w-10 h-10 rounded-xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white flex items-center justify-center cursor-pointer transition-all shadow-sm" title="Yaklaş (+)">
+              <i data-lucide="plus" class="w-4 h-4 stroke-[2.5]"></i>
+            </button>
+            <div class="w-6 h-px bg-slate-700/70"></div>
+            <!-- Zoom Out (-) -->
+            <button id="live-nav-btn-zoom-out" onclick="LiveNavigation.zoomOut()" class="w-10 h-10 rounded-xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white flex items-center justify-center cursor-pointer transition-all shadow-sm" title="Uzaklaş (-)">
+              <i data-lucide="minus" class="w-4 h-4 stroke-[2.5]"></i>
+            </button>
+            <div class="w-6 h-px bg-slate-700/70"></div>
+            <!-- Rota Genel Bakış / Hızlı Tüm Rota -->
+            <button id="live-nav-btn-overview-quick" onclick="LiveNavigation.toggleOverviewOrRecenter()" class="w-10 h-10 rounded-xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-sky-400 hover:text-sky-300 flex items-center justify-center cursor-pointer transition-all shadow-sm" title="Rota Genel Bakış (Tüm Rota)">
+              <i id="live-nav-quick-overview-icon" data-lucide="map" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- 5. Diğer Araçlar & Menü Popover -->
           <div class="relative">
             <button id="live-nav-btn-tools" onclick="LiveNavigation.toggleToolsPopover()" class="w-12 h-12 rounded-full gmaps-tool-btn flex items-center justify-center cursor-pointer active:scale-95 transition-all text-slate-200 hover:text-white shadow-xl border border-slate-600/50" title="Sürüş Menüsü & Araçlar">
               <i data-lucide="more-vertical" class="w-5 h-5"></i>

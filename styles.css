@@ -817,6 +817,16 @@ body.sunlight-mode .leaflet-container {
   border-color: rgba(100, 116, 139, 0.9);
 }
 
+/* Google Maps Nav HUD Zoom & Overview Pill */
+#live-nav-zoom-control-pill {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
+}
+#live-nav-zoom-control-pill button {
+  min-width: 40px !important;
+  min-height: 40px !important;
+  padding: 0 !important;
+}
+
 /* Google Maps Floating Speedometer */
 .gmaps-speedo-card {
   background: rgba(18, 20, 23, 0.94);
@@ -889,11 +899,18 @@ body.sunlight-mode .leaflet-container {
 /* Güneş & Yüksek Kontrast Modunda Sürüş Butonları */
 .sunlight-mode-active .gmaps-tool-btn,
 .sunlight-mode-active .gmaps-speedo-card,
-.sunlight-mode-active .gmaps-report-pill {
+.sunlight-mode-active .gmaps-report-pill,
+.sunlight-mode-active #live-nav-zoom-control-pill,
+body.sunlight-mode #live-nav-zoom-control-pill {
   background: #000000 !important;
   border: 2px solid #facc15 !important;
   color: #ffffff !important;
   box-shadow: 0 0 15px rgba(250, 204, 21, 0.5) !important;
+}
+.sunlight-mode-active #live-nav-zoom-control-pill button,
+body.sunlight-mode #live-nav-zoom-control-pill button {
+  background: #1e293b !important;
+  color: #ffffff !important;
 }
 
 /* HUD Mirror Mode (Head-Up Display Reflection on Windshield) */
