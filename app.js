@@ -8776,9 +8776,9 @@ function switchAdminTab(tab) {
     }
     if (btnEl) {
       if (tName === tab) {
-        btnEl.className = 'px-3 py-1 rounded-lg font-semibold bg-cyan-600 text-white shadow-sm';
+        btnEl.className = 'px-2.5 sm:px-3 py-1.5 rounded-lg font-semibold bg-cyan-600 text-white shadow-sm flex items-center space-x-1 shrink-0';
       } else {
-        btnEl.className = 'px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white';
+        btnEl.className = 'px-2.5 sm:px-3 py-1.5 rounded-lg font-semibold text-slate-400 hover:text-white flex items-center space-x-1 shrink-0';
       }
     }
   });
