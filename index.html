@@ -190,6 +190,12 @@
           <span id="user-auth-btn-label" class="hidden lg:inline text-[11px]">Giriş</span>
         </button>
 
+        <!-- Yönetim & Günlük Ziyaretçi Analitiği Paneli (Admin) -->
+        <button id="btn-admin-header-trigger" onclick="openAdminModal(false, 'analytics')" class="flex items-center space-x-1.5 bg-cyan-950/70 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/40 px-2 sm:px-2.5 py-1.5 rounded-xl text-xs font-semibold shadow-md active:scale-95 transition-all" title="Yönetim & Günlük Ziyaretçi Paneli (Admin)">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-cyan-400 shrink-0"></i>
+          <span class="text-[11px] font-bold">Admin</span>
+        </button>
+
         <!-- Detaylı Rota Planlayıcı Çekmece Butonu -->
         <button id="btn-tablet-sidebar-toggle" onclick="toggleSidebar()" class="hidden md:flex items-center space-x-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1.5 rounded-xl text-xs font-semibold shadow-md border border-slate-700 active:scale-95 transition-all" title="Çoklu Duraklı Rota Planlayıcı">
           <i id="icon-tablet-sidebar" data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-brand-400 shrink-0"></i>
@@ -2568,6 +2574,18 @@
             </div>
             <i data-lucide="external-link" class="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-transform shrink-0"></i>
           </button>
+
+          <!-- Yönetim & Günlük Ziyaretçi Paneli Butonu (Admin Hub) -->
+          <button onclick="openAdminModal(false, 'analytics'); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-cyan-950/40 hover:bg-cyan-900/60 border border-cyan-500/40 hover:border-cyan-400 text-left flex items-center justify-between transition-all group">
+            <div class="flex items-center space-x-3 min-w-0">
+              <span class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-lg shrink-0">📊</span>
+              <div class="min-w-0">
+                <span class="font-extrabold text-sm text-white group-hover:text-cyan-300 block truncate">Yönetim & Günlük Ziyaretçi Analitiği</span>
+                <span class="text-xs text-slate-400 block truncate">Günlük kullanıcı girişleri, mekan ve rota kontrol paneli</span>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-bold border border-cyan-500/40 shrink-0">ADMİN</span>
+          </button>
         </div>
       </div>
     </div>
@@ -3294,7 +3312,7 @@
   </div>
 
   <!-- MODAL: YÖNETİCİ KİMLİK DOĞRULAMA (ADMIN LOGIN PIN / PASSCODE) -->
-  <div id="modal-admin-auth" class="hidden fixed inset-0 z-[1100] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+  <div id="modal-admin-auth" class="hidden fixed inset-0 z-[1600] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl shadow-2xl p-6 flex flex-col space-y-4 relative animate-fade-in">
       <button onclick="closeAdminAuthModal()" class="absolute top-4 right-4 p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
         <i data-lucide="x" class="w-4 h-4"></i>
@@ -3328,8 +3346,8 @@
   </div>
 
   <!-- MODAL: YÖNETİM & VERİ YÖNETİMİ PANELİ (ADMIN PANEL & FULL DASHBOARD) -->
-  <div id="modal-admin" class="hidden fixed inset-0 z-[1000] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-0 sm:p-4 md:p-5 overflow-y-auto">
-    <div class="admin-modal-card bg-slate-900 border border-slate-800 w-full max-w-5xl xl:max-w-6xl rounded-none sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col h-full sm:h-[90vh] max-h-[100dvh] sm:max-h-[92vh]">
+  <div id="modal-admin" class="hidden fixed inset-0 z-[1500] bg-slate-950 flex flex-col w-screen h-screen max-w-full max-h-full overflow-hidden">
+    <div class="admin-modal-card bg-slate-900 border-none w-full h-full flex flex-col overflow-hidden">
       <!-- Panel Üst Çubuğu -->
       <div class="p-3 sm:p-4 border-b border-slate-800 flex items-center justify-between shrink-0 bg-slate-900/95">
         <div class="flex items-center space-x-2 sm:space-x-2.5 min-w-0">
@@ -3341,7 +3359,7 @@
               <h3 class="text-sm sm:text-base font-bold text-white truncate" data-i18n="modal_admin_title">Yönetim & Veri Paneli (Admin)</h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold shrink-0">Yetkili Oturum</span>
             </div>
-            <p class="text-xs text-slate-400 hidden md:block truncate" data-i18n="modal_admin_sub">Mekanlar, hazır rotalar, yol tehlikeleri, telemetri ve sistem sağlığı kontrol merkezi</p>
+            <p class="text-xs text-slate-400 hidden md:block truncate" data-i18n="modal_admin_sub">Günlük ziyaretçi analitiği, mekanlar, hazır rotalar ve telemetri kontrol merkezi</p>
           </div>
         </div>
         <div class="flex items-center space-x-1 sm:space-x-1.5 shrink-0 ml-2">
@@ -3353,8 +3371,9 @@
             <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
             <span class="hidden sm:inline" data-i18n="admin_auth_logout">Çıkış</span>
           </button>
-          <button onclick="closeAdminModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" title="Kapat">
-            <i data-lucide="x" class="w-5 h-5"></i>
+          <button onclick="closeAdminModal()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 hover:text-white text-xs font-bold flex items-center space-x-1.5 transition-colors shadow-sm active:scale-95" title="Kapat">
+            <i data-lucide="x" class="w-4 h-4"></i>
+            <span>Kapat</span>
           </button>
         </div>
       </div>
@@ -3362,7 +3381,11 @@
       <!-- Sekmeler (6 Ana Bölüm + Firebase) -->
       <div class="px-2 sm:px-4 py-2 bg-slate-950 border-b border-slate-800 flex items-center text-xs shrink-0 overflow-x-auto no-scrollbar">
         <div class="flex items-center space-x-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800/80 whitespace-nowrap overflow-x-auto no-scrollbar w-full sm:w-auto">
-          <button id="admin-tab-btn-places" onclick="switchAdminTab('places')" class="px-2.5 sm:px-3 py-1.5 rounded-lg font-semibold bg-cyan-600 text-white shadow-sm flex items-center space-x-1 shrink-0" data-i18n="admin_tab_places">
+          <button id="admin-tab-btn-analytics" onclick="switchAdminTab('analytics')" class="px-2.5 sm:px-3 py-1.5 rounded-lg font-semibold bg-cyan-600 text-white shadow-sm flex items-center space-x-1 shrink-0" data-i18n="admin_tab_analytics">
+            <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i>
+            <span>📊 Günlük Ziyaretçiler & Analitik</span>
+          </button>
+          <button id="admin-tab-btn-places" onclick="switchAdminTab('places')" class="px-2.5 sm:px-3 py-1.5 rounded-lg font-semibold text-slate-400 hover:text-white flex items-center space-x-1 shrink-0" data-i18n="admin_tab_places">
             <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
             <span>Mekanlar</span>
           </button>
@@ -3373,10 +3396,6 @@
           <button id="admin-tab-btn-hazards" onclick="switchAdminTab('hazards')" class="px-2.5 sm:px-3 py-1.5 rounded-lg font-semibold text-slate-400 hover:text-white flex items-center space-x-1 shrink-0" data-i18n="admin_tab_hazards">
             <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
             <span>Yol Bildirimleri</span>
-          </button>
-          <button id="admin-tab-btn-analytics" onclick="switchAdminTab('analytics')" class="px-2.5 sm:px-3 py-1.5 rounded-lg font-semibold text-slate-400 hover:text-white flex items-center space-x-1 shrink-0" data-i18n="admin_tab_analytics">
-            <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i>
-            <span>Analitik & İstatistik</span>
           </button>
           <button id="admin-tab-btn-system" onclick="switchAdminTab('system')" class="px-2.5 sm:px-3 py-1.5 rounded-lg font-semibold text-slate-400 hover:text-white flex items-center space-x-1 shrink-0" data-i18n="admin_tab_system">
             <i data-lucide="activity" class="w-3.5 h-3.5"></i>
@@ -3394,7 +3413,7 @@
       </div>
 
       <!-- SEKME 1: MEKAN YÖNETİMİ -->
-      <div id="admin-tab-places" class="flex flex-col flex-1 overflow-hidden min-h-0">
+      <div id="admin-tab-places" class="hidden flex-col flex-1 overflow-hidden min-h-0">
         <!-- İstatistikler -->
         <div class="p-2.5 sm:p-3 bg-slate-950/80 border-b border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs shrink-0">
           <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
@@ -3738,7 +3757,7 @@
       </div>
 
       <!-- SEKME 4: ANALİTİK & İSTATİSTİKLER (#34) -->
-      <div id="admin-tab-analytics" class="hidden flex-col flex-1 overflow-y-auto p-3 sm:p-5 space-y-3 sm:space-y-4 min-h-0">
+      <div id="admin-tab-analytics" class="flex flex-col flex-1 overflow-y-auto p-3 sm:p-5 space-y-3 sm:space-y-4 min-h-0">
         <!-- Ziyaret ve Oturum Sayaçları -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 text-xs">
           <div class="p-2.5 sm:p-3 rounded-2xl bg-slate-950 border border-slate-800">
@@ -4325,7 +4344,7 @@ service cloud.firestore {
   </div>
 
   <!-- MODAL: YÖNETİCİ ŞİFRE DEĞİŞTİRME -->
-  <div id="modal-admin-change-pass" class="hidden fixed inset-0 z-[1150] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+  <div id="modal-admin-change-pass" class="hidden fixed inset-0 z-[1600] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl shadow-2xl p-6 flex flex-col space-y-4 relative animate-fade-in">
       <button onclick="closeChangeAdminPasswordModal()" class="absolute top-4 right-4 p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
         <i data-lucide="x" class="w-4 h-4"></i>

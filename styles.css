@@ -590,6 +590,23 @@ body.sunlight-mode .leaflet-container {
   -webkit-overflow-scrolling: touch;
 }
 
+#modal-admin {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: var(--app-height, 100dvh) !important;
+  max-width: 100vw !important;
+  max-height: 100dvh !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  z-index: 2000 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  background-color: #020617 !important;
+}
+
 #modal-admin.hidden {
   display: none !important;
 }
@@ -597,57 +614,26 @@ body.sunlight-mode .leaflet-container {
 #modal-admin .admin-modal-card {
   display: flex !important;
   flex-direction: column !important;
-  overflow: hidden !important;
-  margin: auto !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  border-radius: 0 !important;
+  border: none !important;
+  margin: 0 !important;
   box-sizing: border-box !important;
-  background-color: #0f172a !important;
-}
-
-@media (min-width: 641px) {
-  #modal-admin {
-    padding: 1.25rem !important;
-  }
-
-  #modal-admin .admin-modal-card {
-    height: 90vh !important;
-    max-height: 92vh !important;
-    width: 95vw !important;
-    max-width: 1140px !important;
-    border-radius: 1.25rem !important;
-  }
-}
-
-@media (min-width: 1280px) {
-  #modal-admin .admin-modal-card {
-    max-width: 1200px !important;
-  }
-}
-
-@media (max-width: 640px) {
-  #modal-admin {
-    padding: 0 !important;
-  }
-
-  #modal-admin .admin-modal-card {
-    height: 100% !important;
-    height: var(--app-height, 100dvh) !important;
-    max-height: 100dvh !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    border-radius: 0 !important;
-    border: none !important;
-  }
-
-  #modal-admin [id^="admin-tab-"] {
-    padding-bottom: max(1.25rem, env(safe-area-inset-bottom)) !important;
-  }
+  background-color: #0b1120 !important;
+  overflow: hidden !important;
+  flex: 1 1 0% !important;
 }
 
 /* Ensure active tab in Admin fills remaining height and scrolls internally */
 #modal-admin [id^="admin-tab-"] {
   min-height: 0 !important;
   flex: 1 1 0% !important;
+  overflow-y: auto !important;
   -webkit-overflow-scrolling: touch;
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom)) !important;
 }
 
 #modal-admin #admin-tab-places,

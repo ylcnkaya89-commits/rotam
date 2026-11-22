@@ -8879,11 +8879,11 @@ function handleAdminLogin(event) {
       sessionStorage.setItem(ADMIN_CONFIG.SESSION_KEY, 'true');
     } catch (e) {}
     closeAdminAuthModal();
-    openAdminModal(true);
+    openAdminModal(true, 'analytics');
     if (typeof RotamCommunity !== 'undefined') {
       RotamCommunity.renderOnMap();
     }
-    showToast('Yetkili giriş başarılı! Tüm Türkiye noktaları yönetici modunda açıldı.', 'success');
+    showToast('Yetkili giriş başarılı! Günlük ziyaretçi ve analitik paneli açıldı.', 'success');
   } else {
     if (err) err.classList.remove('hidden');
     if (input) {
@@ -8971,7 +8971,7 @@ function handleAdminChangePasswordSubmit(event) {
   }
 }
 
-function openAdminModal(bypassAuth = false) {
+function openAdminModal(bypassAuth = false, defaultTab = 'analytics') {
   if (!bypassAuth && !isAdminAuthenticated()) {
     openAdminAuthModal();
     return;
@@ -8980,7 +8980,7 @@ function openAdminModal(bypassAuth = false) {
   if (!modal) return;
   modal.classList.remove('hidden');
 
-  switchAdminTab('places');
+  switchAdminTab(defaultTab || 'analytics');
   updateAdminStats();
   renderAdminPlacesList();
   initIcons();
@@ -9790,6 +9790,11 @@ const RotamTelemetry = {
     showToast('Analitik verileri JSON olarak indirildi.', 'success');
   }
 };
+
+window.RotamTelemetry = RotamTelemetry;
+window.openAdminModal = openAdminModal;
+window.closeAdminModal = closeAdminModal;
+window.switchAdminTab = switchAdminTab;
 
 function updateAdminStats() {
   const total = state.allPlaces.length;

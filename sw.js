@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v92 (Admin Panel Responsive Screen Optimization)
-const CACHE_NAME = 'rotam-cache-v92';
+// Rotam PWA Service Worker - v93 (Admin Panel Full Screen & Daily Analytics Sync)
+const CACHE_NAME = 'rotam-cache-v93';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

@@ -138,9 +138,35 @@ main {
 }
 
 /* ROTAM High-Contrast Dark Mode Map (Adblocker-Safe, Fast & 100% Reliable) */
-#map.dark-map .leaflet-tile-pane {
+#map.dark-map .leaflet-tile-pane,
+#map.dark-map .leaflet-yandex-container {
   filter: invert(100%) hue-rotate(180deg) brightness(88%) contrast(108%);
   -webkit-filter: invert(100%) hue-rotate(180deg) brightness(88%) contrast(108%);
+}
+
+/* ROTAM Crystal Clear Daytime Mode Map (Natural Colors, 100% Crisp & Visible) */
+#map:not(.dark-map) .leaflet-tile-pane,
+#map:not(.dark-map) .leaflet-yandex-container,
+body.sunlight-mode #map .leaflet-tile-pane,
+body.sunlight-mode #map .leaflet-yandex-container,
+body.sunlight-mode #map.dark-map .leaflet-tile-pane,
+body.sunlight-mode #map.dark-map .leaflet-yandex-container {
+  filter: none !important;
+  -webkit-filter: none !important;
+}
+
+/* Ensure Leaflet receives all pointer events (clicks, drags, touches) over Yandex container */
+.leaflet-yandex-container,
+.leaflet-yandex-container * {
+  pointer-events: none !important;
+}
+
+#map:not(.dark-map),
+body.sunlight-mode #map,
+#map:not(.dark-map) .leaflet-container,
+body.sunlight-mode .leaflet-container {
+  background: #f8fafc !important;
+  background-color: #f8fafc !important;
 }
 
 .leaflet-container {
@@ -246,8 +272,8 @@ main {
 }
 
 .pin-camping {
-  background: linear-gradient(135deg, #84cc16, #65a30d);
-  box-shadow: 0 0 12px rgba(132, 204, 22, 0.5);
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.5);
 }
 
 .pin-viewpoint {
@@ -258,6 +284,11 @@ main {
 .pin-mountain_pass {
   background: linear-gradient(135deg, #6366f1, #4f46e5);
   box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
+}
+
+.pin-service, .pin-repair {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  box-shadow: 0 0 12px rgba(37, 99, 235, 0.6);
 }
 
 /* Pulsing Start Marker Effect */
@@ -547,6 +578,79 @@ main {
   }
 }
 
+/* ===================================================
+   ADMIN PANEL RESPONSIVE FULL-SCREEN & FIT ENGINE
+   =================================================== */
+#modal-admin {
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+#modal-admin {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: var(--app-height, 100dvh) !important;
+  max-width: 100vw !important;
+  max-height: 100dvh !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  z-index: 2000 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  background-color: #020617 !important;
+}
+
+#modal-admin.hidden {
+  display: none !important;
+}
+
+#modal-admin .admin-modal-card {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  border-radius: 0 !important;
+  border: none !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  background-color: #0b1120 !important;
+  overflow: hidden !important;
+  flex: 1 1 0% !important;
+}
+
+/* Ensure active tab in Admin fills remaining height and scrolls internally */
+#modal-admin [id^="admin-tab-"] {
+  min-height: 0 !important;
+  flex: 1 1 0% !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom)) !important;
+}
+
+#modal-admin #admin-tab-places,
+#modal-admin #admin-tab-presets,
+#modal-admin #admin-tab-hazards {
+  overflow: hidden !important;
+}
+
+#modal-admin #admin-places-list,
+#modal-admin #admin-presets-list,
+#modal-admin #admin-hazards-list {
+  min-height: 0 !important;
+  flex: 1 1 0% !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
 /* Panel & Controls Positioning & Anti-Overlap Architecture */
 #floating-map-controls {
   transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -636,21 +740,28 @@ main {
   }
 }
 
-/* Custom In-App Waypoint Autocomplete Box */
+/* Custom In-App Waypoint Autocomplete & Filter Box */
 #waypoint-autocomplete-box {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 100%;
-  margin-top: 4px;
   background: rgba(15, 23, 42, 0.98);
-  border: 1px solid rgba(51, 65, 85, 0.8);
-  border-radius: 0.75rem;
-  box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
-  z-index: 100;
-  max-height: 240px;
+  border: 1.5px solid rgba(59, 130, 246, 0.4);
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  z-index: 99999 !important;
+  max-height: 380px;
   overflow-y: auto;
-  backdrop-blur: 16px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.search-filter-chip {
+  transition: all 0.15s ease-in-out;
+  user-select: none;
+}
+.search-filter-chip.active {
+  background: rgba(245, 158, 11, 0.25) !important;
+  color: #fbbf24 !important;
+  border-color: rgba(245, 158, 11, 0.6) !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
 }
 
 /* Utility: Smooth scrollbar hiding for horizontal pill bars */
@@ -673,6 +784,8 @@ main {
    =================================================== */
 .live-rider-marker {
   position: relative;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -681,21 +794,25 @@ main {
 
 .live-rider-pulse {
   position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 54px;
   height: 54px;
   border-radius: 50%;
   background: rgba(37, 99, 235, 0.28);
   border: 1.5px solid rgba(59, 130, 246, 0.6);
   animation: riderRadarPulse 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  pointer-events: none;
 }
 
 @keyframes riderRadarPulse {
   0% {
-    transform: scale(0.5);
+    transform: translate(-50%, -50%) scale(0.45);
     opacity: 0.95;
   }
   100% {
-    transform: scale(1.6);
+    transform: translate(-50%, -50%) scale(1.6);
     opacity: 0;
   }
 }
@@ -717,6 +834,23 @@ main {
 
 #sidebar.live-nav-hidden {
   display: none !important;
+}
+
+/* Dönen Harita (Heading-Up Navigation Camera Mode) */
+#map.live-nav-rotating {
+  transform-origin: 50% 50% !important;
+  transition: transform 0.45s cubic-bezier(0.2, 0.85, 0.35, 1);
+  will-change: transform;
+}
+
+#map.live-nav-rotating .leaflet-control-container {
+  display: none !important;
+}
+
+#live-nav-btn-compass.compass-heading-active {
+  border-color: rgba(6, 182, 212, 0.85) !important;
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.45) !important;
+  background: rgba(8, 47, 73, 0.95) !important;
 }
 
 #live-nav-overlay {
@@ -756,6 +890,16 @@ main {
   border-color: rgba(100, 116, 139, 0.9);
 }
 
+/* Google Maps Nav HUD Zoom & Overview Pill */
+#live-nav-zoom-control-pill {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
+}
+#live-nav-zoom-control-pill button {
+  min-width: 40px !important;
+  min-height: 40px !important;
+  padding: 0 !important;
+}
+
 /* Google Maps Floating Speedometer */
 .gmaps-speedo-card {
   background: rgba(18, 20, 23, 0.94);
@@ -783,6 +927,12 @@ main {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
 }
 
+.gmaps-speed-limit-sign.overspeed {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.9), 0 0 40px rgba(220, 38, 38, 0.6) !important;
+  animation: overspeedPulse 0.8s ease-in-out infinite alternate;
+}
+
 /* Overspeed Warning Glow */
 .gmaps-speedo-card.overspeed {
   border-color: #ef4444 !important;
@@ -797,6 +947,43 @@ main {
 @keyframes overspeedPulse {
   0% { transform: scale(1); }
   100% { transform: scale(1.06); }
+}
+
+/* Sürüş Araçları Popover Menüsü */
+#live-nav-tools-popover {
+  box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.12);
+  transform-origin: top right;
+  animation: popoverScaleIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+}
+
+@keyframes popoverScaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateX(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateX(0);
+  }
+}
+
+/* Güneş & Yüksek Kontrast Modunda Sürüş Butonları */
+.sunlight-mode-active .gmaps-tool-btn,
+.sunlight-mode-active .gmaps-speedo-card,
+.sunlight-mode-active .gmaps-report-pill,
+.sunlight-mode-active #live-nav-zoom-control-pill,
+body.sunlight-mode #live-nav-zoom-control-pill {
+  background: #000000 !important;
+  border: 2px solid #facc15 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 15px rgba(250, 204, 21, 0.5) !important;
+}
+.sunlight-mode-active #live-nav-zoom-control-pill button,
+body.sunlight-mode #live-nav-zoom-control-pill button {
+  background: #1e293b !important;
+  color: #ffffff !important;
 }
 
 /* HUD Mirror Mode (Head-Up Display Reflection on Windshield) */
@@ -841,9 +1028,1545 @@ main {
   color: #04443f;
   border-color: #ffffff;
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-  transform: scale(1.08);
+}
+
+/* Camper (Karavan) Mode Styling */
+.camper-preset-btn.active {
+  border-color: rgba(245, 158, 11, 0.8) !important;
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #fef08a !important;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.25) !important;
+}
+
+.camper-preset-btn:not(.active):hover {
+  border-color: rgba(148, 163, 184, 0.4);
+  background: rgba(30, 41, 59, 0.8);
+}
+
+/* Community Hazard Map Pins (Waze Style) */
+.community-hazard-divicon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.community-hazard-pin {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  background: #0f172a;
+  border: 2px solid #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.community-hazard-pin:hover {
+  transform: scale(1.18);
+}
+
+.community-hazard-pin.hazard-radar {
+  border-color: #06b6d4 !important;
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.65) !important;
+}
+
+.community-hazard-pin.hazard-crash {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.65) !important;
+}
+
+.community-hazard-pin.hazard-oil {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.65) !important;
+}
+
+.community-hazard-pin.hazard-work {
+  border-color: #f97316 !important;
+  box-shadow: 0 0 16px rgba(249, 115, 22, 0.55) !important;
+}
+
+.community-hazard-pin.hazard-camper {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.55) !important;
+}
+
+.community-hazard-pin .hazard-emoji {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.community-hazard-pin .hazard-pulse {
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  border: 2px solid currentColor;
+  opacity: 0.75;
+  animation: hazard-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes hazard-ping {
+  75%, 100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+/* ==========================================
+   MOBILE SIMPLIFICATION & BOTTOM SHEET STYLES
+   ========================================== */
+@media (max-width: 767px) {
+  #sidebar {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    max-height: 82vh !important;
+    border-radius: 28px 28px 0 0 !important;
+    border-top: 1px solid rgba(249, 115, 22, 0.35) !important;
+    border-right: none !important;
+    z-index: 1050 !important;
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.85) !important;
+    transform: translateY(100%);
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    background: rgba(15, 23, 42, 0.98) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+  }
+
+  #sidebar.mobile-sheet-open {
+    transform: translateY(0) !important;
+    display: flex !important;
+  }
+
+  #sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 8, 15, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1040;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease-out;
+  }
+
+  #sidebar-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Mobile Map FAB Stack */
+  .mobile-map-fab {
+    width: 44px;
+    height: 44px;
+    border-radius: 9999px;
+    background: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    color: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+  }
+
+  .mobile-map-fab:active {
+    transform: scale(0.92);
+  }
+
+  .mobile-map-fab.fab-locate {
+    background: rgba(8, 145, 178, 0.25);
+    border-color: rgba(6, 182, 212, 0.6);
+    color: #22d3ee;
+    box-shadow: 0 0 16px rgba(6, 182, 212, 0.3);
+  }
+}
+
+/* Rotam Smart Story Guide Soundwave Effect */
+.story-soundwave {
+  display: inline-flex;
+  align-items: center;
+  gap: 2.5px;
+  height: 14px;
+}
+
+.story-soundwave span {
+  display: inline-block;
+  width: 2.5px;
+  background: #f59e0b;
+  border-radius: 9999px;
+  animation: story-wave 1.1s ease-in-out infinite;
+}
+
+.story-soundwave span:nth-child(2) { animation-delay: 0.2s; }
+.story-soundwave span:nth-child(3) { animation-delay: 0.4s; }
+.story-soundwave span:nth-child(4) { animation-delay: 0.6s; }
+
+@keyframes story-wave {
+  0%, 100% { height: 4px; }
+  50% { height: 14px; }
+}
+
+/* ==========================================
+   MOBILE & TABLET RESPONSIVE & COCKPIT ENGINE
+   ========================================== */
+
+/* 1. EKRAN & GÜVENLİ ALAN (SAFE AREA) */
+html, body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* 2. ELDİVEN DOSTU BÜYÜK DOKUNMA HEDEFLERİ (48px+) */
+.gmaps-tool-btn,
+.mobile-map-fab,
+#btn-toggle-sidebar,
+#btn-open-gmaps,
+#live-nav-demo-btn,
+.gmaps-bottom-cockpit button,
+.hud-interactive button {
+  min-width: 48px !important;
+  min-height: 48px !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+@media (pointer: coarse) {
+  button, a, .cursor-pointer {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+/* 3. MOTO-KOKPİT YATAY MOD (LANDSCAPE ORIENTATION) */
+@media (orientation: landscape) and (max-height: 560px) {
+  #app-header {
+    min-height: 2.75rem !important;
+    height: 2.75rem !important;
+    padding-top: max(0.2rem, env(safe-area-inset-top)) !important;
+    padding-left: max(0.75rem, env(safe-area-inset-left)) !important;
+    padding-right: max(0.75rem, env(safe-area-inset-right)) !important;
+  }
+  #app-header .splash-logo-card, #app-header img {
+    height: 1.75rem !important;
+    width: 1.75rem !important;
+  }
+
+  /* Alt sekmeyi yatay modda gizle (haritaya tam alan bırak) */
+  #mobile-bottom-nav {
+    display: none !important;
+  }
+
+  /* Mobilde sol çekmece yatayda yarım ekran slide-in */
+  #sidebar {
+    max-height: 100vh !important;
+    width: min(340px, 45vw) !important;
+    left: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    border-radius: 0 20px 20px 0 !important;
+    border-right: 1px solid rgba(249, 115, 22, 0.35) !important;
+    border-top: none !important;
+    transform: translateX(-100%);
+  }
+  #sidebar.mobile-sheet-open {
+    transform: translateX(0) !important;
+  }
+
+  /* CANLI NAVİGASYON KOKPİTİ: YATAYDA APPLE CARPLAY / GİDON DÜZENİ */
+  #live-nav-overlay {
+    padding: 0.5rem !important;
+    pointer-events: none !important;
+  }
+
+  /* Üst Dönüş Kartı: Sol Üste Taşınır */
+  #live-nav-top-panel,
+  #live-nav-overlay > .hud-interactive:first-child {
+    position: absolute !important;
+    left: max(0.75rem, env(safe-area-inset-left)) !important;
+    top: max(0.4rem, env(safe-area-inset-top)) !important;
+    width: min(320px, 38vw) !important;
+    max-width: 320px !important;
+    margin: 0 !important;
+    z-index: 30 !important;
+  }
+
+  .gmaps-maneuver-card {
+    padding: 0.65rem 0.85rem !important;
+    border-radius: 1.25rem !important;
+  }
+  #live-nav-maneuver-icon {
+    font-size: 1.85rem !important;
+  }
+  #live-nav-maneuver-dist {
+    font-size: 1.4rem !important;
+  }
+  #live-nav-street-name {
+    font-size: 0.95rem !important;
+  }
+
+  /* Alt Kokpit Çekmecesi: Sol Alta Taşınır */
+  #live-nav-bottom-cockpit-container {
+    position: absolute !important;
+    left: max(0.75rem, env(safe-area-inset-left)) !important;
+    bottom: max(0.4rem, env(safe-area-inset-bottom)) !important;
+    width: min(320px, 38vw) !important;
+    max-width: 320px !important;
+    margin: 0 !important;
+    z-index: 30 !important;
+  }
+
+  .gmaps-bottom-cockpit {
+    padding: 0.5rem 0.75rem !important;
+    border-radius: 1.25rem !important;
+  }
+  .gmaps-bottom-cockpit > div:first-child {
+    display: none !important;
+  }
+  #live-nav-rem-time {
+    font-size: 1.35rem !important;
+  }
+
+  /* Hız Göstergesi: Kokpitin Hemen Yanına (Orta Alta) */
+  #live-nav-speedo-cluster {
+    position: absolute !important;
+    left: calc(max(0.75rem, env(safe-area-inset-left)) + min(325px, 38vw) + 0.5rem) !important;
+    bottom: max(0.4rem, env(safe-area-inset-bottom)) !important;
+    margin: 0 !important;
+    z-index: 25 !important;
+  }
+
+  /* Sağ Araç Çubuğu: Sağ dikey kenara */
+  #live-nav-right-toolbar {
+    position: absolute !important;
+    right: max(0.75rem, env(safe-area-inset-right)) !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    margin: 0 !important;
+    z-index: 35 !important;
+  }
+
+  /* Yatay Modda Araçlar Popover'ı */
+  #live-nav-tools-popover {
+    position: absolute !important;
+    right: 3.75rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    max-height: 85vh !important;
+    overflow-y: auto !important;
+  }
+
+  /* Bildirim Kapsülleri: Üst Ortada Kompakt */
+  #live-nav-hazard-banner,
+  #live-nav-story-banner,
+  #live-nav-alert-banner,
+  #live-nav-fuel-banner {
+    max-width: 44vw !important;
+    padding: 0.45rem 0.75rem !important;
+  }
+}
+
+/* 4. TABLET DÜZENİ (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  #sidebar {
+    width: 320px !important;
+    transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s ease !important;
+  }
+
+  #sidebar.tablet-collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border-right: none !important;
+    visibility: hidden;
+  }
+
+  #right-panel {
+    width: 340px !important;
+    max-width: 85vw !important;
+    box-shadow: -12px 0 40px rgba(0, 0, 0, 0.8) !important;
+  }
+}
+
+/* 5. GÜNEŞ & AÇIK HAVA YÜKSEK KONTRAST MODU */
+body.sunlight-mode {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+body.sunlight-mode #map .leaflet-tile-pane,
+body.sunlight-mode #map.dark-map .leaflet-tile-pane {
+  filter: none !important;
+  -webkit-filter: none !important;
+}
+
+body.sunlight-mode .gmaps-maneuver-card {
+  background: #022c22 !important;
+  border: 3px solid #10b981 !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9) !important;
+}
+
+body.sunlight-mode #live-nav-maneuver-icon {
+  color: #fbbf24 !important;
+  filter: drop-shadow(0 0 4px #000);
+}
+
+body.sunlight-mode #live-nav-speedo-box {
+  background: #0f172a !important;
+  border: 3px solid #fbbf24 !important;
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.6) !important;
+}
+
+body.sunlight-mode #live-nav-speed-val {
+  color: #fbbf24 !important;
+  font-weight: 900 !important;
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.9) !important;
+}
+
+body.sunlight-mode .gmaps-bottom-cockpit {
+  background: #090d16 !important;
+  border: 2px solid #38bdf8 !important;
+}
+
+body.sunlight-mode #live-nav-rem-time {
+  color: #34d399 !important;
+  text-shadow: 0 0 4px #000 !important;
+}
+
+body.sunlight-mode .gmaps-tool-btn {
+  background: #0f172a !important;
+  border: 2px solid #fbbf24 !important;
+  color: #ffffff !important;
+}
+
+/* 6. HARİTA ÜSTÜ HIZLI KATEGORİ FİLTRE ÇUBUĞU (#map-category-filter-bar) */
+#map-category-filter-bar {
+  max-width: calc(100% - 3.5rem);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+#map-category-filter-bar.map-moving-dim {
+  opacity: 0.35 !important;
+  pointer-events: none !important;
+}
+
+#map-filter-toggle-collapse-btn {
+  user-select: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+#map-filter-toggle-collapse-btn:hover {
+  background: rgba(15, 23, 42, 0.98);
+  border-color: rgba(245, 158, 11, 0.6);
+  color: #ffffff;
+}
+
+@media (min-width: 640px) {
+  #map-category-filter-bar {
+    max-width: min(720px, calc(100% - 24rem));
+  }
+}
+
+.map-category-pill {
+  background: rgba(15, 23, 42, 0.78);
+  color: #94a3b8;
+  border: 1px solid rgba(51, 65, 85, 0.7);
+  white-space: nowrap;
+  user-select: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.map-category-pill:hover {
+  color: #f8fafc;
+  border-color: rgba(148, 163, 184, 0.6);
+}
+
+.map-category-pill.active {
+  background: rgba(30, 41, 59, 0.95);
+  color: #ffffff;
+  border-color: rgba(245, 158, 11, 0.7);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.map-category-pill.active#map-filter-toggle-all {
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.9), rgba(234, 88, 12, 0.9));
+  border-color: #f59e0b;
+  color: #ffffff;
+}
+
+.map-category-pill:not(.active)#map-filter-toggle-all {
+  background: rgba(15, 23, 42, 0.85);
+  border-color: rgba(71, 85, 105, 0.5);
+  color: #64748b;
+  opacity: 0.65;
+}
+
+.map-category-pill.active#map-pill-historic {
+  border-color: rgba(245, 158, 11, 0.8);
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+}
+
+.map-category-pill.active#map-pill-nature {
+  border-color: rgba(16, 185, 129, 0.8);
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+}
+
+.map-category-pill.active#map-pill-photography {
+  border-color: rgba(168, 85, 247, 0.8);
+  background: rgba(168, 85, 247, 0.18);
+  color: #c084fc;
+}
+
+.map-category-pill.active#map-pill-beach {
+  border-color: rgba(56, 189, 248, 0.8);
+  background: rgba(56, 189, 248, 0.18);
+  color: #38bdf8;
+}
+
+.map-category-pill.active#map-pill-gastronomy {
+  border-color: rgba(244, 63, 94, 0.8);
+  background: rgba(244, 63, 94, 0.18);
+  color: #fb7185;
+}
+
+.map-category-pill.active#map-pill-fuel {
+  border-color: rgba(16, 185, 129, 0.8);
+  background: rgba(16, 185, 129, 0.18);
+  color: #6ee7b7;
+}
+
+.map-category-pill.active#map-pill-camping {
+  border-color: rgba(34, 197, 94, 0.85);
+  background: rgba(34, 197, 94, 0.22);
+  color: #4ade80;
+}
+
+.map-category-pill:not(.active) {
+  opacity: 0.45;
+  filter: grayscale(0.5);
+}
+
+.map-pill-count {
+  background: rgba(255, 255, 255, 0.12);
+  color: inherit;
+  font-size: 9px;
+  line-height: 1;
+  padding: 1px 4px;
+  border-radius: 9999px;
+}
+
+/* 7. HIZLI MEKAN ÖNİZLEME KARTI (#quick-place-preview-card) */
+#quick-place-preview-card {
+  will-change: transform, opacity;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.4);
+}
+
+#quick-place-preview-card.preview-visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* 8. KAMPÇI ASİSTANI & OUTDOOR MODAL SEKMELERİ */
+.camp-tab-btn {
+  user-select: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.camp-tab-btn:hover:not(.active) {
+  background: rgba(30, 41, 59, 0.7);
+  border-color: rgba(71, 85, 105, 0.5);
+}
+
+.camp-tab-btn.active {
+  background: linear-gradient(135deg, #16a34a, #15803d) !important;
+  color: #ffffff !important;
+  border-color: rgba(74, 222, 128, 0.4) !important;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35);
+}
+
+/* 9. LIVE NAV RECENTER PILL & OFFLINE PROGRESS STYLES */
+#live-nav-recenter-pill-box {
+  animation: pulseSubtle 2s infinite ease-in-out;
+}
+
+@keyframes pulseSubtle {
+  0%, 100% { transform: translate(-50%, 0) scale(1); }
+  50% { transform: translate(-50%, -4px) scale(1.03); }
+}
+
+.offline-progress-bar-striped {
+  background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);
+  background-size: 1rem 1rem;
+  animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes progress-bar-stripes {
+  0% { background-position: 1rem 0; }
+  100% { background-position: 0 0; }
+}
+
+/* ==========================================
+   10. GOOGLE MAPS FULL-SCREEN EXPERIENCE STYLES
+   ========================================== */
+
+/* Fullscreen Map & Desktop Sidebar Drawer */
+@media (min-width: 768px) {
+  #sidebar {
+    position: absolute !important;
+    inset-y: 0 !important;
+    left: 0 !important;
+    width: 400px !important;
+    max-width: 90vw !important;
+    z-index: 1040 !important;
+    box-shadow: 12px 0 40px rgba(0, 0, 0, 0.7) !important;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+  #sidebar.mobile-sheet-open {
+    transform: translateX(0) !important;
+    display: flex !important;
+  }
+}
+
+/* Floating Google Maps Top Search & Chips */
+#gmaps-top-container {
+  will-change: transform, opacity;
+  transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+}
+
+.gmaps-search-box {
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(51, 65, 85, 0.7);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 0 1px 1px rgba(255, 255, 255, 0.05);
+}
+
+.gmaps-search-box:focus-within {
+  border-color: rgba(249, 115, 22, 0.6);
+  box-shadow: 0 12px 30px -5px rgba(249, 115, 22, 0.2), 0 0 0 2px rgba(249, 115, 22, 0.15);
+}
+
+/* Google Maps Category Chips */
+.gmaps-chip {
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(51, 65, 85, 0.7);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.gmaps-chip:hover {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(148, 163, 184, 0.4);
+  transform: translateY(-1px);
+}
+
+.gmaps-chip.active {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(234, 88, 12, 0.35)) !important;
+  border-color: rgba(249, 115, 22, 0.8) !important;
+  color: #fed7aa !important;
+  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.35);
+}
+
+/* Category Accordion Cards */
+.cat-acc-card {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.cat-acc-card:hover {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(148, 163, 184, 0.4);
+  transform: translateY(-1px);
+}
+
+.cat-acc-card.active {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(234, 88, 12, 0.3)) !important;
+  border-color: rgba(249, 115, 22, 0.8) !important;
+  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.25);
+}
+
+.cat-acc-card.active .cat-check {
+  display: inline-block !important;
+}
+
+/* Google Maps Bottom Place Sheet */
+#gmaps-place-sheet {
+  will-change: transform, opacity;
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.85), 0 0 1px 1px rgba(255, 255, 255, 0.08);
+}
+
+#gmaps-place-sheet.sheet-open {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+  display: block !important;
+}
+
+/* Animated Google Maps Drop Pin Marker (Zero-offset, mathematically aligned to needle tip at 17, 46) */
+.gmaps-drop-pin-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.live-rider-pulse-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.gmaps-drop-pin-wrapper {
+  position: relative;
+  width: 34px;
+  height: 46px;
+  pointer-events: none;
+}
+
+.gmaps-drop-pin-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 34px;
+  height: 46px;
+  transform-origin: 17px 46px;
+  animation: gmapsPinDrop 0.36s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.gmaps-pin-shadow {
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 7px;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 75%);
+  border-radius: 50%;
+  filter: blur(1.5px);
+  animation: gmapsShadowPop 0.36s ease-out;
+}
+
+@keyframes gmapsPinDrop {
+  0% { transform: translateY(-28px) scale(0.5); opacity: 0; }
+  70% { transform: translateY(2px) scale(1.04); }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes gmapsShadowPop {
+  0% { transform: translateX(-50%) scale(0.2); opacity: 0; }
+  100% { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+
+/* ==========================================
+   11. GOOGLE MAPS ALTERNATIVE ROUTES & AUTO THEME
+   ========================================== */
+
+/* Interactive On-Map Route Time Badge Pills */
+.gmaps-route-time-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+  user-select: none;
+  cursor: pointer;
+  background: rgba(15, 23, 42, 0.94);
+  color: #cbd5e1;
+  border: 1.5px solid #64748b;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translate(-50%, -50%);
+}
+
+.gmaps-route-time-pill:hover {
+  transform: translate(-50%, -50%) scale(1.08);
+  border-color: #38bdf8;
+  color: #ffffff;
+  background: rgba(15, 23, 42, 0.98);
+  box-shadow: 0 6px 20px rgba(14, 165, 233, 0.45);
+}
+
+.gmaps-route-time-pill.active {
+  background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+  color: #ffffff !important;
+  border: 2px solid #38bdf8 !important;
+  box-shadow: 0 6px 22px rgba(14, 165, 233, 0.65) !important;
+  transform: translate(-50%, -50%) scale(1.04);
+}
+
+.gmaps-route-time-pill .pill-diff {
+  font-weight: 900;
+}
+
+.gmaps-route-time-pill .pill-dist {
+  font-size: 9.5px;
+  opacity: 0.85;
+}
+
+/* Floating Google Maps Alternative Route Selector Bar */
+#gmaps-route-selector-container {
+  will-change: transform, opacity;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gmaps-route-card {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  user-select: none;
+}
+
+.gmaps-route-card:hover:not(.active) {
+  border-color: rgba(56, 189, 248, 0.5);
+  background: rgba(30, 41, 59, 0.8);
+  transform: translateY(-2px);
+}
+
+.gmaps-route-card.active {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(2, 132, 199, 0.3)) !important;
+  border-color: #0ea5e9 !important;
+  box-shadow: 0 8px 24px -4px rgba(14, 165, 233, 0.4);
+}
+
+/* ==========================================
+   12. GOOGLE MAPS SEARCH HISTORY & FAVORITES
+   ========================================== */
+
+.gmaps-shortcut-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(71, 85, 105, 0.6);
+  color: #f1f5f9;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.gmaps-shortcut-pill:hover {
+  background: rgba(51, 65, 85, 0.95);
+  border-color: #38bdf8;
+  transform: translateY(-1px);
+}
+
+.gmaps-shortcut-pill:active {
+  transform: scale(0.96);
+}
+
+.gmaps-history-item {
+  transition: all 0.15s ease-out;
+}
+
+.gmaps-history-item:hover {
+  background: rgba(30, 41, 59, 0.7);
+}
+
+.gmaps-history-delete-btn {
+  opacity: 0.4;
+  transition: all 0.15s ease-out;
+}
+
+.gmaps-history-item:hover .gmaps-history-delete-btn {
+  opacity: 1;
+}
+
+.gmaps-history-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+/* ==========================================
+   13. GOOGLE MAPS DAY & HIGH-CONTRAST LIGHT MODE
+   Applied when body has .day-mode or .sunlight-mode
+   ========================================== */
+
+/* 1. Google Maps Top Search Box */
+body.day-mode .gmaps-search-box,
+body.sunlight-mode .gmaps-search-box {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+  color: #0f172a !important;
+}
+
+body.day-mode .gmaps-search-box:focus-within,
+body.sunlight-mode .gmaps-search-box:focus-within {
+  border-color: #0284c7 !important;
+  box-shadow: 0 12px 30px -5px rgba(2, 132, 199, 0.25), 0 0 0 2px rgba(2, 132, 199, 0.2) !important;
+}
+
+body.day-mode #gmaps-search-input,
+body.sunlight-mode #gmaps-search-input {
+  color: #0f172a !important;
+}
+
+body.day-mode #gmaps-search-input::placeholder,
+body.sunlight-mode #gmaps-search-input::placeholder {
+  color: #64748b !important;
+}
+
+body.day-mode #gmaps-search-clear-btn,
+body.sunlight-mode #gmaps-search-clear-btn {
+  color: #64748b !important;
+}
+
+body.day-mode #gmaps-search-clear-btn:hover,
+body.sunlight-mode #gmaps-search-clear-btn:hover {
+  color: #0f172a !important;
+  background: #f1f5f9 !important;
+}
+
+body.day-mode #gmaps-voice-search-btn,
+body.sunlight-mode #gmaps-voice-search-btn {
+  color: #475569 !important;
+}
+
+body.day-mode #gmaps-voice-search-btn:hover,
+body.sunlight-mode #gmaps-voice-search-btn:hover {
+  color: #0284c7 !important;
+  background: #f1f5f9 !important;
+}
+
+body.day-mode #gmaps-vehicle-badge,
+body.sunlight-mode #gmaps-vehicle-badge {
+  background: #f8fafc !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+body.day-mode #gmaps-vehicle-label,
+body.sunlight-mode #gmaps-vehicle-label {
+  color: #0284c7 !important;
+}
+
+body.day-mode .gmaps-search-box button,
+body.sunlight-mode .gmaps-search-box button {
+  color: #334155 !important;
+}
+
+body.day-mode .gmaps-search-box button:hover,
+body.sunlight-mode .gmaps-search-box button:hover {
+  color: #0f172a !important;
+  background: #f1f5f9 !important;
+}
+
+/* 2. Google Maps Autocomplete & History Dropdown */
+body.day-mode #gmaps-search-dropdown,
+body.sunlight-mode #gmaps-search-dropdown {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.22) !important;
+  color: #0f172a !important;
+}
+
+body.day-mode #gmaps-search-dropdown > div,
+body.sunlight-mode #gmaps-search-dropdown > div {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+body.day-mode .gmaps-search-item,
+body.sunlight-mode .gmaps-search-item,
+body.day-mode .gmaps-history-item,
+body.sunlight-mode .gmaps-history-item {
+  background: transparent !important;
+  color: #0f172a !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+body.day-mode .gmaps-search-item:hover,
+body.sunlight-mode .gmaps-search-item:hover,
+body.day-mode .gmaps-history-item:hover,
+body.sunlight-mode .gmaps-history-item:hover {
+  background: #f1f5f9 !important;
+}
+
+body.day-mode .gmaps-search-item h4,
+body.sunlight-mode .gmaps-search-item h4,
+body.day-mode .gmaps-history-item h4,
+body.sunlight-mode .gmaps-history-item h4 {
+  color: #0f172a !important;
+}
+
+body.day-mode .gmaps-search-item p,
+body.sunlight-mode .gmaps-search-item p,
+body.day-mode .gmaps-history-item p,
+body.sunlight-mode .gmaps-history-item p {
+  color: #64748b !important;
+}
+
+body.day-mode .gmaps-history-delete-btn,
+body.sunlight-mode .gmaps-history-delete-btn {
+  color: #94a3b8 !important;
+}
+
+body.day-mode .gmaps-history-delete-btn:hover,
+body.sunlight-mode .gmaps-history-delete-btn:hover {
+  color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.12) !important;
+}
+
+/* 3. Search Shortcut Pills (Home, Work, Favorites) */
+body.day-mode .gmaps-shortcut-pill,
+body.sunlight-mode .gmaps-shortcut-pill {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+
+body.day-mode .gmaps-shortcut-pill:hover,
+body.sunlight-mode .gmaps-shortcut-pill:hover {
+  background: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+}
+
+body.day-mode .gmaps-shortcut-pill span,
+body.sunlight-mode .gmaps-shortcut-pill span {
+  color: #0f172a !important;
+}
+
+/* 4. Category Filter Chips */
+body.day-mode .gmaps-chip,
+body.sunlight-mode .gmaps-chip {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #1e293b !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+body.day-mode .gmaps-chip:hover,
+body.sunlight-mode .gmaps-chip:hover {
+  background: #ffffff !important;
+  border-color: #0284c7 !important;
+  color: #0284c7 !important;
+}
+
+/* 5. Google Maps Bottom Place Sheet */
+body.day-mode #gmaps-place-sheet .glass-card,
+body.sunlight-mode #gmaps-place-sheet .glass-card {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.25) !important;
+  color: #0f172a !important;
+}
+
+body.day-mode #gmaps-sheet-title,
+body.sunlight-mode #gmaps-sheet-title {
+  color: #0f172a !important;
+}
+
+body.day-mode #gmaps-sheet-desc,
+body.sunlight-mode #gmaps-sheet-desc {
+  color: #475569 !important;
+}
+
+body.day-mode #gmaps-sheet-region,
+body.sunlight-mode #gmaps-sheet-region {
+  color: #64748b !important;
+}
+
+body.day-mode #gmaps-sheet-eta-box,
+body.sunlight-mode #gmaps-sheet-eta-box {
+  color: #334155 !important;
+}
+
+body.day-mode #gmaps-sheet-eta-box .text-slate-300,
+body.sunlight-mode #gmaps-sheet-eta-box .text-slate-300 {
+  color: #334155 !important;
+}
+
+body.day-mode #gmaps-sheet-btn-route,
+body.sunlight-mode #gmaps-sheet-btn-route,
+body.day-mode #gmaps-sheet-btn-add,
+body.sunlight-mode #gmaps-sheet-btn-add,
+body.day-mode #gmaps-sheet-btn-fav,
+body.sunlight-mode #gmaps-sheet-btn-fav,
+body.day-mode #gmaps-sheet-btn-details,
+body.sunlight-mode #gmaps-sheet-btn-details {
+  background: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #1e293b !important;
+}
+
+body.day-mode #gmaps-sheet-btn-route:hover,
+body.sunlight-mode #gmaps-sheet-btn-route:hover,
+body.day-mode #gmaps-sheet-btn-add:hover,
+body.sunlight-mode #gmaps-sheet-btn-add:hover,
+body.day-mode #gmaps-sheet-btn-fav:hover,
+body.sunlight-mode #gmaps-sheet-btn-fav:hover {
+  background: #e2e8f0 !important;
+}
+
+/* 6. Alternative Route Selector Container */
+body.day-mode #gmaps-route-selector-container .glass-card,
+body.sunlight-mode #gmaps-route-selector-container .glass-card {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.25) !important;
+  color: #0f172a !important;
+}
+
+body.day-mode #gmaps-route-alt-count-title,
+body.sunlight-mode #gmaps-route-alt-count-title {
+  color: #0f172a !important;
+}
+
+body.day-mode .gmaps-route-card,
+body.sunlight-mode .gmaps-route-card {
+  background: #f8fafc !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+body.day-mode .gmaps-route-card .text-white,
+body.sunlight-mode .gmaps-route-card .text-white {
+  color: #0f172a !important;
+}
+
+body.day-mode .gmaps-route-card .text-slate-400,
+body.sunlight-mode .gmaps-route-card .text-slate-400 {
+  color: #64748b !important;
+}
+
+body.day-mode .gmaps-route-card.active,
+body.sunlight-mode .gmaps-route-card.active {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(2, 132, 199, 0.22)) !important;
+  border-color: #0284c7 !important;
+  box-shadow: 0 8px 24px -4px rgba(2, 132, 199, 0.3) !important;
+}
+
+/* 7. Home/Work Setup Modal */
+body.day-mode #rotam-set-special-modal .glass-card,
+body.sunlight-mode #rotam-set-special-modal .glass-card {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+body.day-mode #set-special-title,
+body.sunlight-mode #set-special-title {
+  color: #0f172a !important;
+}
+
+body.day-mode #set-special-desc,
+body.sunlight-mode #set-special-desc {
+  color: #475569 !important;
+}
+
+/* 8. Floating Map Controls & Mobile Layers Popover */
+body.day-mode #floating-map-controls .glass-panel,
+body.sunlight-mode #floating-map-controls .glass-panel,
+body.day-mode #mobile-layers-popover,
+body.sunlight-mode #mobile-layers-popover,
+body.day-mode #map-hint,
+body.sunlight-mode #map-hint {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
+  color: #0f172a !important;
+}
+
+body.day-mode #map-hint span,
+body.sunlight-mode #map-hint span {
+  color: #1e293b !important;
+}
+
+body.day-mode #floating-map-controls .glass-panel button,
+body.sunlight-mode #floating-map-controls .glass-panel button,
+body.day-mode #floating-map-controls #desktop-active-layer-name,
+body.sunlight-mode #floating-map-controls #desktop-active-layer-name {
+  color: #0f172a !important;
+}
+
+body.day-mode #floating-map-controls .h-4.w-px,
+body.sunlight-mode #floating-map-controls .h-4.w-px {
+  background-color: #cbd5e1 !important;
+}
+
+body.day-mode #desktop-layers-accordion,
+body.sunlight-mode #desktop-layers-accordion {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15) !important;
+  color: #0f172a !important;
+}
+
+body.day-mode #desktop-layers-accordion .bg-slate-950\/70,
+body.sunlight-mode #desktop-layers-accordion .bg-slate-950\/70 {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+body.day-mode #desktop-layers-accordion button,
+body.sunlight-mode #desktop-layers-accordion button {
+  color: #0f172a !important;
+}
+
+body.day-mode .tile-btn,
+body.sunlight-mode .tile-btn,
+body.day-mode #mobile-layers-popover button,
+body.sunlight-mode #mobile-layers-popover button {
+  color: #334155 !important;
+}
+
+body.day-mode .tile-btn:hover,
+body.sunlight-mode .tile-btn:hover,
+body.day-mode #mobile-layers-popover button:hover,
+body.sunlight-mode #mobile-layers-popover button:hover {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+/* 9. Dropdown Inner Panels & Sub-elements */
+body.day-mode #gmaps-search-dropdown .bg-slate-950\/70,
+body.sunlight-mode #gmaps-search-dropdown .bg-slate-950\/70 {
+  background: #f8fafc !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+
+body.day-mode #gmaps-search-dropdown .text-amber-400,
+body.sunlight-mode #gmaps-search-dropdown .text-amber-400 {
+  color: #b45309 !important;
+}
+
+body.day-mode #gmaps-search-dropdown .text-amber-300,
+body.sunlight-mode #gmaps-search-dropdown .text-amber-300 {
+  color: #92400e !important;
+}
+
+body.day-mode #gmaps-search-dropdown .text-cyan-400,
+body.sunlight-mode #gmaps-search-dropdown .text-cyan-400 {
+  color: #0284c7 !important;
+}
+
+body.day-mode #gmaps-search-dropdown .text-slate-400,
+body.sunlight-mode #gmaps-search-dropdown .text-slate-400 {
+  color: #475569 !important;
+}
+
+body.day-mode #gmaps-search-dropdown .divide-slate-800\/60 > *,
+body.sunlight-mode #gmaps-search-dropdown .divide-slate-800\/60 > * {
+  border-color: #f1f5f9 !important;
+}
+
+body.day-mode #gmaps-search-dropdown .divide-slate-800\/80 > *,
+body.sunlight-mode #gmaps-search-dropdown .divide-slate-800\/80 > * {
+  border-color: #f1f5f9 !important;
+}
+
+/* ==========================================
+   WEATHER & CROSSWIND RADAR STYLES
+   ========================================== */
+.weather-map-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: auto;
+  cursor: pointer;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6));
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.weather-map-marker:hover {
+  transform: scale(1.12);
+  z-index: 1000 !important;
+}
+
+#weather-stations-timeline::-webkit-scrollbar {
+  height: 4px;
+}
+#weather-stations-timeline::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 4px;
+}
+#weather-stations-timeline::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.4);
+  border-radius: 4px;
 }
 
 
 
+
+
+
+/* ==========================================
+   CONVOY & GROUP RIDE LIVE MARKER STYLES
+   ========================================== */
+.convoy-rider-marker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.7));
+  transition: transform 0.25s ease;
+}
+.convoy-rider-marker:hover {
+  transform: scale(1.15);
+  z-index: 1200 !important;
+}
+.convoy-rider-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  background: #0f172a;
+  border: 2.5px solid #06b6d4;
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.6);
+  position: relative;
+}
+.convoy-rider-badge {
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(6, 182, 212, 0.5);
+  color: #e2e8f0;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  white-space: nowrap;
+  margin-top: 3px;
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.convoy-rider-speed {
+  font-size: 9px;
+  color: #38bdf8;
+  font-family: monospace;
+}
+.convoy-pulse {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid #06b6d4;
+  animation: convoy-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+@keyframes convoy-ping {
+  75%, 100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+/* ==========================================
+   ELEVATION PROFILE & CHART STYLES
+   ========================================== */
+.elevation-chart-svg {
+  width: 100%;
+  height: 120px;
+  overflow: visible;
+}
+.elevation-path-area {
+  fill: url(#elevation-gradient);
+  opacity: 0.85;
+}
+.elevation-path-line {
+  fill: none;
+  stroke: #10b981;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.elevation-steep-segment {
+  fill: none;
+  stroke: #f59e0b;
+  stroke-width: 3.5;
+}
+.elevation-extreme-segment {
+  fill: none;
+  stroke: #ef4444;
+  stroke-width: 4;
+}
+.elevation-cursor-line {
+  stroke: #38bdf8;
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+}
+.elevation-scrub-point {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #38bdf8;
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 0 10px #38bdf8;
+  pointer-events: none;
+}
+
+/* ==========================================
+   SMART FUEL PLANNER STYLES
+   ========================================== */
+.fuel-level-gauge {
+  height: 8px;
+  border-radius: 4px;
+  background: #1e293b;
+  overflow: hidden;
+  position: relative;
+}
+.fuel-level-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+/* ==========================================
+   ROTAM UNIVERSAL ROUTE STAGING SHEET & DRIVER HUB
+   ========================================== */
+#rotam-staging-sheet {
+  transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.hub-tab-btn {
+  user-select: none;
+  cursor: pointer;
+}
+
+body.day-mode #rotam-staging-sheet .glass-card,
+body.sunlight-mode #rotam-staging-sheet .glass-card {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.25) !important;
+}
+
+body.day-mode #rotam-staging-sheet h3,
+body.sunlight-mode #rotam-staging-sheet h3,
+body.day-mode #rotam-staging-sheet #staging-route-dist,
+body.sunlight-mode #rotam-staging-sheet #staging-route-dist {
+  color: #0f172a !important;
+}
+
+body.day-mode #rotam-staging-sheet .bg-slate-950\/70,
+body.sunlight-mode #rotam-staging-sheet .bg-slate-950\/70 {
+  background: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+}
+
+body.day-mode #modal-driver-hub .bg-slate-900,
+body.sunlight-mode #modal-driver-hub .bg-slate-900 {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+body.day-mode #modal-driver-hub .bg-slate-950\/80,
+body.sunlight-mode #modal-driver-hub .bg-slate-950\/80 {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+body.day-mode #modal-driver-hub h3,
+body.sunlight-mode #modal-driver-hub h3,
+body.day-mode #modal-driver-hub span.text-white,
+body.sunlight-mode #modal-driver-hub span.text-white {
+  color: #0f172a !important;
+}
+
+/* ==========================================================================
+   ROTAM ANTI-OVERLAP ARCHITECTURE & CLEAN VIEWPORT COMPOSITION
+   ========================================================================== */
+#app-header {
+  z-index: 1200 !important;
+}
+
+#sidebar {
+  z-index: 1300 !important;
+}
+
+#sidebar-backdrop {
+  z-index: 1290 !important;
+}
+
+/* Ensure mobile floating sheets always float above mobile bottom nav */
+@media (max-width: 767px) {
+  #rotam-staging-sheet,
+  #gmaps-place-sheet,
+  #gmaps-route-selector-container,
+  #mobile-bottom-bar {
+    bottom: calc(3.5rem + 0.75rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* Prevent category chips from colliding into right-hand controls */
+@media (min-width: 640px) and (max-width: 1024px) {
+  #gmaps-top-container {
+    max-width: calc(100vw - 340px) !important;
+  }
+}
+
+/* Search Box Compact Mode on Small Screens */
+@media (max-width: 480px) {
+  .gmaps-search-box {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+    gap: 0.35rem !important;
+  }
+  #gmaps-search-input {
+    font-size: 0.75rem !important;
+  }
+}
+
+/* ===================================================
+   WAYPOINT REORDERING & DRAG-AND-DROP STYLES
+   =================================================== */
+.waypoint-item {
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.waypoint-drag-handle {
+  touch-action: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+.waypoint-item.is-dragging {
+  opacity: 0.45;
+  transform: scale(0.98);
+  border-color: #f59e0b !important;
+  box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.25);
+}
+
+.waypoint-item.drag-over {
+  border-color: #f59e0b !important;
+  background-color: rgba(245, 158, 11, 0.12) !important;
+  transform: translateY(-2px);
+}
 

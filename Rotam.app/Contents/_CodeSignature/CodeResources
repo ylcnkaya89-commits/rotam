@@ -10,27 +10,31 @@
 		</data>
 		<key>Resources/app.js</key>
 		<data>
-		nZ3pTdmMRYgaEbV25df+ri8gXKg=
+		gSDUCWKQV8abYNYKHaPqj80Ba04=
 		</data>
 		<key>Resources/database.py</key>
 		<data>
 		KeSO2ihCBy48LP+olcjGtdxrZZU=
 		</data>
+		<key>Resources/firebase-service.js</key>
+		<data>
+		P5CyGEqi6Ogmjb9782g2WiMooQ0=
+		</data>
 		<key>Resources/index.html</key>
 		<data>
-		dixUCVDkb6r9ijdzcxew8EXZKnE=
+		rqeNkx5Ywib9z2z+9mJt3jcYH+g=
 		</data>
 		<key>Resources/manifest.json</key>
 		<data>
-		5pgos3O3xjyppct7GBx2nUym3mM=
+		GwNmLm7ecER5lWA0kq5tLE5XCaA=
 		</data>
 		<key>Resources/places_data.js</key>
 		<data>
-		nJyDrNlbAWLgBn7IFjSq3DRR1Io=
+		v7SZpcEUa0gkUtMizTeUZAiQkjo=
 		</data>
 		<key>Resources/rotam.db</key>
 		<data>
-		AaDCCz1ivcrRUKQzhM43BhZlMF4=
+		VQqPDEya8mfFmxliAxOR/BxfMU4=
 		</data>
 		<key>Resources/rotam_logo.png</key>
 		<data>
@@ -42,15 +46,15 @@
 		</data>
 		<key>Resources/styles.css</key>
 		<data>
-		4LsVy9yk2LKowWNdMYmhC6/+law=
+		2OMRk4ZkShu5J/Q9yFqYwnZhF5c=
 		</data>
 		<key>Resources/sw.js</key>
 		<data>
-		cY5jmEUup4yp6R5IsPO54dxUXXs=
+		EVKyvQKXDxm5XxyBFElV5IrDtf8=
 		</data>
 		<key>Resources/translations.js</key>
 		<data>
-		bNLGm0JbeeCTDuLAFmoQnBDAjt4=
+		cpmr8rDAemaq4uKad+8vUbVrXRM=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -66,7 +70,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			/+Im+wv2sUMQyBsoQV+pAsm2IYfqOrt24jDITLn9v9g=
+			7WV0cpgzMC0SHjMAICGQ14hsF8OG1KaLGJw7cc+dtis=
 			</data>
 		</dict>
 		<key>Resources/database.py</key>
@@ -76,32 +80,39 @@
 			KVNGwDXhWVU6YkMZjsonoRYYPo+MWk2IXkk9+LB9DIs=
 			</data>
 		</dict>
+		<key>Resources/firebase-service.js</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			Yxj7TySFJn2Z6MmsA9+LwfyNkdjlCk75Y7DBR4If5lk=
+			</data>
+		</dict>
 		<key>Resources/index.html</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			fs/8zQxdKAF7EDjI8IPhSx7PrLAF8jKng+5daSguIk4=
+			cXVPgt6UU/9VsXaNnr9aJ3o6wOLf2405QmiHBnqG+og=
 			</data>
 		</dict>
 		<key>Resources/manifest.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			z2IPzChlH6ki1C1Bo2jnozIQ+2SbkjG46NnkgjppzvU=
+			6pnWz1KUb9lHyutSOsB0rBCWEmedwh8DzK7kLp3KE1A=
 			</data>
 		</dict>
 		<key>Resources/places_data.js</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			uegVv7LBIzRCrCyzpovnat/nvlaH8i3nPgLXD3upiHQ=
+			9rQ7sQ/Mf9J35hM/6VLp8motgdqrMfadeTIPo5Q5eXU=
 			</data>
 		</dict>
 		<key>Resources/rotam.db</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			LExGREFgh079CGCdXXFFiMdhT0g0pTKKXpfT0BuTEvc=
+			AR+2lE0B1VSev6T6kSKPjdKchPBKe7L1+VGVXABLM/g=
 			</data>
 		</dict>
 		<key>Resources/rotam_logo.png</key>
@@ -122,21 +133,21 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			rJ2MtaMz1SKt0I/N82bGOk0oOPuBF9XRWcWnWjRXSG0=
+			7wCUt1o2zD8ZKxCsVEKeyEMa+Ip/qTLjRoyKWyH5wp4=
 			</data>
 		</dict>
 		<key>Resources/sw.js</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			ZLG8ZSB8ZStceYCpsrEhAvyldZmr/TN7FqP39B1NRF0=
+			M1v9k4PK4WDRBW7c1BBw4cCF9VQ4klweRlCg8v6Geis=
 			</data>
 		</dict>
 		<key>Resources/translations.js</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			k2rNyAZ/S3QyiQlgQigT+o7BK7ZGd0ELg5sswpqb2Cw=
+			mCZ2Q30C7/XZJwswPvz0EAc/ggBfIqoavC07mNas75I=
 			</data>
 		</dict>
 	</dict>
