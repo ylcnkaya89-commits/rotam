@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v90 (Live Navigation Zoom Controls, Pinch/Wheel Zoom & Overview Support)
-const CACHE_NAME = 'rotam-cache-v90';
+// Rotam PWA Service Worker - v91 (Daily Analytics, Visitor Breakdown, Chart & Cloud Sync)
+const CACHE_NAME = 'rotam-cache-v91';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
