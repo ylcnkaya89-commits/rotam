@@ -8630,25 +8630,8 @@ function loadPresetRoute(presetId) {
   showToast(`"${preset.title}" hazır rotası haritaya yüklendi!`, 'success');
 }
 
-function switchSavedModalTab(tab) {
-  const btnPresets = document.getElementById('btn-tab-preset-routes');
-  const btnSaved = document.getElementById('btn-tab-my-saved');
-  const contPresets = document.getElementById('saved-modal-presets-container');
-  const contSaved = document.getElementById('saved-routes-list');
-
-  if (tab === 'presets') {
-    if (btnPresets) btnPresets.className = 'px-3 py-1.5 rounded-xl font-bold bg-amber-600 text-white shadow-sm transition-all flex items-center space-x-1.5';
-    if (btnSaved) btnSaved.className = 'px-3 py-1.5 rounded-xl font-semibold bg-slate-800 text-slate-300 hover:text-white transition-all flex items-center space-x-1.5';
-    contPresets?.classList.remove('hidden');
-    contSaved?.classList.add('hidden');
-    renderPresetsList('saved-modal-presets-container');
-  } else {
-    if (btnPresets) btnPresets.className = 'px-3 py-1.5 rounded-xl font-semibold bg-slate-800 text-slate-300 hover:text-white transition-all flex items-center space-x-1.5';
-    if (btnSaved) btnSaved.className = 'px-3 py-1.5 rounded-xl font-bold bg-rose-600 text-white shadow-sm transition-all flex items-center space-x-1.5';
-    contPresets?.classList.add('hidden');
-    contSaved?.classList.remove('hidden');
-    renderSavedRoutesList();
-  }
+function switchSavedModalTab(tab = 'saved') {
+  renderSavedRoutesList();
 }
 
 function openSavedRoutesModal() {
@@ -8661,8 +8644,7 @@ function openSavedRoutesModal() {
     RotamCloud.syncCloudRoutesToLocal();
   }
 
-  // Default to presets so user sees curated routes right away
-  switchSavedModalTab('presets');
+  renderSavedRoutesList();
   initIcons();
 }
 
@@ -8678,7 +8660,7 @@ function renderSavedRoutesList() {
   } catch (err) {}
 
   if (savedList.length === 0) {
-    list.innerHTML = '<p class="text-xs text-slate-400 py-8 text-center">Henüz kaydedilmiş bir özel rotanız bulunmuyor.<br><span class="text-[11px] text-slate-500">Hazır rotaları yukarıdaki "Hazır Efsane Rotalar" sekmesinden inceleyebilirsiniz.</span></p>';
+    list.innerHTML = '<p class="text-xs text-slate-400 py-8 text-center">Henüz kaydedilmiş bir özel rotanız bulunmuyor.<br><span class="text-[11px] text-slate-500">Hazır rotaları Sürücü Merkezi -> "Efsane Rotalar" sekmesinden inceleyebilir veya oluşturduğunuz rotayı buraya kaydedebilirsiniz.</span></p>';
     return;
   }
 
@@ -9045,43 +9027,13 @@ const RotamTelemetry = {
     return `${parseInt(parts[2], 10)} ${months[d.getMonth()] || ''}`;
   },
 
-  ensureDailyHistoryBaseline() {
+  getStoredDailyHistory() {
     let history = {};
     try {
       const raw = localStorage.getItem(this.KEYS.DAILY_HISTORY);
       if (raw) history = JSON.parse(raw);
     } catch (e) {
       history = {};
-    }
-
-    const recordedKeys = Object.keys(history);
-    if (recordedKeys.length < 5) {
-      const now = new Date();
-      for (let i = 21; i >= 1; i--) {
-        const past = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-        const dateKey = this.getDateStr(past);
-        if (!history[dateKey]) {
-          const isWeekend = past.getDay() === 0 || past.getDay() === 6;
-          const seed = past.getDate() * 7 + past.getMonth() * 13;
-          const baseVisitors = isWeekend ? (54 + (seed % 34)) : (26 + (seed % 20));
-          const baseSessions = Math.round(baseVisitors * (1.25 + ((seed % 10) / 30)));
-          const baseRoutes = Math.round(baseVisitors * (0.65 + ((seed % 8) / 30)));
-          const mob = Math.round(baseVisitors * 0.72);
-          const dsk = Math.round(baseVisitors * 0.22);
-          const tab = Math.max(0, baseVisitors - mob - dsk);
-
-          history[dateKey] = {
-            date: dateKey,
-            uniqueVisitors: baseVisitors,
-            totalSessions: baseSessions,
-            routesCount: baseRoutes,
-            devices: { mobile: mob, desktop: dsk, tablet: tab }
-          };
-        }
-      }
-      try {
-        localStorage.setItem(this.KEYS.DAILY_HISTORY, JSON.stringify(history));
-      } catch (e) {}
     }
     return history;
   },
@@ -9102,7 +9054,6 @@ const RotamTelemetry = {
 
   init() {
     try {
-      this.ensureDailyHistoryBaseline();
       const todayStr = this.getDateStr();
       const isNewSession = !sessionStorage.getItem(this.KEYS.SESSION_FLAG);
       const isNewUniqueToday = !localStorage.getItem(this.KEYS.DAILY_DEVICE_VISITED + todayStr);
@@ -9401,16 +9352,7 @@ const RotamTelemetry = {
     }
     const minDate = dateKeys[dateKeys.length - 1];
 
-    let history = {};
-    try {
-      const raw = localStorage.getItem(this.KEYS.DAILY_HISTORY);
-      if (raw) history = JSON.parse(raw);
-    } catch (e) {}
-
-    // Ensure baseline if empty
-    if (Object.keys(history).length < 5) {
-      history = this.ensureDailyHistoryBaseline();
-    }
+    let history = this.getStoredDailyHistory();
 
     let isCloudActive = false;
 
@@ -9745,7 +9687,7 @@ const RotamTelemetry = {
   },
 
   exportDailyCsv() {
-    const data = (this.cachedDailyData && this.cachedDailyData.length) ? this.cachedDailyData : Object.values(this.ensureDailyHistoryBaseline());
+    const data = (this.cachedDailyData && this.cachedDailyData.length) ? this.cachedDailyData : Object.values(this.getStoredDailyHistory());
     const list = Array.isArray(data) ? [...data].sort((a, b) => (b.date || '').localeCompare(a.date || '')) : [];
 
     let csvContent = '\uFEFF'; // UTF-8 BOM for Excel
@@ -11285,15 +11227,6 @@ document.addEventListener('DOMContentLoaded', () => {
   renderCorridorPoiList();
   renderJourneyTimeline();
   initIcons();
-
-  // Auto-dismiss map hint after 8 seconds to prevent visual clutter
-  setTimeout(() => {
-    const hint = document.getElementById('map-hint');
-    if (hint) {
-      hint.style.opacity = '0';
-      setTimeout(() => hint.remove(), 400);
-    }
-  }, 8000);
 
   // Initialize real-time telemetry (#34)
   if (typeof RotamTelemetry !== 'undefined') {
@@ -15201,7 +15134,7 @@ const RotamCommunity = {
   dismissedHazardIds: new Set(),
   layerVisible: true,
   eventSource: null,
-  cloudEndpoint: 'https://rotam-live-default-rtdb.firebaseio.com/incidents',
+  cloudEndpoint: '',
 
   // Pre-seeded realistic community hazards across Turkey routes
   seedDefaults: [
@@ -15281,22 +15214,21 @@ const RotamCommunity = {
   },
 
   getEndpoint() {
-    let ep = sanitizeFirebaseDbUrl(this.getRawEndpoint());
-    if (!ep) {
-      ep = sanitizeFirebaseDbUrl(this.cloudEndpoint);
-    }
-    if (!ep) {
-      ep = 'https://rotam-live-default-rtdb.firebaseio.com';
-    }
-    return ep + '/incidents';
+    const raw = this.getRawEndpoint();
+    if (!raw) return '';
+    const ep = sanitizeFirebaseDbUrl(raw);
+    return ep ? ep + '/incidents' : '';
   },
 
   init() {
     this.loadLocalIncidents();
-    this.syncCloud();
-    this.startLiveStream();
-    // Background polling fallback every 60 seconds
-    setInterval(() => this.syncCloud(), 60000);
+    const ep = this.getEndpoint();
+    if (ep) {
+      this.syncCloud();
+      this.startLiveStream();
+      // Background polling fallback every 60 seconds only when configured
+      setInterval(() => this.syncCloud(), 60000);
+    }
   },
 
   startLiveStream() {

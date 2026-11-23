@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v94 (Unified Driver Hub & Clean Architecture)
-const CACHE_NAME = 'rotam-cache-v94';
+// Rotam PWA Service Worker - v95 (Pure Telemetry, Lean Modals & Network Optimization)
+const CACHE_NAME = 'rotam-cache-v95';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
