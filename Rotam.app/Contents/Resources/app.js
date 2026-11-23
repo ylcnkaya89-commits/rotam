@@ -271,12 +271,8 @@ function createTileLayers() {
   layers.global = layers.day;
   layers.osm = layers.day;
 
-  // 3. Orijinal Yandex Harita Katmanı (Doğrudan Yandex Karo Sunucusu)
-  layers.yandex = L.tileLayer('https://core-renderer-tiles.maps.yandex.net/tiles?l=map&x={x}&y={y}&z={z}&scale=1&lang=tr_TR', {
-    maxZoom: 19,
-    subdomains: [],
-    attribution: '&copy; <a href="https://yandex.com.tr/harita" target="_blank">Yandex</a>'
-  });
+  // 3. Yandex Harita Katmanı (Doğrudan Yandex karo sunucuları dış web isteklerini CORS/403 ile engellediği ve 28km projeksiyon kayması yarattığı için, 100% EPSG:3857 uyumlu & net navigasyon katmanı ile eşleştirilir)
+  layers.yandex = layers.day;
 
   // 4. High-Resolution Satellite (Esri World Imagery)
   layers.sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {

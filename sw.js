@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v95 (Pure Telemetry, Lean Modals & Network Optimization)
-const CACHE_NAME = 'rotam-cache-v95';
+// Rotam PWA Service Worker - v97 (High-Precision Map Engine & Fallback Resiliency)
+const CACHE_NAME = 'rotam-cache-v97';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
