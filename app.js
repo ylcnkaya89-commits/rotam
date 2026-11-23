@@ -1254,7 +1254,7 @@ function toggleSidebar() {
 // ==========================================
 // SÜRÜCÜ & KEŞİF MERKEZİ (UNIFIED DRIVER HUB MODAL)
 // ==========================================
-function openDriverHubModal(tab = 'discover') {
+function openDriverHubModal(tab = 'presets') {
   const modal = document.getElementById('modal-driver-hub');
   if (modal) {
     modal.classList.remove('hidden');
@@ -1271,7 +1271,7 @@ function closeDriverHubModal() {
 }
 
 function switchDriverHubTab(tabName) {
-  const tabs = ['discover', 'ride', 'tools'];
+  const tabs = ['presets', 'discover', 'nearby', 'ride', 'tools'];
   tabs.forEach(t => {
     const btn = document.getElementById(`tab-btn-hub-${t}`);
     const pane = document.getElementById(`tab-pane-hub-${t}`);
@@ -1289,6 +1289,21 @@ function switchDriverHubTab(tabName) {
       if (pane) pane.classList.add('hidden');
     }
   });
+
+  if (tabName === 'presets') {
+    if (typeof renderPresetsList === 'function') {
+      renderPresetsList('presets-routes-container', typeof activePresetCategory !== 'undefined' ? activePresetCategory : 'all');
+    }
+  } else if (tabName === 'discover') {
+    if (typeof filterDiscoverPlaces === 'function') {
+      filterDiscoverPlaces();
+    }
+  } else if (tabName === 'nearby') {
+    if (typeof fetchNearby === 'function') {
+      fetchNearby(typeof nearbyRadius !== 'undefined' ? nearbyRadius : 50);
+    }
+  }
+  if (typeof initIcons === 'function') initIcons();
 }
 
 window.openDriverHubModal = openDriverHubModal;
@@ -1296,7 +1311,7 @@ window.closeDriverHubModal = closeDriverHubModal;
 window.switchDriverHubTab = switchDriverHubTab;
 
 function toggleHeaderAccordion() {
-  openDriverHubModal('discover');
+  openDriverHubModal('presets');
 }
 
 function closeHeaderAccordion() {
@@ -1305,16 +1320,6 @@ function closeHeaderAccordion() {
 
 window.toggleHeaderAccordion = toggleHeaderAccordion;
 window.closeHeaderAccordion = closeHeaderAccordion;
-
-// Tıklama dışı otomatik kapatma (Click outside to close)
-document.addEventListener('click', (e) => {
-  const panel = document.getElementById('header-accordion-panel');
-  const btn = document.getElementById('btn-toggle-header-accordion');
-  if (!panel || panel.classList.contains('hidden')) return;
-  if (!panel.contains(e.target) && !btn?.contains(e.target)) {
-    closeHeaderAccordion();
-  }
-});
 
 function toggleMobileLayersPopover() {
   const popover = document.getElementById('mobile-layers-popover');
@@ -7974,14 +7979,11 @@ let discoverFilterCat = 'all';
 let discoverFilterReg = 'all';
 
 function openDiscoverModal() {
-  const modal = document.getElementById('modal-discover');
-  if (!modal) return;
-  modal.classList.remove('hidden');
-  filterDiscoverPlaces();
+  openDriverHubModal('discover');
 }
 
 function closeDiscoverModal() {
-  document.getElementById('modal-discover')?.classList.add('hidden');
+  closeDriverHubModal();
 }
 
 function selectDiscoverCategory(cat) {
@@ -8093,12 +8095,11 @@ function setAsDestination(lat, lon, name) {
 let nearbyRadius = 50;
 
 function openNearbyModal() {
-  document.getElementById('modal-nearby')?.classList.remove('hidden');
-  fetchNearby(nearbyRadius);
+  openDriverHubModal('nearby');
 }
 
 function closeNearbyModal() {
-  document.getElementById('modal-nearby')?.classList.add('hidden');
+  closeDriverHubModal();
 }
 
 function refreshNearbyGPS() {
@@ -8488,15 +8489,11 @@ const PRESET_ROUTES = [
 let activePresetCategory = 'all';
 
 function openPresetsModal() {
-  const modal = document.getElementById('modal-presets');
-  if (!modal) return;
-  modal.classList.remove('hidden');
-  renderPresetsList('presets-routes-container', activePresetCategory);
-  initIcons();
+  openDriverHubModal('presets');
 }
 
 function closePresetsModal() {
-  document.getElementById('modal-presets')?.classList.add('hidden');
+  closeDriverHubModal();
 }
 
 function filterPresetsByCategory(tag) {
@@ -11341,6 +11338,16 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     dismissSplashScreen();
   }, 150);
+
+  // Auto-open Admin Analytics modal if requested via URL param (e.g. ?admin=1)
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('admin')) {
+      setTimeout(() => {
+        if (typeof openAdminModal === 'function') openAdminModal(false, 'analytics');
+      }, 350);
+    }
+  } catch (e) {}
 });
 
 // Standalone PWA & Dynamic Viewport Synchronizer (iOS 'Ana Ekrana Ekle' & Android PWA)
@@ -11775,8 +11782,7 @@ const RotamSpeech = {
 window.RotamSpeech = RotamSpeech;
 
 // ==========================================
-// ROTAM INTERCOM & KASK SES MOTORU (HELMET AUDIO ENGINE)
-// Bluetooth Kask Uyandırma (Pre-wake chime), Radar & Tehlike Sesli Uyarıları, Kask Ses Testi
+// ROTAM INTERCOM & SESLİ YÖNLENDİRME KÖPRÜSÜ
 // ==========================================
 const RotamIntercom = {
   helmetModeEnabled: true,
@@ -11797,55 +11803,14 @@ const RotamIntercom = {
     try {
       localStorage.setItem('rotam_helmet_mode', String(enabled));
     } catch (e) {}
-    showToast(enabled ? 'Kask & Intercom Modu Açık 🏍️🔊' : 'Kask Modu Kapatıldı 🔇', 'info');
-  },
-
-  // Bluetooth kask kulaklığı uyku moduna geçmişse mikro çan sesiyle kanalı açar
-  wakeBluetoothAudio() {
-    try {
-      if (typeof RotamSpeech !== 'undefined' && RotamSpeech.playNavChime) {
-        RotamSpeech.playNavChime();
-      }
-    } catch (e) {}
+    showToast(enabled ? 'Sesli Rehber Açık 🏍️🔊' : 'Sesli Rehber Kapatıldı 🔇', 'info');
   },
 
   speak(text, options = {}) {
     if (!text) return;
     if (!options.isTest && typeof LiveNavigation !== 'undefined' && !LiveNavigation.voiceEnabled) return;
-
-    if (this.helmetModeEnabled) {
-      this.wakeBluetoothAudio();
-      if (options.urgent || options.isTest) {
-        if (typeof RotamSpeech !== 'undefined') {
-          RotamSpeech.speak(text, { ...options, rate: 1.04 });
-        }
-      } else {
-        setTimeout(() => {
-          if (typeof RotamSpeech !== 'undefined') {
-            RotamSpeech.speak(text, { ...options, rate: 1.04 });
-          }
-        }, 120);
-      }
-    } else {
-      if (typeof RotamSpeech !== 'undefined') {
-        RotamSpeech.speak(text, options);
-      }
-    }
-  },
-
-  // Sürüş öncesi kask kulaklığı ses seviyesi testi
-  testHelmetAudio() {
-    showToast('Kask & Intercom ses seviyesi test ediliyor... 🔊', 'info');
-    // 1. Web Audio ve Bluetooth intercom DAC kanalını anında uyandırmak için çift tonlu çan çal
-    this.wakeBluetoothAudio();
-
-    // 2. Tarayıcı autoplay güvenlik engelini (not-allowed) aşmak için SpeechSynthesis'i doğrudan eşzamanlı başlat
-    if (typeof RotamSpeech !== 'undefined' && RotamSpeech.speak) {
-      RotamSpeech.speak('Rotam kask sesli yönlendirme devrede. Ses seviyesi uygun, iyi yolculuklar!', {
-        urgent: true,
-        isTest: true,
-        rate: 1.0
-      });
+    if (typeof RotamSpeech !== 'undefined') {
+      RotamSpeech.speak(text, options);
     }
   },
 
@@ -14365,9 +14330,6 @@ const LiveNavigation = {
     if (typeof RotamCommunity !== 'undefined') {
       RotamCommunity.checkProximity(lat, lon);
     }
-    if (typeof RotamStoryGuide !== 'undefined') {
-      RotamStoryGuide.checkProximity(lat, lon);
-    }
     if (typeof RotamIntercom !== 'undefined') {
       RotamIntercom.checkHazardProximity(lat, lon);
     }
@@ -15204,311 +15166,15 @@ const LiveNavigation = {
 };
 
 // ==========================================
-// ROTAM OFFLINE MAP & CORRIDOR CACHE ENGINE
+// ROTAM OFFLINE MAP & EXPORT COMPATIBILITY SHIM
 // ==========================================
 const RotamOfflineMap = {
-  isDownloading: false,
-  cancelRequested: false,
-  CACHE_NAME: 'rotam-tiles-v1',
-
-  latLonToTile(lat, lon, zoom) {
-    const rad = (lat * Math.PI) / 180;
-    const n = Math.pow(2, zoom);
-    const x = Math.floor(((lon + 180) / 360) * n);
-    const y = Math.floor(
-      ((1 - Math.log(Math.tan(rad) + 1 / Math.cos(rad)) / Math.PI) / 2) * n
-    );
-    return {
-      x: Math.max(0, Math.min(n - 1, x)),
-      y: Math.max(0, Math.min(n - 1, y)),
-      z: zoom
-    };
-  },
-
-  async getStats() {
-    if (!('caches' in window)) return { count: 0, sizeMb: '0.0' };
-    try {
-      const cache = await caches.open(this.CACHE_NAME);
-      const keys = await cache.keys();
-      const count = keys.length;
-      const sizeMb = ((count * 18) / 1024).toFixed(1);
-      return { count, sizeMb };
-    } catch (e) {
-      return { count: 0, sizeMb: '0.0' };
-    }
-  },
-
-  async updateStatsUI() {
-    const stats = await this.getStats();
-    const countEl = document.getElementById('offline-stats-count');
-    const sizeEl = document.getElementById('offline-stats-size');
-    const badgeEl = document.getElementById('mobile-offline-badge');
-
-    if (countEl) countEl.textContent = `${stats.count.toLocaleString()} karo`;
-    if (sizeEl) sizeEl.textContent = `~${stats.sizeMb} MB`;
-    if (badgeEl) {
-      badgeEl.textContent = stats.count > 0 ? `${stats.sizeMb}MB` : 'İndir';
-    }
-  },
-
   openModal() {
-    const modal = document.getElementById('modal-offline-maps');
-    if (modal) modal.classList.remove('hidden');
-    this.updateStatsUI();
-    this.updateRoutePreviewUI();
-    if (typeof initIcons === 'function') initIcons();
+    exportGPX();
   },
-
-  closeModal() {
-    if (this.isDownloading) {
-      const isEn = (window.state && window.state.lang === 'en');
-      const confirmCancel = confirm(
-        isEn
-          ? 'Download is in progress. Do you want to cancel?'
-          : 'Harita indirme işlemi devam ediyor. İptal etmek istiyor musunuz?'
-      );
-      if (confirmCancel) {
-        this.cancelRequested = true;
-      } else {
-        return;
-      }
-    }
-    const modal = document.getElementById('modal-offline-maps');
-    if (modal) modal.classList.add('hidden');
-  },
-
-  updateRoutePreviewUI() {
-    const routeBox = document.getElementById('offline-active-route-box');
-    const noRouteBox = document.getElementById('offline-no-route-box');
-    const routeInfoEl = document.getElementById('offline-route-info');
-    const isEn = (window.state && window.state.lang === 'en');
-
-    if (state.routeData && state.routeData.geometry && state.routeData.geometry.coordinates) {
-      if (routeBox) routeBox.classList.remove('hidden');
-      if (noRouteBox) noRouteBox.classList.add('hidden');
-      if (routeInfoEl) {
-        const km = (state.routeData.distance / 1000).toFixed(0);
-        routeInfoEl.textContent = isEn
-          ? `Active Route: ${km} km Corridor (Zoom 7-13)`
-          : `Aktif Rota: ${km} km Sürüş Koridoru (Zoom 7-13)`;
-      }
-    } else {
-      if (routeBox) routeBox.classList.add('hidden');
-      if (noRouteBox) noRouteBox.classList.remove('hidden');
-    }
-  },
-
-  async clearCache() {
-    const isEn = (window.state && window.state.lang === 'en');
-    const msg = isEn
-      ? 'Are you sure you want to delete all offline downloaded map tiles?'
-      : 'İndirilen tüm çevrimdışı harita karolarını silmek istediğinize emin misiniz?';
-    if (!confirm(msg)) return;
-
-    try {
-      if ('caches' in window) {
-        await caches.delete(this.CACHE_NAME);
-        await caches.open(this.CACHE_NAME);
-      }
-      showToast(isEn ? 'Offline tile cache cleared' : 'Çevrimdışı harita önbelleği temizlendi', 'info');
-      this.updateStatsUI();
-    } catch (e) {
-      console.warn('Clear cache error:', e);
-    }
-  },
-
-  async downloadCurrentRoute() {
-    if (!state.routeData || !state.routeData.geometry || !state.routeData.geometry.coordinates) {
-      const isEn = (window.state && window.state.lang === 'en');
-      showToast(
-        isEn
-          ? 'Please create a route first to download its offline corridor map.'
-          : 'Lütfen önce bir rota oluşturun.',
-        'info'
-      );
-      this.openModal();
-      return;
-    }
-
-    const coords = state.routeData.geometry.coordinates; // [lon, lat]
-    const tileSet = new Set();
-
-    // Sample route points (every ~1km or at least 150 points along the path)
-    const step = Math.max(1, Math.floor(coords.length / 200));
-    const sampled = [];
-    for (let i = 0; i < coords.length; i += step) {
-      sampled.push(coords[i]);
-    }
-    if (sampled[sampled.length - 1] !== coords[coords.length - 1]) {
-      sampled.push(coords[coords.length - 1]);
-    }
-
-    // Generate tiles for zoom levels 7 to 13 with corridor buffer
-    for (const [lon, lat] of sampled) {
-      for (let z = 7; z <= 13; z++) {
-        const t = this.latLonToTile(lat, lon, z);
-        tileSet.add(`${z}/${t.x}/${t.y}`);
-        if (z >= 11) {
-          tileSet.add(`${z}/${t.x + 1}/${t.y}`);
-          tileSet.add(`${z}/${t.x - 1}/${t.y}`);
-          tileSet.add(`${z}/${t.x}/${t.y + 1}`);
-          tileSet.add(`${z}/${t.x}/${t.y - 1}`);
-        }
-      }
-    }
-
-    const tilesArray = Array.from(tileSet).map((k) => {
-      const [z, x, y] = k.split('/');
-      return { z: parseInt(z), x: parseInt(x), y: parseInt(y) };
-    });
-
-    const isEn = (window.state && window.state.lang === 'en');
-    await this.executeTileBatchDownload(
-      tilesArray,
-      isEn ? 'Downloading Route Corridor Map' : 'Aktif Rota Koridoru İndiriliyor'
-    );
-  },
-
-  async downloadRegion(regionKey) {
-    const isEn = (window.state && window.state.lang === 'en');
-    let bounds = null;
-    let minZ = 7;
-    let maxZ = 11;
-    let title = '';
-
-    if (regionKey === 'turkey_overview') {
-      bounds = { minLat: 35.8, maxLat: 42.2, minLon: 25.8, maxLon: 44.6 };
-      minZ = 5;
-      maxZ = 7;
-      title = isEn ? 'Turkey Overview' : 'Türkiye Genel Bakış';
-    } else if (regionKey === 'aegean_med') {
-      bounds = { minLat: 36.2, maxLat: 38.8, minLon: 26.5, maxLon: 32.2 };
-      minZ = 7;
-      maxZ = 11;
-      title = isEn ? 'Aegean & Mediterranean' : 'Ege & Akdeniz Sahilleri';
-    } else if (regionKey === 'marmara') {
-      bounds = { minLat: 40.0, maxLat: 41.6, minLon: 26.8, maxLon: 30.2 };
-      minZ = 7;
-      maxZ = 11;
-      title = isEn ? 'Marmara Region' : 'Marmara & Boğazlar';
-    } else if (regionKey === 'blacksea') {
-      bounds = { minLat: 40.5, maxLat: 41.8, minLon: 36.5, maxLon: 41.8 };
-      minZ = 7;
-      maxZ = 11;
-      title = isEn ? 'Black Sea Highlands' : 'Karadeniz & Yaylalar';
-    } else if (regionKey === 'balkans') {
-      bounds = { minLat: 38.0, maxLat: 43.5, minLon: 20.0, maxLon: 26.5 };
-      minZ = 7;
-      maxZ = 10;
-      title = isEn ? 'Balkans & Greece' : 'Balkanlar & Yunanistan (Selanik, Atina, Sofya)';
-    } else if (regionKey === 'alps') {
-      bounds = { minLat: 45.5, maxLat: 47.8, minLon: 8.5, maxLon: 13.5 };
-      minZ = 7;
-      maxZ = 10;
-      title = isEn ? 'Alps & Passes' : 'Alpler & Dağ Geçitleri (Stelvio, Dolomitler)';
-    } else if (regionKey === 'caucasus') {
-      bounds = { minLat: 41.2, maxLat: 43.5, minLon: 41.2, maxLon: 45.2 };
-      minZ = 7;
-      maxZ = 10;
-      title = isEn ? 'Georgia & Caucasus' : 'Gürcistan & Kafkaslar (Batum, Tiflis)';
-    }
-
-    if (!bounds) return;
-
-    const tileSet = new Set();
-    for (let z = minZ; z <= maxZ; z++) {
-      const tl = this.latLonToTile(bounds.maxLat, bounds.minLon, z);
-      const br = this.latLonToTile(bounds.minLat, bounds.maxLon, z);
-      for (let x = Math.min(tl.x, br.x); x <= Math.max(tl.x, br.x); x++) {
-        for (let y = Math.min(tl.y, br.y); y <= Math.max(tl.y, br.y); y++) {
-          tileSet.add(`${z}/${x}/${y}`);
-        }
-      }
-    }
-
-    const tilesArray = Array.from(tileSet).map((k) => {
-      const [z, x, y] = k.split('/');
-      return { z: parseInt(z), x: parseInt(x), y: parseInt(y) };
-    });
-
-    await this.executeTileBatchDownload(tilesArray, title);
-  },
-
-  async executeTileBatchDownload(tiles, label) {
-    if (this.isDownloading) return;
-    if (!('caches' in window)) {
-      showToast('Tarayıcınız CacheStorage API desteklemiyor.', 'error');
-      return;
-    }
-
-    this.isDownloading = true;
-    this.cancelRequested = false;
-
-    const progressBox = document.getElementById('offline-progress-box');
-    const progressBar = document.getElementById('offline-progress-bar');
-    const progressText = document.getElementById('offline-progress-text');
-    const progressLabel = document.getElementById('offline-progress-label');
-
-    if (progressBox) progressBox.classList.remove('hidden');
-    if (progressLabel) progressLabel.textContent = label;
-
-    const total = tiles.length;
-    let completed = 0;
-    const isEn = (window.state && window.state.lang === 'en');
-
-    try {
-      const cache = await caches.open(this.CACHE_NAME);
-      const concurrency = 6;
-
-      for (let i = 0; i < total; i += concurrency) {
-        if (this.cancelRequested) {
-          showToast(isEn ? 'Download cancelled' : 'İndirme iptal edildi', 'info');
-          break;
-        }
-
-        const chunk = tiles.slice(i, i + concurrency);
-        await Promise.all(
-          chunk.map(async ({ z, x, y }) => {
-            const url = `https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
-            try {
-              const match = await cache.match(url);
-              if (!match) {
-                const res = await fetch(url, { mode: 'cors' });
-                if (res.ok) {
-                  await cache.put(url, res);
-                }
-              }
-            } catch (err) {
-              // Ignore single tile fetch failures
-            }
-            completed++;
-          })
-        );
-
-        const pct = Math.min(100, Math.round((completed / total) * 100));
-        if (progressBar) progressBar.style.width = `${pct}%`;
-        if (progressText) {
-          progressText.textContent = `${completed} / ${total} (%${pct})`;
-        }
-      }
-
-      if (!this.cancelRequested) {
-        showToast(
-          isEn
-            ? `✅ Offline map ready (${completed} tiles saved)!`
-            : `✅ Çevrimdışı harita hazır (${completed} karo kaydedildi)!`,
-          'success'
-        );
-      }
-    } catch (err) {
-      console.warn('Tile batch download error:', err);
-      showToast(isEn ? 'Offline download error.' : 'İndirme sırasında bir hata oluştu.', 'error');
-    } finally {
-      this.isDownloading = false;
-      this.cancelRequested = false;
-      if (progressBox) progressBox.classList.add('hidden');
-      this.updateStatsUI();
-    }
+  closeModal() {},
+  downloadCurrentRoute() {
+    exportGPX();
   }
 };
 
@@ -15518,19 +15184,11 @@ window.RotamOfflineMap = RotamOfflineMap;
 window.addEventListener('online', () => {
   const isEn = (window.state && window.state.lang === 'en');
   showToast(isEn ? '🌐 Internet connection restored' : '🌐 İnternet bağlantısı sağlandı', 'success');
-  const badge = document.getElementById('offline-network-badge');
-  if (badge) badge.classList.add('hidden');
 });
 
 window.addEventListener('offline', () => {
   const isEn = (window.state && window.state.lang === 'en');
-  showToast(isEn ? '📡 Offline mode active (Saved maps ready)' : '📡 Çevrimdışı mod: İndirilen haritalar devrede', 'info');
-  const badge = document.getElementById('offline-network-badge');
-  if (badge) badge.classList.remove('hidden');
-  // İnternet kesildiğinde indirilen karoların görünmesi için otomatik olarak Dünya/OSM katmanına geç
-  if (state.activeTileLayer === 'yandex' && tileLayers && tileLayers.global) {
-    switchTile('global');
-  }
+  showToast(isEn ? '📡 You are offline' : '📡 Çevrimdışı moddasınız', 'info');
 });
 
 // ==========================================
@@ -16975,7 +16633,7 @@ window.RotamTraffic = RotamTraffic;
 // ROTAM AKILLI KÜLTÜR & TARİH FISILTISI (SMART STORY GUIDE)
 // ==========================================
 const RotamStoryGuide = {
-  enabled: true,
+  enabled: false,
   lastSpokenTimestamp: 0,
   minIntervalMs: 150000, // 2.5 dakika mola (aşırı konuşmayı engeller)
   toldStoryIds: new Set(),
@@ -17210,58 +16868,8 @@ const RotamStoryGuide = {
   },
 
   checkProximity(userLat, userLon) {
-    if (!this.enabled || !userLat || !userLon) return;
-
-    const now = Date.now();
-    // Cooldown check (minimum 2.5 dakika mola)
-    if (now - this.lastSpokenTimestamp < this.minIntervalMs) return;
-
-    // Don't interrupt turn-by-turn navigation voice if currently speaking
-    if (typeof window.speechSynthesis !== 'undefined' && window.speechSynthesis.speaking) {
-      return;
-    }
-
-    // 1. Search curated high-value stories first
-    for (const item of this.curatedStories) {
-      if (this.toldStoryIds.has(item.id)) continue;
-      const d = haversineMeters(userLat, userLon, item.lat, item.lon);
-      const rad = item.radiusM || 2500;
-      if (d <= rad) {
-        this.triggerStory(item, d);
-        return;
-      }
-    }
-
-    // 2. Fallback to all POIs in database (DEFAULT_HISTORIC_PLACES or state.allPlaces)
-    const allPlaces = (window.state && window.state.allPlaces && window.state.allPlaces.length) 
-      ? window.state.allPlaces 
-      : (window.DEFAULT_HISTORIC_PLACES || []);
-
-    for (const p of allPlaces) {
-      const pid = 'poi_' + (p.id || p.name);
-      if (this.toldStoryIds.has(pid)) continue;
-      if (!p.lat || !p.lon) continue;
-
-      // Sadece tarihi yerler sesli olarak anlatılır; benzinlikler kesinlikle filtrelenir
-      const isFuel = p.category === 'fuel' || p.category === 'ev_charge' ||
-        /benzin|petrol|akaryakıt|yakıt|istasyon|opet|shell|bp|total|aytemiz|lukoil|sunpet|po\b/i.test(p.name || '');
-      if (isFuel) continue;
-      if (p.category !== 'historic') continue;
-
-      const d = haversineMeters(userLat, userLon, p.lat, p.lon);
-      if (d <= 2000 && p.description && p.description.length > 20) {
-        const generatedItem = {
-          id: pid,
-          title: p.name,
-          lat: p.lat,
-          lon: p.lon,
-          teaser: p.description.substring(0, 100),
-          story: `${p.name} noktasına yaklaşıyorsunuz. ${p.description}`
-        };
-        this.triggerStory(generatedItem, d);
-        return;
-      }
-    }
+    // Sürüş sırasında dikkat dağınıklığını ve ses çakışmasını önlemek için otomatik tetikleme devre dışıdır.
+    return;
   },
 
   triggerStory(storyItem, distanceM) {
@@ -17341,305 +16949,18 @@ const RotamStoryGuide = {
 window.RotamStoryGuide = RotamStoryGuide;
 
 // ==========================================
-// 8. ROTAM KAMPÇI ASİSTANI & DOĞA REHBERİ (OUTDOOR ASSISTANT)
+// 8. ROTAM KAMPÇI & DOĞA ALANLARI FİLTRESİ
 // ==========================================
 
-const CAMPING_CHECKLIST_DATA = {
-  shelter: [
-    { id: 'tent', label: 'Çadır (Mevsime uygun, su geçirmez tente & taban)', icon: '⛺' },
-    { id: 'pegs', label: 'Çadır Kazıkları & Lastik Çekiç & Gerdirme İpleri', icon: '🔨' },
-    { id: 'bag', label: 'Uyku Tulumu (Rakıma ve gece soğuğuna uygun)', icon: '🛌' },
-    { id: 'mat', label: 'Yalıtımlı Kamp Matı / Şişme Yatak (R-Değeri 2.5+)', icon: '🧘' },
-    { id: 'pillow', label: 'Şişme Kamp Yastığı & Termal İçlik', icon: '🧣' },
-    { id: 'tarp', label: 'Gölgelik Tente (Tarp) & Zemin Örtüsü (Footprint)', icon: '🛡️' }
-  ],
-  kitchen: [
-    { id: 'stove', label: 'Taşınabilir Kamp Ocağı & Yedek Gaz Kartuşu', icon: '🔥' },
-    { id: 'lighter', label: 'Rüzgar Geçirmez Çakmak / Magnezyum Çubuğu', icon: '✨' },
-    { id: 'cookset', label: 'Kompakt Tencere & Tava & Cezve Seti', icon: '🍳' },
-    { id: 'cutlery', label: 'Çatal, Kaşık, Bıçak & Emaye / Çelik Bardak', icon: '🍴' },
-    { id: 'water', label: 'İçme Suyu (Kişi başı günlük en az 3-4 Litre)', icon: '💧' },
-    { id: 'purifier', label: 'Su Filtresi veya Su Arıtma Tableti', icon: '🧪' },
-    { id: 'food', label: 'Bozulmayan Yiyecekler (Konserve, kuruyemiş, hazır makarna)', icon: '🥫' }
-  ],
-  power: [
-    { id: 'headlamp', label: 'Kafa Lambası (Yedek pilli veya Type-C şarjlı)', icon: '🔦' },
-    { id: 'lantern', label: 'Çadır İçi Asılabilir Led Kamp Feneri', icon: '💡' },
-    { id: 'powerbank', label: 'Yüksek Kapasiteli Powerbank (20.000 mAh+)', icon: '🔋' },
-    { id: 'cables', label: 'Telefon ve Cihaz Şarj Kabloları', icon: '🔌' },
-    { id: 'offline_map', label: 'Çevrimdışı Harita (Rotam & Google Maps indirilmiş)', icon: '📱' }
-  ],
-  safety: [
-    { id: 'firstaid', label: 'Kapsamlı İlk Yardım Kiti (Sargı, yanık kremi, ağrı kesici)', icon: '🩹' },
-    { id: 'spray', label: 'Sinek & Böcek & Kene Kovucu Sprey', icon: '🦟' },
-    { id: 'knife', label: 'Çok Amaçlı Kamp Bıçağı / İsviçre Çakısı / Balta', icon: '🔪' },
-    { id: 'trash_bags', label: 'Dayanıklı Çöp Torbası (İz Bırakma - Sıfır Atık)', icon: '🗑️' },
-    { id: 'whistle', label: 'Acil Durum Düdüğü & Pusula / Yangın Söndürücü', icon: '🧭' }
-  ]
-};
-
-function getCheckedCampingItems() {
-  try {
-    const raw = localStorage.getItem('rotam_camping_checklist');
-    return raw ? new Set(JSON.parse(raw)) : new Set();
-  } catch (e) {
-    return new Set();
-  }
-}
-
-function saveCheckedCampingItems(set) {
-  try {
-    localStorage.setItem('rotam_camping_checklist', JSON.stringify(Array.from(set)));
-  } catch (e) {}
-}
-
-function toggleCampingChecklistItem(id) {
-  const checked = getCheckedCampingItems();
-  if (checked.has(id)) {
-    checked.delete(id);
-  } else {
-    checked.add(id);
-  }
-  saveCheckedCampingItems(checked);
-  renderCampingChecklist();
-}
-
-function resetCampingChecklist() {
-  saveCheckedCampingItems(new Set());
-  renderCampingChecklist();
-  showToast('Kamp kontrol listesi sıfırlandı 🎒', 'info');
-}
-
-function renderCampingChecklist() {
-  const checked = getCheckedCampingItems();
-  let totalItems = 0;
-  let checkedCount = 0;
-
-  const cats = [
-    { key: 'shelter', elId: 'camp-checklist-shelter' },
-    { key: 'kitchen', elId: 'camp-checklist-kitchen' },
-    { key: 'power', elId: 'camp-checklist-power' },
-    { key: 'safety', elId: 'camp-checklist-safety' }
-  ];
-
-  cats.forEach(c => {
-    const container = document.getElementById(c.elId);
-    if (!container) return;
-    const items = CAMPING_CHECKLIST_DATA[c.key] || [];
-    container.innerHTML = '';
-
-    items.forEach(item => {
-      totalItems++;
-      const isDone = checked.has(item.id);
-      if (isDone) checkedCount++;
-
-      const itemEl = document.createElement('div');
-      itemEl.className = `flex items-center space-x-2.5 p-2 rounded-xl border transition-all cursor-pointer ${
-        isDone 
-          ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200' 
-          : 'bg-slate-900/80 border-slate-800 text-slate-300 hover:border-slate-700'
-      }`;
-      itemEl.onclick = () => toggleCampingChecklistItem(item.id);
-
-      itemEl.innerHTML = `
-        <div class="w-5 h-5 rounded-lg flex items-center justify-center shrink-0 border transition-colors ${
-          isDone 
-            ? 'bg-emerald-500 border-emerald-400 text-slate-950 font-black text-xs' 
-            : 'border-slate-700 bg-slate-950/60'
-        }">
-          ${isDone ? '✓' : ''}
-        </div>
-        <span class="text-sm shrink-0">${item.icon}</span>
-        <span class="text-[11px] leading-tight flex-1 ${isDone ? 'line-through opacity-75' : 'font-medium'}">${item.label}</span>
-      `;
-      container.appendChild(itemEl);
-    });
-  });
-
-  const percent = totalItems > 0 ? Math.round((checkedCount / totalItems) * 100) : 0;
-  const progressText = document.getElementById('camp-checklist-progress-text');
-  const progressBar = document.getElementById('camp-checklist-progress-bar');
-
-  if (progressText) {
-    progressText.textContent = `${checkedCount} / ${totalItems} (%${percent})`;
-  }
-  if (progressBar) {
-    progressBar.style.width = `${percent}%`;
-  }
-}
-
-function openCampingAssistantModal(tab = 'checklist') {
-  const modal = document.getElementById('modal-camping-assistant');
-  if (!modal) return;
-  modal.classList.remove('hidden');
-  switchCampingTab(tab);
-  if (typeof initIcons === 'function') initIcons();
+function openCampingAssistantModal(tab = 'spots') {
+  filterMapOnlyCamping();
 }
 
 function closeCampingAssistantModal() {
-  const modal = document.getElementById('modal-camping-assistant');
-  if (modal) modal.classList.add('hidden');
-}
-
-function switchCampingTab(tabKey) {
-  const tabs = ['checklist', 'safety', 'weather', 'spots'];
-  tabs.forEach(t => {
-    const btn = document.getElementById(`camp-tab-btn-${t}`);
-    const content = document.getElementById(`camp-tab-content-${t}`);
-    if (btn) {
-      if (t === tabKey) {
-        btn.classList.add('active', 'bg-emerald-600', 'text-white');
-        btn.classList.remove('text-slate-400');
-      } else {
-        btn.classList.remove('active', 'bg-emerald-600', 'text-white');
-        btn.classList.add('text-slate-400');
-      }
-    }
-    if (content) {
-      if (t === tabKey) {
-        content.classList.remove('hidden');
-      } else {
-        content.classList.add('hidden');
-      }
-    }
-  });
-
-  if (tabKey === 'checklist') {
-    renderCampingChecklist();
-  } else if (tabKey === 'spots') {
-    renderCampingSpotsList();
-  } else if (tabKey === 'weather') {
-    calculateCampNightTemp();
-  }
-
-  if (typeof initIcons === 'function') initIcons();
-}
-
-function calculateCampNightTemp() {
-  const dayTempInput = document.getElementById('calc-day-temp');
-  const campAltInput = document.getElementById('calc-camp-alt');
-  const tempResultEl = document.getElementById('calc-result-temp');
-  const bagResultEl = document.getElementById('calc-result-bag');
-  const matResultEl = document.getElementById('calc-result-mat');
-
-  const dayTemp = parseFloat(dayTempInput?.value) || 28;
-  const campAlt = Math.max(0, parseFloat(campAltInput?.value) || 1400);
-
-  // Lapse Rate: her 1000m rakımda yaklaşık 6.5°C sıcaklık düşüşü
-  const altDrop = (campAlt / 1000) * 6.5;
-  const dayTempAtAlt = dayTemp - altDrop;
-
-  // Dağlık/açık alanda gece radyatif soğuma (gündüze göre ~11-13°C düşüş)
-  const nightMin = Math.round(dayTempAtAlt - 11.5);
-  const nightMax = nightMin + 2;
-
-  if (tempResultEl) {
-    tempResultEl.textContent = `~${nightMin}°C ile ${nightMax}°C arası`;
-    tempResultEl.className = nightMin <= 5 
-      ? 'text-base font-black text-cyan-300 font-mono' 
-      : (nightMin <= 15 ? 'text-base font-black text-emerald-300 font-mono' : 'text-base font-black text-amber-300 font-mono');
-  }
-
-  let bagStr = '';
-  let matStr = '';
-
-  if (nightMin <= -2) {
-    bagStr = 'Comfort -5°C / Limit -12°C (Kışlık / Kaz Tüyü Tulum)';
-    matStr = 'R-Değeri 4.0+ (Ekstrem Kışlık Çift Kat Yalıtımlı Mat)';
-  } else if (nightMin <= 5) {
-    bagStr = 'Comfort 0°C / Limit -5°C (4 Mevsim / Yayla Tulumu)';
-    matStr = 'R-Değeri 3.0 - 3.8 (Termal Şişme Mat)';
-  } else if (nightMin <= 12) {
-    bagStr = 'Comfort +5°C / Limit 0°C (3 Mevsim Baharlık Tulum)';
-    matStr = 'R-Değeri 2.2 - 2.8 (Termal Köpük veya Şişme Mat)';
-  } else if (nightMin <= 18) {
-    bagStr = 'Comfort +10°C / Limit +5°C (Hafif Yazlık Tulum)';
-    matStr = 'R-Değeri 1.5 - 2.0 (Standart Kamp Matı)';
-  } else {
-    bagStr = 'Comfort +16°C+ veya Polar Battaniye';
-    matStr = 'R-Değeri 1.0 - 1.5 (Standart Yazlık Mat)';
-  }
-
-  if (bagResultEl) bagResultEl.textContent = bagStr;
-  if (matResultEl) matResultEl.textContent = matStr;
-}
-
-function renderCampingSpotsList(filteredSpots = null) {
-  const container = document.getElementById('camp-spots-list-container');
-  if (!container) return;
-
-  const allPlaces = (window.state && window.state.allPlaces && window.state.allPlaces.length)
-    ? window.state.allPlaces
-    : (window.DEFAULT_HISTORIC_PLACES || []);
-
-  const spots = filteredSpots || allPlaces.filter(p => p.category === 'camping');
-
-  if (spots.length === 0) {
-    container.innerHTML = `
-      <div class="col-span-full p-6 text-center text-slate-500 text-xs">
-        Aradığınız kriterde kamp alanı bulunamadı.
-      </div>
-    `;
-    return;
-  }
-
-  container.innerHTML = spots.map(s => {
-    const city = s.city || s.region || 'Türkiye';
-    const desc = s.description ? escapeHtml(s.description.substring(0, 95)) + (s.description.length > 95 ? '...' : '') : '';
-    const tagBadges = (s.tags || []).slice(0, 3).map(t => `<span class="bg-slate-900 text-slate-400 px-1.5 py-0.5 rounded text-[9px]">#${escapeHtml(t)}</span>`).join(' ');
-
-    return `
-      <div class="glass-card bg-slate-950/70 border border-slate-800/90 hover:border-emerald-500/50 p-3 rounded-2xl flex flex-col justify-between space-y-2 transition-all group">
-        <div>
-          <div class="flex items-start justify-between gap-1.5">
-            <h5 class="font-bold text-white text-xs group-hover:text-emerald-300 transition-colors line-clamp-1 flex items-center gap-1">
-              <span>🏕️</span>
-              <span>${escapeHtml(s.name)}</span>
-            </h5>
-            <span class="text-[10px] bg-emerald-500/15 text-emerald-300 font-semibold px-2 py-0.5 rounded-full shrink-0 border border-emerald-500/25">${escapeHtml(city)}</span>
-          </div>
-          ${desc ? `<p class="text-[11px] text-slate-400 mt-1 leading-relaxed line-clamp-2">${desc}</p>` : ''}
-          <div class="flex flex-wrap gap-1 mt-1.5">${tagBadges}</div>
-        </div>
-        <div class="flex items-center space-x-1.5 pt-1.5 border-t border-slate-800/80">
-          <button onclick="showCampSpotOnMap(${s.id})" class="flex-1 py-1.5 bg-emerald-600/90 hover:bg-emerald-500 text-white rounded-xl text-[11px] font-bold flex items-center justify-center space-x-1 transition-all active:scale-95 shadow-sm">
-            <span>🗺️ Haritada Göster</span>
-          </button>
-          <button onclick="openPlaceDetailById(${s.id})" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-[11px] font-semibold transition-all" title="Detayları İncele">
-            <span>ℹ️</span>
-          </button>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function filterCampingSpotsList() {
-  const q = (document.getElementById('camp-spots-search')?.value || '').toLowerCase().trim();
-  const allPlaces = (window.state && window.state.allPlaces && window.state.allPlaces.length)
-    ? window.state.allPlaces
-    : (window.DEFAULT_HISTORIC_PLACES || []);
-
-  const campSpots = allPlaces.filter(p => p.category === 'camping');
-
-  if (!q) {
-    renderCampingSpotsList(campSpots);
-    return;
-  }
-
-  const filtered = campSpots.filter(s => {
-    const nameMatch = (s.name || '').toLowerCase().includes(q);
-    const cityMatch = (s.city || s.region || '').toLowerCase().includes(q);
-    const descMatch = (s.description || '').toLowerCase().includes(q);
-    const tagsMatch = (s.tags || []).some(t => t.toLowerCase().includes(q));
-    return nameMatch || cityMatch || descMatch || tagsMatch;
-  });
-
-  renderCampingSpotsList(filtered);
+  // Safe backward-compatibility shim
 }
 
 function showCampSpotOnMap(id) {
-  closeCampingAssistantModal();
   const places = (window.state && window.state.allPlaces && window.state.allPlaces.length)
     ? window.state.allPlaces
     : (window.DEFAULT_HISTORIC_PLACES || []);
@@ -17674,7 +16995,6 @@ function showCampSpotOnMap(id) {
 }
 
 function filterMapOnlyCamping() {
-  closeCampingAssistantModal();
   state.activePoiCategories.clear();
   state.activePoiCategories.add('camping');
   updatePoiCategoryFilterUI();
@@ -17686,12 +17006,5 @@ function filterMapOnlyCamping() {
 // Global scope bindings for inline HTML handlers
 window.openCampingAssistantModal = openCampingAssistantModal;
 window.closeCampingAssistantModal = closeCampingAssistantModal;
-window.switchCampingTab = switchCampingTab;
-window.toggleCampingChecklistItem = toggleCampingChecklistItem;
-window.resetCampingChecklist = resetCampingChecklist;
-window.calculateCampNightTemp = calculateCampNightTemp;
-window.filterCampingSpotsList = filterCampingSpotsList;
 window.filterMapOnlyCamping = filterMapOnlyCamping;
 window.showCampSpotOnMap = showCampSpotOnMap;
-
-

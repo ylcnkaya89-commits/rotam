@@ -191,7 +191,7 @@
         </button>
 
         <!-- Yönetim & Günlük Ziyaretçi Analitiği Paneli (Admin) -->
-        <button id="btn-admin-header-trigger" onclick="openAdminModal(false, 'analytics')" class="flex items-center space-x-1.5 bg-cyan-950/70 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/40 px-2 sm:px-2.5 py-1.5 rounded-xl text-xs font-semibold shadow-md active:scale-95 transition-all" title="Yönetim & Günlük Ziyaretçi Paneli (Admin)">
+        <button id="btn-admin-header-trigger" onclick="openAdminModal(false, 'analytics')" class="hidden items-center space-x-1.5 bg-cyan-950/70 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/40 px-2 sm:px-2.5 py-1.5 rounded-xl text-xs font-semibold shadow-md active:scale-95 transition-all" title="Yönetim & Günlük Ziyaretçi Paneli (Admin)">
           <i data-lucide="shield-check" class="w-3.5 h-3.5 text-cyan-400 shrink-0"></i>
           <span class="text-[11px] font-bold">Admin</span>
         </button>
@@ -204,8 +204,6 @@
       </div>
     </div>
 
-    <!-- Hidden stub for backwards compatibility -->
-    <div id="header-accordion-panel" class="hidden"></div>
   </header>
 
   <!-- MAIN APP CONTAINER -->
@@ -776,10 +774,6 @@
               <span data-i18n="btn_start_live_ride">CANLI SÜRÜŞÜ BAŞLAT</span>
               <span class="text-[10px] bg-cyan-400/20 text-cyan-200 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ml-1">HUD</span>
             </button>
-            <button type="button" onclick="RotamIntercom.testHelmetAudio()" class="col-span-2 py-2 px-3 bg-slate-900/90 hover:bg-slate-800 text-cyan-300 font-bold rounded-xl text-xs border border-cyan-500/30 flex items-center justify-center space-x-1.5 active:scale-[0.99] transition-all" title="Kask Intercom / Bluetooth Sesini Test Et">
-              <i data-lucide="headphones" class="w-3.5 h-3.5 text-cyan-400"></i>
-              <span>Kask & Intercom Ses Testi</span>
-            </button>
             <div class="col-span-2 grid grid-cols-2 gap-2">
               <button type="button" onclick="openInGoogleMaps()" class="py-2 px-2.5 bg-emerald-600/90 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-md shadow-emerald-600/20 flex items-center justify-center space-x-1.5 active:scale-[0.99] transition-all" title="Rotayı Google Maps'te Aç ve Harici Navigasyonu Başlat">
                 <i data-lucide="navigation" class="w-3.5 h-3.5 text-white"></i>
@@ -793,10 +787,6 @@
             <button type="button" onclick="exportGPX()" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl text-xs border border-slate-700 flex items-center justify-center space-x-1.5 transition-all">
               <i data-lucide="download" class="w-3.5 h-3.5 text-accent-400"></i>
               <span data-i18n="btn_export_gpx">GPX İndir</span>
-            </button>
-            <button type="button" onclick="RotamOfflineMap.downloadCurrentRoute()" class="col-span-2 py-2 px-3 bg-slate-800 hover:bg-slate-700 text-emerald-300 font-semibold rounded-xl text-xs border border-emerald-500/30 flex items-center justify-center space-x-1.5 transition-all" title="Bu rotanın çevrimdışı harita karolarını telefona indir">
-              <i data-lucide="download-cloud" class="w-3.5 h-3.5 text-emerald-400"></i>
-              <span>Çevrimdışı Haritayı İndir</span>
             </button>
             <button type="button" onclick="openSaveRouteModal()" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl text-xs border border-slate-700 flex items-center justify-center space-x-1.5 transition-all">
               <i data-lucide="bookmark-plus" class="w-3.5 h-3.5 text-brand-400"></i>
@@ -839,23 +829,6 @@
             <!-- JS tarafından 5 kontrol noktası kartı doldurulur -->
           </div>
 
-          <!-- Başlangıç / Varış Hızlı İkili Görünüm (Eski uyumluluk) -->
-          <div id="weather-mini-summary" class="hidden grid-cols-2 gap-2 text-xs">
-            <div id="weather-start" class="bg-slate-950/70 p-2 rounded-xl border border-slate-800/80">
-              <p class="text-[9px] text-slate-400 font-bold uppercase">Başlangıç</p>
-              <div class="flex items-center justify-between mt-0.5">
-                <span id="weather-start-temp" class="text-xs font-bold text-white">--</span>
-                <span id="weather-start-wind" class="text-[10px] text-slate-400"></span>
-              </div>
-            </div>
-            <div id="weather-end" class="bg-slate-950/70 p-2 rounded-xl border border-slate-800/80">
-              <p class="text-[9px] text-slate-400 font-bold uppercase">Varış</p>
-              <div class="flex items-center justify-between mt-0.5">
-                <span id="weather-end-temp" class="text-xs font-bold text-white">--</span>
-                <span id="weather-end-wind" class="text-[10px] text-slate-400"></span>
-              </div>
-            </div>
-          </div>
         </div>
 
       </div>
@@ -1522,17 +1495,6 @@
                 </div>
               </button>
 
-              <!-- Kask & Intercom Ses Testi -->
-              <button onclick="RotamIntercom.testHelmetAudio(); LiveNavigation.toggleToolsPopover(false);" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-800/90 active:bg-slate-750 text-left transition-all">
-                <div class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0 border border-cyan-500/30">
-                  <i data-lucide="headphones" class="w-4 h-4"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                  <span class="text-xs font-bold text-white block">Kask Ses Testi</span>
-                  <span class="text-[10px] text-slate-400 block truncate">Bluetooth / Intercom ses kontrolü</span>
-                </div>
-              </button>
-
               <!-- Konvoy & Grup Takibi -->
               <button onclick="RotamConvoy.openModal(); LiveNavigation.toggleToolsPopover(false);" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-800/90 active:bg-slate-750 text-left transition-all">
                 <div class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0 border border-cyan-500/30">
@@ -1986,29 +1948,6 @@
               </p>
             </div>
           </div>
-
-          <!-- 4. Akordiyon Bölüm: Çevrimdışı Harita Yönetimi -->
-          <div class="accordion-section rounded-xl bg-slate-950/70 border border-slate-800/90 overflow-hidden">
-            <button onclick="toggleAccordionSection('acc-body-offline')" class="w-full px-3 py-2 flex items-center justify-between text-xs font-bold text-slate-200 hover:text-white hover:bg-slate-800/50 transition-colors">
-              <span class="flex items-center space-x-1.5">
-                <i data-lucide="download-cloud" class="w-3.5 h-3.5 text-emerald-400"></i>
-                <span>Çevrimdışı Haritalar</span>
-              </span>
-              <i id="icon-acc-body-offline" data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 transition-transform"></i>
-            </button>
-            <div id="acc-body-offline" class="hidden p-2.5 pt-0 space-y-1.5">
-              <button id="btn-offline-maps" onclick="RotamOfflineMap.openModal()" class="w-full px-2.5 py-2 rounded-xl text-xs font-semibold text-emerald-400 bg-emerald-950/40 hover:bg-emerald-900/60 flex items-center justify-between border border-emerald-500/30 transition-all">
-                <span class="flex items-center space-x-2">
-                  <span>📥</span>
-                  <span>Bölge İndir & Yönet</span>
-                </span>
-                <span class="text-[11px] font-bold text-emerald-300">Yönet →</span>
-              </button>
-              <p class="text-[10px] text-slate-400 px-1 leading-relaxed">
-                Hücresel internetin çekmediği dağ rotalarında haritayı internetsiz kullanmak için bölge karolarını indirin.
-              </p>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -2054,12 +1993,6 @@
               <span>⛰️</span> <span>Topografik & Alpler Geçitleri</span>
             </button>
             <div class="h-px bg-slate-800 my-1"></div>
-            <button onclick="RotamOfflineMap.openModal(); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-bold text-emerald-400 hover:bg-emerald-500/10 flex items-center justify-between">
-              <span class="flex items-center space-x-1.5">
-                <span>📥</span> <span>Çevrimdışı Harita</span>
-              </span>
-              <span id="mobile-offline-badge" class="text-[10px] text-emerald-400 font-mono">Yönet</span>
-            </button>
             <button onclick="openLocationPickerModal(); toggleMobileLayersPopover()" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-bold text-cyan-300 hover:bg-cyan-500/10 flex items-center justify-between">
               <span class="flex items-center space-x-1.5">
                 <span>📍</span> <span>Konumumu Doğrula</span>
@@ -2199,11 +2132,11 @@
               </div>
             </details>
 
-            <!-- Kamp Asistanı Hızlı Erişim -->
-            <button onclick="openCampingAssistantModal()" class="w-full mt-2.5 p-2 rounded-xl bg-gradient-to-r from-emerald-950 to-slate-950 border border-emerald-500/40 hover:border-emerald-400 text-emerald-300 flex items-center justify-between text-xs font-bold transition-all shadow-sm">
+            <!-- Kamp & Karavan Alanları Hızlı Filtre -->
+            <button onclick="filterMapOnlyCamping()" class="w-full mt-2.5 p-2 rounded-xl bg-gradient-to-r from-emerald-950 to-slate-950 border border-emerald-500/40 hover:border-emerald-400 text-emerald-300 flex items-center justify-between text-xs font-bold transition-all shadow-sm">
               <span class="flex items-center space-x-2">
                 <span>🏕️</span>
-                <span>Kampçı Asistanı & Kontrol Listesi</span>
+                <span>Kamp & Karavan Alanlarını Filtrele</span>
               </span>
               <i data-lucide="chevron-right" class="w-4 h-4 text-emerald-400"></i>
             </button>
@@ -2317,71 +2250,11 @@
     </main>
   </div>
 
-  <!-- MODAL: TÜRKİYE'Yİ KEŞFET (STANDALONE DESTINATION BROWSER) -->
-  <div id="modal-discover" class="hidden fixed inset-0 z-[1000] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
-    <div class="responsive-modal-card bg-slate-900 border border-slate-800 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
-      
-      <!-- Modal Header -->
-      <div class="p-4 border-b border-slate-800 flex items-center justify-between">
-        <div class="flex items-center space-x-2.5">
-          <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
-            <i data-lucide="compass" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <h3 class="text-base font-bold text-white" data-i18n="modal_discover_title">Türkiye'yi Keşfet</h3>
-            <p class="text-xs text-slate-400" data-i18n="modal_discover_sub">Antik kentler, doğa harikaları, kanyonlar, sahiller ve gastronomi durakları</p>
-          </div>
-        </div>
-        <button onclick="closeDiscoverModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <!-- Kategori ve Arama Filtreleri -->
-      <div class="p-3.5 bg-slate-950/80 border-b border-slate-800 space-y-2.5">
-        <div class="relative">
-          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
-          <input type="text" id="discover-search-input" oninput="filterDiscoverPlaces()" placeholder="Yerin adı, şehir veya özellik ara (Örn: Sagalassos, Yedigöller, Kaputaş, Efes, Urfa...)" data-i18n-placeholder="search_discover_placeholder" class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
-        </div>
-
-        <!-- Kategori Çipleri -->
-        <div class="flex flex-wrap gap-1 text-[11px]" id="discover-category-filters">
-          <button onclick="selectDiscoverCategory('all')" class="discover-cat-btn active px-3 py-1 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/40 font-medium" data-cat="all" data-i18n="cat_all">Tümü</button>
-          <button onclick="selectDiscoverCategory('historic')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="historic" data-i18n="cat_historic">🏛️ Tarih</button>
-          <button onclick="selectDiscoverCategory('mountain_pass')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="mountain_pass" data-i18n="cat_mountain_pass">⛰️ Dağ Geçidi</button>
-          <button onclick="selectDiscoverCategory('nature')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="nature" data-i18n="cat_nature">🌲 Doğa</button>
-          <button onclick="selectDiscoverCategory('photography')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="photography" data-i18n="cat_photography">📸 Fotoğraf</button>
-          <button onclick="selectDiscoverCategory('beach')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="beach" data-i18n="cat_beach">🌊 Sahil</button>
-          <button onclick="selectDiscoverCategory('gastronomy')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="gastronomy" data-i18n="cat_gastronomy">🍴 Lezzet</button>
-          <button onclick="selectDiscoverCategory('camping')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="camping" data-i18n="cat_camping">🚐 Karavan & Kamp</button>
-          <button onclick="selectDiscoverCategory('ev_charge')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="ev_charge" data-i18n="cat_ev_charge">⚡ EV Şarj</button>
-        </div>
-
-        <!-- Bölge Filtreleri -->
-        <div class="flex flex-wrap gap-1 text-[10px] text-slate-400 pt-1 border-t border-slate-900" id="discover-region-filters">
-          <button onclick="selectDiscoverRegion('all')" class="discover-reg-btn active px-2 py-0.5 rounded bg-slate-800 text-amber-400 font-semibold" data-reg="all" data-i18n="region_all">Tüm Bölgeler</button>
-          <button onclick="selectDiscoverRegion('Ege')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Ege" data-i18n="region_aegean">Ege</button>
-          <button onclick="selectDiscoverRegion('Akdeniz')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Akdeniz" data-i18n="region_mediterranean">Akdeniz</button>
-          <button onclick="selectDiscoverRegion('İç Anadolu')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="İç Anadolu" data-i18n="region_central">İç Anadolu</button>
-          <button onclick="selectDiscoverRegion('Marmara')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Marmara" data-i18n="region_marmara">Marmara</button>
-          <button onclick="selectDiscoverRegion('Karadeniz')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Karadeniz" data-i18n="region_blacksea">Karadeniz</button>
-          <button onclick="selectDiscoverRegion('Doğu & Güneydoğu')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Doğu & Güneydoğu" data-i18n="region_east">Doğu & GD</button>
-          <button onclick="selectDiscoverRegion('Yurtdışı')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white text-cyan-400 border border-cyan-500/30" data-reg="Yurtdışı" data-i18n="region_abroad">🌍 Yurtdışı & Avrupa</button>
-        </div>
-      </div>
-
-      <!-- Keşif Kartları Grid Listesi -->
-      <div class="p-4 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-3" id="discover-places-grid">
-        <!-- JS tarafından doldurulur -->
-      </div>
-    </div>
-  </div>
-
   <!-- MODAL: SÜRÜCÜ & KEŞİF MERKEZİ (UNIFIED DRIVER HUB) -->
   <div id="modal-driver-hub" class="hidden fixed inset-0 z-[1000] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
-    <div class="responsive-modal-card bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
+    <div class="responsive-modal-card bg-slate-900 border border-slate-800 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
       <!-- Hub Header -->
-      <div class="p-4 sm:p-5 border-b border-slate-800/90 flex items-center justify-between bg-slate-950/60">
+      <div class="p-4 sm:p-5 border-b border-slate-800/90 flex items-center justify-between bg-slate-950/60 shrink-0">
         <div class="flex items-center space-x-3">
           <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500/20 to-brand-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0 shadow-inner">
             <i data-lucide="layout-grid" class="w-5 h-5"></i>
@@ -2391,7 +2264,7 @@
               <h3 class="text-base sm:text-lg font-black text-white">Sürücü & Keşif Merkezi</h3>
               <span class="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[10px] font-extrabold uppercase">V3 HUB</span>
             </div>
-            <p class="text-xs text-slate-400">Rotanızı zenginleştirin, topluluğa bağlanın ve sürüş araçlarını yönetin.</p>
+            <p class="text-xs text-slate-400">Rotanızı zenginleştirin, ikonik güzergahları keşfedin ve sürüş araçlarını yönetin.</p>
           </div>
         </div>
         <button onclick="closeDriverHubModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors" title="Kapat">
@@ -2400,10 +2273,18 @@
       </div>
 
       <!-- Segmented Hub Tabs -->
-      <div class="p-2 sm:px-4 bg-slate-950 border-b border-slate-800/80 flex items-center space-x-1.5 overflow-x-auto no-scrollbar">
-        <button id="tab-btn-hub-discover" onclick="switchDriverHubTab('discover')" class="hub-tab-btn active px-3 py-2 rounded-xl text-xs font-bold transition-all border border-amber-500/40 bg-amber-500/20 text-amber-300 flex items-center space-x-1.5 shrink-0">
+      <div class="p-2 sm:px-4 bg-slate-950 border-b border-slate-800/80 flex items-center space-x-1.5 overflow-x-auto no-scrollbar shrink-0">
+        <button id="tab-btn-hub-presets" onclick="switchDriverHubTab('presets')" class="hub-tab-btn active px-3 py-2 rounded-xl text-xs font-bold transition-all border border-amber-500/40 bg-amber-500/20 text-amber-300 flex items-center space-x-1.5 shrink-0">
+          <span>🏍️</span>
+          <span>Efsane Rotalar</span>
+        </button>
+        <button id="tab-btn-hub-discover" onclick="switchDriverHubTab('discover')" class="hub-tab-btn px-3 py-2 rounded-xl text-xs font-bold transition-all border border-transparent text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center space-x-1.5 shrink-0">
           <span>🏛️</span>
-          <span>Keşif & Güzergahlar</span>
+          <span>Türkiye'yi Keşfet</span>
+        </button>
+        <button id="tab-btn-hub-nearby" onclick="switchDriverHubTab('nearby')" class="hub-tab-btn px-3 py-2 rounded-xl text-xs font-bold transition-all border border-transparent text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center space-x-1.5 shrink-0">
+          <span>📍</span>
+          <span>Yakınımda Ne Var</span>
         </button>
         <button id="tab-btn-hub-ride" onclick="switchDriverHubTab('ride')" class="hub-tab-btn px-3 py-2 rounded-xl text-xs font-bold transition-all border border-transparent text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center space-x-1.5 shrink-0">
           <span>👥</span>
@@ -2416,55 +2297,93 @@
       </div>
 
       <!-- Tab Content Area -->
-      <div class="p-4 sm:p-5 overflow-y-auto space-y-4">
-        <!-- 1. TAB: KEŞİF & GÜZERGAHLAR -->
-        <div id="tab-pane-hub-discover" class="space-y-2.5">
-          <button onclick="openPresetsModal(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-amber-500/40 text-left flex items-center justify-between transition-all group">
-            <div class="flex items-center space-x-3 min-w-0">
-              <span class="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center text-lg shrink-0">✨</span>
-              <div class="min-w-0">
-                <span class="font-extrabold text-sm text-white group-hover:text-amber-300 block truncate">14 Efsane Hazır Rota</span>
-                <span class="text-xs text-slate-400 block truncate">Motosiklet ve karavan için seçilmiş ikonik Türkiye rotaları</span>
-              </div>
+      <div class="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1">
+        <!-- 1. TAB: EFSANE HAZIR ROTALAR -->
+        <div id="tab-pane-hub-presets" class="space-y-3">
+          <!-- Filtreler & Arama -->
+          <div class="p-3 bg-slate-950/80 rounded-2xl border border-slate-800 flex flex-col sm:flex-row gap-2">
+            <div class="relative flex-1">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5"></i>
+              <input type="text" id="presets-search-input" oninput="filterPresetsList()" placeholder="Hazır rota veya bölge ara (Örn: Kaş, Sakar, Bolu, Kapadokya...)" data-i18n-placeholder="presets_search_placeholder" class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500">
             </div>
-            <span class="px-2 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold border border-amber-500/30 shrink-0">14 Rota</span>
-          </button>
+            <div class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar pb-0.5">
+              <button onclick="filterPresetsByCategory('all')" class="preset-filter-btn active text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-amber-600 text-white shrink-0" data-tag="all" data-i18n="presets_filter_all">Tümü</button>
+              <button onclick="filterPresetsByCategory('moto')" class="preset-filter-btn text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white shrink-0" data-tag="moto" data-i18n="presets_filter_moto">🏍️ Viraj</button>
+              <button onclick="filterPresetsByCategory('history')" class="preset-filter-btn text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white shrink-0" data-tag="history" data-i18n="presets_filter_history">🏛️ Tarih</button>
+              <button onclick="filterPresetsByCategory('nature')" class="preset-filter-btn text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white shrink-0" data-tag="nature" data-i18n="presets_filter_nature">🌲 Doğa</button>
+              <button onclick="filterPresetsByCategory('coast')" class="preset-filter-btn text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white shrink-0" data-tag="coast" data-i18n="presets_filter_coast">🌊 Sahil</button>
+              <button onclick="filterPresetsByCategory('abroad')" class="preset-filter-btn text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-cyan-400 hover:text-white shrink-0 border border-cyan-500/30" data-tag="abroad" data-i18n="presets_filter_abroad">🌍 Yurtdışı</button>
+            </div>
+          </div>
 
-          <button onclick="openDiscoverModal(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-orange-500/40 text-left flex items-center justify-between transition-all group">
-            <div class="flex items-center space-x-3 min-w-0">
-              <span class="w-10 h-10 rounded-xl bg-orange-500/15 text-orange-400 flex items-center justify-center text-lg shrink-0">🏛️</span>
-              <div class="min-w-0">
-                <span class="font-extrabold text-sm text-white group-hover:text-amber-300 block truncate">Türkiye'yi Keşfet (870+ Nokta)</span>
-                <span class="text-xs text-slate-400 block truncate">Antik kentler, kanyonlar, virajlı dağ geçitleri ve seyir terasları</span>
-              </div>
-            </div>
-            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition-transform shrink-0"></i>
-          </button>
-
-          <button onclick="openNearbyModal(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-emerald-500/40 text-left flex items-center justify-between transition-all group">
-            <div class="flex items-center space-x-3 min-w-0">
-              <span class="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-lg shrink-0">📍</span>
-              <div class="min-w-0">
-                <span class="font-extrabold text-sm text-white group-hover:text-emerald-300 block truncate">Yakınımda Ne Var? (Geo-Explorer)</span>
-                <span class="text-xs text-slate-400 block truncate">Mevcut konumunuzun 10-50 km çevresindeki en popüler duraklar</span>
-              </div>
-            </div>
-            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-transform shrink-0"></i>
-          </button>
-
-          <button onclick="openSavedRoutesModal(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-rose-500/40 text-left flex items-center justify-between transition-all group">
-            <div class="flex items-center space-x-3 min-w-0">
-              <span class="w-10 h-10 rounded-xl bg-rose-500/15 text-rose-400 flex items-center justify-center text-lg shrink-0">❤️</span>
-              <div class="min-w-0">
-                <span class="font-extrabold text-sm text-white group-hover:text-rose-300 block truncate">Kayıtlı Rotalarım & Favoriler</span>
-                <span class="text-xs text-slate-400 block truncate">Daha önce kaydettiğiniz sürüş planları ve favori duraklarınız</span>
-              </div>
-            </div>
-            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-rose-400 transition-transform shrink-0"></i>
-          </button>
+          <!-- Liste Container -->
+          <div class="space-y-3" id="presets-routes-container">
+            <!-- JS ile render edilir -->
+          </div>
         </div>
 
-        <!-- 2. TAB: TOPLULUK & CANLI SÜRÜŞ -->
+        <!-- 2. TAB: TÜRKİYE'Yİ KEŞFET -->
+        <div id="tab-pane-hub-discover" class="hidden space-y-3">
+          <!-- Kategori ve Arama Filtreleri -->
+          <div class="p-3.5 bg-slate-950/80 rounded-2xl border border-slate-800 space-y-2.5">
+            <div class="relative">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+              <input type="text" id="discover-search-input" oninput="filterDiscoverPlaces()" placeholder="Yerin adı, şehir veya özellik ara (Örn: Sagalassos, Yedigöller, Kaputaş, Efes, Urfa...)" data-i18n-placeholder="search_discover_placeholder" class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+            </div>
+
+            <!-- Kategori Çipleri -->
+            <div class="flex flex-wrap gap-1 text-[11px]" id="discover-category-filters">
+              <button onclick="selectDiscoverCategory('all')" class="discover-cat-btn active px-3 py-1 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/40 font-medium" data-cat="all" data-i18n="cat_all">Tümü</button>
+              <button onclick="selectDiscoverCategory('historic')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="historic" data-i18n="cat_historic">🏛️ Tarih</button>
+              <button onclick="selectDiscoverCategory('mountain_pass')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="mountain_pass" data-i18n="cat_mountain_pass">⛰️ Dağ Geçidi</button>
+              <button onclick="selectDiscoverCategory('nature')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="nature" data-i18n="cat_nature">🌲 Doğa</button>
+              <button onclick="selectDiscoverCategory('photography')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="photography" data-i18n="cat_photography">📸 Fotoğraf</button>
+              <button onclick="selectDiscoverCategory('beach')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="beach" data-i18n="cat_beach">🌊 Sahil</button>
+              <button onclick="selectDiscoverCategory('gastronomy')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="gastronomy" data-i18n="cat_gastronomy">🍴 Lezzet</button>
+              <button onclick="selectDiscoverCategory('camping')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="camping" data-i18n="cat_camping">🚐 Karavan & Kamp</button>
+              <button onclick="selectDiscoverCategory('ev_charge')" class="discover-cat-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white" data-cat="ev_charge" data-i18n="cat_ev_charge">⚡ EV Şarj</button>
+            </div>
+
+            <!-- Bölge Filtreleri -->
+            <div class="flex flex-wrap gap-1 text-[10px] text-slate-400 pt-1 border-t border-slate-900" id="discover-region-filters">
+              <button onclick="selectDiscoverRegion('all')" class="discover-reg-btn active px-2 py-0.5 rounded bg-slate-800 text-amber-400 font-semibold" data-reg="all" data-i18n="region_all">Tüm Bölgeler</button>
+              <button onclick="selectDiscoverRegion('Ege')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Ege" data-i18n="region_aegean">Ege</button>
+              <button onclick="selectDiscoverRegion('Akdeniz')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Akdeniz" data-i18n="region_mediterranean">Akdeniz</button>
+              <button onclick="selectDiscoverRegion('İç Anadolu')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="İç Anadolu" data-i18n="region_central">İç Anadolu</button>
+              <button onclick="selectDiscoverRegion('Marmara')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Marmara" data-i18n="region_marmara">Marmara</button>
+              <button onclick="selectDiscoverRegion('Karadeniz')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Karadeniz" data-i18n="region_blacksea">Karadeniz</button>
+              <button onclick="selectDiscoverRegion('Doğu & Güneydoğu')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white" data-reg="Doğu & GD">Doğu & GD</button>
+              <button onclick="selectDiscoverRegion('Yurtdışı')" class="discover-reg-btn px-2 py-0.5 rounded bg-slate-900 hover:text-white text-cyan-400 border border-cyan-500/30" data-reg="Yurtdışı" data-i18n="region_abroad">🌍 Yurtdışı & Avrupa</button>
+            </div>
+          </div>
+
+          <!-- Keşif Kartları Grid Listesi -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="discover-places-grid">
+            <!-- JS tarafından doldurulur -->
+          </div>
+        </div>
+
+        <!-- 3. TAB: YAKINIMDA NE VAR -->
+        <div id="tab-pane-hub-nearby" class="hidden space-y-3">
+          <div class="p-3 bg-slate-950/80 rounded-2xl border border-slate-800 flex items-center justify-between text-xs">
+            <div class="flex items-center space-x-1">
+              <span class="text-slate-400" data-i18n="nearby_radius_label">Mesafe Yarıçapı:</span>
+              <button onclick="fetchNearby(10)" class="nearby-radius-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white" data-radius="10">10 km</button>
+              <button onclick="fetchNearby(25)" class="nearby-radius-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white" data-radius="25">25 km</button>
+              <button onclick="fetchNearby(50)" class="nearby-radius-btn active px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-bold" data-radius="50">50 km</button>
+            </div>
+            <button onclick="refreshNearbyGPS()" class="text-emerald-400 hover:text-emerald-300 flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 transition-colors">
+              <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+              <span data-i18n="btn_refresh">Yenile</span>
+            </button>
+          </div>
+
+          <div class="space-y-2.5" id="nearby-places-list">
+            <p class="text-xs text-slate-400 text-center py-6" data-i18n="nearby_scanning">Konumunuz alınıyor ve yakındaki noktalar taranıyor...</p>
+          </div>
+        </div>
+
+        <!-- 4. TAB: TOPLULUK & CANLI SÜRÜŞ -->
         <div id="tab-pane-hub-ride" class="hidden space-y-2.5">
           <button onclick="RotamConvoy.openModal(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-cyan-500/40 text-left flex items-center justify-between transition-all group">
             <div class="flex items-center space-x-3 min-w-0">
@@ -2488,30 +2407,19 @@
             <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition-transform shrink-0"></i>
           </button>
 
-          <button onclick="RotamIntercom.testHelmetAudio(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-sky-500/40 text-left flex items-center justify-between transition-all group">
-            <div class="flex items-center space-x-3 min-w-0">
-              <span class="w-10 h-10 rounded-xl bg-sky-500/15 text-sky-400 flex items-center justify-center text-lg shrink-0">🎧</span>
-              <div class="min-w-0">
-                <span class="font-extrabold text-sm text-white group-hover:text-sky-300 block truncate">Kask & Intercom Ses Testi</span>
-                <span class="text-xs text-slate-400 block truncate">Bluetooth kulaklık ve D5-A5 çan ses seviyesini deneyin</span>
-              </div>
-            </div>
-            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-sky-400 transition-transform shrink-0"></i>
-          </button>
-
-          <button onclick="openCampingAssistantModal(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-emerald-500/40 text-left flex items-center justify-between transition-all group">
+          <button onclick="filterMapOnlyCamping(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-emerald-500/40 text-left flex items-center justify-between transition-all group">
             <div class="flex items-center space-x-3 min-w-0">
               <span class="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-lg shrink-0">🏕️</span>
               <div class="min-w-0">
-                <span class="font-extrabold text-sm text-white group-hover:text-emerald-300 block truncate">Kamp & Karavan Asistanı</span>
-                <span class="text-xs text-slate-400 block truncate">Gece sıcaklığı, tulum konfor limiti ve ekipman listesi</span>
+                <span class="font-extrabold text-sm text-white group-hover:text-emerald-300 block truncate">Kamp & Karavan Alanları</span>
+                <span class="text-xs text-slate-400 block truncate">Haritada Türkiye geneli kamp, çadır ve karavan alanlarını filtreleyin</span>
               </div>
             </div>
             <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-transform shrink-0"></i>
           </button>
         </div>
 
-        <!-- 3. TAB: ARAÇ & DOSYALAR -->
+        <!-- 5. TAB: ARAÇ & DOSYALAR -->
         <div id="tab-pane-hub-tools" class="hidden space-y-2.5">
           <button onclick="openLocationPickerModal(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-cyan-500/40 text-left flex items-center justify-between transition-all group">
             <div class="flex items-center space-x-3 min-w-0">
@@ -2535,6 +2443,17 @@
             <i data-lucide="bookmark-plus" class="w-4 h-4 text-slate-500 group-hover:text-brand-400 transition-transform shrink-0"></i>
           </button>
 
+          <button onclick="openSavedRoutesModal(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-rose-500/40 text-left flex items-center justify-between transition-all group">
+            <div class="flex items-center space-x-3 min-w-0">
+              <span class="w-10 h-10 rounded-xl bg-rose-500/15 text-rose-400 flex items-center justify-center text-lg shrink-0">❤️</span>
+              <div class="min-w-0">
+                <span class="font-extrabold text-sm text-white group-hover:text-rose-300 block truncate">Kayıtlı Rotalarım & Favoriler</span>
+                <span class="text-xs text-slate-400 block truncate">Daha önce kaydettiğiniz sürüş planları ve favori duraklarınız</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-rose-400 transition-transform shrink-0"></i>
+          </button>
+
           <div class="grid grid-cols-2 gap-2.5">
             <button onclick="exportGPX(); closeDriverHubModal();" class="p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-slate-700 text-left flex items-center space-x-2.5 transition-all">
               <span class="text-xl shrink-0">📥</span>
@@ -2552,17 +2471,6 @@
               </div>
             </button>
           </div>
-
-          <button onclick="RotamOfflineMap.openModal(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-teal-500/40 text-left flex items-center justify-between transition-all group">
-            <div class="flex items-center space-x-3 min-w-0">
-              <span class="w-10 h-10 rounded-xl bg-teal-500/15 text-teal-400 flex items-center justify-center text-lg shrink-0">🌐</span>
-              <div class="min-w-0">
-                <span class="font-extrabold text-sm text-white group-hover:text-teal-300 block truncate">Çevrimdışı Harita İndir</span>
-                <span class="text-xs text-slate-400 block truncate">İnternetsiz dağ ve kanyon rotaları için paket indirin</span>
-              </div>
-            </div>
-            <i data-lucide="download-cloud" class="w-4 h-4 text-slate-500 group-hover:text-teal-400 transition-transform shrink-0"></i>
-          </button>
 
           <button onclick="openInGoogleMaps(); closeDriverHubModal();" class="w-full p-3 rounded-2xl bg-slate-950/80 hover:bg-slate-800/90 border border-slate-800 hover:border-emerald-500/40 text-left flex items-center justify-between transition-all group">
             <div class="flex items-center space-x-3 min-w-0">
@@ -2706,83 +2614,6 @@
         <button onclick="closeLocationPickerModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition-colors">
           Kapat
         </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: YAKINIMDA NE VAR? (GPS GEO-EXPLORER) -->
-  <div id="modal-nearby" class="hidden fixed inset-0 z-[1000] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="responsive-modal-card bg-slate-900 border border-slate-800 w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
-      <div class="p-4 border-b border-slate-800 flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-          <i data-lucide="navigation" class="w-5 h-5 text-emerald-400"></i>
-          <h3 class="text-base font-bold text-white" data-i18n="modal_nearby_title">Yakınımda Ne Var?</h3>
-        </div>
-        <button onclick="closeNearbyModal()" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <div class="p-3 bg-slate-950 border-b border-slate-800 flex items-center justify-between text-xs">
-        <div class="flex items-center space-x-1">
-          <span class="text-slate-400" data-i18n="nearby_radius_label">Mesafe Yarıçapı:</span>
-          <button onclick="fetchNearby(10)" class="nearby-radius-btn px-2 py-1 rounded bg-slate-800 text-slate-300" data-radius="10">10 km</button>
-          <button onclick="fetchNearby(25)" class="nearby-radius-btn px-2 py-1 rounded bg-slate-800 text-slate-300" data-radius="25">25 km</button>
-          <button onclick="fetchNearby(50)" class="nearby-radius-btn active px-2 py-1 rounded bg-emerald-600 text-white font-bold" data-radius="50">50 km</button>
-        </div>
-        <button onclick="refreshNearbyGPS()" class="text-emerald-400 hover:text-emerald-300 flex items-center space-x-1">
-          <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
-          <span data-i18n="btn_refresh">Yenile</span>
-        </button>
-      </div>
-
-      <div class="p-4 overflow-y-auto space-y-2.5" id="nearby-places-list">
-        <p class="text-xs text-slate-400 text-center py-6" data-i18n="nearby_scanning">Konumunuz alınıyor ve yakındaki noktalar taranıyor...</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: HAZIR EFSANE ROTALAR (CURATED SCENIC ROUTES) -->
-  <div id="modal-presets" class="hidden fixed inset-0 z-[1000] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
-    <div class="responsive-modal-card bg-slate-900 border border-slate-800 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
-      <!-- Header -->
-      <div class="p-4 border-b border-slate-800 flex items-center justify-between">
-        <div class="flex items-center space-x-2.5">
-          <div class="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-            <i data-lucide="sparkles" class="w-4 h-4"></i>
-          </div>
-          <div>
-            <div class="flex items-center space-x-2">
-              <h3 class="text-base font-bold text-white" data-i18n="modal_presets_title">Efsane Hazır Rotalar</h3>
-              <span class="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[10px] font-bold">10 Küratör Güzergah</span>
-            </div>
-            <p class="text-xs text-slate-400" data-i18n="modal_presets_sub">Motosiklet ve seyahat tutkunları için özenle seçilmiş ikonik Türkiye güzergahları</p>
-          </div>
-        </div>
-        <button onclick="closePresetsModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" title="Kapat">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <!-- Filtreler & Arama -->
-      <div class="p-3 bg-slate-950 border-b border-slate-800 flex flex-col sm:flex-row gap-2">
-        <div class="relative flex-1">
-          <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5"></i>
-          <input type="text" id="presets-search-input" oninput="filterPresetsList()" placeholder="Hazır rota veya bölge ara (Örn: Kaş, Sakar, Bolu, Kapadokya...)" data-i18n-placeholder="presets_search_placeholder" class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500">
-        </div>
-        <div class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar pb-0.5">
-          <button onclick="filterPresetsByCategory('all')" class="preset-filter-btn active text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-amber-600 text-white shrink-0" data-tag="all" data-i18n="presets_filter_all">Tümü</button>
-          <button onclick="filterPresetsByCategory('moto')" class="preset-filter-btn text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white shrink-0" data-tag="moto" data-i18n="presets_filter_moto">🏍️ Viraj</button>
-          <button onclick="filterPresetsByCategory('history')" class="preset-filter-btn text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white shrink-0" data-tag="history" data-i18n="presets_filter_history">🏛️ Tarih</button>
-          <button onclick="filterPresetsByCategory('nature')" class="preset-filter-btn text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white shrink-0" data-tag="nature" data-i18n="presets_filter_nature">🌲 Doğa</button>
-          <button onclick="filterPresetsByCategory('coast')" class="preset-filter-btn text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white shrink-0" data-tag="coast" data-i18n="presets_filter_coast">🌊 Sahil</button>
-          <button onclick="filterPresetsByCategory('abroad')" class="preset-filter-btn text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-cyan-400 hover:text-white shrink-0 border border-cyan-500/30" data-tag="abroad" data-i18n="presets_filter_abroad">🌍 Yurtdışı</button>
-        </div>
-      </div>
-
-      <!-- Liste Container -->
-      <div class="p-4 overflow-y-auto space-y-3 flex-1" id="presets-routes-container">
-        <!-- JS ile render edilir -->
       </div>
     </div>
   </div>
@@ -4488,10 +4319,7 @@ service cloud.firestore {
               <span>Şebeke / 4G Çekim Alanı</span>
             </div>
           </div>
-          <button onclick="openCampingAssistantModal('checklist')" class="w-full text-center text-[10px] font-bold text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-xl py-2 transition-all flex items-center justify-center space-x-1.5 mt-1 active:scale-95">
-            <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
-            <span>Kamp Ekipman Kontrol Listesini Aç (Çadır, Tulum, Ocak...)</span>
-          </button>
+
         </div>
 
         <!-- Etiketler -->
@@ -4509,237 +4337,6 @@ service cloud.firestore {
           </button>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- MODAL: KAMPÇI ASİSTANI & DOĞA REHBERİ (#modal-camping-assistant) -->
-  <div id="modal-camping-assistant" class="hidden fixed inset-0 z-[1150] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
-    <div class="responsive-modal-card bg-slate-900 border border-slate-800 w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
-      
-      <!-- Modal Header -->
-      <div class="p-4 bg-gradient-to-r from-emerald-950/80 via-slate-900 to-slate-950 border-b border-slate-800 flex items-center justify-between shrink-0">
-        <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xl shadow-inner">
-            🏕️
-          </div>
-          <div>
-            <h3 class="text-base font-black text-white flex items-center space-x-2">
-              <span>Rotam Kampçı Asistanı & Doğa Rehberi</span>
-              <span class="text-[9px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30 font-bold">Outdoor V3</span>
-            </h3>
-            <p class="text-xs text-slate-400">Çadır & karavan kontrol listesi, yangın kuralları, rakım analizi ve kamp yerleri</p>
-          </div>
-        </div>
-        <button onclick="closeCampingAssistantModal()" class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" title="Kapat">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <!-- Sekme Başlıkları (Tabs) -->
-      <div class="flex items-center space-x-1 p-2 bg-slate-950/80 border-b border-slate-800 overflow-x-auto no-scrollbar shrink-0 text-xs">
-        <button id="camp-tab-btn-checklist" onclick="switchCampingTab('checklist')" class="camp-tab-btn active px-3.5 py-1.5 rounded-xl font-bold bg-emerald-600 text-white shadow-sm flex items-center space-x-1.5 shrink-0 transition-all">
-          <span>🎒</span>
-          <span>Ekipman Kontrol Listesi</span>
-        </button>
-        <button id="camp-tab-btn-safety" onclick="switchCampingTab('safety')" class="camp-tab-btn px-3.5 py-1.5 rounded-xl font-bold text-slate-400 hover:text-white flex items-center space-x-1.5 shrink-0 transition-all">
-          <span>🔥</span>
-          <span>Ateş & Doğa Güvenliği</span>
-        </button>
-        <button id="camp-tab-btn-weather" onclick="switchCampingTab('weather')" class="camp-tab-btn px-3.5 py-1.5 rounded-xl font-bold text-slate-400 hover:text-white flex items-center space-x-1.5 shrink-0 transition-all">
-          <span>❄️</span>
-          <span>Rakım & Gece Soğuğu</span>
-        </button>
-        <button id="camp-tab-btn-spots" onclick="switchCampingTab('spots')" class="camp-tab-btn px-3.5 py-1.5 rounded-xl font-bold text-slate-400 hover:text-white flex items-center space-x-1.5 shrink-0 transition-all">
-          <span>📍</span>
-          <span>Seçkin Kamp Alanları (48)</span>
-        </button>
-      </div>
-
-      <!-- Sekme İçerikleri (Scrollable Body) -->
-      <div class="p-4 sm:p-5 overflow-y-auto flex-1 space-y-4">
-        
-        <!-- SEKME 1: EKİPMAN KONTROL LİSTESİ -->
-        <div id="camp-tab-content-checklist" class="space-y-4">
-          <!-- İlerleme Çubuğu -->
-          <div class="glass-card bg-slate-950/80 border border-slate-800 p-3.5 rounded-2xl flex flex-col space-y-2">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-bold text-slate-300 flex items-center space-x-1.5">
-                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
-                <span>Hazırlık Durumu</span>
-              </span>
-              <span id="camp-checklist-progress-text" class="font-mono font-bold text-emerald-400">0 / 23 (%0)</span>
-            </div>
-            <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800">
-              <div id="camp-checklist-progress-bar" class="bg-gradient-to-r from-emerald-500 to-green-400 h-full rounded-full transition-all duration-300" style="width: 0%;"></div>
-            </div>
-            <div class="flex items-center justify-between pt-1 text-[11px] text-slate-400">
-              <span>Eksiksiz kamp için yola çıkmadan önce eşyalarınızı işaretleyin.</span>
-              <button onclick="resetCampingChecklist()" class="text-rose-400 hover:text-rose-300 font-semibold hover:underline">Sıfırla</button>
-            </div>
-          </div>
-
-          <!-- Kategori 1: Barınma & Uyku -->
-          <div class="glass-card bg-slate-950/60 border border-slate-800/80 p-3.5 rounded-2xl space-y-2.5">
-            <h4 class="text-xs font-bold text-emerald-300 flex items-center space-x-2">
-              <span>⛺</span>
-              <span>Barınma & Konfor</span>
-            </h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs" id="camp-checklist-shelter"></div>
-          </div>
-
-          <!-- Kategori 2: Mutfak & Beslenme -->
-          <div class="glass-card bg-slate-950/60 border border-slate-800/80 p-3.5 rounded-2xl space-y-2.5">
-            <h4 class="text-xs font-bold text-amber-300 flex items-center space-x-2">
-              <span>🍳</span>
-              <span>Mutfak, Ocak & Temiz Su</span>
-            </h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs" id="camp-checklist-kitchen"></div>
-          </div>
-
-          <!-- Kategori 3: Aydınlatma & Enerji -->
-          <div class="glass-card bg-slate-950/60 border border-slate-800/80 p-3.5 rounded-2xl space-y-2.5">
-            <h4 class="text-xs font-bold text-cyan-300 flex items-center space-x-2">
-              <span>💡</span>
-              <span>Aydınlatma & Güç</span>
-            </h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs" id="camp-checklist-power"></div>
-          </div>
-
-          <!-- Kategori 4: Sağlık, Güvenlik & Doğa -->
-          <div class="glass-card bg-slate-950/60 border border-slate-800/80 p-3.5 rounded-2xl space-y-2.5">
-            <h4 class="text-xs font-bold text-rose-300 flex items-center space-x-2">
-              <span>🩹</span>
-              <span>İlk Yardım, Güvenlik & İz Bırakma</span>
-            </h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs" id="camp-checklist-safety"></div>
-          </div>
-        </div>
-
-        <!-- SEKME 2: ATEŞ & DOĞA GÜVENLİĞİ (YASALAR & İZ BIRAKMA) -->
-        <div id="camp-tab-content-safety" class="hidden space-y-3.5 text-xs text-slate-300">
-          <!-- Yangın Genelgesi Uyarısı -->
-          <div class="glass-card bg-rose-950/40 border border-rose-500/50 p-4 rounded-2xl flex items-start space-x-3 text-white">
-            <span class="text-2xl shrink-0">⚠️</span>
-            <div class="space-y-1">
-              <h4 class="font-bold text-rose-300 text-sm">Türkiye Orman Yangını Tebliği (1 Mayıs - 31 Ekim)</h4>
-              <p class="text-xs text-slate-200 leading-relaxed">
-                Milli parklar ve ormanlık alanlarda yaz aylarında açıkta yerde kontrolsüz ateş yakmak kanunen kesinlikle yasaktır ve ağır yaptırımlar uygulanır. Her zaman gazlı kamp ocaklarını tercih edin ve yalnızca izinli kamp işletmelerindeki belirlenmiş ocak yerlerinde ateş yakın.
-              </p>
-            </div>
-          </div>
-
-          <!-- 7 İz Bırakma Kuralı -->
-          <div class="glass-card bg-slate-950/70 border border-slate-800 p-4 rounded-2xl space-y-3">
-            <h4 class="font-bold text-emerald-400 text-xs uppercase tracking-wider flex items-center space-x-2">
-              <span>🌿</span>
-              <span>Doğayı Koru: "İz Bırakma (Leave No Trace)" 7 Altın Kuralı</span>
-            </h4>
-            <ul class="space-y-2.5 text-xs">
-              <li class="flex items-start space-x-2">
-                <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center shrink-0 text-[10px]">1</span>
-                <span><strong>Çöpünü Asla Bırakma:</strong> Meyve kabukları bile aylarca çürümez. Götürdüğünüz her şeyi (ve mümkünse doğada bulduğunuz diğer çöpleri) torbaya koyup geri getirin.</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center shrink-0 text-[10px]">2</span>
-                <span><strong>Ateşi Tamamen Söndür (Köz Testi):</strong> Ayrılmadan önce közlerin üzerine bol su dökün, karıştırın ve elinizle dokunabilecek kadar soğuduğundan emin olun.</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center shrink-0 text-[10px]">3</span>
-                <span><strong>Yiyecekleri Çadırda Tutmayın:</strong> Domuz, tilki ve ayı gibi yaban hayvanları kokuya gelir. Yiyecek ve çöpleri aracınızda veya ağaca asılı torbada saklayın.</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center shrink-0 text-[10px]">4</span>
-                <span><strong>Su Kaynaklarını Kirletmeyin:</strong> Göl ve derelerin en az 50 metre uzağına çadır kurun; bulaşıklarınızı doğal kaynak içine yıkamayın.</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center shrink-0 text-[10px]">5</span>
-                <span><strong>Kuru Dere Yataklarından Uzak Durun:</strong> Dağların zirvelerine yağan aniden şiddetli yağmur, kilometrelerce uzaktaki kuru dere yataklarında ani sel felaketine yol açabilir.</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center shrink-0 text-[10px]">6</span>
-                <span><strong>Gece Sessizliğini Koruyun:</strong> Doğanın sesini ve diğer kampçıların huzurunu bozmamak için gece hoparlör kullanmayın.</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- SEKME 3: RAKIM & GECE SOĞUĞU HESAPLAYICISI -->
-        <div id="camp-tab-content-weather" class="hidden space-y-4 text-xs">
-          <div class="glass-card bg-cyan-950/30 border border-cyan-500/40 p-4 rounded-2xl flex items-start space-x-3 text-white">
-            <span class="text-2xl shrink-0">❄️</span>
-            <div>
-              <h4 class="font-bold text-cyan-300 text-sm">Neden Gece Üşürsünüz? (Lapse Rate Kuralı)</h4>
-              <p class="text-xs text-slate-300 leading-relaxed mt-0.5">
-                Atmosferde her 1000 metre yükseklikte sıcaklık ortalama <strong>6.5°C düşer</strong>. Ayrıca gece açık havada dağlık alanlar hızla ısı kaybeder. Deniz kenarında 30°C olan hava, 1500m yaylada gece <strong>5°C'ye</strong> kadar düşebilir!
-              </p>
-            </div>
-          </div>
-
-          <!-- İnteraktif Hesaplayıcı -->
-          <div class="glass-card bg-slate-950/80 border border-slate-800 p-4 rounded-2xl space-y-3">
-            <h4 class="font-bold text-white text-xs uppercase tracking-wider">Hızlı Gece Sıcaklık & Tulum Hesaplayıcı</h4>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label class="block text-slate-400 text-[11px] mb-1">Gündüz Deniz/Şehir Sıcaklığı (°C):</label>
-                <input type="number" id="calc-day-temp" value="28" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono font-bold focus:border-cyan-400 outline-none">
-              </div>
-              <div>
-                <label class="block text-slate-400 text-[11px] mb-1">Kamp Yeri Rakımı (Metre):</label>
-                <input type="number" id="calc-camp-alt" value="1400" step="100" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono font-bold focus:border-cyan-400 outline-none">
-              </div>
-            </div>
-
-            <button onclick="calculateCampNightTemp()" class="w-full py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-600/30 active:scale-95 transition-all">
-              Tahmini Gece Soğuğunu Hesapla
-            </button>
-
-            <!-- Sonuç Kutusu -->
-            <div id="calc-result-box" class="p-3.5 rounded-xl bg-slate-900 border border-cyan-500/30 flex flex-col space-y-1.5 animate-fade-in">
-              <div class="flex items-center justify-between">
-                <span class="text-slate-400">Beklenen Gece Sıcaklığı:</span>
-                <span id="calc-result-temp" class="text-base font-black text-cyan-300 font-mono">~7°C - 9°C</span>
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="text-slate-400">Önerilen Uyku Tulumu:</span>
-                <span id="calc-result-bag" class="font-bold text-emerald-400">Comfort +2°C / Limit -3°C</span>
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="text-slate-400">Zemin Matı İzolasyonu:</span>
-                <span id="calc-result-mat" class="font-bold text-amber-300">R-Değeri 2.5 - 3.2 (Termal Mat)</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- SEKME 4: SEÇKİN KAMP ALANLARI LİSTESİ -->
-        <div id="camp-tab-content-spots" class="hidden space-y-3">
-          <div class="flex items-center justify-between gap-2">
-            <div class="relative flex-1">
-              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
-              <input type="text" id="camp-spots-search" oninput="filterCampingSpotsList()" placeholder="Kamp alanı adı veya şehir ara (Örn: Yedigöller, Kaş, Karagöl...)" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
-            </div>
-            <button onclick="filterMapOnlyCamping()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shrink-0 flex items-center space-x-1 shadow-md shadow-emerald-600/30 active:scale-95 transition-all" title="Haritada Yalnızca Kamp Alanlarını Göster">
-              <i data-lucide="map" class="w-3.5 h-3.5"></i>
-              <span>Haritada Göster</span>
-            </button>
-          </div>
-
-          <div id="camp-spots-list-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[50vh] overflow-y-auto pr-1">
-            <!-- JS tarafından dinamik doldurulur -->
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Modal Footer -->
-      <div class="p-3 bg-slate-950 border-t border-slate-800 flex items-center justify-between shrink-0 text-xs">
-        <span class="text-slate-500 text-[11px]">Rotam V3 Doğasever Platformu</span>
-        <button onclick="closeCampingAssistantModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl transition-colors">
-          Kapat
-        </button>
-      </div>
-
     </div>
   </div>
 
@@ -4803,169 +4400,6 @@ service cloud.firestore {
           <span data-i18n="ride_choice_select_dest">Varış Noktası Seç ve Rota Çiz</span>
         </button>
       </div>
-    </div>
-  </div>
-
-  <!-- FLOATING ÇEVRİMDİŞİ AĞ BİLDİRİMİ (OFFLINE NETWORK BADGE) -->
-  <div id="offline-network-badge" class="hidden fixed bottom-14 md:bottom-5 left-1/2 -translate-x-1/2 z-[800] bg-slate-900/95 border border-emerald-500/50 shadow-2xl px-3.5 py-1.5 rounded-full text-[11px] font-bold text-emerald-300 flex items-center space-x-2 backdrop-blur-md animate-fade-in pointer-events-none">
-    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-    <span>📡 Çevrimdışı Mod Aktif (İndirilen Harita Devrede)</span>
-  </div>
-
-  <!-- MODAL: ÇEVRİMDİŞİ HARİTA YÖNETİCİSİ (OFFLINE MAPS ENGINE) -->
-  <div id="modal-offline-maps" class="hidden fixed inset-0 z-[1000] bg-slate-950/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
-    <div class="responsive-modal-card bg-slate-900 border border-slate-800 w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col p-5 space-y-4 max-h-[90vh] overflow-y-auto">
-      
-      <!-- Modal Başlığı -->
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center space-x-2">
-          <i data-lucide="download-cloud" class="w-5 h-5 text-emerald-400"></i>
-          <div>
-            <h3 class="text-sm sm:text-base font-bold text-white">Çevrimdışı Harita İndir & Yönet</h3>
-            <p class="text-[10px] text-slate-400">İnternetsiz dağ ve orman yollarında kesintisiz sürüş</p>
-          </div>
-        </div>
-        <button onclick="RotamOfflineMap.closeModal()" class="p-1 rounded-lg text-slate-400 hover:text-white cursor-pointer">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <!-- İndirme İlerleme Çubuğu (Download Progress Box) -->
-      <div id="offline-progress-box" class="hidden p-3.5 rounded-xl bg-slate-950 border border-emerald-500/40 space-y-2">
-        <div class="flex items-center justify-between text-xs">
-          <span id="offline-progress-label" class="font-bold text-emerald-300">Harita Karoları İndiriliyor...</span>
-          <span id="offline-progress-text" class="font-mono text-slate-300">0 / 0 (%0)</span>
-        </div>
-        <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
-          <div id="offline-progress-bar" class="h-full bg-emerald-500 offline-progress-bar-striped transition-all duration-200" style="width: 0%"></div>
-        </div>
-        <div class="flex justify-end">
-          <button onclick="RotamOfflineMap.cancelRequested = true" class="text-[10px] text-red-400 hover:text-red-300 font-semibold underline cursor-pointer">
-            İndirmeyi Durdur
-          </button>
-        </div>
-      </div>
-
-      <!-- 1. Aktif Rota Haritası Kartı -->
-      <div id="offline-active-route-box" class="p-3.5 rounded-xl bg-slate-950/70 border border-cyan-500/40 space-y-2.5">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-2">
-            <span class="text-lg">🏍️</span>
-            <div>
-              <h4 class="text-xs font-bold text-white">Aktif Rota Sürüş Koridoru</h4>
-              <p id="offline-route-info" class="text-[10px] text-cyan-300">Aktif Rota Koridoru (Zoom 7-13)</p>
-            </div>
-          </div>
-          <span class="text-[9px] bg-cyan-400/20 text-cyan-300 px-2 py-0.5 rounded-full font-bold uppercase">Önerilen</span>
-        </div>
-        <p class="text-[11px] text-slate-300 leading-relaxed">
-          Oluşturduğunuz rotanın geçtiği tüm şehirler, virajlar ve dinlenme tesisleri koridorundaki harita karolarını telefonunuza kaydeder.
-        </p>
-        <button onclick="RotamOfflineMap.downloadCurrentRoute()" class="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30 active:scale-95 transition-all cursor-pointer">
-          <i data-lucide="download" class="w-4 h-4"></i>
-          <span>Bu Rotanın Haritasını İndir (~6-15 MB)</span>
-        </button>
-      </div>
-
-      <!-- Henüz Rota Yokken Gösterilen Uyarı -->
-      <div id="offline-no-route-box" class="hidden p-3 rounded-xl bg-slate-950 border border-slate-800 text-center space-y-1 text-xs">
-        <p class="text-slate-300 font-medium">📍 Henüz aktif bir rota oluşturmadınız.</p>
-        <p class="text-[10px] text-slate-500">Rota çizdikten sonra bu butona basarak o rotanın sürüş koridorunu anında indirebilirsiniz.</p>
-      </div>
-
-      <!-- 2. Hızlı Bölge Paketleri -->
-      <div class="space-y-2">
-        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
-          <span>📦</span>
-          <span>Popüler Bölge Harita Paketleri</span>
-        </h4>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-          <!-- Paket 1 -->
-          <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-            <div>
-              <span class="font-bold text-white block">Türkiye Genel Bakış</span>
-              <span class="text-[10px] text-slate-400">Tüm anayollar (Zoom 5-7, ~2 MB)</span>
-            </div>
-            <button onclick="RotamOfflineMap.downloadRegion('turkey_overview')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-[11px] border border-slate-700 shrink-0 cursor-pointer">
-              İndir
-            </button>
-          </div>
-          <!-- Paket 2 -->
-          <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-            <div>
-              <span class="font-bold text-white block">Ege & Akdeniz Sahili</span>
-              <span class="text-[10px] text-slate-400">Çanakkale-Antalya (~7 MB)</span>
-            </div>
-            <button onclick="RotamOfflineMap.downloadRegion('aegean_med')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-[11px] border border-slate-700 shrink-0 cursor-pointer">
-              İndir
-            </button>
-          </div>
-          <!-- Paket 3 -->
-          <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-            <div>
-              <span class="font-bold text-white block">Marmara & Boğazlar</span>
-              <span class="text-[10px] text-slate-400">İstanbul, Bursa, Çanakkale (~6 MB)</span>
-            </div>
-            <button onclick="RotamOfflineMap.downloadRegion('marmara')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-[11px] border border-slate-700 shrink-0 cursor-pointer">
-              İndir
-            </button>
-          </div>
-          <!-- Paket 4 -->
-          <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-            <div>
-              <span class="font-bold text-white block">Karadeniz Yaylaları</span>
-              <span class="text-[10px] text-slate-400">Samsun-Artvin dağ yolları (~7 MB)</span>
-            </div>
-            <button onclick="RotamOfflineMap.downloadRegion('blacksea')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-[11px] border border-slate-700 shrink-0 cursor-pointer">
-              İndir
-            </button>
-          </div>
-          <!-- Paket 5: Balkanlar & Yunanistan -->
-          <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-            <div>
-              <span class="font-bold text-white block">🌍 Balkanlar & Yunanistan</span>
-              <span class="text-[10px] text-slate-400">Selanik, Atina, Sofya, Üsküp (~6 MB)</span>
-            </div>
-            <button onclick="RotamOfflineMap.downloadRegion('balkans')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-[11px] border border-slate-700 shrink-0 cursor-pointer">
-              İndir
-            </button>
-          </div>
-          <!-- Paket 6: Alpler & Dağ Geçitleri -->
-          <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-            <div>
-              <span class="font-bold text-white block">⛰️ Alpler & Dağ Geçitleri</span>
-              <span class="text-[10px] text-slate-400">Stelvio, Dolomitler, Grossglockner (~5 MB)</span>
-            </div>
-            <button onclick="RotamOfflineMap.downloadRegion('alps')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-[11px] border border-slate-700 shrink-0 cursor-pointer">
-              İndir
-            </button>
-          </div>
-          <!-- Paket 7: Gürcistan & Kafkaslar -->
-          <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-            <div>
-              <span class="font-bold text-white block">🏔️ Gürcistan & Kafkaslar</span>
-              <span class="text-[10px] text-slate-400">Batum, Tiflis, Kazbek Yolu (~4 MB)</span>
-            </div>
-            <button onclick="RotamOfflineMap.downloadRegion('caucasus')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-[11px] border border-slate-700 shrink-0 cursor-pointer">
-              İndir
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- 3. Cihaz Depolama Durumu & Temizleme -->
-      <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between text-xs">
-        <div>
-          <span class="text-slate-400 block text-[10px]">Kayıtlı Çevrimdışı Harita:</span>
-          <span class="font-mono font-bold text-emerald-400">
-            <span id="offline-stats-count">0 karo</span> (<span id="offline-stats-size">~0 MB</span>)
-          </span>
-        </div>
-        <button onclick="RotamOfflineMap.clearCache()" class="px-2.5 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 font-semibold text-[11px] border border-red-500/30 transition-colors cursor-pointer">
-          Temizle
-        </button>
-      </div>
-
     </div>
   </div>
 
