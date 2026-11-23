@@ -251,27 +251,55 @@ function initPlacesDatabase() {
   }
 }
 
-// Map Tile Layers Setup - Sole Provider: Yandex Maps
+// Map Tile Layers Setup - Multi-Layer Engine (OpenStreetMap Dark & Daylight, Direct Yandex, Topo Alps, Satellite)
 function createTileLayers() {
   if (typeof L === 'undefined') return {};
   const layers = {};
 
-  // Orijinal Yandex Harita Katmanı (Tek ve Yetkili Harita Sağlayıcısı)
+  // 1. ROTAM Gece / Kokpit Modu (Standard OSM + Dark Filter - Zero API Key, 100% Reliable)
+  layers.dark = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
+  });
+
+  // 2. ROTAM Net Gündüz Navigasyon Modu (Official OSM Daylight - 100% Reliable, Zero Key, 100% EPSG:3857, Sıfır Kayma)
+  layers.day = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
+  });
+  layers.voyager = layers.day;
+  layers.global = layers.day;
+  layers.osm = layers.day;
+
+  // 3. Orijinal Yandex Harita Katmanı (Doğrudan Yandex Karo Sunucusu)
   layers.yandex = L.tileLayer('https://core-renderer-tiles.maps.yandex.net/tiles?l=map&x={x}&y={y}&z={z}&scale=1&lang=tr_TR', {
     maxZoom: 19,
     subdomains: [],
-    attribution: '&copy; <a href="https://yandex.com.tr/harita" target="_blank">Yandex Haritalar</a>'
+    attribution: '&copy; <a href="https://yandex.com.tr/harita" target="_blank">Yandex</a>'
   });
 
-  // Tüm varyantları Yandex'e bağla (geriye uyumluluk ve sıfır hata garantisi)
-  layers.day = layers.yandex;
-  layers.dark = layers.yandex;
-  layers.sat = layers.yandex;
-  layers.topo = layers.yandex;
-  layers.global = layers.yandex;
-  layers.osm = layers.yandex;
-  layers.voyager = layers.yandex;
-  layers.hybrid = layers.yandex;
+  // 4. High-Resolution Satellite (Esri World Imagery)
+  layers.sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 19,
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, USGS'
+  });
+  layers.hybrid = layers.sat;
+
+  // 5. Topografik & Alpler Dağ Geçitleri (OpenTopoMap)
+  layers.topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+    maxZoom: 17,
+    subdomains: ['a', 'b', 'c'],
+    attribution: '&copy; <a href="https://opentopomap.org" target="_blank">OpenTopoMap</a>'
+  });
+
+  // Add error resilience
+  Object.entries(layers).forEach(([name, l]) => {
+    if (l && typeof l.on === 'function') {
+      l.on('tileerror', (e) => {
+        console.warn(`Harita katmanı (${name}) karosu yüklenirken uyarı:`, e);
+      });
+    }
+  });
 
   return layers;
 }
@@ -329,13 +357,13 @@ function initMap() {
     return;
   }
 
-  // Yandex'in orijinal renk paleti ve net detayları için dark-map filtresini kaldır
-  mapEl.classList.remove('dark-map');
+  // Ensure dark-map filter is active for dark mode
+  mapEl.classList.add('dark-map');
 
   patchLeafletDraggableForRotation();
 
   tileLayers = createTileLayers();
-  const defaultTile = tileLayers.yandex;
+  const defaultTile = tileLayers.dark || tileLayers.yandex;
 
   // Center on saved verified user location if available, otherwise Turkey center
   let initialCenter = [39.0, 35.2];
@@ -372,7 +400,7 @@ function initMap() {
   // Custom Zoom Control placed bottom right
   L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-  state.activeTileLayer = 'yandex';
+  state.activeTileLayer = 'dark';
   mapInitialized = true;
 
   // Map Click Listener to add waypoints & auto-collapse filters on mobile
@@ -968,18 +996,96 @@ function clearHighlightMarkers() {
   state.highlightMarkers = [];
 }
 
-function switchTile(tileKey = 'yandex') {
-  if (!map || !tileLayers) return;
-  const targetLayer = tileLayers.yandex;
-  if (targetLayer && !map.hasLayer(targetLayer)) {
-    Object.values(tileLayers).forEach(l => {
-      if (l && map.hasLayer(l) && l !== targetLayer) {
-        map.removeLayer(l);
-      }
-    });
-    map.addLayer(targetLayer);
+function switchTile(tileKey) {
+  if (!map) return;
+
+  const mapEl = document.getElementById('map');
+  const isDark = (tileKey === 'dark');
+
+  // Normalize tileKey: 'day', 'yandex', 'dark', 'sat', 'global', 'topo'
+  let canonicalKey = tileKey;
+  if (tileKey === 'osm' || tileKey === 'voyager') {
+    canonicalKey = 'global';
   }
-  state.activeTileLayer = 'yandex';
+
+  // Handle dark mode / day mode classes
+  if (isDark) {
+    if (mapEl) mapEl.classList.add('dark-map');
+    document.body.classList.remove('sunlight-mode', 'day-mode');
+  } else {
+    if (mapEl) mapEl.classList.remove('dark-map');
+    document.body.classList.add('day-mode');
+  }
+
+  // Determine target layer: 'day', 'yandex', 'dark', 'sat', 'global', 'topo'
+  let targetLayer = null;
+  if (tileLayers) {
+    if (canonicalKey === 'global') {
+      targetLayer = tileLayers.global || tileLayers.osm || tileLayers.day;
+    } else if (canonicalKey === 'topo') {
+      targetLayer = tileLayers.topo || tileLayers.dark;
+    } else if (canonicalKey === 'sat') {
+      targetLayer = tileLayers.sat || tileLayers.dark;
+    } else if (canonicalKey === 'dark') {
+      targetLayer = tileLayers.dark || tileLayers.global;
+    } else if (canonicalKey === 'yandex') {
+      targetLayer = tileLayers.yandex || tileLayers.day;
+    } else {
+      targetLayer = tileLayers.day || tileLayers.dark;
+    }
+  }
+
+  if (targetLayer && map) {
+    if (tileLayers) {
+      Object.entries(tileLayers).forEach(([k, l]) => {
+        if (l && l !== targetLayer && map.hasLayer(l)) {
+          map.removeLayer(l);
+        }
+      });
+    }
+    if (!map.hasLayer(targetLayer)) {
+      map.addLayer(targetLayer);
+    }
+  }
+
+  state.activeTileLayer = canonicalKey;
+
+  // Update floating controls and buttons
+  document.querySelectorAll('.tile-btn').forEach(b => {
+    b.classList.remove('bg-slate-800', 'text-white');
+    b.classList.add('text-slate-400');
+    const check = b.querySelector('.active-check');
+    if (check) check.classList.add('hidden');
+  });
+
+  const activeBtnId = (canonicalKey === 'dark') ? 'tile-dark'
+    : (canonicalKey === 'day' ? 'tile-day'
+    : (canonicalKey === 'yandex' ? 'tile-yandex'
+    : (canonicalKey === 'sat' ? 'tile-sat'
+    : (canonicalKey === 'global' ? 'tile-global'
+    : (canonicalKey === 'topo' ? 'tile-topo' : 'tile-day')))));
+  const activeBtn = document.getElementById(activeBtnId);
+  if (activeBtn) {
+    activeBtn.classList.add('bg-slate-800', 'text-white');
+    activeBtn.classList.remove('text-slate-400');
+    const check = activeBtn.querySelector('.active-check');
+    if (check) check.classList.remove('hidden');
+  }
+
+  // Update active layer label on desktop accordion pill
+  const layerLabels = {
+    day: '☀️ Gündüz',
+    yandex: 'Я Yandex',
+    dark: '🌙 Gece',
+    sat: '🛰️ Uydu',
+    global: '🌍 Dünya',
+    topo: '⛰️ Topo'
+  };
+  const activeLabel = document.getElementById('desktop-active-layer-name');
+  if (activeLabel && layerLabels[canonicalKey]) {
+    activeLabel.textContent = layerLabels[canonicalKey];
+  }
+
   setTimeout(() => { if (map) map.invalidateSize(); }, 50);
 }
 
@@ -989,25 +1095,101 @@ function switchTile(tileKey = 'yandex') {
 // based on astronomic sunrise/sunset times calculated from GPS.
 // ==========================================
 const RotamAutoTheme = {
-  mode: 'yandex',
+  mode: localStorage.getItem('rotam_theme_mode') || 'auto', // 'auto' | 'dark' | 'day' | 'manual'
+  timer: null,
+
   init() {
     this.apply();
-  },
-  apply() {
-    if (!map || !tileLayers || !tileLayers.yandex) return;
-    switchTile('yandex');
+    if (this.timer) clearInterval(this.timer);
+    this.timer = setInterval(() => {
+      if (this.mode === 'auto') this.apply();
+    }, 4 * 60 * 1000); // Check every 4 minutes
     this.updateUI();
   },
-  toggle() {
-    showToast('Harita motoru: Yandex Harita (Varsayılan)', 'info');
+
+  isDaytime(lat = 39.0, lon = 35.0) {
+    const now = new Date();
+    const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+    // Solar declination approximation
+    const declination = 23.45 * Math.sin((Math.PI / 180) * (360 / 365) * (dayOfYear - 81));
+    const latRad = lat * (Math.PI / 180);
+    const decRad = declination * (Math.PI / 180);
+    const cosHourAngle = -Math.tan(latRad) * Math.tan(decRad);
+    const hourAngle = Math.acos(Math.max(-1, Math.min(1, cosHourAngle))) * (180 / Math.PI);
+
+    const tzOffsetHours = -now.getTimezoneOffset() / 60;
+    const solarNoon = 12.0 - (lon - (tzOffsetHours * 15)) / 15;
+    const sunriseHour = solarNoon - (hourAngle / 15);
+    const sunsetHour = solarNoon + (hourAngle / 15);
+
+    const currentDecimalHour = now.getHours() + now.getMinutes() / 60;
+    return currentDecimalHour >= sunriseHour && currentDecimalHour < sunsetHour;
   },
+
+  apply() {
+    if (!map || !tileLayers || (!tileLayers.day && !tileLayers.dark && !tileLayers.yandex)) return;
+    let targetTile = 'dark';
+    if (this.mode === 'auto') {
+      const userLat = state.userLocation?.lat || 39.0;
+      const userLon = state.userLocation?.lon || 35.0;
+      targetTile = this.isDaytime(userLat, userLon) ? 'day' : 'dark';
+    } else if (this.mode === 'day') {
+      targetTile = 'day';
+    } else {
+      targetTile = 'dark';
+    }
+    switchTile(targetTile);
+    this.updateUI();
+  },
+
+  toggle() {
+    const isEn = (window.state && window.state.lang === 'en');
+    if (this.mode === 'auto') {
+      const isDay = this.isDaytime();
+      this.mode = isDay ? 'dark' : 'day';
+      localStorage.setItem('rotam_theme_mode', this.mode);
+      switchTile(this.mode === 'dark' ? 'dark' : 'day');
+      showToast(this.mode === 'dark' ? (isEn ? '🌙 Gece Modu' : '🌙 Gece Modu') : (isEn ? '☀️ Gündüz Modu' : '☀️ Gündüz Modu'), 'info');
+    } else {
+      this.mode = 'auto';
+      localStorage.setItem('rotam_theme_mode', 'auto');
+      this.apply();
+      const isDay = this.isDaytime();
+      showToast(isEn ? `🌓 Otomatik Gündüz/Gece (${isDay ? 'Gündüz ☀️' : 'Gece 🌙'})` : `🌓 Otomatik Gündüz/Gece (${isDay ? 'Gündüz ☀️' : 'Gece 🌙'}) Aktif`, 'success');
+    }
+    this.updateUI();
+  },
+
   updateUI() {
-    const desktopLabel = document.getElementById('desktop-auto-theme-label');
-    if (desktopLabel) desktopLabel.textContent = 'Я Yandex';
     const mobileStatus = document.getElementById('mobile-auto-theme-status');
-    if (mobileStatus) mobileStatus.textContent = 'Yandex';
+    const desktopLabel = document.getElementById('desktop-auto-theme-label');
+    const desktopBtn = document.getElementById('tile-auto');
+    const isDay = this.isDaytime();
+
+    if (this.mode === 'auto') {
+      if (mobileStatus) {
+        mobileStatus.textContent = isDay ? 'Gündüz ☀️' : 'Gece 🌙';
+        mobileStatus.className = 'text-[10px] text-amber-400 font-bold';
+      }
+      if (desktopLabel) desktopLabel.textContent = isDay ? 'Oto ☀️' : 'Oto 🌙';
+      if (desktopBtn) {
+        desktopBtn.classList.add('bg-slate-800', 'text-amber-400');
+        desktopBtn.classList.remove('text-slate-400');
+      }
+    } else {
+      if (mobileStatus) {
+        mobileStatus.textContent = this.mode === 'dark' ? 'Gece (Sabit)' : 'Gündüz (Sabit)';
+        mobileStatus.className = 'text-[10px] text-slate-400';
+      }
+      if (desktopLabel) desktopLabel.textContent = 'Oto';
+      if (desktopBtn) {
+        desktopBtn.classList.remove('bg-slate-800', 'text-amber-400');
+        desktopBtn.classList.add('text-slate-400');
+      }
+    }
   }
 };
+
 window.RotamAutoTheme = RotamAutoTheme;
 
 // Splash Screen Dismissal
@@ -16374,11 +16556,6 @@ const RotamTraffic = {
     }
     if (btn) {
       btn.classList.toggle('border-emerald-500/40', this.isActive);
-    }
-    const mobBadge = document.getElementById('mobile-traffic-status');
-    if (mobBadge) {
-      mobBadge.textContent = this.isActive ? 'Açık' : 'Kapalı';
-      mobBadge.className = this.isActive ? 'text-[10px] font-bold text-emerald-400' : 'text-[10px] text-slate-400';
     }
   }
 };
