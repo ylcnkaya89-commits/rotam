@@ -12577,18 +12577,18 @@ const RotamGpsOptimizer = {
     this.lastAccuracy = accuracy;
 
     // 2. Outlier Rejection & Fresh GPS Recovery:
-    // Only apply outlier rejection if we already have a prior verified hardware fix!
-    // If accuracy is good (<= 45m) or after 2 consecutive pings, it's a real GPS relocation: accept immediately!
-    if (this.hasRealGpsFix && !isInitialFix && this.lastProcessedCoord && this.lastTimestamp > 0) {
+    // Compare new raw fix against previous RAW fix (not snapped road coordinate) to prevent false jumps!
+    if (this.hasRealGpsFix && !isInitialFix && (this.lastRawCoord || this.lastProcessedCoord) && this.lastTimestamp > 0) {
+      const prevCoord = this.lastRawCoord || this.lastProcessedCoord;
       const timeDeltaSec = Math.max(0.2, (timestamp - this.lastTimestamp) / 1000);
-      const jumpMeters = haversineMeters(this.lastProcessedCoord[0], this.lastProcessedCoord[1], rawLat, rawLon);
+      const jumpMeters = haversineMeters(prevCoord[0], prevCoord[1], rawLat, rawLon);
       const impliedSpeedKmH = (jumpMeters / timeDeltaSec) * 3.6;
 
       if (accuracy > this.MAX_ACCEPTABLE_ACCURACY && jumpMeters > 70) {
         console.warn(`[RotamGPS] Outlier rejected: accuracy ${Math.round(accuracy)}m, jump ${Math.round(jumpMeters)}m`);
         return {
-          lat: this.lastProcessedCoord[0],
-          lon: this.lastProcessedCoord[1],
+          lat: this.lastProcessedCoord ? this.lastProcessedCoord[0] : rawLat,
+          lon: this.lastProcessedCoord ? this.lastProcessedCoord[1] : rawLon,
           rawLat,
           rawLon,
           speed: this.lastSpeedKmH,
@@ -12607,12 +12607,13 @@ const RotamGpsOptimizer = {
         if (accuracy <= 45 || this.consecutiveTeleports >= 2) {
           console.log(`[RotamGPS] New real GPS fix accepted at [${rawLat.toFixed(5)}, ${rawLon.toFixed(5)}] (accuracy ${Math.round(accuracy)}m)`);
           this.consecutiveTeleports = 0;
+          this.lastRawCoord = [rawLat, rawLon];
           this.lastProcessedCoord = [rawLat, rawLon];
         } else {
           console.warn(`[RotamGPS] Teleport rejected (ping ${this.consecutiveTeleports}): speed ${Math.round(impliedSpeedKmH)} km/h, jump ${Math.round(jumpMeters)}m`);
           return {
-            lat: this.lastProcessedCoord[0],
-            lon: this.lastProcessedCoord[1],
+            lat: this.lastProcessedCoord ? this.lastProcessedCoord[0] : rawLat,
+            lon: this.lastProcessedCoord ? this.lastProcessedCoord[1] : rawLon,
             rawLat,
             rawLon,
             speed: this.lastSpeedKmH,
@@ -12631,6 +12632,7 @@ const RotamGpsOptimizer = {
       // First verified hardware GPS fix
       this.hasRealGpsFix = true;
       this.consecutiveTeleports = 0;
+      this.lastRawCoord = [rawLat, rawLon];
       this.lastProcessedCoord = [rawLat, rawLon];
     }
 
@@ -12639,25 +12641,35 @@ const RotamGpsOptimizer = {
     let distFromLastRaw = 0;
     let dt = 1.0;
 
-    if (this.lastProcessedCoord && this.lastTimestamp > 0) {
+    const prevRaw = this.lastRawCoord || this.lastProcessedCoord;
+    if (prevRaw && this.lastTimestamp > 0) {
       dt = Math.max(0.3, (timestamp - this.lastTimestamp) / 1000);
-      distFromLastRaw = haversineMeters(this.lastProcessedCoord[0], this.lastProcessedCoord[1], rawLat, rawLon);
+      distFromLastRaw = haversineMeters(prevRaw[0], prevRaw[1], rawLat, rawLon);
     }
 
-    if (pos.coords.speed !== null && !isNaN(pos.coords.speed) && pos.coords.speed >= 0) {
+    const hasHardwareSpeed = (pos.coords.speed !== null && !isNaN(pos.coords.speed) && pos.coords.speed >= 0);
+    if (hasHardwareSpeed) {
       rawSpeedKmH = pos.coords.speed * 3.6;
     } else if (distFromLastRaw > 0 && dt > 0) {
-      rawSpeedKmH = (distFromLastRaw / dt) * 3.6;
+      // Inferred speed from raw GPS displacement:
+      // If accuracy is poor (e.g. Wi-Fi positioning ±52m), displacement within accuracy error bubble is pure noise!
+      if (accuracy > 30 && distFromLastRaw < accuracy * 0.8) {
+        rawSpeedKmH = 0;
+      } else {
+        rawSpeedKmH = (distFromLastRaw / dt) * 3.6;
+      }
     }
 
     // Dynamic noise threshold: under buildings/trees or high accuracy circle, jitter is higher
-    const dynamicNoiseMeters = Math.max(this.STATIONARY_DIST_THRESHOLD_M, Math.min(14, accuracy * 0.45));
+    const dynamicNoiseMeters = Math.max(this.STATIONARY_DIST_THRESHOLD_M, Math.min(25, accuracy * 0.5));
 
     // Determine if vehicle is stationary:
-    // A) Raw calculated speed is below noise floor (3.2 km/h), OR
-    // B) Displacement is within noise radius AND speed is low (< 7.0 km/h)
+    // A) Hardware or inferred speed is below noise floor (3.2 km/h), OR
+    // B) Displacement is within noise radius AND speed is not high (< 12.0 km/h), OR
+    // C) Weak GPS fix (accuracy > 35m) without confirmed large displacement (> 35m)
     const isStationary = (rawSpeedKmH < this.SPEED_NOISE_FLOOR_KMH) ||
-                         (distFromLastRaw < dynamicNoiseMeters && rawSpeedKmH < 7.0);
+                         (distFromLastRaw < dynamicNoiseMeters && rawSpeedKmH < 12.0) ||
+                         (accuracy > 35 && distFromLastRaw < accuracy * 0.75 && !hasHardwareSpeed);
 
     let speedKmH = 0;
     if (!isStationary) {
