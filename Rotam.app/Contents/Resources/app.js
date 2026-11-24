@@ -11484,14 +11484,18 @@ const RotamSpeech = {
 
   startKeepAlive() {
     this.stopKeepAlive();
+    // Chromium 15 saniye konuşma kesilme hatası için keep-alive.
+    // Mobil Safari/Chrome'da kısa cümleleri (2-5 sn) bölmemek için aralık 14 sn yapılır.
     this.keepAliveTimer = setInterval(() => {
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
-          window.speechSynthesis.pause();
-          window.speechSynthesis.resume();
+          try {
+            window.speechSynthesis.pause();
+            window.speechSynthesis.resume();
+          } catch (_) {}
         }
       }
-    }, 4000);
+    }, 14000);
   },
 
   stopKeepAlive() {
@@ -11607,7 +11611,7 @@ const RotamSpeech = {
 
     try {
       if (window.speechSynthesis.paused) {
-        window.speechSynthesis.resume();
+        try { window.speechSynthesis.resume(); } catch (_) {}
       }
       if (window.speechSynthesis.speaking && !this.activeUtterance) {
         try { window.speechSynthesis.cancel(); } catch (_) {}
@@ -11653,7 +11657,7 @@ const RotamSpeech = {
       };
 
       // Watchdog: Chrome/Safari konuşurken donarsa kuyruğun kilitlenmesini engelle
-      const maxMs = Math.max(3500, nextItem.text.length * 130);
+      const maxMs = Math.max(6000, (nextItem.text.length * 180) + 2000);
       this.watchdogTimer = setTimeout(() => {
         if (!finished) {
           console.debug('Speech watchdog timer unhung utterance');
@@ -12169,9 +12173,10 @@ const RotamBackgroundEngine = {
         }
       });
       navigator.mediaSession.setActionHandler('pause', () => {
-        // Helmet intercom pause button toggles voice guidance
-        if (window.LiveNavigation) {
-          window.LiveNavigation.toggleVoice();
+        // Sistem/kulaklık/kilit ekranı pause sinyalinde sadece arka plan ses döngüsünü durdur.
+        // Asla LiveNavigation.toggleVoice() çağrılmamalıdır (ekran kilitlendiğinde veya bildirim geldiğinde sesi kapatır!)
+        if (this.audioEl && !this.audioEl.paused) {
+          try { this.audioEl.pause(); } catch (_) {}
         }
       });
       navigator.mediaSession.setActionHandler('stop', () => {
@@ -12815,7 +12820,7 @@ const LiveNavigation = {
   isSimulation: false,
   isFreeRide: false,
   wasFreeRide: false,
-  voiceEnabled: true,
+  voiceEnabled: (typeof localStorage !== 'undefined' && localStorage.getItem('rotam_voice_enabled') === 'false') ? false : true,
   wakeLock: null,
   watchId: null,
   marker: null,
@@ -14884,6 +14889,9 @@ const LiveNavigation = {
 
   toggleVoice() {
     this.voiceEnabled = !this.voiceEnabled;
+    try {
+      localStorage.setItem('rotam_voice_enabled', String(this.voiceEnabled));
+    } catch (_) {}
     this.updateControlsUI();
     const isEn = (window.state && window.state.lang === 'en');
     const msg = this.voiceEnabled

@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v99 (Eliminate Raw vs Snapped Coordinate Speed Flaw)
-const CACHE_NAME = 'rotam-cache-v99';
+// Rotam PWA Service Worker - v100 (Fix MediaSession Auto-Mute Bug on Mobile)
+const CACHE_NAME = 'rotam-cache-v100';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
