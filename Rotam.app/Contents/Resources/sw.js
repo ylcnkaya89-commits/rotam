@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v100 (Fix MediaSession Auto-Mute Bug on Mobile)
-const CACHE_NAME = 'rotam-cache-v100';
+// Rotam PWA Service Worker - v101 (Mobile Phone UX & Live Nav Cockpit Ergonomics)
+const CACHE_NAME = 'rotam-cache-v101';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

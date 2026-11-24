@@ -1375,6 +1375,57 @@ html, body {
   }
 }
 
+/* 3.1 MOTO-KOKPİT DİKEY MOBİL MOD (PORTRAIT PHONE ORIENTATION) */
+@media (max-width: 767px) {
+  /* Çentik ve Dinamik Ada güvenli alan koruması */
+  #live-nav-overlay {
+    padding-top: max(0.65rem, env(safe-area-inset-top, 0px)) !important;
+    padding-bottom: max(0.65rem, env(safe-area-inset-bottom, 0px)) !important;
+    padding-left: max(0.65rem, env(safe-area-inset-left, 0px)) !important;
+    padding-right: max(0.65rem, env(safe-area-inset-right, 0px)) !important;
+  }
+
+  /* Sağ araç çubuğu: Üst manevra kartının hemen altına, 4 kompakt eldiven dostu butona hizalanır */
+  #live-nav-right-toolbar {
+    top: calc(max(0.65rem, env(safe-area-inset-top, 0px)) + 124px) !important;
+    right: max(0.75rem, env(safe-area-inset-right, 0px)) !important;
+    gap: 0.55rem !important;
+  }
+
+  /* Hız göstergesi: Alt kokpit çekmecesinin hemen üzerinde, el altında */
+  #live-nav-speedo-cluster {
+    bottom: calc(max(6.2rem, env(safe-area-inset-bottom, 0px) + 5.6rem)) !important;
+    left: max(0.75rem, env(safe-area-inset-left, 0px)) !important;
+  }
+
+  /* Yeniden Ortala butonu: Alt çekmecenin üzerinde ekran ortasında */
+  #live-nav-recenter-pill-box {
+    bottom: calc(max(6.2rem, env(safe-area-inset-bottom, 0px) + 5.6rem)) !important;
+  }
+
+  /* Alt kokpit çekmecesi: Telefonun alt kaydırma çizgisi (home bar) ile çakışmaz */
+  .gmaps-bottom-cockpit {
+    padding-bottom: max(1.5rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem)) !important;
+    border-top-left-radius: 1.5rem !important;
+    border-top-right-radius: 1.5rem !important;
+  }
+
+  /* Üst manevra kartı mobil padding */
+  .gmaps-maneuver-card {
+    padding: 0.75rem 0.9rem !important;
+    border-radius: 1.25rem !important;
+  }
+
+  /* Araçlar popover'ı mobilde ekranı aşmaz ve dikey kaydırılabilir */
+  #live-nav-tools-popover {
+    max-height: calc(100dvh - 140px) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    right: 3.5rem !important;
+    width: min(290px, 82vw) !important;
+  }
+}
+
 /* 4. TABLET DÜZENİ (768px - 1024px) */
 @media (min-width: 768px) and (max-width: 1024px) {
   #sidebar {

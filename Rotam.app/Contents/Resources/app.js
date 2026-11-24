@@ -13499,6 +13499,96 @@ const LiveNavigation = {
     }
   },
 
+  cycleLayer() {
+    const layers = ['day', 'yandex', 'sat', 'dark'];
+    const cur = (typeof currentTile !== 'undefined') ? currentTile : 'day';
+    const nextIdx = (layers.indexOf(cur) + 1) % layers.length;
+    const nextTile = layers[nextIdx];
+    if (typeof switchTile === 'function') {
+      switchTile(nextTile);
+    }
+    const isEn = (window.state && window.state.lang === 'en');
+    const names = {
+      day: isEn ? '☀️ Day Map (Clear & Calibrated)' : '☀️ Gündüz Haritası (Net & Kalibreli)',
+      yandex: isEn ? 'Я Yandex Map' : 'Я Yandex Harita',
+      sat: isEn ? '🛰️ Satellite Hybrid (Esri HD)' : '🛰️ Uydu & Hibrit (Esri HD)',
+      dark: isEn ? '🌙 Night Cockpit Mode' : '🌙 Gece / Kokpit Modu'
+    };
+    showToast(names[nextTile] || nextTile, 'info');
+  },
+
+  hideCollidingControlsForLiveRide() {
+    if (typeof closeMobileSidebar === 'function') closeMobileSidebar();
+    if (typeof closeRightPanel === 'function') closeRightPanel();
+    if (typeof dismissHomepagePlanner === 'function') dismissHomepagePlanner();
+
+    const bottomBar = document.getElementById('mobile-bottom-bar');
+    if (bottomBar) bottomBar.classList.add('hidden');
+    const bottomNav = document.getElementById('mobile-bottom-nav');
+    if (bottomNav) bottomNav.classList.add('hidden');
+
+    const floatingControls = document.getElementById('floating-map-controls');
+    if (floatingControls) {
+      floatingControls.classList.add('!hidden');
+      floatingControls.style.display = 'none';
+    }
+    const mobileFabs = document.getElementById('mobile-floating-fabs');
+    if (mobileFabs) {
+      mobileFabs.classList.add('!hidden');
+      mobileFabs.style.display = 'none';
+    }
+
+    document.getElementById('map-category-filter-bar')?.classList.add('hidden');
+    document.getElementById('gmaps-top-container')?.classList.add('hidden');
+    document.getElementById('app-header')?.classList.add('hidden');
+    if (typeof closeGmapsPlaceSheet === 'function') closeGmapsPlaceSheet();
+    if (typeof dismissGmapsRouteSelector === 'function') dismissGmapsRouteSelector();
+    if (typeof dismissStagingSheet === 'function') dismissStagingSheet();
+    if (typeof dismissQuickPlacePreview === 'function') dismissQuickPlacePreview();
+    if (typeof clearRouteAlternativeMarkers === 'function') clearRouteAlternativeMarkers();
+    document.getElementById('btn-toggle-right-panel')?.classList.add('hidden');
+    document.getElementById('map-hint')?.classList.add('hidden');
+    document.getElementById('elevation-panel')?.classList.add('hidden');
+
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) sidebar.classList.add('live-nav-hidden');
+    if (map) {
+      setTimeout(() => map.invalidateSize(), 100);
+      setTimeout(() => map.invalidateSize(), 300);
+    }
+  },
+
+  restoreControlsAfterLiveRide() {
+    const bottomNav = document.getElementById('mobile-bottom-nav');
+    if (bottomNav) bottomNav.classList.remove('hidden');
+
+    const floatingControls = document.getElementById('floating-map-controls');
+    if (floatingControls) {
+      floatingControls.classList.remove('!hidden');
+      floatingControls.style.display = '';
+    }
+    const mobileFabs = document.getElementById('mobile-floating-fabs');
+    if (mobileFabs) {
+      mobileFabs.classList.remove('!hidden');
+      mobileFabs.style.display = '';
+    }
+
+    document.getElementById('map-category-filter-bar')?.classList.remove('hidden');
+    document.getElementById('gmaps-top-container')?.classList.remove('hidden');
+    document.getElementById('app-header')?.classList.remove('hidden');
+    document.getElementById('btn-toggle-right-panel')?.classList.remove('hidden');
+    if (state.routeData && typeof showRouteStagingSheet === 'function') {
+      showRouteStagingSheet(state.routeData);
+    }
+
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) sidebar.classList.remove('live-nav-hidden');
+    if (map) {
+      setTimeout(() => map.invalidateSize(), 100);
+      setTimeout(() => map.invalidateSize(), 300);
+    }
+  },
+
   startFreeRide() {
     this.isActive = true;
     this.isFreeRide = true;
@@ -13520,28 +13610,7 @@ const LiveNavigation = {
     const overlay = document.getElementById('live-nav-overlay');
     if (overlay) overlay.classList.remove('hidden');
 
-    // Clean UI for distraction-free riding cockpit
-    if (typeof closeMobileSidebar === 'function') closeMobileSidebar();
-    if (typeof closeRightPanel === 'function') closeRightPanel();
-    if (typeof dismissHomepagePlanner === 'function') dismissHomepagePlanner();
-
-    const bottomBar = document.getElementById('mobile-bottom-bar');
-    if (bottomBar) bottomBar.classList.add('hidden');
-    document.getElementById('floating-map-controls')?.classList.add('hidden');
-    document.getElementById('map-category-filter-bar')?.classList.add('hidden');
-    document.getElementById('gmaps-top-container')?.classList.add('hidden');
-    if (typeof closeGmapsPlaceSheet === 'function') closeGmapsPlaceSheet();
-    dismissQuickPlacePreview();
-    document.getElementById('btn-toggle-right-panel')?.classList.add('hidden');
-    document.getElementById('map-hint')?.classList.add('hidden');
-    document.getElementById('elevation-panel')?.classList.add('hidden');
-
-    const sidebar = document.getElementById('sidebar');
-    if (sidebar) sidebar.classList.add('live-nav-hidden');
-    if (map) {
-      setTimeout(() => map.invalidateSize(), 100);
-      setTimeout(() => map.invalidateSize(), 300);
-    }
+    this.hideCollidingControlsForLiveRide();
 
     this.requestWakeLock();
     this.isManualZoom = false;
@@ -13671,35 +13740,7 @@ const LiveNavigation = {
     const overlay = document.getElementById('live-nav-overlay');
     if (overlay) overlay.classList.remove('hidden');
 
-    // Clean UI for distraction-free riding cockpit
-    if (typeof closeMobileSidebar === 'function') closeMobileSidebar();
-    if (typeof closeRightPanel === 'function') closeRightPanel();
-    if (typeof dismissHomepagePlanner === 'function') dismissHomepagePlanner();
-
-    // Hide all colliding floating controls and cards during Live HUD
-    const bottomBar = document.getElementById('mobile-bottom-bar');
-    if (bottomBar) bottomBar.classList.add('hidden');
-    const bottomNav = document.getElementById('mobile-bottom-nav');
-    if (bottomNav) bottomNav.classList.add('hidden');
-
-    document.getElementById('floating-map-controls')?.classList.add('hidden');
-    document.getElementById('gmaps-top-container')?.classList.add('hidden');
-    document.getElementById('app-header')?.classList.add('hidden');
-    if (typeof closeGmapsPlaceSheet === 'function') closeGmapsPlaceSheet();
-    if (typeof dismissGmapsRouteSelector === 'function') dismissGmapsRouteSelector();
-    if (typeof dismissStagingSheet === 'function') dismissStagingSheet();
-    if (typeof clearRouteAlternativeMarkers === 'function') clearRouteAlternativeMarkers();
-    document.getElementById('btn-toggle-right-panel')?.classList.add('hidden');
-    document.getElementById('map-hint')?.classList.add('hidden');
-    document.getElementById('elevation-panel')?.classList.add('hidden');
-
-    // On desktop, collapse sidebar for full-screen immersive map navigation
-    const sidebar = document.getElementById('sidebar');
-    if (sidebar) sidebar.classList.add('live-nav-hidden');
-    if (map) {
-      setTimeout(() => map.invalidateSize(), 100);
-      setTimeout(() => map.invalidateSize(), 300);
-    }
+    this.hideCollidingControlsForLiveRide();
 
     // Request screen wake lock
     this.requestWakeLock();
@@ -13841,26 +13882,7 @@ const LiveNavigation = {
     if (overlay) overlay.classList.add('hidden');
     document.getElementById('live-nav-recenter-pill-box')?.classList.add('hidden');
 
-    // Restore floating controls and cards
-    const bottomNav = document.getElementById('mobile-bottom-nav');
-    if (bottomNav) bottomNav.classList.remove('hidden');
-
-    document.getElementById('floating-map-controls')?.classList.remove('hidden');
-    document.getElementById('map-category-filter-bar')?.classList.remove('hidden');
-    document.getElementById('gmaps-top-container')?.classList.remove('hidden');
-    document.getElementById('app-header')?.classList.remove('hidden');
-    document.getElementById('btn-toggle-right-panel')?.classList.remove('hidden');
-    if (state.routeData && typeof showRouteStagingSheet === 'function') {
-      showRouteStagingSheet(state.routeData);
-    }
-
-    // Restore desktop sidebar
-    const sidebar = document.getElementById('sidebar');
-    if (sidebar) sidebar.classList.remove('live-nav-hidden');
-    if (map) {
-      setTimeout(() => map.invalidateSize(), 100);
-      setTimeout(() => map.invalidateSize(), 300);
-    }
+    this.restoreControlsAfterLiveRide();
 
     // Reset Dönen Harita (Heading-Up) camera rotation back to 0deg (North-Up)
     const mapEl = document.getElementById('map');
