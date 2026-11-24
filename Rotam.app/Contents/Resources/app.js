@@ -12424,7 +12424,9 @@ const RotamGpsOptimizer = {
   OFF_ROUTE_THRESHOLD_METERS: 55, // Off route if farther than 55 meters
   OFF_ROUTE_CONFIRM_PINGS: 3,     // Require 3 consecutive off-route pings before reroute
   MAX_ACCEPTABLE_ACCURACY: 90,    // Reject outright if accuracy > 90m and prior good fix exists
-  LOW_SPEED_DEADBAND_KMH: 3.5,    // Freeze heading when below 3.5 km/h to avoid spinning
+  SPEED_NOISE_FLOOR_KMH: 3.2,     // Any speed below 3.2 km/h is treated as GPS stationary noise -> 0 km/h
+  STATIONARY_DIST_THRESHOLD_M: 4.5, // GPS displacement under 4.5m (or accuracy * 0.45) is anchored
+  LOW_SPEED_DEADBAND_KMH: 4.0,    // Freeze heading when below 4.0 km/h to avoid spinning
   MAX_PLAUSIBLE_SPEED_KMH: 220,   // Rejection threshold for GPS teleport spikes
 
   // Internal State
@@ -12632,14 +12634,44 @@ const RotamGpsOptimizer = {
       this.lastProcessedCoord = [rawLat, rawLon];
     }
 
-    // 3. Raw Speed
+    // 3. Raw Speed & Intelligent Stationary Jitter Filter
+    let rawSpeedKmH = 0;
+    let distFromLastRaw = 0;
+    let dt = 1.0;
+
+    if (this.lastProcessedCoord && this.lastTimestamp > 0) {
+      dt = Math.max(0.3, (timestamp - this.lastTimestamp) / 1000);
+      distFromLastRaw = haversineMeters(this.lastProcessedCoord[0], this.lastProcessedCoord[1], rawLat, rawLon);
+    }
+
+    if (pos.coords.speed !== null && !isNaN(pos.coords.speed) && pos.coords.speed >= 0) {
+      rawSpeedKmH = pos.coords.speed * 3.6;
+    } else if (distFromLastRaw > 0 && dt > 0) {
+      rawSpeedKmH = (distFromLastRaw / dt) * 3.6;
+    }
+
+    // Dynamic noise threshold: under buildings/trees or high accuracy circle, jitter is higher
+    const dynamicNoiseMeters = Math.max(this.STATIONARY_DIST_THRESHOLD_M, Math.min(14, accuracy * 0.45));
+
+    // Determine if vehicle is stationary:
+    // A) Raw calculated speed is below noise floor (3.2 km/h), OR
+    // B) Displacement is within noise radius AND speed is low (< 7.0 km/h)
+    const isStationary = (rawSpeedKmH < this.SPEED_NOISE_FLOOR_KMH) ||
+                         (distFromLastRaw < dynamicNoiseMeters && rawSpeedKmH < 7.0);
+
     let speedKmH = 0;
-    if (pos.coords.speed !== null && !isNaN(pos.coords.speed)) {
-      speedKmH = Math.max(0, Math.round(pos.coords.speed * 3.6));
-    } else if (this.lastProcessedCoord && this.lastTimestamp > 0) {
-      const dt = Math.max(0.5, (timestamp - this.lastTimestamp) / 1000);
-      const dm = haversineMeters(this.lastProcessedCoord[0], this.lastProcessedCoord[1], rawLat, rawLon);
-      speedKmH = Math.min(180, Math.round((dm / dt) * 3.6));
+    if (!isStationary) {
+      // Vehicle is genuinely moving
+      if (this.lastSpeedKmH > 0) {
+        // Responsive EMA filter (prevents single-ping speed spikes while keeping acceleration snappy)
+        speedKmH = Math.round(this.lastSpeedKmH * 0.3 + rawSpeedKmH * 0.7);
+      } else {
+        speedKmH = Math.round(rawSpeedKmH);
+      }
+      speedKmH = Math.min(this.MAX_PLAUSIBLE_SPEED_KMH, Math.max(0, speedKmH));
+    } else {
+      // Stopped at red light, parked or stationary: HARD ZERO!
+      speedKmH = 0;
     }
 
     // 4. Map Matching (Snap-to-Route)
@@ -12677,7 +12709,7 @@ const RotamGpsOptimizer = {
     this.distanceToRoad = distanceToRoad;
     this.roadBearing = roadBearing;
 
-    // 5. Coordinate Smoothing (Exponential Moving Average)
+    // 5. Coordinate Smoothing (Exponential Moving Average) & Stationary Lock
     let smoothedLat = targetLat;
     let smoothedLon = targetLon;
 
@@ -12688,8 +12720,9 @@ const RotamGpsOptimizer = {
         // Large movement or initial relocation: jump directly without smoothing lag!
         smoothedLat = targetLat;
         smoothedLon = targetLon;
-      } else if (this.hasRealGpsFix && speedKmH < 2 && distFromLast < 1.2) {
-        // Stationary deadband: if speed is 0 and movement is under 1.2m, lock position
+      } else if (isStationary || (speedKmH === 0 && distFromLast < dynamicNoiseMeters)) {
+        // STATIONARY LOCK: Vehicle is not moving, lock coordinates to anchor point!
+        // Completely eliminates GPS wander into roadside buildings and phantom speed!
         smoothedLat = this.lastProcessedCoord[0];
         smoothedLon = this.lastProcessedCoord[1];
       } else {
@@ -12697,19 +12730,19 @@ const RotamGpsOptimizer = {
         let alpha = 0.55;
         if (speedKmH > 60) alpha = 0.85;
         else if (speedKmH > 25) alpha = 0.65;
-        else if (speedKmH < 5) alpha = 0.35;
+        else if (speedKmH < 8) alpha = 0.35;
 
         smoothedLat = this.lastProcessedCoord[0] + alpha * (targetLat - this.lastProcessedCoord[0]);
         smoothedLon = this.lastProcessedCoord[1] + alpha * (targetLon - this.lastProcessedCoord[1]);
       }
     }
 
-    // 6. Heading Stabilization & Deadband (< 3.5 km/h)
+    // 6. Heading Stabilization & Deadband (< 4.0 km/h or Stationary)
     let rawHeading = pos.coords.heading;
     let targetHeading = this.lastHeading;
 
-    if (speedKmH < this.LOW_SPEED_DEADBAND_KMH) {
-      // Stopped at red light or walking slowly: freeze heading to avoid spinning!
+    if (isStationary || speedKmH < this.LOW_SPEED_DEADBAND_KMH) {
+      // Stopped at red light, parked or stationary: FREEZE heading to prevent map/camera spinning!
       targetHeading = this.lastHeading;
     } else if (rawHeading !== null && !isNaN(rawHeading) && rawHeading >= 0) {
       targetHeading = rawHeading;
@@ -13881,8 +13914,9 @@ const LiveNavigation = {
       if (typeof RotamGpsOptimizer !== 'undefined') {
         res = RotamGpsOptimizer.processPosition(pos, isInitial, activeCoords);
       } else {
-        const rawSpeed = (pos.coords.speed !== null && !isNaN(pos.coords.speed))
+        let rawSpeed = (pos.coords.speed !== null && !isNaN(pos.coords.speed))
           ? Math.max(0, Math.round(pos.coords.speed * 3.6)) : 0;
+        if (rawSpeed < 3.2) rawSpeed = 0;
         res = {
           lat: pos.coords.latitude,
           lon: pos.coords.longitude,
@@ -14132,10 +14166,10 @@ const LiveNavigation = {
     this.lastGpsTime = Date.now(); // GPS stale detection için timestamp
     state.userLocation = { lat, lon };
 
-    // Telemetry distance & speed calculation
+    // Telemetry distance & speed calculation (Only count distance when genuinely in motion)
     if (this.lastGpsCoord) {
       const stepD = haversineMeters(this.lastGpsCoord[0], this.lastGpsCoord[1], lat, lon);
-      if (stepD >= 1 && stepD <= 1000) {
+      if (speed >= 3.2 && stepD >= 2.5 && stepD <= 1000) {
         this.distanceTraveledM += stepD;
       }
     }
