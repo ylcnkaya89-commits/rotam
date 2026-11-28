@@ -4030,6 +4030,14 @@ function showGmapsPlaceSheet(place) {
     sheet.classList.add('sheet-open');
   });
 
+  // On mobile, hide bottom nav and elevate floating FABs so sheet docks cleanly at bottom
+  if (window.innerWidth < 768) {
+    const bottomNav = document.getElementById('mobile-bottom-nav');
+    if (bottomNav) bottomNav.classList.add('hidden');
+    const fabs = document.getElementById('mobile-floating-fabs');
+    if (fabs) fabs.classList.add('place-sheet-active');
+  }
+
   if (typeof initIcons === 'function') initIcons();
 }
 
@@ -4043,6 +4051,19 @@ function closeGmapsPlaceSheet() {
       }
     }, 280);
   }
+
+  // On mobile, restore bottom nav and reset FAB position
+  if (window.innerWidth < 768) {
+    const bottomNav = document.getElementById('mobile-bottom-nav');
+    const stagingSheet = document.getElementById('rotam-staging-sheet');
+    const isStagingVisible = stagingSheet && !stagingSheet.classList.contains('hidden');
+    if (bottomNav && (!window.LiveNavigation || !window.LiveNavigation.isActive) && !isStagingVisible) {
+      bottomNav.classList.remove('hidden');
+    }
+    const fabs = document.getElementById('mobile-floating-fabs');
+    if (fabs) fabs.classList.remove('place-sheet-active');
+  }
+
   // Only remove drop pin if not currently locked on an active route
   if (!state.routeData) {
     removeGmapsPin();
@@ -6093,6 +6114,14 @@ function showRouteStagingSheet(routeData) {
     sheet.classList.remove('translate-y-6', 'opacity-0');
     sheet.classList.add('translate-y-0', 'opacity-100');
   });
+
+  // On mobile, hide bottom nav and elevate floating FABs so staging sheet docks cleanly at bottom
+  if (window.innerWidth < 768) {
+    const bottomNav = document.getElementById('mobile-bottom-nav');
+    if (bottomNav) bottomNav.classList.add('hidden');
+    const fabs = document.getElementById('mobile-floating-fabs');
+    if (fabs) fabs.classList.add('staging-active');
+  }
 }
 
 function dismissStagingSheet() {
@@ -6103,6 +6132,18 @@ function dismissStagingSheet() {
   setTimeout(() => {
     sheet.classList.add('hidden');
   }, 250);
+
+  // On mobile, restore bottom nav and reset FAB position
+  if (window.innerWidth < 768) {
+    const bottomNav = document.getElementById('mobile-bottom-nav');
+    const placeSheet = document.getElementById('gmaps-place-sheet');
+    const isPlaceVisible = placeSheet && !placeSheet.classList.contains('hidden');
+    if (bottomNav && (!window.LiveNavigation || !window.LiveNavigation.isActive) && !isPlaceVisible) {
+      bottomNav.classList.remove('hidden');
+    }
+    const fabs = document.getElementById('mobile-floating-fabs');
+    if (fabs) fabs.classList.remove('staging-active');
+  }
 }
 
 function startLiveRideFromStaging() {
