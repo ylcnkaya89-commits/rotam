@@ -1403,7 +1403,12 @@ document.addEventListener('click', (e) => {
   const navToolsBtn = document.getElementById('live-nav-btn-tools');
   if (navToolsPopover && !navToolsPopover.classList.contains('hidden')) {
     if (!navToolsPopover.contains(e.target) && !navToolsBtn?.contains(e.target)) {
-      navToolsPopover.classList.add('hidden');
+      if (typeof LiveNavigation !== 'undefined' && LiveNavigation.toggleToolsPopover) {
+        LiveNavigation.toggleToolsPopover(false);
+      } else {
+        navToolsPopover.classList.add('hidden');
+        document.getElementById('live-nav-tools-backdrop')?.classList.add('hidden');
+      }
     }
   }
 });
@@ -13392,23 +13397,40 @@ const LiveNavigation = {
     }
   },
 
-  toggleToolsPopover(show) {
-    const popover = document.getElementById('live-nav-tools-popover');
-    if (!popover) return;
-    if (show === undefined) {
-      popover.classList.toggle('hidden');
-    } else if (show) {
-      popover.classList.remove('hidden');
-    } else {
-      popover.classList.add('hidden');
+  toggleToolsPopover(show, e) {
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
     }
-    if (!popover.classList.contains('hidden')) {
+    const popover = document.getElementById('live-nav-tools-popover');
+    const backdrop = document.getElementById('live-nav-tools-backdrop');
+    if (!popover) return;
+
+    // Harita etkileşimlerinin menü üzerinden sızmasını engelle (Leaflet event izolasyonu)
+    if (typeof L !== 'undefined' && L.DomEvent && !popover._leafletEventsBound) {
+      L.DomEvent.disableClickPropagation(popover);
+      L.DomEvent.disableScrollPropagation(popover);
+      if (backdrop) {
+        L.DomEvent.disableClickPropagation(backdrop);
+        L.DomEvent.disableScrollPropagation(backdrop);
+      }
+      popover._leafletEventsBound = true;
+    }
+
+    const isCurrentlyHidden = popover.classList.contains('hidden');
+    const shouldShow = (show === undefined) ? isCurrentlyHidden : Boolean(show);
+
+    if (shouldShow) {
+      popover.classList.remove('hidden');
+      if (backdrop) backdrop.classList.remove('hidden');
       if (typeof RotamBackgroundEngine !== 'undefined') {
         RotamBackgroundEngine.updateControlsUI();
       }
       if (typeof initIcons === 'function') {
         initIcons();
       }
+    } else {
+      popover.classList.add('hidden');
+      if (backdrop) backdrop.classList.add('hidden');
     }
   },
 

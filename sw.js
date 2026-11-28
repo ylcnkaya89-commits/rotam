@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v103 (High-Contrast Cockpit Palette & Modern Lucide Icon Sizing)
-const CACHE_NAME = 'rotam-cache-v103';
+// Rotam PWA Service Worker - v104 (Responsive Drive Tools Bottom Sheet & Touch Isolation)
+const CACHE_NAME = 'rotam-cache-v104';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 
