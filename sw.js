@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v106 (Two-Finger 3D Tilt & 360° Rotate Gesture Controller & Drive Mode 3D)
-const CACHE_NAME = 'rotam-cache-v106';
+// Rotam PWA Service Worker - v107 (Seamless Fullscreen 3D & Dynamic Corner Coverage Scale)
+const CACHE_NAME = 'rotam-cache-v107';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

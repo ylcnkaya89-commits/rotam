@@ -318,7 +318,9 @@ function patchLeafletDraggableForRotation() {
 
       const pitchRad = (pitch * Math.PI) / 180;
       const pitchCos = Math.max(0.35, Math.cos(pitchRad));
-      const scale = (typeof LiveNavigation !== 'undefined' && LiveNavigation.isActive && LiveNavigation.compassMode === 'heading') ? 1.55 : 1.35;
+      const scale = (typeof RotamMapGestureController !== 'undefined' && RotamMapGestureController.getRequiredScale)
+        ? RotamMapGestureController.getRequiredScale(bearing, pitch)
+        : ((typeof LiveNavigation !== 'undefined' && LiveNavigation.isActive && LiveNavigation.compassMode === 'heading') ? 2.0 : 1.5);
 
       const rotX = offset.x * cos + offset.y * sin;
       const rotY = -offset.x * sin + offset.y * cos;
@@ -527,6 +529,27 @@ const RotamMapGestureController = {
     this.applyTransform(true);
   },
 
+  getRequiredScale(bearing = 0, pitch = 0) {
+    if (Math.abs(bearing) < 0.5 && Math.abs(pitch) < 0.5) return 1.0;
+    const rad = Math.abs((bearing * Math.PI) / 180);
+    const sin = Math.abs(Math.sin(rad));
+    const cos = Math.abs(Math.cos(rad));
+    const w = window.innerWidth || 1200;
+    const h = window.innerHeight || 800;
+    const aspect = Math.max(w / h, h / w);
+
+    // Rotasyon kaynaklı köşe çekilmelerini tamamen dolduran ölçek faktörü
+    const rotScale = cos + (aspect * sin);
+
+    // 3D perspektif eğim kaynaklı ufuk çekilmesini (vanishing point) telafi eden faktör
+    const pitchRad = (pitch * Math.PI) / 180;
+    const pitchScale = 1 + (Math.sin(pitchRad) * 0.85);
+
+    // %6 güvenlik marjı ile çarpım, ekranın hiçbir köşesinde asla siyah boşluk bırakmaz
+    const totalScale = rotScale * pitchScale * 1.06;
+    return Math.max(1.0, Math.min(3.5, totalScale));
+  },
+
   applyTransform(smooth = false) {
     const mapEl = document.getElementById('map');
     if (!mapEl) return;
@@ -555,7 +578,7 @@ const RotamMapGestureController = {
       return;
     }
 
-    const scale = (typeof LiveNavigation !== 'undefined' && LiveNavigation.isActive && LiveNavigation.compassMode === 'heading') ? 1.55 : 1.35;
+    const scale = this.getRequiredScale(effBearing, this.pitch);
     if (smooth) {
       mapEl.style.transition = 'transform 0.35s cubic-bezier(0.2, 0.85, 0.35, 1)';
       setTimeout(() => { mapEl.style.transition = ''; }, 370);
@@ -564,7 +587,7 @@ const RotamMapGestureController = {
     }
 
     mapEl.style.transformOrigin = '50% 50%';
-    mapEl.style.transform = `perspective(900px) scale(${scale}) rotateX(${this.pitch}deg) rotateZ(${effBearing}deg)`;
+    mapEl.style.transform = `perspective(1000px) scale(${scale}) rotateX(${this.pitch}deg) rotateZ(${effBearing}deg)`;
     this.updateCompassUI(effBearing, this.pitch);
   },
 
@@ -14568,9 +14591,13 @@ const LiveNavigation = {
     if (diff < -180) diff += 360;
     this.currentMapRotation = (this.currentMapRotation || 0) + diff;
 
-    // Scale 1.55 covers the viewport diagonal completely at any orientation with 3D perspective
+    // Dinamik tam ekran doluluk ölçeği (köşelerde siyah boşluk bırakmaz)
+    const scale = (typeof RotamMapGestureController !== 'undefined' && RotamMapGestureController.getRequiredScale)
+      ? RotamMapGestureController.getRequiredScale(this.currentMapRotation, pitch)
+      : 2.2;
+
     mapEl.style.transformOrigin = '50% 50%';
-    mapEl.style.transform = `perspective(900px) scale(1.55) rotateX(${pitch}deg) rotateZ(${this.currentMapRotation}deg)`;
+    mapEl.style.transform = `perspective(1000px) scale(${scale}) rotateX(${pitch}deg) rotateZ(${this.currentMapRotation}deg)`;
 
     const needleEl = document.getElementById('live-nav-compass-needle');
     if (needleEl) {

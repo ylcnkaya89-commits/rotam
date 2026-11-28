@@ -137,6 +137,9 @@ main {
   min-height: 100% !important;
   z-index: 1 !important;
   background-color: #090d16;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
   transform-style: preserve-3d !important;
   transform-origin: 50% 50% !important;
   touch-action: none !important;
