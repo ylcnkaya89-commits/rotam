@@ -852,31 +852,41 @@ body.sunlight-mode .leaflet-container {
 
 /* Google Maps Top Green Maneuver Card */
 .gmaps-maneuver-card {
-  background: linear-gradient(180deg, #005a54 0%, #034842 100%);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(135deg, #024b42 0%, #03665a 50%, #057d6e 100%) !important;
+  border: 1.5px solid rgba(52, 211, 153, 0.45) !important;
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.75), 0 0 24px rgba(4, 120, 87, 0.25) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .gmaps-next-pill {
-  background: #04443f;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  background: rgba(2, 44, 38, 0.95) !important;
+  border: 1px solid rgba(52, 211, 153, 0.3) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 /* Google Maps Bottom Cockpit Sheet */
 .gmaps-bottom-cockpit {
-  background: rgba(18, 20, 23, 0.96);
-  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(9, 13, 22, 0.99) 100%) !important;
+  border-top: 1.5px solid rgba(51, 65, 85, 0.75) !important;
+  box-shadow: 0 -12px 36px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 /* Google Maps Right Toolbar Circular Buttons */
 .gmaps-tool-btn {
-  background: rgba(18, 20, 23, 0.92);
-  border: 1px solid rgba(51, 65, 85, 0.8);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(12px);
+  background: rgba(15, 23, 42, 0.94) !important;
+  border: 1.5px solid rgba(71, 85, 105, 0.75) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .gmaps-tool-btn:hover {
-  background: rgba(30, 41, 59, 0.95);
-  border-color: rgba(100, 116, 139, 0.9);
+  background: rgba(30, 41, 59, 0.98) !important;
+  border-color: rgba(56, 189, 248, 0.7) !important;
+  box-shadow: 0 8px 24px rgba(56, 189, 248, 0.25) !important;
 }
 
 /* Google Maps Nav HUD Zoom & Overview Pill */
@@ -891,29 +901,33 @@ body.sunlight-mode .leaflet-container {
 
 /* Google Maps Floating Speedometer */
 .gmaps-speedo-card {
-  background: rgba(18, 20, 23, 0.94);
-  border: 1.5px solid rgba(71, 85, 105, 0.7);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(14px);
+  background: rgba(11, 15, 25, 0.95) !important;
+  border: 1.5px solid rgba(52, 211, 153, 0.45) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7), 0 0 16px rgba(16, 185, 129, 0.2) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 /* Google Maps Incident Report Pill */
 .gmaps-report-pill {
-  background: rgba(18, 20, 23, 0.94);
-  border: 1px solid rgba(71, 85, 105, 0.8);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(12px);
+  background: linear-gradient(135deg, #d97706 0%, #ea580c 100%) !important;
+  border: 1.5px solid rgba(253, 224, 71, 0.7) !important;
+  box-shadow: 0 8px 22px rgba(234, 88, 12, 0.45), 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: #ffffff !important;
 }
 .gmaps-report-pill:hover {
-  background: rgba(30, 41, 59, 0.98);
-  border-color: rgba(148, 163, 184, 0.9);
+  background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%) !important;
+  border-color: #fef08a !important;
+  box-shadow: 0 10px 28px rgba(249, 115, 22, 0.6) !important;
 }
 
 /* Speed Limit Sign (Standard European / Turkish Round Red & White) */
 .gmaps-speed-limit-sign {
-  background: #ffffff;
-  border: 3.5px solid #ef4444;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+  background: #ffffff !important;
+  border: 3.5px solid #ef4444 !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6) !important;
 }
 
 .gmaps-speed-limit-sign.overspeed {
@@ -925,12 +939,17 @@ body.sunlight-mode .leaflet-container {
 /* Overspeed Warning Glow */
 .gmaps-speedo-card.overspeed {
   border-color: #ef4444 !important;
-  background: rgba(220, 38, 38, 0.25) !important;
-  box-shadow: 0 0 25px rgba(239, 68, 68, 0.8), inset 0 0 15px rgba(239, 68, 68, 0.4) !important;
-  animation: overspeedPulse 1s ease-in-out infinite alternate;
+  background: linear-gradient(135deg, rgba(185, 28, 28, 0.95) 0%, rgba(220, 38, 38, 0.9) 100%) !important;
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.85), inset 0 0 15px rgba(254, 202, 202, 0.2) !important;
+  animation: overspeedPulse 0.9s ease-in-out infinite alternate;
 }
 .gmaps-speedo-card.overspeed span {
-  color: #fca5a5 !important;
+  color: #ffffff !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important;
+}
+.gmaps-speedo-card.overspeed span:last-child {
+  color: #fef08a !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8) !important;
 }
 
 @keyframes overspeedPulse {

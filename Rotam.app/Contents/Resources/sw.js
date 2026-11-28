@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v102 (Mobile Screen Optimization & Smooth Bottom Docking)
-const CACHE_NAME = 'rotam-cache-v102';
+// Rotam PWA Service Worker - v103 (High-Contrast Cockpit Palette & Modern Lucide Icon Sizing)
+const CACHE_NAME = 'rotam-cache-v103';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

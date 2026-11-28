@@ -855,52 +855,52 @@
         <div id="gmaps-category-chips" class="pointer-events-auto flex items-center space-x-1.5 py-1 overflow-x-auto no-scrollbar max-w-full">
           <!-- 1. Efsane Rotalar (14 Küratör Güzergah) -->
           <button onclick="openPresetsModal()" class="gmaps-chip px-3 py-1.5 rounded-full text-xs font-bold text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/40 flex items-center space-x-1.5 shrink-0 active:scale-95 shadow-md" title="14 Küratör Motosiklet & Seyahat Rotası">
-            <span>🏍️</span>
+            <span class="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center text-xs">🏍️</span>
             <span>Efsane Rotalar</span>
             <span class="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-amber-500/30 text-amber-200">14</span>
           </button>
 
           <!-- 2. Benzin & Şarj -->
           <button onclick="quickFilterCategory('fuel')" id="gmaps-chip-fuel" data-cat="fuel" class="gmaps-chip px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-semibold text-slate-200 flex items-center space-x-1.5 shrink-0 active:scale-95" title="Akaryakıt & EV Şarj">
-            <span>⛽</span>
+            <span class="w-5 h-5 rounded-full bg-cyan-500/20 flex items-center justify-center text-xs">⛽</span>
             <span data-i18n="gmaps_chip_fuel">Benzin</span>
           </button>
 
           <!-- 3. Motosiklet & Araç Servisi, Tamirci, Lastikçi -->
           <button onclick="quickFilterCategory('service')" id="gmaps-chip-service" data-cat="service" class="gmaps-chip px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-semibold text-slate-200 flex items-center space-x-1.5 shrink-0 active:scale-95" title="Motosiklet & Araç Servisi, Lastikçi, Yol Yardım">
-            <span>🔧</span>
+            <span class="w-5 h-5 rounded-full bg-orange-500/20 flex items-center justify-center text-xs">🔧</span>
             <span data-i18n="gmaps_chip_service">Tamir & Servis</span>
           </button>
 
           <!-- 4. Mola & Kafe -->
           <button onclick="quickFilterCategory('gastronomy')" id="gmaps-chip-rest" data-cat="gastronomy" class="gmaps-chip px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-semibold text-slate-200 flex items-center space-x-1.5 shrink-0 active:scale-95" title="Mola Yerleri & Kafe">
-            <span>☕</span>
+            <span class="w-5 h-5 rounded-full bg-rose-500/20 flex items-center justify-center text-xs">☕</span>
             <span data-i18n="gmaps_chip_rest">Mola</span>
           </button>
 
           <!-- 5. Tarihi Yerler & Antik Kent -->
           <button onclick="quickFilterCategory('historic')" id="gmaps-chip-historic" data-cat="historic" class="gmaps-chip px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-semibold text-slate-200 flex items-center space-x-1.5 shrink-0 active:scale-95" title="Tarihi Yerler & Antik Kentler">
-            <span>🏛️</span>
+            <span class="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-xs">🏛️</span>
             <span data-i18n="gmaps_chip_historic">Tarih</span>
           </button>
 
-          <!-- 5. Canlı Konvoy Sürüşü -->
+          <!-- 6. Canlı Konvoy Sürüşü -->
           <button onclick="RotamConvoy.openModal()" class="gmaps-chip px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-bold text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/40 flex items-center space-x-1.5 shrink-0 active:scale-95 shadow-sm" title="Canlı Grup Sürüşü (Konvoy)">
-            <span>👥</span>
+            <span class="w-5 h-5 rounded-full bg-cyan-500/20 flex items-center justify-center text-xs">👥</span>
             <span>Konvoy</span>
           </button>
 
-          <!-- 6. Akordiyon / Tüm Kategorileri Genişlet Butonu -->
+          <!-- 7. Akordiyon / Tüm Kategorileri Genişlet Butonu -->
           <button id="btn-categories-accordion-toggle" onclick="toggleCategoriesAccordion()" class="gmaps-chip px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-bold text-slate-300 bg-slate-900/90 hover:bg-slate-800 border border-slate-700 flex items-center space-x-1.5 shrink-0 active:scale-95 transition-all" title="Tüm Keşif & Mola Kategorileri">
-            <span>📂</span>
+            <span class="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center text-xs">📂</span>
             <span id="category-accordion-btn-text">Keşfet</span>
             <span id="category-active-count-badge" class="hidden px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500 text-slate-950">0</span>
             <i id="category-accordion-chevron" data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200"></i>
           </button>
 
-          <!-- 7. Filtreleri Temizle Butonu (Aktif filtre olunca görünür) -->
-          <button id="btn-clear-category-filters" onclick="clearAllCategoryFilters()" class="hidden gmaps-chip px-2 py-1.5 rounded-full text-xs font-semibold text-rose-300 bg-rose-950/70 hover:bg-rose-900/90 border border-rose-500/40 flex items-center space-x-1 shrink-0 active:scale-95 transition-all" title="Filtreleri Temizle">
-            <i data-lucide="x" class="w-3 h-3"></i>
+          <!-- 8. Filtreleri Temizle Butonu (Aktif filtre olunca görünür) -->
+          <button id="btn-clear-category-filters" onclick="clearAllCategoryFilters()" class="hidden gmaps-chip px-2.5 py-1.5 rounded-full text-xs font-semibold text-rose-300 bg-rose-950/70 hover:bg-rose-900/90 border border-rose-500/40 flex items-center space-x-1 shrink-0 active:scale-95 transition-all" title="Filtreleri Temizle">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
             <span class="text-[11px]">Temizle</span>
           </button>
         </div>
@@ -1239,8 +1239,8 @@
           <div class="gmaps-maneuver-card rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 text-white shadow-2xl relative overflow-hidden">
             <div class="flex items-center space-x-3 sm:space-x-4">
               <!-- Sol: Büyük Yön / Dönüş Oku -->
-              <div class="w-13 h-13 sm:w-16 sm:h-16 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0 shadow-inner">
-                <span id="live-nav-maneuver-icon" class="text-3xl sm:text-4xl font-black text-white leading-none">↑</span>
+              <div class="w-13 h-13 sm:w-16 sm:h-16 rounded-2xl bg-white/15 border border-white/30 flex items-center justify-center shrink-0 shadow-lg shadow-emerald-950/40 backdrop-blur-md">
+                <span id="live-nav-maneuver-icon" class="text-3xl sm:text-4xl font-black text-white leading-none drop-shadow">↑</span>
               </div>
 
               <!-- Orta/Sağ: Mesafe ve Sokak/Cadde İsmi -->
@@ -1576,11 +1576,11 @@
           </div>
 
           <!-- 5. Olay & Durum Bildir Kapsülü ([ ⚠️ Bildir ]) -->
-          <button onclick="LiveNavigation.openIncidentReportModal()" class="px-3 py-2 rounded-full gmaps-report-pill flex items-center space-x-1.5 cursor-pointer active:scale-95 transition-all text-white shadow-xl mt-1" title="Radar, Kaza, Yol Çalışması Bildir">
-            <div class="w-4 h-4 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center">
-              <i data-lucide="triangle-alert" class="w-3.5 h-3.5 text-amber-400"></i>
+          <button onclick="LiveNavigation.openIncidentReportModal()" class="px-3.5 py-2 rounded-full gmaps-report-pill flex items-center space-x-1.5 cursor-pointer active:scale-95 transition-all text-white shadow-xl mt-1" title="Radar, Kaza, Yol Çalışması Bildir">
+            <div class="w-4 h-4 rounded-full bg-white/20 text-white flex items-center justify-center">
+              <i data-lucide="triangle-alert" class="w-3.5 h-3.5 text-white stroke-[2.5]"></i>
             </div>
-            <span class="text-xs font-bold tracking-wide" data-i18n="live_nav_report">Bildir</span>
+            <span class="text-xs font-black tracking-wide" data-i18n="live_nav_report">Bildir</span>
           </button>
         </div>
 
@@ -1588,14 +1588,14 @@
         <div id="live-nav-speedo-cluster" class="hud-interactive absolute left-3 sm:left-5 bottom-24 sm:bottom-28 pointer-events-auto z-20 flex items-center space-x-2.5">
           <!-- Hız Sayacı -->
           <div id="live-nav-speedo-box" class="gmaps-speedo-card rounded-2xl px-3.5 py-2.5 flex flex-col items-center min-w-[64px] sm:min-w-[72px] text-white transition-all duration-300">
-            <span id="live-nav-speed-val" class="text-3xl sm:text-4xl font-black font-mono leading-none tracking-tight text-white">0</span>
-            <span class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-wider" data-i18n="live_nav_speed">km/s</span>
+            <span id="live-nav-speed-val" class="text-3xl sm:text-4xl font-black font-mono leading-none tracking-tight text-white drop-shadow">0</span>
+            <span class="text-[10px] font-bold text-slate-300 uppercase mt-1 tracking-wider" data-i18n="live_nav_speed">km/s</span>
           </div>
 
           <!-- Resmi Hız Sınırı Tabelası (Türk & Avrupa Standartı Kırmızı Halka) -->
           <div id="live-nav-speed-limit-badge" onclick="LiveNavigation.cycleSpeedLimit()" class="gmaps-speed-limit-sign rounded-full w-13 h-13 sm:w-14 sm:h-14 flex flex-col items-center justify-center shadow-2xl transition-all shrink-0 cursor-pointer active:scale-95 select-none" title="Yol Hız Sınırı (Değiştirmek için dokunun)">
             <span id="live-nav-speed-limit-val" class="text-lg sm:text-xl font-black text-slate-900 leading-none">90</span>
-            <span class="text-[7px] font-black text-slate-500 uppercase leading-none mt-0.5 tracking-tighter">LİMİT</span>
+            <span class="text-[7px] font-black text-red-600 uppercase leading-none mt-0.5 tracking-tighter">LİMİT</span>
           </div>
         </div>
 
@@ -1610,20 +1610,20 @@
               <!-- Sol: Kalan Süre, Kalan Km ve Tahmini Varış Saati (ETA) -->
               <div class="flex flex-col min-w-0">
                 <div class="flex items-center space-x-1.5">
-                  <span id="live-nav-rem-time" class="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">-- dk.</span>
+                  <span id="live-nav-rem-time" class="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight drop-shadow-sm">-- dk.</span>
                   <span class="text-emerald-400 text-lg">🍃</span>
                 </div>
                 <div class="flex items-center space-x-1.5 text-xs sm:text-sm font-semibold text-slate-300 mt-0.5">
                   <span id="live-nav-rem-dist">-- km</span>
                   <span class="text-slate-500">•</span>
-                  <span id="live-nav-eta-time">--:--</span>
+                  <span id="live-nav-eta-time" class="text-sky-300 font-mono">--:--</span>
                 </div>
               </div>
 
               <!-- Sağ: Kırmızı ÇIKIŞ Butonu -->
               <div class="flex items-center space-x-2 shrink-0">
                 <!-- Kırmızı Çıkış Butonu (Google Maps Red Exit Pill) -->
-                <button onclick="LiveNavigation.stop()" class="px-5 sm:px-6 py-2.5 sm:py-3 bg-red-600 hover:bg-red-500 active:scale-95 text-white font-black text-xs sm:text-sm rounded-full shadow-lg shadow-red-600/40 flex items-center space-x-1.5 transition-all cursor-pointer">
+                <button onclick="LiveNavigation.stop()" class="px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 active:scale-95 text-white font-black text-xs sm:text-sm rounded-full shadow-lg shadow-red-600/50 border border-red-400/40 flex items-center space-x-1.5 transition-all cursor-pointer">
                   <i data-lucide="x" class="w-4 h-4 stroke-[3]"></i>
                   <span data-i18n="live_nav_exit">Çıkış</span>
                 </button>
@@ -1634,9 +1634,9 @@
 
         <!-- FLOATING YENİDEN ORTALA BUTONU (KULLANICI HARİTADA GEZDİĞİNDE BELİRİR) -->
         <div id="live-nav-recenter-pill-box" class="hidden absolute bottom-24 sm:bottom-28 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
-          <button onclick="LiveNavigation.recenterMap()" class="flex items-center space-x-2 px-4 py-2.5 rounded-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shadow-2xl border border-cyan-400/50 backdrop-blur-md active:scale-95 transition-all cursor-pointer">
-            <i data-lucide="locate-fixed" class="w-4 h-4 text-cyan-200"></i>
-            <span data-i18n="live_nav_recenter">Yeniden Ortala</span>
+          <button onclick="LiveNavigation.recenterMap()" class="flex items-center space-x-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-sky-500 to-cyan-600 hover:from-sky-400 hover:to-cyan-500 text-white font-black text-xs shadow-xl shadow-cyan-600/40 border border-sky-300/60 backdrop-blur-md active:scale-95 transition-all cursor-pointer">
+            <i data-lucide="locate-fixed" class="w-4 h-4 text-white stroke-[2.5]"></i>
+            <span data-i18n="live_nav_recenter">Ortala</span>
           </button>
         </div>
 
@@ -4456,26 +4456,26 @@ service cloud.firestore {
   </div>
 
   <!-- MOBİL ALT SABİT MENÜ (MOBILE BOTTOM NAV - 5 TEMEL SEÇENEK: ROTA, KEŞFET, SÜRÜŞÜ BAŞLAT, YAKINIMDA, ROTALARIM) -->
-  <nav id="mobile-bottom-nav" class="md:hidden bg-slate-900/95 border-t border-slate-800/80 px-2 py-1 flex items-center justify-around z-30 shrink-0 backdrop-blur-xl w-full max-w-full">
-    <button id="mobile-nav-btn-plan" onclick="handleMobileNavPlan()" class="flex-1 flex flex-col items-center justify-center p-1 text-brand-400 font-semibold text-[10px] active:scale-95 transition-all">
-      <i data-lucide="map" class="w-4 h-4 mb-0.5"></i>
+  <nav id="mobile-bottom-nav" class="md:hidden bg-slate-900/95 border-t border-slate-800/80 px-2 py-1.5 flex items-center justify-around z-30 shrink-0 backdrop-blur-xl w-full max-w-full">
+    <button id="mobile-nav-btn-plan" onclick="handleMobileNavPlan()" class="flex-1 flex flex-col items-center justify-center p-1 text-emerald-400 font-semibold text-[10px] active:scale-95 transition-all">
+      <i data-lucide="map" class="w-5 h-5 mb-0.5 stroke-[2]"></i>
       <span data-i18n="mobile_nav_plan">Rota</span>
     </button>
     <button onclick="openDiscoverModal()" class="flex-1 flex flex-col items-center justify-center p-1 text-slate-400 hover:text-white text-[10px] active:scale-95 transition-all">
-      <i data-lucide="compass" class="w-4 h-4 mb-0.5"></i>
+      <i data-lucide="compass" class="w-5 h-5 mb-0.5 stroke-[2]"></i>
       <span data-i18n="mobile_nav_discover">Keşfet</span>
     </button>
     <!-- ORTA ÖNE ÇIKAN CANLI SÜRÜŞÜ BAŞLAT BUTONU -->
-    <button id="mobile-nav-btn-ride" onclick="handleMobileNavRideStart()" class="flex flex-col items-center justify-center px-3.5 py-1 -mt-3 bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white rounded-2xl shadow-xl shadow-cyan-600/40 border border-cyan-400/50 active:scale-95 transition-all shrink-0" title="Canlı Sürüş Modunu Başlat">
-      <i data-lucide="play" class="w-4 h-4 fill-white text-white mb-0.5"></i>
-      <span class="text-[8.5px] font-black uppercase tracking-tight whitespace-nowrap" data-i18n="nav_start_ride_short">Sürüşü Başlat</span>
+    <button id="mobile-nav-btn-ride" onclick="handleMobileNavRideStart()" class="flex flex-col items-center justify-center px-4 py-1.5 -mt-3.5 bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 text-white rounded-2xl shadow-xl shadow-emerald-600/40 border border-emerald-400/60 active:scale-95 transition-all shrink-0" title="Canlı Sürüş Modunu Başlat">
+      <i data-lucide="play" class="w-5 h-5 fill-white text-white mb-0.5"></i>
+      <span class="text-[9px] font-black uppercase tracking-tight whitespace-nowrap" data-i18n="nav_start_ride_short">Sürüşü Başlat</span>
     </button>
     <button onclick="openNearbyModal()" class="flex-1 flex flex-col items-center justify-center p-1 text-slate-400 hover:text-white text-[10px] active:scale-95 transition-all">
-      <i data-lucide="navigation" class="w-4 h-4 mb-0.5"></i>
+      <i data-lucide="navigation" class="w-5 h-5 mb-0.5 stroke-[2]"></i>
       <span data-i18n="mobile_nav_nearby">Yakınımda</span>
     </button>
     <button onclick="openSavedRoutesModal()" class="flex-1 flex flex-col items-center justify-center p-1 text-slate-400 hover:text-white text-[10px] active:scale-95 transition-all">
-      <i data-lucide="folder-heart" class="w-4 h-4 mb-0.5"></i>
+      <i data-lucide="folder-heart" class="w-5 h-5 mb-0.5 stroke-[2]"></i>
       <span data-i18n="mobile_nav_saved">Rotalarım</span>
     </button>
   </nav>
