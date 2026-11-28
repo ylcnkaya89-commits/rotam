@@ -1,5 +1,5 @@
-// Rotam PWA Service Worker - v104 (Responsive Drive Tools Bottom Sheet & Touch Isolation)
-const CACHE_NAME = 'rotam-cache-v104';
+// Rotam PWA Service Worker - v105 (Two-Finger 3D Tilt & 360° Rotate Gesture Controller)
+const CACHE_NAME = 'rotam-cache-v105';
 const TILE_CACHE_NAME = 'rotam-tiles-v1';
 const CDN_CACHE_NAME = 'rotam-cdn-v1';
 

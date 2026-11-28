@@ -300,28 +300,31 @@ function createTileLayers() {
   return layers;
 }
 
-// Patch Leaflet Draggable to compensate for CSS rotated & scaled map container in LiveNavigation
+// Patch Leaflet Draggable to compensate for CSS rotated & scaled map container in LiveNavigation & Gesture Controller
 function patchLeafletDraggableForRotation() {
   if (typeof L === 'undefined' || !L.Draggable || L.Draggable._rotamPatched) return;
   L.Draggable._rotamPatched = true;
 
   const origAdjustAndSetPosition = L.Draggable.prototype._adjustAndSetPosition;
   L.Draggable.prototype._adjustAndSetPosition = function (offset) {
-    if (
-      typeof LiveNavigation !== 'undefined' &&
-      LiveNavigation.isActive &&
-      LiveNavigation.currentMapRotation
-    ) {
-      // Rotation angle in radians
-      const deg = LiveNavigation.currentMapRotation;
-      const rad = (deg * Math.PI) / 180;
+    const bearing = (typeof RotamMapGestureController !== 'undefined' && RotamMapGestureController.bearing) ||
+                    (typeof LiveNavigation !== 'undefined' && LiveNavigation.isActive && LiveNavigation.currentMapRotation) || 0;
+    const pitch = (typeof RotamMapGestureController !== 'undefined' && RotamMapGestureController.pitch) || 0;
+
+    if (bearing || pitch) {
+      const rad = (bearing * Math.PI) / 180;
       const cos = Math.cos(rad);
       const sin = Math.sin(rad);
-      const scale = 1.55; // CSS scale factor in live-nav-rotating
 
-      // Transform raw screen delta into element's rotated coordinate frame
-      const adjX = (offset.x * cos + offset.y * sin) / scale;
-      const adjY = (-offset.x * sin + offset.y * cos) / scale;
+      const pitchRad = (pitch * Math.PI) / 180;
+      const pitchCos = Math.max(0.35, Math.cos(pitchRad));
+      const scale = (typeof LiveNavigation !== 'undefined' && LiveNavigation.isActive && LiveNavigation.compassMode === 'heading') ? 1.55 : 1.35;
+
+      const rotX = offset.x * cos + offset.y * sin;
+      const rotY = -offset.x * sin + offset.y * cos;
+
+      const adjX = rotX / scale;
+      const adjY = (rotY / pitchCos) / scale;
 
       const adjOffset = new L.Point(adjX, adjY);
       return origAdjustAndSetPosition.call(this, adjOffset);
@@ -329,6 +332,257 @@ function patchLeafletDraggableForRotation() {
     return origAdjustAndSetPosition.call(this, offset);
   };
 }
+
+// ==========================================
+// 2-Finger Touch & Trackpad Map Gesture Controller (3D Tilt / Pitch & 360° Rotate / Bearing)
+// ==========================================
+const RotamMapGestureController = {
+  bearing: 0, // Z ekseni dönüş açısı (0° - 360°)
+  pitch: 0,   // X ekseni 3D eğim açısı (0° - 60°)
+  isGesturing: false,
+  gestureType: null, // 'pitch', 'rotate', 'zoom'
+  startDist: 0,
+  startAngle: 0,
+  startMidY: 0,
+  startPitch: 0,
+  startBearing: 0,
+  isRightDragging: false,
+  rightStartX: 0,
+  rightStartY: 0,
+  rightStartBearing: 0,
+  rightStartPitch: 0,
+
+  init() {
+    const mapEl = document.getElementById('map');
+    if (!mapEl || this._initialized) return;
+    this._initialized = true;
+
+    // Mobil Çoklu Dokunma (İki Parmak Döndürme & 3D Eğme)
+    mapEl.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
+    mapEl.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+    mapEl.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
+    mapEl.addEventListener('touchcancel', (e) => this.handleTouchEnd(e), { passive: false });
+
+    // Masaüstü / Fare Sağ Tık ile Eğme ve Döndürme
+    mapEl.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+    window.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+    window.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+    mapEl.addEventListener('contextmenu', (e) => {
+      if (this.isRightDragging || Math.abs(this.pitch) > 1 || Math.abs(this.bearing) > 1) {
+        e.preventDefault();
+      }
+    });
+
+    // Mac Trackpad İki Parmak Çevirme Desteği (Gesture Events)
+    mapEl.addEventListener('gesturestart', (e) => {
+      this.startBearing = this.bearing;
+      e.preventDefault();
+    });
+    mapEl.addEventListener('gesturechange', (e) => {
+      if (typeof e.rotation === 'number') {
+        this.setBearing(this.startBearing + e.rotation);
+      }
+      e.preventDefault();
+    });
+  },
+
+  handleTouchStart(e) {
+    if (e.touches.length === 2) {
+      this.isGesturing = true;
+      this.gestureType = null;
+
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      const dx = t2.clientX - t1.clientX;
+      const dy = t2.clientY - t1.clientY;
+
+      this.startDist = Math.hypot(dx, dy);
+      this.startAngle = Math.atan2(dy, dx) * 180 / Math.PI;
+      this.startMidY = (t1.clientY + t2.clientY) / 2;
+      this.startPitch = this.pitch;
+      this.startBearing = this.bearing;
+    }
+  },
+
+  handleTouchMove(e) {
+    if (!this.isGesturing || e.touches.length !== 2) return;
+
+    const t1 = e.touches[0];
+    const t2 = e.touches[1];
+    const dx = t2.clientX - t1.clientX;
+    const dy = t2.clientY - t1.clientY;
+
+    const dist = Math.hypot(dx, dy);
+    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+    const midY = (t1.clientY + t2.clientY) / 2;
+
+    const deltaDist = dist - this.startDist;
+    let deltaAngle = angle - this.startAngle;
+    if (deltaAngle > 180) deltaAngle -= 360;
+    if (deltaAngle < -180) deltaAngle += 360;
+    const deltaMidY = midY - this.startMidY;
+
+    // Hareket türünü belirle (Tilt vs Rotate)
+    if (!this.gestureType) {
+      if (Math.abs(deltaMidY) > 12 && Math.abs(deltaAngle) < 20 && Math.abs(deltaDist) < 28) {
+        this.gestureType = 'pitch';
+      } else if (Math.abs(deltaAngle) > 7) {
+        this.gestureType = 'rotate';
+      } else if (Math.abs(deltaDist) > 35 && Math.abs(deltaMidY) < 15) {
+        this.gestureType = 'zoom';
+      }
+    }
+
+    if (this.gestureType === 'pitch') {
+      e.preventDefault();
+      e.stopPropagation();
+      // İki parmakla yukarı kaydırma (deltaMidY < 0) 3D eğimi artırır (0° - 60°)
+      const targetPitch = Math.max(0, Math.min(60, this.startPitch - (deltaMidY * 0.38)));
+      this.setPitch(targetPitch);
+    } else if (this.gestureType === 'rotate') {
+      e.preventDefault();
+      e.stopPropagation();
+      const targetBearing = (this.startBearing + deltaAngle) % 360;
+      this.setBearing(targetBearing);
+      // Döndürürken aynı zamanda yukarı/aşağı kaydırırsa eğimi de güncelle
+      if (Math.abs(deltaMidY) > 18) {
+        const targetPitch = Math.max(0, Math.min(60, this.startPitch - (deltaMidY * 0.25)));
+        this.setPitch(targetPitch);
+      }
+    }
+  },
+
+  handleTouchEnd(e) {
+    if (e.touches.length < 2) {
+      this.isGesturing = false;
+      this.gestureType = null;
+    }
+  },
+
+  handleMouseDown(e) {
+    if (e.button === 2) {
+      this.isRightDragging = true;
+      this.rightStartX = e.clientX;
+      this.rightStartY = e.clientY;
+      this.rightStartBearing = this.bearing;
+      this.rightStartPitch = this.pitch;
+      e.preventDefault();
+    }
+  },
+
+  handleMouseMove(e) {
+    if (!this.isRightDragging) return;
+    const dx = e.clientX - this.rightStartX;
+    const dy = e.clientY - this.rightStartY;
+
+    const newBearing = (this.rightStartBearing + (dx * 0.4)) % 360;
+    const newPitch = Math.max(0, Math.min(60, this.rightStartPitch - (dy * 0.35)));
+
+    this.setBearingAndPitch(newBearing, newPitch);
+  },
+
+  handleMouseUp(e) {
+    if (this.isRightDragging) {
+      this.isRightDragging = false;
+    }
+  },
+
+  setPitch(pitch) {
+    this.pitch = Math.round(pitch * 10) / 10;
+    this.applyTransform();
+  },
+
+  setBearing(bearing) {
+    this.bearing = Math.round(bearing * 10) / 10;
+    this.applyTransform();
+  },
+
+  setBearingAndPitch(bearing, pitch) {
+    this.bearing = Math.round(bearing * 10) / 10;
+    this.pitch = Math.round(pitch * 10) / 10;
+    this.applyTransform();
+  },
+
+  applyTransform(smooth = false) {
+    const mapEl = document.getElementById('map');
+    if (!mapEl) return;
+
+    let effBearing = this.bearing;
+    if (typeof LiveNavigation !== 'undefined' && LiveNavigation.isActive && LiveNavigation.compassMode === 'heading') {
+      effBearing = LiveNavigation.currentMapRotation || this.bearing;
+    }
+
+    if (Math.abs(effBearing) < 0.5 && Math.abs(this.pitch) < 0.5) {
+      this.bearing = 0;
+      this.pitch = 0;
+      if (smooth) {
+        mapEl.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.85, 0.35, 1)';
+        setTimeout(() => { mapEl.style.transition = ''; }, 420);
+      }
+      if (!LiveNavigation?.isActive || LiveNavigation.compassMode === 'north') {
+        mapEl.style.transform = '';
+      }
+      this.updateCompassUI(0, 0);
+      return;
+    }
+
+    const scale = (typeof LiveNavigation !== 'undefined' && LiveNavigation.isActive && LiveNavigation.compassMode === 'heading') ? 1.55 : 1.35;
+    if (smooth) {
+      mapEl.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.85, 0.35, 1)';
+      setTimeout(() => { mapEl.style.transition = ''; }, 420);
+    } else {
+      mapEl.style.transition = 'none';
+    }
+
+    mapEl.style.transformOrigin = '50% 50%';
+    mapEl.style.transform = `scale(${scale}) rotateX(${this.pitch}deg) rotateZ(${effBearing}deg)`;
+    this.updateCompassUI(effBearing, this.pitch);
+  },
+
+  resetOrientation() {
+    this.bearing = 0;
+    this.pitch = 0;
+    this.applyTransform(true);
+    if (typeof LiveNavigation !== 'undefined' && LiveNavigation.isActive) {
+      LiveNavigation.compassMode = 'north';
+      LiveNavigation.currentMapRotation = 0;
+    }
+  },
+
+  updateCompassUI(bearing, pitch) {
+    const isTransformed = Math.abs(bearing) > 1 || Math.abs(pitch) > 1;
+
+    // Mobil Pusula FAB
+    const mobFab = document.getElementById('mobile-compass-fab');
+    const mobNeedle = document.getElementById('mobile-compass-needle');
+    if (mobFab) {
+      if (isTransformed) {
+        mobFab.classList.remove('hidden');
+        if (mobNeedle) mobNeedle.style.transform = `rotate(${-bearing}deg)`;
+      } else {
+        mobFab.classList.add('hidden');
+      }
+    }
+
+    // Masaüstü Pusula Butonu
+    const deskBtn = document.getElementById('desktop-compass-btn');
+    const deskNeedle = document.getElementById('desktop-compass-needle');
+    if (deskBtn) {
+      if (isTransformed) {
+        deskBtn.classList.remove('hidden');
+        if (deskNeedle) deskNeedle.style.transform = `rotate(${-bearing}deg)`;
+      } else {
+        deskBtn.classList.add('hidden');
+      }
+    }
+
+    // Canlı Navigasyon Çubuğu Pusula İğnesi
+    const liveNeedle = document.getElementById('live-nav-compass-needle');
+    if (liveNeedle && (!LiveNavigation || !LiveNavigation.isActive || LiveNavigation.compassMode !== 'heading')) {
+      liveNeedle.style.transform = `rotate(${-bearing}deg)`;
+    }
+  }
+};
 
 // ==========================================
 // Yandex Maps Sole Provider Engine Initialization
@@ -398,6 +652,11 @@ function initMap() {
 
   state.activeTileLayer = 'dark';
   mapInitialized = true;
+
+  // Initialize 2-finger touch & desktop tilt/rotation gesture controller
+  if (typeof RotamMapGestureController !== 'undefined') {
+    RotamMapGestureController.init();
+  }
 
   // Map Click Listener to add waypoints & auto-collapse filters on mobile
   map.on('click', async (e) => {
