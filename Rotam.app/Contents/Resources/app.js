@@ -340,28 +340,26 @@ const RotamMapGestureController = {
   bearing: 0, // Z ekseni dönüş açısı (0° - 360°)
   pitch: 0,   // X ekseni 3D eğim açısı (0° - 60°)
   isGesturing: false,
-  gestureType: null, // 'pitch', 'rotate', 'zoom'
-  startDist: 0,
-  startAngle: 0,
-  startMidY: 0,
-  startPitch: 0,
-  startBearing: 0,
+  lastDist: 0,
+  lastAngle: 0,
+  lastMidY: 0,
   isRightDragging: false,
   rightStartX: 0,
   rightStartY: 0,
   rightStartBearing: 0,
   rightStartPitch: 0,
+  _initialized: false,
 
   init() {
     const mapEl = document.getElementById('map');
     if (!mapEl || this._initialized) return;
     this._initialized = true;
 
-    // Mobil Çoklu Dokunma (İki Parmak Döndürme & 3D Eğme)
-    mapEl.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
-    mapEl.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
-    mapEl.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
-    mapEl.addEventListener('touchcancel', (e) => this.handleTouchEnd(e), { passive: false });
+    // Mobil Çoklu Dokunma (Capture modunda window'a bağlanır, hiçbir alt eleman veya Leaflet stopPropagation ile engelleyemez)
+    window.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false, capture: true });
+    window.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false, capture: true });
+    window.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false, capture: true });
+    window.addEventListener('touchcancel', (e) => this.handleTouchEnd(e), { passive: false, capture: true });
 
     // Masaüstü / Fare Sağ Tık ile Eğme ve Döndürme
     mapEl.addEventListener('mousedown', (e) => this.handleMouseDown(e));
@@ -375,37 +373,54 @@ const RotamMapGestureController = {
 
     // Mac Trackpad İki Parmak Çevirme Desteği (Gesture Events)
     mapEl.addEventListener('gesturestart', (e) => {
-      this.startBearing = this.bearing;
+      this.rightStartBearing = this.bearing;
       e.preventDefault();
     });
     mapEl.addEventListener('gesturechange', (e) => {
       if (typeof e.rotation === 'number') {
-        this.setBearing(this.startBearing + e.rotation);
+        this.setBearing(this.rightStartBearing + e.rotation);
       }
       e.preventDefault();
     });
   },
 
   handleTouchStart(e) {
-    if (e.touches.length === 2) {
+    if (e.touches && e.touches.length === 2) {
+      const target = e.target;
+      // Buton, form elemanları veya modal üzerindeki dokunmaları es geç
+      if (target && target.closest && target.closest('button, a, input, select, textarea, #live-nav-tools-popover, .modal-content, #mobile-sidebar, #app-header')) {
+        return;
+      }
       this.isGesturing = true;
-      this.gestureType = null;
-
       const t1 = e.touches[0];
       const t2 = e.touches[1];
       const dx = t2.clientX - t1.clientX;
       const dy = t2.clientY - t1.clientY;
 
-      this.startDist = Math.hypot(dx, dy);
-      this.startAngle = Math.atan2(dy, dx) * 180 / Math.PI;
-      this.startMidY = (t1.clientY + t2.clientY) / 2;
-      this.startPitch = this.pitch;
-      this.startBearing = this.bearing;
+      this.lastDist = Math.hypot(dx, dy);
+      this.lastAngle = Math.atan2(dy, dx) * 180 / Math.PI;
+      this.lastMidY = (t1.clientY + t2.clientY) / 2;
     }
   },
 
   handleTouchMove(e) {
-    if (!this.isGesturing || e.touches.length !== 2) return;
+    if (!e.touches || e.touches.length !== 2) return;
+
+    if (!this.isGesturing) {
+      const target = e.target;
+      if (target && target.closest && target.closest('button, a, input, select, textarea, #live-nav-tools-popover, .modal-content, #mobile-sidebar, #app-header')) {
+        return;
+      }
+      this.isGesturing = true;
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      const dx = t2.clientX - t1.clientX;
+      const dy = t2.clientY - t1.clientY;
+      this.lastDist = Math.hypot(dx, dy);
+      this.lastAngle = Math.atan2(dy, dx) * 180 / Math.PI;
+      this.lastMidY = (t1.clientY + t2.clientY) / 2;
+      return;
+    }
 
     const t1 = e.touches[0];
     const t2 = e.touches[1];
@@ -416,46 +431,46 @@ const RotamMapGestureController = {
     const angle = Math.atan2(dy, dx) * 180 / Math.PI;
     const midY = (t1.clientY + t2.clientY) / 2;
 
-    const deltaDist = dist - this.startDist;
-    let deltaAngle = angle - this.startAngle;
+    let deltaAngle = angle - this.lastAngle;
     if (deltaAngle > 180) deltaAngle -= 360;
     if (deltaAngle < -180) deltaAngle += 360;
-    const deltaMidY = midY - this.startMidY;
 
-    // Hareket türünü belirle (Tilt vs Rotate)
-    if (!this.gestureType) {
-      if (Math.abs(deltaMidY) > 12 && Math.abs(deltaAngle) < 20 && Math.abs(deltaDist) < 28) {
-        this.gestureType = 'pitch';
-      } else if (Math.abs(deltaAngle) > 7) {
-        this.gestureType = 'rotate';
-      } else if (Math.abs(deltaDist) > 35 && Math.abs(deltaMidY) < 15) {
-        this.gestureType = 'zoom';
+    const deltaY = midY - this.lastMidY;
+
+    let hasChanged = false;
+
+    // 1. Z Ekseni Döndürme (Harita Çevirme)
+    if (Math.abs(deltaAngle) > 0.35) {
+      this.bearing = (this.bearing + deltaAngle) % 360;
+      if (typeof LiveNavigation !== 'undefined' && LiveNavigation.isActive) {
+        LiveNavigation.compassMode = 'free';
+        LiveNavigation.currentMapRotation = this.bearing;
+        const needleEl = document.getElementById('live-nav-compass-needle');
+        if (needleEl) needleEl.style.transform = `rotate(${Math.round(this.bearing)}deg)`;
       }
+      hasChanged = true;
     }
 
-    if (this.gestureType === 'pitch') {
-      e.preventDefault();
-      e.stopPropagation();
-      // İki parmakla yukarı kaydırma (deltaMidY < 0) 3D eğimi artırır (0° - 60°)
-      const targetPitch = Math.max(0, Math.min(60, this.startPitch - (deltaMidY * 0.38)));
-      this.setPitch(targetPitch);
-    } else if (this.gestureType === 'rotate') {
-      e.preventDefault();
-      e.stopPropagation();
-      const targetBearing = (this.startBearing + deltaAngle) % 360;
-      this.setBearing(targetBearing);
-      // Döndürürken aynı zamanda yukarı/aşağı kaydırırsa eğimi de güncelle
-      if (Math.abs(deltaMidY) > 18) {
-        const targetPitch = Math.max(0, Math.min(60, this.startPitch - (deltaMidY * 0.25)));
-        this.setPitch(targetPitch);
-      }
+    // 2. X Ekseni 3D Eğim (İki parmak birlikte yukarı/aşağı dikey kaydırma)
+    if (Math.abs(deltaY) > 0.5) {
+      // Yukarı kaydırma (deltaY < 0) 3D eğimi artırır (0° - 60°), aşağı kaydırma düzeltir (0°)
+      this.pitch = Math.max(0, Math.min(60, this.pitch - (deltaY * 0.42)));
+      hasChanged = true;
     }
+
+    if (hasChanged) {
+      if (e.cancelable) e.preventDefault();
+      this.applyTransform();
+    }
+
+    this.lastAngle = angle;
+    this.lastMidY = midY;
+    this.lastDist = dist;
   },
 
   handleTouchEnd(e) {
-    if (e.touches.length < 2) {
+    if (!e.touches || e.touches.length < 2) {
       this.isGesturing = false;
-      this.gestureType = null;
     }
   },
 
@@ -503,39 +518,53 @@ const RotamMapGestureController = {
     this.applyTransform();
   },
 
+  toggle3D() {
+    if (this.pitch > 10) {
+      this.pitch = 0;
+    } else {
+      this.pitch = 45; // 45 derece akıcı 3D kokpit perspektifi
+    }
+    this.applyTransform(true);
+  },
+
   applyTransform(smooth = false) {
     const mapEl = document.getElementById('map');
     if (!mapEl) return;
 
-    let effBearing = this.bearing;
+    let effBearing = this.bearing || 0;
     if (typeof LiveNavigation !== 'undefined' && LiveNavigation.isActive && LiveNavigation.compassMode === 'heading') {
       effBearing = LiveNavigation.currentMapRotation || this.bearing;
     }
 
-    if (Math.abs(effBearing) < 0.5 && Math.abs(this.pitch) < 0.5) {
+    effBearing = ((effBearing % 360) + 360) % 360;
+    if (effBearing > 180) effBearing -= 360;
+
+    const isFlat = Math.abs(effBearing) < 0.5 && Math.abs(this.pitch) < 0.5;
+
+    if (isFlat && (!window.LiveNavigation || !window.LiveNavigation.isActive)) {
       this.bearing = 0;
       this.pitch = 0;
       if (smooth) {
-        mapEl.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.85, 0.35, 1)';
-        setTimeout(() => { mapEl.style.transition = ''; }, 420);
+        mapEl.style.transition = 'transform 0.35s cubic-bezier(0.2, 0.85, 0.35, 1)';
+        setTimeout(() => { mapEl.style.transition = ''; }, 370);
+      } else {
+        mapEl.style.transition = '';
       }
-      if (!LiveNavigation?.isActive || LiveNavigation.compassMode === 'north') {
-        mapEl.style.transform = '';
-      }
+      mapEl.style.transform = '';
       this.updateCompassUI(0, 0);
       return;
     }
 
     const scale = (typeof LiveNavigation !== 'undefined' && LiveNavigation.isActive && LiveNavigation.compassMode === 'heading') ? 1.55 : 1.35;
     if (smooth) {
-      mapEl.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.85, 0.35, 1)';
-      setTimeout(() => { mapEl.style.transition = ''; }, 420);
+      mapEl.style.transition = 'transform 0.35s cubic-bezier(0.2, 0.85, 0.35, 1)';
+      setTimeout(() => { mapEl.style.transition = ''; }, 370);
     } else {
       mapEl.style.transition = 'none';
     }
 
     mapEl.style.transformOrigin = '50% 50%';
-    mapEl.style.transform = `scale(${scale}) rotateX(${this.pitch}deg) rotateZ(${effBearing}deg)`;
+    mapEl.style.transform = `perspective(900px) scale(${scale}) rotateX(${this.pitch}deg) rotateZ(${effBearing}deg)`;
     this.updateCompassUI(effBearing, this.pitch);
   },
 
@@ -551,8 +580,52 @@ const RotamMapGestureController = {
 
   updateCompassUI(bearing, pitch) {
     const isTransformed = Math.abs(bearing) > 1 || Math.abs(pitch) > 1;
+    const is3DActive = pitch > 10;
 
-    // Mobil Pusula FAB
+    // 1. Sürüş Modu (Live Navigation) 3D Butonu
+    const live3DBtn = document.getElementById('live-nav-btn-3d');
+    const live3DLabel = document.getElementById('live-nav-3d-label');
+    if (live3DLabel) live3DLabel.textContent = is3DActive ? '2D' : '3D';
+    if (live3DBtn) {
+      if (is3DActive) {
+        live3DBtn.classList.add('border-amber-400', 'text-amber-300', 'bg-amber-500/20');
+        live3DBtn.classList.remove('border-sky-500/40', 'text-sky-400');
+      } else {
+        live3DBtn.classList.remove('border-amber-400', 'text-amber-300', 'bg-amber-500/20');
+        live3DBtn.classList.add('border-sky-500/40', 'text-sky-400');
+      }
+    }
+
+    // 2. Sürüş Araçları Alt Menüsü (Tools Grid) 3D Rozeti
+    const tools3DBadge = document.getElementById('live-nav-tools-3d-badge');
+    const tools3DSub = document.getElementById('live-nav-tools-3d-sub');
+    if (tools3DBadge) tools3DBadge.textContent = is3DActive ? '2D' : '3D';
+    if (tools3DSub) tools3DSub.textContent = is3DActive ? '2D Düz Yap' : '3D Perspektif';
+
+    // 3. Mobil Normal Mod FAB 3D Butonu
+    const mob3DLabel = document.getElementById('mobile-3d-toggle-label');
+    const mob3DBtn = document.getElementById('mobile-3d-toggle-btn');
+    if (mob3DLabel) mob3DLabel.textContent = is3DActive ? '2D' : '3D';
+    if (mob3DBtn) {
+      if (is3DActive) {
+        mob3DBtn.classList.add('border-amber-400', 'text-amber-300');
+        mob3DBtn.classList.remove('border-sky-400', 'text-sky-400');
+      } else {
+        mob3DBtn.classList.remove('border-amber-400', 'text-amber-300');
+        mob3DBtn.classList.add('border-sky-400', 'text-sky-400');
+      }
+    }
+
+    // 4. Masaüstü Normal Mod 3D Butonu
+    const desk3DLabel = document.getElementById('desktop-3d-toggle-label');
+    if (desk3DLabel) {
+      desk3DLabel.textContent = is3DActive ? '2D' : '3D';
+      desk3DLabel.className = is3DActive
+        ? 'px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-mono text-[10px] font-black'
+        : 'px-1.5 py-0.5 rounded-md bg-slate-800 text-cyan-400 font-mono text-[10px] font-black';
+    }
+
+    // 5. Mobil Pusula FAB
     const mobFab = document.getElementById('mobile-compass-fab');
     const mobNeedle = document.getElementById('mobile-compass-needle');
     if (mobFab) {
@@ -564,7 +637,7 @@ const RotamMapGestureController = {
       }
     }
 
-    // Masaüstü Pusula Butonu
+    // 6. Masaüstü Pusula Butonu
     const deskBtn = document.getElementById('desktop-compass-btn');
     const deskNeedle = document.getElementById('desktop-compass-needle');
     if (deskBtn) {
@@ -576,13 +649,14 @@ const RotamMapGestureController = {
       }
     }
 
-    // Canlı Navigasyon Çubuğu Pusula İğnesi
+    // 7. Canlı Navigasyon Çubuğu Pusula İğnesi
     const liveNeedle = document.getElementById('live-nav-compass-needle');
     if (liveNeedle && (!LiveNavigation || !LiveNavigation.isActive || LiveNavigation.compassMode !== 'heading')) {
       liveNeedle.style.transform = `rotate(${-bearing}deg)`;
     }
   }
 };
+window.RotamMapGestureController = RotamMapGestureController;
 
 // ==========================================
 // Yandex Maps Sole Provider Engine Initialization
@@ -14471,17 +14545,15 @@ const LiveNavigation = {
     const mapEl = document.getElementById('map');
     if (!mapEl) return;
 
+    const pitch = (typeof RotamMapGestureController !== 'undefined') ? RotamMapGestureController.pitch : 0;
+
     if (this.compassMode === 'north' || this.isOverviewMode || !this.isActive) {
-      if (mapEl.classList.contains('live-nav-rotating')) {
-        mapEl.style.transform = 'scale(1) rotate(0deg)';
-        setTimeout(() => {
-          if (!this.isActive || this.compassMode === 'north' || this.isOverviewMode) {
-            mapEl.classList.remove('live-nav-rotating');
-            mapEl.style.transform = '';
-          }
-        }, 450);
-      }
       this.currentMapRotation = 0;
+      if (typeof RotamMapGestureController !== 'undefined') {
+        RotamMapGestureController.applyTransform(true);
+      } else {
+        mapEl.style.transform = (pitch > 0.5) ? `perspective(900px) scale(1.35) rotateX(${pitch}deg)` : '';
+      }
       return;
     }
 
@@ -14496,8 +14568,17 @@ const LiveNavigation = {
     if (diff < -180) diff += 360;
     this.currentMapRotation = (this.currentMapRotation || 0) + diff;
 
-    // Scale 1.55 covers the viewport diagonal completely at any orientation
-    mapEl.style.transform = `scale(1.55) rotate(${this.currentMapRotation}deg)`;
+    // Scale 1.55 covers the viewport diagonal completely at any orientation with 3D perspective
+    mapEl.style.transformOrigin = '50% 50%';
+    mapEl.style.transform = `perspective(900px) scale(1.55) rotateX(${pitch}deg) rotateZ(${this.currentMapRotation}deg)`;
+
+    const needleEl = document.getElementById('live-nav-compass-needle');
+    if (needleEl) {
+      needleEl.style.transform = `rotate(${Math.round(this.currentMapRotation)}deg)`;
+    }
+    if (typeof RotamMapGestureController !== 'undefined') {
+      RotamMapGestureController.updateCompassUI(this.currentMapRotation, pitch);
+    }
   },
 
   // Native iOS/Android GPS bridge entrypoint

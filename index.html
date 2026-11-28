@@ -847,7 +847,7 @@
     <main class="flex-1 relative w-full h-full overflow-hidden min-h-0 min-w-0">
       
       <!-- LEAFLET HARİTA DİVİ -->
-      <div id="map" class="w-full h-full dark-map"></div>
+      <div id="map" class="w-full h-full dark-map" style="touch-action: none !important;"></div>
 
       <!-- GOOGLE MAPS FLOATING QUICK DISCOVERY CHIPS & CATEGORIES (#gmaps-top-container) -->
       <div id="gmaps-top-container" class="absolute top-2.5 left-2.5 right-2.5 sm:left-4 sm:right-4 z-[950] pointer-events-none flex flex-col space-y-2">
@@ -1411,7 +1411,12 @@
             </div>
           </button>
 
-          <!-- 2. Sesli Rehber (Hoparlör Açık/Kapalı) -->
+          <!-- 2. 3D / 2D Perspektif Butonu (Sürüş Modu) -->
+          <button id="live-nav-btn-3d" onclick="RotamMapGestureController.toggle3D()" class="w-12 h-12 rounded-full gmaps-tool-btn flex items-center justify-center cursor-pointer active:scale-95 transition-all text-sky-400 border border-sky-500/40 shadow-xl" title="3D / 2D Perspektif Eğim">
+            <span id="live-nav-3d-label" class="font-black text-xs font-mono tracking-tight">3D</span>
+          </button>
+
+          <!-- 3. Sesli Rehber (Hoparlör Açık/Kapalı) -->
           <button id="live-nav-voice-btn" onclick="LiveNavigation.toggleVoice()" class="w-12 h-12 rounded-full gmaps-tool-btn flex items-center justify-center cursor-pointer active:scale-95 transition-all text-emerald-400 hover:text-emerald-300 shadow-xl" title="Sesli Yönlendirme">
             <i id="live-nav-voice-icon" data-lucide="volume-2" class="w-5 h-5"></i>
           </button>
@@ -1463,6 +1468,17 @@
 
               <!-- 2 Sütunlu Kompakt ve Ergonomik Araç Izgarası -->
               <div id="live-nav-tools-grid" class="grid grid-cols-2 gap-1.5 sm:gap-2 overflow-y-auto no-scrollbar max-h-[60vh] pr-0.5">
+                <!-- 0. 3D / 2D Perspektif Görünüm -->
+                <button onclick="RotamMapGestureController.toggle3D(); LiveNavigation.toggleToolsPopover(false);" class="flex items-center space-x-2 p-2 rounded-xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 active:scale-95 text-left transition-all cursor-pointer">
+                  <div class="w-7 h-7 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center shrink-0 border border-sky-500/30">
+                    <span id="live-nav-tools-3d-badge" class="text-xs font-black font-mono">3D</span>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <span class="text-xs font-bold text-white block truncate">3D Görünüm</span>
+                    <span id="live-nav-tools-3d-sub" class="text-[9px] text-sky-300 block truncate">Perspektif Eğim</span>
+                  </div>
+                </button>
+
                 <!-- 1. Güneş & Yüksek Kontrast Modu -->
                 <button onclick="RotamDisplay.toggleSunlightMode(); LiveNavigation.toggleToolsPopover(false);" class="flex items-center space-x-2 p-2 rounded-xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 active:scale-95 text-left transition-all cursor-pointer">
                   <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/30">
@@ -1836,6 +1852,11 @@
             <span class="text-[10px] font-bold">Kuzey</span>
           </button>
 
+          <!-- 3D / 2D Perspektif Butonu -->
+          <button id="desktop-3d-toggle-btn" onclick="RotamMapGestureController.toggle3D()" class="px-2 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 flex items-center space-x-1 transition-all active:scale-95" title="3D / 2D Perspektif Eğim">
+            <span id="desktop-3d-toggle-label" class="px-1.5 py-0.5 rounded-md bg-slate-800 text-cyan-400 font-mono text-[10px] font-black">3D</span>
+          </button>
+
           <!-- Konum Doğrula & Düzelt Butonu (Hızlı Şehir & Haritadan Seçim) -->
           <button onclick="openLocationPickerModal()" class="px-1.5 py-1.5 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/10 transition-all" title="Konumumu Doğrula / Şehir Değiştir">
             <i data-lucide="edit-3" class="w-3 h-3 text-cyan-400"></i>
@@ -1978,6 +1999,11 @@
 
       <!-- MOBİL İÇİN SADE VE ERGONOMİK FAB KONTROLLERİ (MOBİL SADELEŞTİRME) -->
       <div id="mobile-floating-fabs" class="flex sm:hidden absolute bottom-28 right-3 z-20 flex-col space-y-2 items-end">
+        <!-- 3D / 2D Eğim Geçiş Butonu (X Ekseni Perspektif) -->
+        <button id="mobile-3d-toggle-btn" onclick="RotamMapGestureController.toggle3D()" class="mobile-map-fab fab-3d active:scale-95 transition-all text-white font-black text-xs shadow-xl" title="3D / 2D Harita Perspektifi">
+          <span id="mobile-3d-toggle-label">3D</span>
+        </button>
+
         <!-- Pusula / Kuzeye Hizala FAB (Harita döndürüldüğünde veya eğildiğinde görünür) -->
         <button id="mobile-compass-fab" onclick="RotamMapGestureController.resetOrientation()" class="hidden mobile-map-fab fab-compass active:scale-95 transition-all text-white shadow-xl" title="Kuzeye Dön / 2D Düz Yap">
           <div id="mobile-compass-needle" class="w-6 h-6 flex items-center justify-center transition-transform duration-200">
